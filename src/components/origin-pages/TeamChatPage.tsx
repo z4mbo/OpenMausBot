@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { CloudOff, Download, File as FileIcon, Loader2, MessagesSquare, Paperclip, Pencil, RotateCw, Send, Trash2, X } from "lucide-react";
+import { Bot as BotIcon, CloudOff, Download, File as FileIcon, Loader2, MessagesSquare, Paperclip, Pencil, RotateCw, Send, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useCloudSession, type CloudUser } from "@/lib/origin-cloud";
 import { originRealtime, originRealtimeFile, usePolled, type MemberChatAttachment, type MemberChatMessage, type RealtimeTarget } from "@/lib/origin-realtime";
@@ -9,6 +9,8 @@ import { ChatMarkdown } from "../ChatMarkdown";
 import { useTeammates, type Teammate } from "../origin-members/teammates";
 import { CloudGate, EmptyState, Loading, Notice, ghostButton, iconButton, inputClass, primaryButton, type OriginPageProps } from "./ui";
 import { PersonAvatar } from "./PersonAvatar";
+import { BotAvatar } from "../Avatar";
+import { useStore } from "@/state/store";
 
 const MESSAGES = "/api/local-chat/messages";
 const FILES = "/api/local-chat/files";
@@ -64,10 +66,22 @@ export type TeamChatProps = {
 
 const MENTION_CHOICES = 8;
 
+/** The project's own agent, which answers in this chat when someone tags it. */
+type ChatAgent = { id: string; name: string; userId: string };
+type ChatPage = { messages: MemberChatMessage[]; hasMore: boolean; agent?: ChatAgent; thinking?: { botId: string; name: string } };
+
+export const isAgentAuthor = (userId: string) => userId.startsWith("agent:");
+
+function AgentAvatar({ botId, name, size }: { botId: string; name: string; size: number }) {
+  const bot = useStore().state.bots.find((candidate) => candidate.id === botId);
+  if (bot) return <BotAvatar bot={bot} size={size} />;
+  return <span className="flex shrink-0 items-center justify-center rounded-full bg-raised text-ink-secondary" style={{ width: size, height: size }} aria-label={name}><BotIcon size={Math.round(size * 0.55)} /></span>;
+}
+
 export function TeamChat({ target, projectId, name, me, canWrite, people, emptyTitle, emptyBody, readOnlyNote, markRead = false }: TeamChatProps) {
   const key = `${target.teamId}:${target.conversation}`;
   const { value: latest, error, refresh } = usePolled(
-    () => originRealtime<{ messages: MemberChatMessage[]; hasMore: boolean }>(MESSAGES, target),
+    () => originRealtime<ChatPage>(MESSAGES, target),
     POLL_MS, key,
   );
   const [older, setOlder] = useState<MemberChatMessage[]>([]);
@@ -88,10 +102,16 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
   const bottom = useRef<HTMLDivElement>(null);
   const messages = mergeMessages(older, latest?.messages ?? []);
   const lastId = messages.at(-1)?.id;
+  const agent = latest?.agent;
+  const thinking = latest?.thinking;
+  const mentionPool = useMemo<Teammate[]>(() => agent ? [{
+    id: agent.userId, userId: agent.userId, name: agent.name, kind: "Project bot", description: "Project bot · reads this chat",
+    avatar: <AgentAvatar botId={agent.id} name={agent.name} size={24} />,
+  }, ...people] : [...people], [agent?.id, agent?.name, people]);
   const mention = mentionQueryAt(draft, caret);
   const choices = useMemo(
-    () => (mention && mention.start !== dismissedAt ? mentionChoicesForQuery(people, mention.query).slice(0, MENTION_CHOICES) : []),
-    [mention?.start, mention?.query, dismissedAt, people],
+    () => (mention && mention.start !== dismissedAt ? mentionChoicesForQuery(mentionPool, mention.query).slice(0, MENTION_CHOICES) : []),
+    [mention?.start, mention?.query, dismissedAt, mentionPool],
   );
   const focus = useChatFocus();
   const wanted = focus && focus.conversation === (target.conversation ?? "") ? focus : null;
@@ -164,7 +184,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
     setBusy(true);
     setNotice("");
     try {
-      const mentionUserIds = mentionedPeople(draft, people).map((person) => person.userId);
+      const mentionUserIds = mentionedPeople(draft, people).map((person) => person.userId).filter((id) => !isAgentAuthor(id));
       await originRealtime(MESSAGES, target, { json: { body: draft, attachmentIds, ...(mentionUserIds.length ? { mentionUserIds } : {}) } });
       if (draftVersion.current === sentVersion) setDraft("");
       setPending((current) => current.filter((file) => !attachmentIds.includes(file.id)));
@@ -251,10 +271,13 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
                 data-member-message={message.id} data-continued={continued || undefined}>
                 {continued
                   ? <time dateTime={new Date(message.createdAt).toISOString()} className="w-[30px] shrink-0 pt-0.5 text-center text-[10px] tabular-nums text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) group-hover:opacity-100 group-focus-within:opacity-100 touch:opacity-100">{new Date(message.createdAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}</time>
-                  : <PersonAvatar person={{ name: message.authorName, email: message.authorEmail, avatarUrl: message.avatarUrl ?? null }} size={30} />}
+                  : isAgentAuthor(message.authorUserId)
+                    ? <AgentAvatar botId={message.authorUserId.slice("agent:".length)} name={message.authorName} size={30} />
+                    : <PersonAvatar person={{ name: message.authorName, email: message.authorEmail, avatarUrl: message.avatarUrl ?? null }} size={30} />}
                 <div className="min-w-0 flex-1">
                   <div className={cn("flex flex-wrap items-baseline gap-2", continued && "absolute right-2 top-0.5 z-10 max-md:static")}>
                     {!continued && <span className="text-[13px] font-semibold text-ink">{mine ? "You" : message.authorName}</span>}
+                    {!continued && isAgentAuthor(message.authorUserId) && <span className="rounded-md bg-raised px-1.5 py-px text-[10.5px] font-medium text-ink-secondary">Bot</span>}
                     {!continued && <time dateTime={new Date(message.createdAt).toISOString()} className="text-[11px] tabular-nums text-ink-tertiary">{timeLabel(message.createdAt)}</time>}
                     {message.editedAt && <span className="text-[11px] text-ink-tertiary">edited</span>}
                     {canWrite && (
@@ -280,7 +303,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
                         <button type="button" className={iconButton} aria-label="Cancel editing" onClick={() => setEditing(null)}><X size={14} /></button>
                       </div>
                     </form>
-                  ) : message.body && <div className="text-[13.5px] text-ink"><MessageBody message={message} me={me} /></div>}
+                  ) : message.body && <div className="text-[13.5px] text-ink"><MessageBody message={message} me={me} agentName={agent?.name} /></div>}
                   {message.attachments?.length ? (
                     <div className="mt-1.5 flex flex-wrap gap-2">
                       {message.attachments.map((file) => <Attachment key={file.id} file={file} target={target} />)}
@@ -303,6 +326,13 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
             );
           })}
         </ol>
+        {thinking && (
+          <div className="mt-2.5 flex items-center gap-2.5 px-0 motion-safe:animate-msg-in" role="status" data-agent-thinking>
+            <AgentAvatar botId={thinking.botId} name={thinking.name} size={30} />
+            <span className="text-[13px] text-ink-secondary"><span className="font-semibold text-ink">{thinking.name}</span> is reading the chat and writing an answer</span>
+            <Loader2 size={13} className="animate-spin text-ink-tertiary" aria-hidden="true" />
+          </div>
+        )}
         <div ref={bottom} />
       </div>
       <div className="border-t border-hairline/40 p-3">
@@ -335,7 +365,7 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
             <div className="flex items-end gap-1.5 rounded-2xl border border-hairline/60 bg-inset p-1.5 transition-colors focus-within:border-accent/60">
               <input ref={fileInput} type="file" multiple hidden onChange={(event) => void attach(event.target.files)} />
               <button type="button" className={iconButton} aria-label="Attach a file" title="Attach a file" disabled={busy || pending.length >= 8} onClick={() => fileInput.current?.click()}><Paperclip size={15} /></button>
-              <textarea ref={input} className="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[13.5px] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary max-md:text-[16px]" rows={1} placeholder={`Message ${name}`} aria-label="Message"
+              <textarea ref={input} className="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-1 py-1.5 text-[13.5px] text-ink outline-none [field-sizing:content] placeholder:text-ink-tertiary max-md:text-[16px]" rows={1} placeholder={agent ? `Message ${name}, or @${agent.name} to ask the project bot` : `Message ${name}`} aria-label="Message"
                 role="combobox" aria-autocomplete="list" aria-expanded={choices.length > 0} aria-controls={choices.length ? "team-chat-mentions" : undefined}
                 aria-activedescendant={choices[highlight] ? `team-chat-mention-${choices[highlight]!.id}` : undefined}
                 value={draft} onKeyDown={onKeyDown}
@@ -352,9 +382,12 @@ export function TeamChat({ target, projectId, name, me, canWrite, people, emptyT
   );
 }
 
-function MessageBody({ message, me }: { message: MemberChatMessage; me: CloudUser }) {
+function MessageBody({ message, me, agentName }: { message: MemberChatMessage; me: CloudUser; agentName?: string }) {
   const mentions = message.mentions;
-  const peers = useMemo(() => (mentions ?? []).filter((mention) => mention.userId !== me._id).map((mention) => ({ name: mention.name })), [mentions, me._id]);
+  const peers = useMemo(() => [
+    ...(mentions ?? []).filter((mention) => mention.userId !== me._id).map((mention) => ({ name: mention.name })),
+    ...(agentName ? [{ name: agentName }] : []),
+  ], [mentions, me._id, agentName]);
   const mine = mentions?.find((mention) => mention.userId === me._id);
   return <ChatMarkdown text={message.body} mentionPeers={peers} {...(mine ? { mentionPerson: { profileName: mine.name } } : {})} />;
 }
