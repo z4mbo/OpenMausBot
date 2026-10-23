@@ -70,10 +70,12 @@ function ReviewStrip({ bot }: { bot: Bot }) {
  * nudge to set up a model when this member has none. */
 export function SharedThreadBar({ bot, empty }: { bot: Bot; empty: boolean }) {
   const { dispatch } = useStore();
+  const runsOn = useCloudQuery<{ host: { name: string; ownerName: string; mine: boolean; online: boolean } | null }>("agentHosts:runsOn", bot.shared ? { agentId: bot.shared.agentId } : "skip");
   const task = bot.tasks?.find((candidate) => candidate.threadId === bot.threadId);
   if (!bot.shared) return <ShareBotChip bot={bot} />;
   if (!task) return null;
   const run = task.shared?.run;
+  const host = runsOn?.host && !runsOn.host.mine ? runsOn.host : null;
   const noModel = !bot.modelSelection?.instanceId;
   const setPrivate = (value: boolean) => void api(`/api/bots/${encodeURIComponent(bot.id)}/shared-private`, {
     method: "PUT", body: JSON.stringify({ threadId: task.threadId, private: value }),
@@ -92,6 +94,9 @@ export function SharedThreadBar({ bot, empty }: { bot: Bot; empty: boolean }) {
       <div className="flex items-center gap-2 px-1 text-[12px] text-ink-tertiary">
         {task.shared ? <Users className="size-3.5" aria-hidden /> : <Lock className="size-3.5" aria-hidden />}
         <span>{task.shared ? t("shared.sharedThread") : t("shared.privateThread")}</span>
+        {task.shared && host && (
+          <span data-shared-runs-on>· {t(host.online ? "shared.runsOn" : "shared.runsOnOffline", { name: host.ownerName, host: host.name })}</span>
+        )}
         {!task.shared && empty && (
           <button type="button" className="text-ink-secondary underline-offset-2 hover:underline" onClick={() => setPrivate(!task.sharedPrivate)}>
             {task.sharedPrivate ? t("shared.share") : t("shared.keepPrivate")}

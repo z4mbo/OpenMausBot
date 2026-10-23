@@ -15,6 +15,7 @@ import { CloudBackendPicker } from "../CloudBackendPicker";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { Switch } from "../SettingsPrimitives";
 import { ProposalStatus } from "./ProposalStatus";
+import { RunsOnCard } from "./RunsOnCard";
 import { ToolSelectionCard } from "./ToolSelectionCard";
 import { HIGHLEVEL_SLUG } from "@/lib/highlevel-sign-in";
 import { useBotApps } from "./useBotApps";
@@ -553,6 +554,7 @@ export function AccessSection({
 
   return (
     <div className="flex flex-col gap-4">
+      <RunsOnCard bot={bot} />
       <div className="rounded-xl bg-card p-4" data-testid="access-works-on">
         <div className="text-[15px] font-medium text-ink">{t("access.worksOn", { name: bot.name, short: worksOn.short })}</div>
         <ProposalStatus bot={bot} kind="owner" />

@@ -87,15 +87,23 @@ export interface SharedAgentsDeps {
   /** The cheap helper model's short answer on this member's keys, for the Chief heartbeat note. */
   quickText?(botId: string, prompt: string): Promise<string>;
   connect?: (url: string, sessionToken: string) => CloudConnection;
+  /** "server" for an always-on Origin server, so teammates can pick it to run agents around the clock. */
+  hostKind?: "local" | "server";
   files?: { cloud?: string; links?: string; state?: string; outbox?: string; bots?: string };
 }
 
-export type SendDecision = { status: "running"; sendId: string } | { status: "queued"; sendId: string; runId: string; teamId: string; cloudThreadId: string };
+export type SendDecision =
+  | { status: "running"; sendId: string; fallback?: string }
+  | { status: "queued"; sendId: string; runId: string; teamId: string; cloudThreadId: string }
+  | { status: "hosted"; sendId: string; runner: { name: string; host: string } };
+
+/** A teammate's run of an agent set to run on this app, as Origin lists it. */
+export type HostedRow = { runId: string; threadId: string; status: string; text: string; hostedFor?: { userId: string; name: string; messageId?: string } };
 
 const TICK_MS = 15_000;
 const MENTIONS_PER_MESSAGE = 10;
 const MENTION_REQUESTS_PER_MINUTE = 20;
-const HOST_EVERY_MS = 10 * 60_000;
+const HOST_EVERY_MS = 60_000;
 const HEARTBEAT_EVERY_MS = 5 * 60_000;
 const BUDGET_REFUSAL = /Budget reached: [^\n]*/;
 const ID = /^[a-z0-9]{1,64}$/;
@@ -227,6 +235,8 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
         discover(bot.id, value as { _id: string; title: string; clientId?: string }[]);
       }));
       wanted.set(`team:${shared.teamId}`, () => cloud.subscribe("agentRuns:pendingForMe", { teamId: shared.teamId }, (value) => {
+        hostedRows.set(shared.teamId, value as HostedRow[]);
+        adoptHosted(shared.teamId);
         lease?.pending(shared.teamId, value as { runId: string; status: string }[]);
       }));
     }
@@ -237,6 +247,27 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     }
     for (const [key, start] of wanted) if (!watches.has(key)) watches.set(key, start());
     mirror?.sync();
+  };
+
+  const hostedRows = new Map<string, HostedRow[]>();
+  /** Teammates' runs that this app hosts become local queued runs answering their mirrored message, once it has arrived. */
+  const adoptHosted = (teamId: string) => {
+    if (!lease) return;
+    const rows = hostedRows.get(teamId) ?? [];
+    const remembered = new Set(box().queuedRuns().map((run) => run.runId));
+    const local = Object.entries(threads());
+    for (const row of rows) {
+      if (!row.hostedFor?.messageId || remembered.has(row.runId)) continue;
+      const threadId = local.find(([, cloudThreadId]) => cloudThreadId === row.threadId)?.[0];
+      if (!threadId || lease.runFor(threadId) === row.runId || lease.holds(threadId)) continue;
+      const bot = store.botByThread(threadId);
+      const message = store.messagesFor(threadId).find((candidate) => candidate.remote?.cloudId === row.hostedFor!.messageId);
+      if (!bot || !message) continue;
+      lease.remember({
+        runId: row.runId, botId: bot.id, threadId, cloudThreadId: row.threadId, teamId, messageId: message.id, text: row.text,
+        sender: { name: row.hostedFor.name, id: `origin:${row.hostedFor.userId}` },
+      });
+    }
   };
 
   const disconnect = () => {
@@ -293,6 +324,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     mirror = createThreadMirror({
       store, outbox: box(), cloud, threads, runFor: (threadId) => lease?.runFor(threadId), me: () => connection?.me?.id ?? null,
       redact: deps.redact, kick: () => schedule(),
+      onSnapshot: () => { for (const teamId of hostedRows.keys()) adoptHosted(teamId); },
     });
     syncWatches();
     schedule();
@@ -301,12 +333,13 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   const publishHost = async () => {
     if (!connection || Date.now() - hostPublishedAt < HOST_EVERY_MS) return;
     hostPublishedAt = Date.now();
+    const kind = deps.hostKind ?? "local";
     const ready = (await deps.instances().catch(() => [] as SelectableInstance[]))
       .filter((instance) => instance.enabled !== false && instance.snapshot.state === "available" && instance.snapshot.authenticated !== false);
     const engines = [...new Set(ready.map((instance) => instance.driverKind))];
     const models = [...new Set(ready.flatMap((instance) => [instance.models.default, ...instance.models.options.map((option) => option.id)]).filter(Boolean))].slice(0, 100);
     for (const teamId of new Set(sharedBots().map((bot) => bot.shared!.teamId))) {
-      await connection.cloud.mutation("agents:publishHost", { teamId, name: hostname().slice(0, 80) || "Desktop", engines, models, computers: [] }).catch(() => undefined);
+      await connection.cloud.mutation("agents:publishHost", { teamId, name: hostname().slice(0, 80) || "Desktop", engines, models, computers: [], kind }).catch(() => undefined);
     }
   };
 
@@ -323,6 +356,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   const tick = async () => {
     await ensureConnection().catch(() => undefined);
     syncWatches();
+    for (const teamId of hostedRows.keys()) adoptHosted(teamId);
     await lease?.tick().catch(() => undefined);
     await publishHost().catch(() => undefined);
     await heartbeat().catch(() => undefined);
@@ -371,8 +405,9 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       unbindThread(bot.id, input.threadId);
       return null;
     }
+    if (begun.status === "hosted") return { status: "hosted", sendId, runner: begun.runner };
     return begun.status === "running"
-      ? { status: "running", sendId }
+      ? { status: "running", sendId, ...(begun.fallback ? { fallback: begun.fallback } : {}) }
       : { status: "queued", sendId, runId: begun.runId, teamId: shared.teamId, cloudThreadId };
   };
 
