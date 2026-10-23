@@ -1,9 +1,10 @@
 import { studioModel, type StudioModel } from "../shared/studio.ts";
+import { blankValues, fillBlanks, promptTakesBlanks } from "../shared/studio-blanks.ts";
 import {
-  presetPromptText, STUDIO_PRESET_GROUPS, STUDIO_PRESETS, studioPreset, studioPresetModel, type StudioPreset,
+  STUDIO_PRESET_GROUPS, STUDIO_PRESETS, studioPreset, studioPresetModel, type StudioPreset,
 } from "../shared/studio-presets.ts";
 import { ORIGIN_STUDIO_PRESET_CARDS_MAX } from "../shared/origin-studio-cards.ts";
-import { clip, refuse, text } from "./origin-studio.ts";
+import { clip, record, refuse, text } from "./origin-studio.ts";
 
 export function presetSources(model: StudioModel): string {
   if (!model.needs.length) return "none";
@@ -50,7 +51,10 @@ export function withPreset(args: Record<string, unknown>): Record<string, unknow
   if (!id) return args;
   const preset = studioPreset(id) ?? refuse(`No Studio preset ${clip(id, 64)}; list them with origin_studio_presets.`);
   const model = text(args.model) || preset.model;
-  const filled: Record<string, unknown> = { ...args, model, prompt: text(args.prompt).trim() ? args.prompt : presetPromptText(preset.prompt ?? "") };
+  const template = preset.prompt ?? "";
+  const fill = Object.fromEntries(Object.entries(record(args.fill)).map(([key, value]) => [key, text(value)]));
+  const written = promptTakesBlanks(studioModel(model)) ? fillBlanks(template, blankValues(template, fill)) : template;
+  const filled: Record<string, unknown> = { ...args, model, prompt: text(args.prompt).trim() ? args.prompt : written };
   const defaults: Record<string, unknown> = {
     mode: studioModel(model)?.mode, aspect_ratio: preset.aspectRatio, duration: preset.duration, resolution: preset.resolution,
     camera_motion: preset.motion, camera_angle: preset.angle, sound: preset.sound,

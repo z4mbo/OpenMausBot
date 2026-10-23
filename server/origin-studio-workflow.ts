@@ -4,6 +4,7 @@ import { writeFileAtomic } from "./atomic.ts";
 import { DATA_DIR } from "./config.ts";
 import { clip, connectedStudioCloud, refuse, record, studioRunner, STUDIO_TERMINAL, text, type StudioCloud, type StudioRunner } from "./origin-studio.ts";
 import type { StudioGeneration, StudioMediaKind } from "../shared/studio.ts";
+import { fillBlanks, promptTakesBlanks } from "../shared/studio-blanks.ts";
 import {
   STUDIO_BROADCAST_GROUPS, broadcastGroupOf, validateWorkflow, workflowNodeModel, workflowOrder, workflowPorts,
   type StudioRunNode, type StudioWorkflowGraph, type StudioWorkflowNode, type StudioWorkflowRun,
@@ -96,7 +97,8 @@ export function createWorkflowExecutor(deps: WorkflowDeps): WorkflowExecutor {
         return value && "url" in value ? value.url : undefined;
       };
       const linked = inputs.get("prompt");
-      const prompt = [text(node.params.prompt).trim(), linked && "text" in linked ? linked.text.trim() : ""].filter(Boolean).join("\n\n");
+      const written = [text(node.params.prompt).trim(), linked && "text" in linked ? linked.text.trim() : ""].filter(Boolean).join("\n\n");
+      const prompt = promptTakesBlanks(model) ? fillBlanks(written) : written;
       const sources = model.needs.map((_, index) => media(`in${index}`) ?? refuse(`Connect ${model.label}'s inputs.`));
       const references = [media("ref0"), media("ref1")].filter((url): url is string => Boolean(url));
       const param = (key: string) => (node.params[key] === undefined || node.params[key] === "" ? undefined : node.params[key]);

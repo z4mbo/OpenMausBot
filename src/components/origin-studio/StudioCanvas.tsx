@@ -1,12 +1,12 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
-import { AlertTriangle, ArrowUpFromLine, AudioLines, Ban, BookmarkPlus, Clapperboard, Image as ImageIcon, FastForward, Loader2, Maximize2, RotateCcw, Scissors, Send, Shuffle, Square, Trash2, UserRound } from "lucide-react";
+import { AlertTriangle, ArrowUpFromLine, AudioLines, Ban, BookmarkPlus, Clapperboard, Image as ImageIcon, FastForward, LayoutTemplate, Loader2, Maximize2, RotateCcw, Scissors, Send, Shuffle, Square, Trash2, UserRound, Workflow } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { relativeTime } from "@/lib/memory";
 import { useVideoPoster } from "@/lib/video-poster";
-import { formatSeconds, ratioOf, studioCard, typing } from "./studio-ui";
-import { studioEta, type StudioGeneration } from "../../../shared/studio";
+import { GENERATION_DRAG, formatSeconds, ratioOf, studioCard, typing } from "./studio-ui";
+import { studioEta, studioModel, type StudioGeneration } from "../../../shared/studio";
 
-export type TileAction = "open" | "animate" | "upscale" | "remix" | "removeBackground" | "extend" | "reuse" | "library" | "broadcast" | "cancel" | "delete";
+export type TileAction = "open" | "animate" | "upscale" | "remix" | "removeBackground" | "extend" | "reuse" | "template" | "workflow" | "library" | "broadcast" | "cancel" | "delete";
 
 interface ActionSpec {
   id: TileAction;
@@ -22,7 +22,9 @@ const ACTIONS: Record<TileAction, ActionSpec> = {
   remix: { id: "remix", label: "Remix", key: "R", icon: Shuffle },
   removeBackground: { id: "removeBackground", label: "Remove background", icon: Scissors },
   extend: { id: "extend", label: "Extend", key: "X", icon: FastForward },
-  reuse: { id: "reuse", label: "Reuse settings", key: "P", icon: RotateCcw },
+  reuse: { id: "reuse", label: "Recreate", key: "P", icon: RotateCcw },
+  template: { id: "template", label: "Save as template", key: "S", icon: LayoutTemplate },
+  workflow: { id: "workflow", label: "Open as workflow", key: "G", icon: Workflow },
   library: { id: "library", label: "Save to library", key: "L", icon: BookmarkPlus },
   broadcast: { id: "broadcast", label: "Add to Publish", key: "B", icon: Send },
   cancel: { id: "cancel", label: "Cancel", icon: Square },
@@ -39,6 +41,7 @@ export function tileActions(row: StudioGeneration, canEdit: boolean, isAdmin: bo
     if (kind === "video") list.push("extend", "upscale");
     list.push("broadcast");
     if (kind === "image") list.push("library");
+    if (studioModel(row.model)) list.push("template", "workflow");
   }
   if (canEdit) list.push("reuse");
   if (live && canEdit) list.push("cancel");
@@ -46,7 +49,7 @@ export function tileActions(row: StudioGeneration, canEdit: boolean, isAdmin: bo
   return list.map((id) => ACTIONS[id]);
 }
 
-const KEY_ACTION: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", l: "library", b: "broadcast", Delete: "delete", Backspace: "delete" };
+export const KEY_ACTION: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", s: "template", g: "workflow", l: "library", b: "broadcast", Delete: "delete", Backspace: "delete" };
 
 /** Seconds since a live generation started, ticking each second. */
 function useElapsed(since: number, live: boolean): number {
@@ -137,6 +140,7 @@ function Tile({ row, rows, canEdit, isAdmin, busy, onAction }: {
   );
   return (
     <article tabIndex={0} onKeyDown={onKey} onDoubleClick={() => row.status === "done" && onAction(row, "open")} data-studio-generation={row.status} data-studio-tile={row._id}
+      draggable={row.status === "done" && Boolean(row.outputs[0])} onDragStart={(event) => { event.dataTransfer.setData(GENERATION_DRAG, row._id); event.dataTransfer.effectAllowed = "copy"; }}
       aria-label={`${row.modelLabel} ${row.kind}: ${row.prompt || "no prompt"}`}
       className={cn(studioCard, "mb-3 break-inside-avoid outline-none focus-visible:border-accent motion-safe:animate-pop-in")}>
       {live && <div className="relative bg-inset" style={{ aspectRatio: ratioOf(row.aspectRatio, row.kind) }}><Progress row={row} rows={rows} /></div>}

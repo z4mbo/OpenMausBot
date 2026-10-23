@@ -1,4 +1,5 @@
 import { studioModel, type StudioModel } from "./studio.ts";
+import { fillBlanks } from "./studio-blanks.ts";
 
 export type StudioPresetGroup = "motion" | "video" | "photo" | "product" | "audio";
 
@@ -84,5 +85,5 @@ export function presetBlank(prompt: string): { start: number; end: number } | nu
 
 /** A preset prompt as sent: placeholders nobody replaced keep their words and lose their brackets. */
 export function presetPromptText(prompt: string): string {
-  return prompt.replace(new RegExp(BLANK.source, "g"), "$1");
+  return fillBlanks(prompt);
 }

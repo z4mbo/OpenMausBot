@@ -4,11 +4,10 @@ import { cn } from "@/lib/cn";
 import { relativeTime } from "@/lib/memory";
 import { useVideoPoster } from "@/lib/video-poster";
 import { Modal, ghostButton, iconButton } from "../origin-pages/ui";
-import { tileActions, type TileAction } from "./StudioCanvas";
+import { KEY_ACTION, tileActions, type TileAction } from "./StudioCanvas";
 import { typing } from "./studio-ui";
 import { STUDIO_CAMERA_MOTIONS, type StudioGeneration } from "../../../shared/studio";
 
-const KEYS: Record<string, TileAction> = { a: "animate", u: "upscale", r: "remix", x: "extend", p: "reuse", l: "library", b: "broadcast" };
 
 function settings(row: StudioGeneration): string[] {
   const params = row.params ?? {};
@@ -45,7 +44,7 @@ export function StudioViewer({ row, rows, canEdit, isAdmin, busy, onAction, onMo
       onMove(event.key === "ArrowLeft" ? -1 : 1);
       return;
     }
-    const action = KEYS[event.key.toLowerCase()];
+    const action = KEY_ACTION[event.key.toLowerCase()];
     if (action && actions.some((spec) => spec.id === action)) {
       event.preventDefault();
       onAction(row, action);

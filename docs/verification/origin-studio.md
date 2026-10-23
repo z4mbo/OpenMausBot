@@ -15,8 +15,8 @@ node --experimental-strip-types scripts/verify-origin-studio.ts
 ```
 
 It seeds a project with finished, failed and cancelled generations, a
-product photo in Assets and an "Aurora bottle" product in the Studio library,
-then prints `previewUrl`. Drive it from a second
+product photo in Assets, an "Aurora bottle" product in the Studio library and a
+"Launch hero" project template with two named blanks, then prints `previewUrl`. Drive it from a second
 terminal:
 
 ```sh
@@ -27,8 +27,8 @@ Set `OMB_VERIFY_PLAYWRIGHT` to Playwright's `index.mjs` when it is not
 resolvable from the repository root. At 1280 and 375 px, dark and light, the
 check covers:
 
-- Create, Workflows, Design and Presets share one header: the Studio title and
-  the same four-way control;
+- Create and Workflows share one header: the Studio title and the same two-way
+  control; templates, the library and Design live outside those two views;
 - the seeded video has no poster from fal, so its tile shows the first frame,
   drawn in the browser from the fixture's WebM and kept in the Cache API; the
   video itself loads only on hover;
@@ -45,7 +45,7 @@ check covers:
 - Enter opens the viewer, the arrows walk the results and ? lists the
   shortcuts;
 - the Podcast template runs step by step and its three Outputs land in Assets;
-- the Library tab lists the project's characters, products and styles; at
+- Library opens the project's characters, products and styles; at
   1280 px dark a character is saved from a generated image, "Create with" it
   sets up the next generation, and fal receives its reference image and the
   line "Keep … consistent with the reference images: …"; L on a tile opens a
@@ -61,10 +61,17 @@ check covers:
 - at 1280 px dark: a workflow is built from the palette, with Ctrl+Z,
   Ctrl+Shift+Z, Ctrl+C then Ctrl+V and a double-click on empty canvas, links
   are dragged, and it is saved with Ctrl+S, run with Ctrl+Enter and listed;
-- at 1280 px dark: T opens the Presets tab with their ComfyUI preview images;
-  search plus Enter picks Motion transfer, whose inputs read Character and
-  Motion video, and fal's Kling motion control receives the character image,
-  the video and `character_orientation`;
+- at 1280 px dark: T opens the template gallery (the project's own templates
+  first, then the presets with their ComfyUI preview images); search plus Enter
+  picks Motion transfer, whose slots read Character and Motion video, and fal's
+  Kling motion control receives the character image, the video and
+  `character_orientation`;
+- at 1280 px dark: S on a result opens Save as template; a selected word
+  becomes a named placeholder, the template is saved, picked from "Yours", its
+  blanks show as fields in the prompt bar, and fal receives the prompt with the
+  filled values and no brackets;
+- at 1280 px dark: G on a result opens it as a workflow, one model step per
+  generation in its line, with the inputs panel beside the canvas;
 - Assets shows every finished output under the Studio folder without a Save
   step.
 
@@ -74,7 +81,17 @@ uploaded-copy swap, workflow steps kept out of Assets, run permissions, the
 library, joining a large output's pieces, a run's Broadcast drafts) by
 `backend/convex/studio.test.ts` and `backend/convex/studioWorkflows.test.ts`;
 copy, paste, undo and palette search by
-`src/components/origin-studio/workflow-edit.test.ts`. Presets are covered the
+`src/components/origin-studio/workflow-edit.test.ts`. Templates and blanks are
+covered the same way: `shared/studio-blanks.test.ts` reads, fills, sets and
+marks `[Label: default]` blanks; `shared/studio-workflow.test.ts` lays every
+workflow template out without overlaps and turns a generation's line into a
+valid workflow; `backend/convex/studioTemplates.test.ts` saves a generation as
+a template with its cover, example inputs and settings and refuses other
+models and inputs of the wrong kind; `server/origin-studio.test.ts` saves and
+lists templates with `origin_studio_template_save` and `origin_studio_presets`,
+fills blanks through `origin_studio_generate`'s `template` and `fill`, saves
+workflows from a template or a generation with `origin_studio_workflow_save`,
+and returns a run card from `origin_studio_workflow_run`. Presets are covered the
 same way:
 
 - `shared/studio-presets.test.ts` checks every preset's model, unique id,
