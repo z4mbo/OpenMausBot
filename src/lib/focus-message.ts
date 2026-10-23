@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { api, useStore, type Action, type AppState } from "@/state/store";
 import type { SearchHit } from "@/lib/search-hit";
+import { revealConversation } from "@/lib/origin-pages";
 
 const FLASH_CLASSES = ["ring-2", "ring-accent/70", "rounded-2xl", "transition-shadow"];
 
@@ -15,6 +16,7 @@ export async function landOnSearchHit(
   const bot = hit.botId ? state.bots.find((candidate) => candidate.id === hit.botId) : undefined;
   const group = hit.groupId ? state.groups.find((candidate) => candidate.id === hit.groupId) : undefined;
   if (!ownerId || (!bot && !group)) throw new Error("That conversation is no longer available.");
+  revealConversation(bot);
 
   const switchAlone = bot && bot.threadId !== hit.threadId && !threadsShown ? bot : undefined;
   if (!switchAlone) dispatch({ type: "select", id: ownerId });

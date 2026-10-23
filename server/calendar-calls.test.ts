@@ -89,6 +89,27 @@ describe("CalendarCallManager", () => {
     expect(manager(file, now).get(created.id)?.nextRunAt).toBeNull();
   });
 
+  it("keeps the pending occurrence when only a call's details change", async () => {
+    let now = new Date(2026, 9, 23, 9, 0, 5).getTime();
+    const due: number[] = [];
+    const calls = new CalendarCallManager({ file: tempFile(), now: () => now, botExists: () => true, onDue: (_call, at) => { due.push(at); } });
+    const daily = calls.create(input({ schedule: { type: "daily", time: "09:00", weekdays: [1, 2, 3, 4, 5] } }));
+    const nineToday = new Date(2026, 9, 23, 9, 0).getTime();
+    expect(daily.nextRunAt).toBeGreaterThan(now);
+    calls.update(daily.id, { name: "Stand-up" });
+    expect(calls.get(daily.id)?.nextRunAt).toBe(daily.nextRunAt);
+    expect(calls.update(daily.id, { schedule: { type: "daily", time: "17:00", weekdays: [5] } }).nextRunAt).toBe(new Date(2026, 9, 23, 17, 0).getTime());
+
+    const once = calls.create(input({ schedule: { type: "once", at: nineToday + 1_000 } }));
+    now = nineToday + 2_000;
+    await calls.tick();
+    expect(due).toEqual([nineToday + 1_000]);
+    calls.update(once.id, { name: "Renamed after it ran" });
+    await calls.tick();
+    expect(due).toEqual([nineToday + 1_000]);
+    expect(calls.get(once.id)?.nextRunAt).toBeNull();
+  });
+
   it("retries a failed kickoff while the event is current and skips stale events", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     let now = 2_000;

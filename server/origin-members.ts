@@ -119,15 +119,18 @@ export function appRealtimeStore(): RealtimeStore {
 }
 
 /** A project's team chat for the Origin agent tools; an agent posts under its own name, never the person's. */
+const WORKSPACE_CONVERSATION = "";
+
 export function originTeamChat(store: () => RealtimeStore = appRealtimeStore): OriginTeamChat {
-  const scope = (teamId: string, projectId: string, author: { userId: string; name: string }): ChatScope => ({
+  const scope = (teamId: string, projectId: string | null, author: { userId: string; name: string }): ChatScope => ({
     user: { userId: author.userId, name: author.name, email: "", teamId, role: "member" },
-    conversation: `project:${projectId}`,
+    conversation: projectId === null ? WORKSPACE_CONVERSATION : `project:${projectId}`,
   });
   const line = (message: { id: string; authorName: string; body: string; createdAt: number }) =>
     ({ id: message.id, authorName: message.authorName, body: message.body, createdAt: message.createdAt });
   return {
     recent: (teamId, projectId, limit) => store().messages(scope(teamId, projectId, { userId: "", name: "" })).slice(-limit).map(line),
+    workspace: (teamId, limit) => store().messages(scope(teamId, null, { userId: "", name: "" })).slice(-limit).map(line),
     post: (teamId, projectId, agent, body) => line(store().send(scope(teamId, projectId, { userId: `agent:${agent.id}`, name: agent.name }), body)),
   };
 }

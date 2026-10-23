@@ -52,7 +52,7 @@ export function CompanionNewBotDialog() {
   }, []);
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
     <div ref={dialog} role="dialog" aria-modal="true" aria-label={t("newBot.create")} tabIndex={-1}
-      className="w-full max-w-sm rounded-2xl border border-hairline/50 bg-panel p-5 text-ink shadow-2xl"
+      className="w-full max-w-sm rounded-2xl border border-hairline/50 bg-panel p-5 text-ink"
       onKeyDown={event => {
         if (event.key === "Escape") { event.stopPropagation(); close(); }
         if (event.key === "Tab") {
@@ -224,7 +224,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
   const title = defaultsMode ? t("newBot.defaults") : projectDialog ? "New project" : section === STANDALONE_SECTION ? "New agent" : t("sidebar.newBot");
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-3 sm:p-5">
     <div ref={dialog} role="dialog" aria-modal="true" aria-label={title} aria-busy={saving} tabIndex={-1}
-      className="flex h-[min(760px,94dvh)] w-full max-w-[900px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel shadow-2xl outline-none">
+      className="flex h-[min(760px,94dvh)] w-full max-w-[900px] flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-panel outline-none">
       <div className="flex shrink-0 items-center justify-between border-b border-hairline/40 px-5 py-4">
         <h2 className="text-[17px] font-semibold text-ink">{title}</h2>
         <button type="button" onClick={() => closeRef.current()} aria-label={t("common.close")}
@@ -276,7 +276,7 @@ export function LocalNewBotDialog({ defaultsMode = false, onClose, section, onCr
         <button type="button" onClick={() => closeRef.current()} className="rounded-lg px-4 py-2 text-[13px] text-ink-secondary hover:bg-control">{t("common.cancel")}</button>
         <button type="button" disabled={!ready || saving || accessIncomplete || (!defaultsMode && !bot.name.trim())} onClick={() => void save()}
           className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2 text-[13px] font-medium text-white hover:brightness-110 disabled:opacity-40">
-          {saving && <Loader2 size={15} className="animate-spin" />}{defaultsMode ? t("newBot.saveDefaults") : projectDialog ? "Create project" : t("newBot.create")}
+          {saving && <Loader2 size={15} className="animate-spin" />}{defaultsMode ? t("newBot.saveDefaults") : projectDialog ? "Create project" : section === STANDALONE_SECTION ? "Create agent" : t("newBot.create")}
         </button>
       </div>
       <LocalComputerAutoWarning open={warning === "local"} onCancel={() => setWarning(null)} onConfirm={() => { draft.consent.acknowledgeLocalAuto = true; setWarning(null); void save(); }} />
@@ -317,7 +317,7 @@ function DraftSection({ active, draft, defaultsMode, access }: { active: Section
 function ProjectsNeedEditAccess({ onClose }: { onClose(): void }) {
   return <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
     onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onClose(); } }}>
-    <div role="alertdialog" aria-modal="true" aria-label="New project" className="w-full max-w-sm rounded-2xl border border-hairline/50 bg-panel p-5 text-center shadow-2xl motion-safe:animate-pop-in">
+    <div role="alertdialog" aria-modal="true" aria-label="New project" className="w-full max-w-sm rounded-2xl border border-hairline/50 bg-panel p-5 text-center motion-safe:animate-pop-in">
       <span className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-raised text-ink-secondary" aria-hidden="true"><Lock size={20} /></span>
       <h2 className="text-[16px] font-semibold text-ink">Viewers can't create projects</h2>
       <p className="mt-1.5 text-[13px] leading-relaxed text-ink-secondary">Ask a workspace owner or admin to make you a member, or to create the project and give you access.</p>

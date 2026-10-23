@@ -2991,11 +2991,18 @@ describe("notifications feed", () => {
     expect(state.notifications.map((n) => n.id)).toEqual(["live", "n2", "n1"]);
   });
 
-  it("hydration takes the server's copy for an id both sides have (a failed mark-read resyncs to unread)", () => {
+  it("a resync after a failed mark-read takes the server's unread copy", () => {
     let state = reducer(initialState, { type: "notificationsHydrated", notifications: [entry("n1", 1)] });
     state = reducer(state, { type: "notificationRead", id: "n1" });
-    state = reducer(state, { type: "notificationsHydrated", notifications: [entry("n1", 1)] });
+    state = reducer(state, { type: "notificationsHydrated", notifications: [entry("n1", 1)], resync: true });
     expect(state.notifications[0].read).toBe(false);
+  });
+
+  it("a hydration that started before a read does not bring its unread badge back", () => {
+    let state = reducer(initialState, { type: "notificationsHydrated", notifications: [entry("n1", 1), entry("n2", 2)] });
+    state = reducer(state, { type: "notificationRead", id: "n1" });
+    state = reducer(state, { type: "notificationsHydrated", notifications: [entry("n2", 2), entry("n1", 1)] });
+    expect(state.notifications.map((n) => [n.id, n.read])).toEqual([["n2", false], ["n1", true]]);
   });
 
   it("showRoutines closes the feed so its rail is reachable again", () => {

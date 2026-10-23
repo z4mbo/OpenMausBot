@@ -66,6 +66,12 @@ describe("DefaultsBeat", () => {
     expect(html).not.toContain(">Shared bots<");
   });
 
+  it("holds the pickers until the plan they save into has arrived", () => {
+    store.instances = [ready("claude", "claudeAgent", ["opus", "sonnet"])];
+    expect(render()).toMatch(/<select[^>]*disabled=""[^>]*aria-label="Default model for Anthropic"|<select[^>]*aria-label="Default model for Anthropic"[^>]*disabled=""/);
+    expect(render({ defaults: {}, bots: [] } as unknown as SharedAgentPlan)).not.toMatch(/<select[^>]*disabled=""/);
+  });
+
   it("asks the server for the plan", async () => {
     store.api.mockResolvedValue({ defaults: {}, bots: [] });
     render();

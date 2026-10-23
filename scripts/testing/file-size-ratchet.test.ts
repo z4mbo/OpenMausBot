@@ -15,7 +15,7 @@ const HARD_CAP = 2000;
 const LISTED_FROM = 1000;
 
 const LINES: Record<string, number> = {
-  "server/index.ts": 17682,
+  "server/index.ts": 17680,
   "src/state/store.tsx": 3613,
   "electron/main.mjs": 3496,
   "server/store.ts": 2420,
@@ -25,7 +25,7 @@ const LINES: Record<string, number> = {
   "server/drivers/codex.ts": 1872,
   "server/routines.ts": 1876,
   "src/components/ComputerPanel.tsx": 1918,
-  "src/components/RoutineCalendarPage.tsx": 2099,
+  "src/components/RoutineCalendarPage.tsx": 2098,
   "server/config.ts": 1472,
   "src/components/ChatView.tsx": 1567,
   "server/routine-requests.ts": 1680,
@@ -43,14 +43,14 @@ const LINES: Record<string, number> = {
   "src/components/ModelPicker.tsx": 1204,
   "src/components/PhoneSetupFlow.tsx": 1283,
   "server/cli.ts": 1080,
-  "src/components/SettingsModal.tsx": 1155,
+  "src/components/SettingsModal.tsx": 1153,
   "src/components/ChatMarkdown.tsx": 1014,
-  "src/components/PluginsPanel.tsx": 1119,
+  "src/components/PluginsPanel.tsx": 1115,
   "server/org-library.ts": 1003,
   "src/components/TeamLibraryPanel.tsx": 1120,
   "src/components/AttachmentPreview.tsx": 1044,
   "server/drivers/agents-catalog.ts": 1178,
-  "server/origin-cloud.ts": 1142,
+  "server/origin-cloud.ts": 1138,
   "src/components/origin-pages/CallPage.tsx": 1239,
   "src/components/zap-dots/scene.ts": 1413,
 };

@@ -97,6 +97,8 @@ export function createDefaultTeamRoutes(deps: { store: Store; maxWorkspaceBots: 
 }
 
 let activeHeadId: string | null = null;
+/** The workspace the person last opened in the app. */
+export const openWorkspaceHead = () => activeHeadId;
 
 /** Template teams join the workspace the person has open, so its head can reach and manage them. */
 export function watchTemplateTeams(store: Store): () => void {

@@ -64,7 +64,7 @@ describe("postNotificationRead", () => {
     vi.stubGlobal("fetch", fetchMock);
     const dispatch = vi.fn();
     await postNotificationRead("/api/notifications/n1/read", dispatch);
-    expect(dispatch).toHaveBeenCalledWith({ type: "notificationsHydrated", notifications: feed });
+    expect(dispatch).toHaveBeenCalledWith({ type: "notificationsHydrated", notifications: feed, resync: true });
   });
 
   it("reloads the feed after a network error, and stays quiet if that fails too", async () => {
@@ -72,7 +72,7 @@ describe("postNotificationRead", () => {
     const dispatch = vi.fn();
     vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce(new Error("down")).mockResolvedValueOnce(reply(true, { notifications: feed })));
     await postNotificationRead("/api/notifications/n1/read", dispatch);
-    expect(dispatch).toHaveBeenCalledWith({ type: "notificationsHydrated", notifications: feed });
+    expect(dispatch).toHaveBeenCalledWith({ type: "notificationsHydrated", notifications: feed, resync: true });
     dispatch.mockClear();
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("down")));
     await expect(postNotificationRead("/api/notifications/n1/read", dispatch)).resolves.toBeUndefined();

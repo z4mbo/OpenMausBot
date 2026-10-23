@@ -124,7 +124,7 @@ export function DefaultsBeat({ onNext, setMascot, onSetUpModels }: BeatProps & {
                   size="sm"
                   className="w-[260px] max-w-[55%]"
                   value={String(row.selected)}
-                  disabled={saving}
+                  disabled={saving || !plan}
                   aria-label={t("onboarding.defaults.provider", { provider })}
                   onChange={(event) => pick(row.driverKind, Number(event.target.value))}
                 >

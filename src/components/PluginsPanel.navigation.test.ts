@@ -58,6 +58,7 @@ const CONFIGURED = 3;
 const STATUS = 6;
 const PHASE = 13;
 const HIGHLEVEL_CONNECTED = 21;
+const CATALOG_LOAD = 22;
 
 type Node = ReactElement<{ children?: ReactNode; "aria-pressed"?: boolean; "data-apps-filter"?: string; onClick?: () => void; [key: string]: unknown }>;
 function nodes(value: ReactNode): Node[] {
@@ -108,6 +109,17 @@ describe("Apps pop-up", () => {
     const grid = tree.find((node) => node.props["data-apps-grid"] !== undefined)!;
     expect(nodes(grid).some((node) => node.props.whopCard === true)).toBe(true);
     expect(fixture.dispatch).not.toHaveBeenCalled();
+  });
+  it("offers Try again instead of an endless spinner when the catalog fails, and retries the catalog", () => {
+    fixture.overrides.set(CARDS, null);
+    expect(render().html).toContain("Loading catalog");
+    fixture.overrides.set(CATALOG_LOAD, { attempt: 0, failed: true });
+    const { html, nodes: tree } = render();
+    expect(html).not.toContain("Loading catalog");
+    expect(html).toContain("Try again");
+    const after = tree.flatMap((node) => node.props.after ? nodes(node.props.after as ReactNode) : []);
+    after.find((node) => node.props.children === "Try again")!.props.onClick!();
+    expect(fixture.overrides.get(CATALOG_LOAD)).toEqual({ attempt: 1, failed: false });
   });
   it("counts Whop among connected apps", () => {
     fixture.overrides.set(18, true);

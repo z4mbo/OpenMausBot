@@ -11,6 +11,10 @@ describe("new-bot templates", () => {
     expect(resolveBotCreationDefaults(defaults, { settings: { toolScope: null } }).profile).toEqual({ toolScope: null });
     expect(newBotDefaultsSchema.safeParse({ profile: { toolScope: { deny: ["mcp:*:read"] } } }).success).toBe(false);
   });
+  it("accepts a routine's continuity and start-up run in the template", () => {
+    const routine = { name: "Digest", prompt: "Summarise", schedule: { type: "daily", time: "08:00", weekdays: [1] }, continuity: true, runOnStartup: true };
+    expect(newBotDefaultsSchema.parse({ routines: [routine] }).routines[0]).toMatchObject({ continuity: true, runOnStartup: true });
+  });
   it("stores Full as a plain preference, with no consent field, and creates new bots with it", () => {
     const defaults = newBotDefaultsSchema.parse({ profile: { name: "", approvalMode: "full" } });
     expect(defaults.profile).toEqual({ name: "", approvalMode: "full" });

@@ -73,6 +73,22 @@ it.each(["success", "failure"] as const)("a current-session logout %s still clea
   expect(sessionStore.get()).toBeNull();
 });
 
+it("signs out at once while the backend is unreachable, and still asks it to revoke the token", async () => {
+  vi.useFakeTimers();
+  try {
+    fixture.mutation.mockReturnValue(new Promise(() => {}));
+    let done = false;
+    const pending = logoutCloud().then(() => { done = true; });
+    expect(sessionStore.get()).toBeNull();
+    expect(fixture.mutation.mock.calls[0]![1]).toEqual({ sessionToken: "fixture-session-one" });
+    await vi.advanceTimersByTimeAsync(3_000);
+    await pending;
+    expect(done).toBe(true);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 it("rejects a delayed login after a backend switch without sending its token to the new backend", async () => {
   setSessionToken(null);
   const request = deferred<{ sessionToken: string }>(); fixture.action.mockReturnValue(request.promise);

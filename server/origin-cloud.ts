@@ -88,16 +88,12 @@ export interface OriginGitHub {
 }
 
 /** One message of a project's team chat, as the Origin tools read it. */
-export interface OriginChatLine {
-  id: string;
-  authorName: string;
-  body: string;
-  createdAt: number;
-}
+export interface OriginChatLine { id: string; authorName: string; body: string; createdAt: number }
 
-/** The project team chat ("project:<id>" in the app's realtime store). */
+/** The project team chat ("project:<id>" in the app's realtime store) and the workspace channel everyone reads; never direct messages. */
 export interface OriginTeamChat {
   recent(teamId: string, projectId: string, limit: number): OriginChatLine[];
+  workspace?(teamId: string, limit: number): OriginChatLine[];
   /** Posts as the agent itself, never as the person. */
   post(teamId: string, projectId: string, agent: { id: string; name: string }, body: string): OriginChatLine;
 }

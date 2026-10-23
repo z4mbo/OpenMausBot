@@ -101,6 +101,12 @@ function cloneSchedule(schedule: CalendarCallSchedule): CalendarCallSchedule {
     : { type: "daily", time: schedule.time, weekdays: [...schedule.weekdays] };
 }
 
+function sameSchedule(left: CalendarCallSchedule, right: CalendarCallSchedule): boolean {
+  if (left.type === "once") return right.type === "once" && right.at === left.at;
+  if (right.type === "once") return false;
+  return left.time === right.time && sameRoster(left.weekdays.map(String), right.weekdays.map(String));
+}
+
 function sameRoster(left: readonly string[], right: readonly string[]): boolean {
   if (left.length !== right.length) return false;
   const wanted = new Set(left);
@@ -251,7 +257,7 @@ export class CalendarCallManager {
       id: previous.id,
       ...clean,
       roomId: patch.botIds && !sameRoster(clean.botIds, previous.botIds) ? undefined : previous.roomId,
-      nextRunAt: this.initialOccurrence(clean.schedule, this.now()),
+      nextRunAt: sameSchedule(clean.schedule, previous.schedule) ? previous.nextRunAt : this.initialOccurrence(clean.schedule, this.now()),
       createdAt: previous.createdAt,
       updatedAt: this.now(),
     };

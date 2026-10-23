@@ -112,6 +112,15 @@ describe("the update card", () => {
     expect(card()!.querySelector('[role="progressbar"]')).toBeNull();
   });
 
+  it("tells the person to quit and reopen when a restart stalls", async () => {
+    await emit({ status: "installing", version: "0.2.0" });
+    await act(async () => button()!.click());
+    const stalled = "Restart is taking longer than expected. Quit and reopen Origin to finish the update.";
+    expect(card()!.textContent).not.toContain(stalled);
+    await emit({ status: "installing", version: "0.2.0", message: stalled });
+    expect(card()!.textContent).toContain(stalled);
+  });
+
   it("offers Install where a terminal finishes the update", async () => {
     await emit({ status: "downloaded", version: "0.2.0", installMode: "handoff" });
     await act(async () => button()!.click());

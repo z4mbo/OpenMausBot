@@ -81,6 +81,7 @@ Use only mapped, tested commands:
 - [Studio: create, workflows and Assets](origin-studio.md)
 - [Origin cards in agent chat](origin-chat-cards.md)
 - [Project bar and core sections](origin-core-sections.md)
+- [Workspace pages and workspace context](origin-workspace.md)
 - [Brand kit across Canvas, Pages and Studio](origin-brand-kit.md)
 - [Canvas design tools, collaboration and agents](origin-canvas-pro.md)
 - [Launchpad and milestones](origin-launchpad.md)

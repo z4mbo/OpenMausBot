@@ -149,7 +149,9 @@ export function UpdateCard({
 
   const note = failed
     ? state.message?.split("\n")[0]?.slice(0, 160) || t("update.card.failed")
-    : downloading
+    : status === "installing" && state.message
+      ? state.message
+      : downloading
       ? t("update.card.downloadingNote")
       : handoff
         ? t("update.card.handoffNote")
@@ -167,7 +169,7 @@ export function UpdateCard({
         aria-labelledby="update-card-title"
         aria-describedby="update-card-note"
         data-update-card
-        className="animate-pop-in relative w-full max-w-[420px] rounded-2xl border border-hairline/50 bg-panel p-6 shadow-2xl shadow-black/50"
+        className="animate-pop-in relative w-full max-w-[420px] rounded-2xl border border-hairline/50 bg-panel p-6"
       >
         <button
           type="button"

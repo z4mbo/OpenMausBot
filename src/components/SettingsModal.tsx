@@ -158,14 +158,12 @@ export function sectionMatches(section: (typeof SECTIONS)[number], query: string
   return [t(section.labelKey), ...section.keywords].some((part) => part.toLowerCase().includes(query));
 }
 
-function ProfileFields() {
+export function ProfileFields() {
   const { state, dispatch } = useStore();
   const [name, setName] = useState(state.config?.profile?.name ?? "");
   const [email, setEmail] = useState(state.config?.profile?.email ?? "");
-  useEffect(() => {
-    setName(state.config?.profile?.name ?? "");
-    setEmail(state.config?.profile?.email ?? "");
-  }, [state.config?.profile?.name, state.config?.profile?.email]);
+  useEffect(() => setName(state.config?.profile?.name ?? ""), [state.config?.profile?.name]);
+  useEffect(() => setEmail(state.config?.profile?.email ?? ""), [state.config?.profile?.email]);
 
   const save = () => {
     void fetch("/api/config", {

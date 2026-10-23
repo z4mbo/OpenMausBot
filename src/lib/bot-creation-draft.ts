@@ -10,7 +10,7 @@ const routineTemplate = (routine: Routine): BotRoutineTemplate => ({
   name: routine.name, prompt: routine.prompt, schedule: routine.schedule,
   enabled: routine.enabled, runOn: routine.runOn, durationMinutes: routine.durationMinutes,
   timeoutMinutes: routine.timeoutMinutes, overlap: routine.overlap,
-  attachments: routine.attachments,
+  attachments: routine.attachments, continuity: routine.continuity, runOnStartup: routine.runOnStartup,
 });
 
 export class BotCreationDraft {

@@ -28,6 +28,13 @@ describe("isolated creation draft", () => {
     expect(network).not.toHaveBeenCalled();
   });
 
+  it("keeps a draft routine's continuity and start-up run in the template it creates", async () => {
+    const draft = new BotCreationDraft(EMPTY_BOT_DEFAULTS, vi.fn(), vi.fn() as unknown as typeof api);
+    await draft.request("/api/routines", { method: "POST", body: JSON.stringify({ botId: draft.id,
+      name: "Digest", prompt: "Summarise", schedule: { type: "daily", time: "08:00", weekdays: [1] }, continuity: true, runOnStartup: true }) });
+    expect(draft.export().routines[0]).toMatchObject({ continuity: true, runOnStartup: true });
+  });
+
   it("makes independent copies and new routine identities for every draft", () => {
     const defaults = { ...EMPTY_BOT_DEFAULTS, profile: { name: "Default" }, routines: [{
       name: "Status", prompt: "Check status", enabled: false, schedule: { type: "once" as const, at: 123456789 },

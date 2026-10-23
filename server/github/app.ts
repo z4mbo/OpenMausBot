@@ -32,7 +32,7 @@ async function installationFor(service: GitHubService, repoUrl: string, account?
 }
 
 /** Security: installation tokens live only in memory for GitHub's one-hour lifetime and are never persisted or returned to a model. */
-/** `extra` widens the token by permissions such as Actions for Ship's workflow runs; the installation must have granted them. */
+/** `extra` widens the token by permissions such as Actions; the installation must have granted them. */
 export async function installationToken(service: GitHubService, repoUrl: string, pushOnly = false, account?: Account, extra: Readonly<Record<string, string>> = {}) {
   const repo = parseGitHubRepo(repoUrl);
   if (!repo) throw new Error("GitHub repository required");

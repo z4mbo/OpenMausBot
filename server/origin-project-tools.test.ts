@@ -83,6 +83,7 @@ function fakeChat() {
       reads.push(projectId);
       return [{ id: "m1", authorName: "Ana", body: `Hello ${projectId} team`, createdAt: 0 }].slice(0, limit);
     },
+    workspace: (teamId, limit) => [{ id: "w1", authorName: "Ben", body: `Launch party is on Friday for ${teamId}`, createdAt: 0 }].slice(0, limit),
     post: (teamId, projectId, agent, body) => {
       posts.push({ teamId, projectId, agent, body });
       return { id: "m2", authorName: agent.name, body, createdAt: 1 };
@@ -168,6 +169,12 @@ describe("project team chat", () => {
       expect(chat.recent("team2", "kaiproject01", 5)).toEqual([]);
       const scope = { user: { userId: "u1", name: "Ana", email: "a@x.dev", teamId: "team1", role: "member" }, conversation: "project:kaiproject01" as const };
       expect(store.messages(scope)[0]).toMatchObject({ authorUserId: "agent:kai-dev", authorName: "Developer" });
+      const ana = { userId: "u1", name: "Ana", email: "a@x.dev", teamId: "team1", role: "member" as const };
+      store.send({ user: ana, conversation: "" }, "Everyone: launch party Friday");
+      const dm = store.openDirectConversation(ana, "u2");
+      store.send({ user: ana, conversation: dm }, "Private note");
+      expect(chat.workspace!("team1", 5)).toMatchObject([{ authorName: "Ana", body: "Everyone: launch party Friday" }]);
+      expect(chat.workspace!("team2", 5)).toEqual([]);
     } finally {
       store.close();
     }
@@ -252,6 +259,53 @@ describe("per-turn Origin context", () => {
     expect(head).toContain("- Yuki (Origin project yuki) · repo ggs/yuki · Chief Yuki");
     expect(head).toContain("you route, project Chiefs deliver");
     expect(head).toContain("- Kai: 2 open issue(s), 1 high priority");
+  });
+
+  it("gives the head and standalone agents the whole workspace: issues, team chat, routines, calendar and conversations", async () => {
+    const { client } = workspaceConvex();
+    const now = Date.parse("2026-10-23T10:00:00Z");
+    const bots = [
+      ...WORKSPACE.map((bot) => bot.id === "kai-chief" ? { ...bot, tasks: [{ title: "Plan the beta", createdAt: now - 60_000, updatedAt: now - 60_000 }] } : bot),
+      { id: "scout", name: "Scout", section: "Agents", tasks: [{ title: "Routine output", createdAt: now, routineRunId: "run1" }, { title: "New thread", createdAt: now }] },
+      { id: "outsider", name: "Outsider", section: "Mars" },
+    ] as unknown as BotRecord[];
+    const turn = createOriginTurnContext({
+      bots: () => bots, state: () => ({ url: "http://127.0.0.1:3210", sessionToken: "tok", projects: LINKS }), connect: () => client,
+      teamChat: fakeChat().chat, waitMs: 5_000, now: () => now,
+      activity: () => ({
+        routines: [
+          { name: "Stand-up", botId: "kai-chief", enabled: true, nextRunAt: Date.parse("2026-10-24T09:00:00Z") },
+          { name: "Scan", botId: "scout", enabled: false, nextRunAt: null },
+          { name: "Elsewhere", botId: "outsider", enabled: true, nextRunAt: now + 1 },
+        ],
+        runs: [{ routineName: "Stand-up", botId: "kai-chief", status: "failed", scheduledFor: now - 3_600_000 }],
+        calls: [
+          { name: "Launch review", botIds: ["kai-chief", "kai-dev"], nextRunAt: Date.parse("2026-10-25T14:30:00Z"), durationMinutes: 30 },
+          { name: "Next month", botIds: ["kai-chief"], nextRunAt: now + 40 * 86_400_000, durationMinutes: 15 },
+        ],
+      }),
+    });
+    const head = (await turn.parts("head")).map((part) => part.text).join("");
+    expect(head).toContain("you route, project Chiefs deliver");
+    expect(head).toContain('- Kai: 2 open issue(s), 1 high priority. Top: ORI-AB12 "Set up CI"');
+    expect(head).toContain('- Routines (2): "Stand-up" by Kai next 2026-10-24 09:00 UTC; "Scan" by Scout (paused)');
+    expect(head).toContain('- Routine runs that need the person: "Stand-up" failed (2026-10-23 09:00 UTC)');
+    expect(head).toContain('- Calendar, next 7 days: "Launch review" 2026-10-25 14:30 UTC, 30 min with Kai, Developer');
+    expect(head).toContain('- Recent conversations: Kai "Plan the beta"');
+    expect(head).toContain('- Workspace chat, latest: Ben: "Launch party is on Friday for team1"');
+    for (const hidden of ["Elsewhere", "Next month", "Routine output", "New thread"]) expect(head).not.toContain(hidden);
+
+    const scout = await turn.parts("scout");
+    expect(scout.map((part) => part.id)).toEqual(["origin-project", "origin-status"]);
+    const text = scout.map((part) => part.text).join("");
+    expect(text).toContain("you are one of Head's agents, outside its projects");
+    expect(text).toContain("- Kai · Chief Kai");
+    expect(text).toContain("- Yuki: 1 open issue(s), 1 high priority");
+    expect(text).toContain('"Launch review"');
+    expect(text).not.toContain("you route, project Chiefs deliver");
+    expect(text).not.toContain("Stripe");
+
+    expect(await turn.parts("outsider")).toEqual([]);
   });
 
   it("caches for a minute and refreshes after a change", async () => {

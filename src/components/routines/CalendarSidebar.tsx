@@ -82,10 +82,8 @@ export function CalendarSidebar({ bots, anchor, onSelectDate }: CalendarSidebarP
               />
               <BotAvatar bot={bot} size={27} animated={false} />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[11.5px] font-medium text-ink">{bot.name}</div>
-                <div className="truncate text-[9.5px] text-ink-tertiary">
-                  {bot.title || "BotAgent"}
-                </div>
+                <div className="truncate text-[12.5px] font-medium text-ink">{bot.name}</div>
+                {(bot.title || bot.section) && <div className="truncate text-[11px] text-ink-tertiary">{bot.title || bot.section}</div>}
               </div>
               <span className="shrink-0 rounded-full border border-hairline/50 px-1.5 py-0.5 text-[8.5px] text-ink-tertiary opacity-0 transition-opacity group-hover:opacity-100">
                 Drag

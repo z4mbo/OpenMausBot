@@ -1,8 +1,10 @@
 import type { NotificationTarget } from "@/lib/notify";
+import { revealConversation } from "@/lib/origin-pages";
 import type { Action, AppState } from "./store";
 
 interface NotificationThreadOwner {
   id: string;
+  chiefOfStaff?: boolean;
   threadId: string;
   mainThreadId?: string;
   tasks?: Array<{ threadId: string }>;
@@ -37,6 +39,7 @@ export function openNotificationTarget(
       (candidate.tasks ?? []).some((task) => task.threadId === target.threadId),
   );
   if (group) {
+    revealConversation(undefined);
     dispatch({ type: "select", id: group.id });
     if (group.threadId !== target.threadId) {
       dispatch({ type: "switchGroupTask", groupId: group.id, threadId: target.threadId });
@@ -46,6 +49,7 @@ export function openNotificationTarget(
   const bot = state.bots.find((candidate) =>
     candidate.threadId === target.threadId || candidate.tasks?.some((task) => task.threadId === target.threadId)
   ) ?? state.bots.find((candidate) => candidate.id === target.botId);
+  revealConversation(bot);
   if (!bot) {
     dispatch({ type: "select", id: target.botId });
     return;

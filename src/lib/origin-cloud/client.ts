@@ -123,14 +123,19 @@ export function functionRef<T extends FunctionType>(name: string) {
   return makeFunctionReference<T>(name);
 }
 
+const LOGOUT_REVOKE_WAIT_MS = 3_000;
+
+/** Signs this app out at once; revoking the token on the backend gets a short wait, because a disconnected client holds mutations until it reconnects. */
 export async function logoutCloud(): Promise<void> {
   const session = captureCloudSession();
   const client = cloudClient();
-  try {
-    if (client && session.token) await client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: session.token });
-  } finally {
-    if (session.isCurrent()) setSessionToken(null);
-  }
+  const revoke = client && session.token
+    ? client.mutation(functionRef<"mutation">("auth:logout"), { sessionToken: session.token }).then(() => undefined, () => undefined)
+    : Promise.resolve();
+  if (session.isCurrent()) setSessionToken(null);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  await Promise.race([revoke, new Promise<void>((resolve) => { timer = setTimeout(resolve, LOGOUT_REVOKE_WAIT_MS); })]);
+  clearTimeout(timer);
 }
 
 export function withSession(args: Record<string, unknown> = {}): Record<string, unknown> {

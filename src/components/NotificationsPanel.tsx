@@ -95,7 +95,7 @@ export async function postNotificationRead(path: string, dispatch: (action: Acti
   }
   try {
     const { notifications } = await api<{ notifications?: unknown }>("/api/notifications");
-    if (Array.isArray(notifications)) dispatch({ type: "notificationsHydrated", notifications });
+    if (Array.isArray(notifications)) dispatch({ type: "notificationsHydrated", notifications, resync: true });
   } catch {
     // Offline: the next hydration corrects the badge.
   }

@@ -1,6 +1,6 @@
-import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginGitHub, type OriginProjectBot } from "./origin-cloud.ts";
+import { convexOriginClient, defaultOriginCloudFile, readOriginCloud, type OriginGitHub } from "./origin-cloud.ts";
 import { originTeamChat } from "./origin-members.ts";
-import { createOriginTurnContext } from "./origin-project-context.ts";
+import { createOriginTurnContext, type OriginContextDeps } from "./origin-project-context.ts";
 import { createProjectFolders } from "./origin-project-folders.ts";
 import type { ProjectGit } from "./github/project-git.ts";
 import { PASS, type PublicRouteHandler } from "./routes/table.ts";
@@ -8,8 +8,8 @@ import { PASS, type PublicRouteHandler } from "./routes/table.ts";
 const RECONCILE_EVERY_MS = 120_000;
 const FIRST_RECONCILE_MS = 5_000;
 
-export interface OriginAgentSupportDeps {
-  bots(): readonly OriginProjectBot[];
+export interface OriginAgentSupportDeps extends Pick<OriginContextDeps, "activity" | "openHead"> {
+  bots: OriginContextDeps["bots"];
   github(): OriginGitHub;
   chosenRoot(): string | undefined;
   saveRoot(root: string | null): void;
@@ -32,6 +32,7 @@ export function createOriginAgentSupport(deps: OriginAgentSupportDeps) {
   const teamChat = originTeamChat();
   const context = createOriginTurnContext({
     bots: deps.bots, state: cloud, connect: convexOriginClient, github: deps.github, teamChat, folder: folders.folderOf,
+    activity: deps.activity, openHead: deps.openHead,
   });
   const reconcile = () => void folders.reconcile().then((paths) => deps.localFolders ? deps.git?.prepare(paths) : undefined).catch(warn);
   setTimeout(reconcile, FIRST_RECONCILE_MS).unref();

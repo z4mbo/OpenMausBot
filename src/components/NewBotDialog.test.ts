@@ -35,9 +35,9 @@ function nodes(value: ReactNode): Node[] {
   const node = value as Node;
   return [node, ...Children.toArray(node.props.children).flatMap(nodes)];
 }
-function render(defaultsMode = false, onCreated?: () => void | Promise<void>) {
+function render(defaultsMode = false, onCreated?: () => void | Promise<void>, section?: string) {
   let tree!: ReturnType<typeof NewBotDialog>;
-  function Capture() { fixture.hook = 0; tree = NewBotDialog({ defaultsMode, onCreated }); return tree; }
+  function Capture() { fixture.hook = 0; tree = NewBotDialog({ defaultsMode, onCreated, section }); return tree; }
   const html = renderToStaticMarkup(createElement(Capture));
   return { html, nodes: nodes(tree) };
 }
@@ -114,6 +114,12 @@ describe("bot draft dialog", () => {
     create.props.onClick!();
     expect(fixture.dispatch).toHaveBeenCalledWith({ type: "newBot", onCreated: expect.any(Function) });
     expect(fixture.api).not.toHaveBeenCalled();
+  });
+  it("names an agent made from the sidebar an agent, from title to button", () => {
+    const { html } = render(false, undefined, "Agents");
+    expect(html).toContain("New agent");
+    expect(html).toContain("Create agent");
+    expect(html).not.toContain(">Create bot<");
   });
   it("opens immediately with all sections and no creation request", () => {
     const result = render();

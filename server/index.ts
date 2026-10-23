@@ -589,7 +589,7 @@ import { createHostedSlackRoutes } from "./routes/hosted-slack.ts";
 import { createBotPresetRoutes } from "./routes/bot-presets.ts";
 import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
-import { createDefaultTeamRoutes, initializeWorkspaceTeams } from "./origin-teams.ts";
+import { createDefaultTeamRoutes, initializeWorkspaceTeams, openWorkspaceHead } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
 import { createOriginCloudRoutes, cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import { BroadcastScheduler, createBroadcastRoutes } from "./broadcast/scheduler.ts";
@@ -13558,11 +13558,9 @@ const originAgents = createOriginAgentSupport({
   bots: () => store.bots,
   github: () => originGitHub(githubService()),
   chosenRoot: () => cfg.origin?.projectsRoot ?? undefined,
-  saveRoot: (projectsRoot) => {
-    saveConfig({ origin: { projectsRoot } });
-    cfg.origin = projectsRoot ? { projectsRoot } : {};
-  },
-  cwdOf: (botId) => store.bot(botId)?.cwd,
+  saveRoot: (projectsRoot) => { saveConfig({ origin: { projectsRoot } }); cfg.origin = projectsRoot ? { projectsRoot } : {}; },
+  cwdOf: (botId) => store.bot(botId)?.cwd, openHead: openWorkspaceHead,
+  activity: () => ({ routines: routines?.listRoutines() ?? [], runs: routines?.listRuns(Date.now() - 7 * 86_400_000) ?? [], calls: calendarCalls?.list() ?? [] }),
   setCwd: (botId, cwd) => {
     const bot = store.patchBot(botId, { cwd });
     if (bot) broadcast({ kind: "bot", bot: wireBot(bot) });

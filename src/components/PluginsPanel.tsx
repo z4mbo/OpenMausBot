@@ -233,20 +233,14 @@ export function PluginsPanel() {
   const [configured, setConfigured] = useState(false);
   const [mode, setMode] = useState<"managed" | "self-hosted" | "unavailable">("unavailable");
   const [setup, setSetup] = useState<ConnectorSetup | undefined>(undefined);
-  const [status, setStatus] = useState<Record<string, ConnectorStatus>>(
-    () => cachedConnectorStatus ?? readCachedInventory()?.services ?? {},
-  );
-  const [stale, setStale] = useState(
-    cachedConnectorStatus !== null && !cachedConnectorStatusAuthoritative,
-  );
+  const [status, setStatus] = useState<Record<string, ConnectorStatus>>(() => cachedConnectorStatus ?? readCachedInventory()?.services ?? {});
+  const [stale, setStale] = useState(cachedConnectorStatus !== null && !cachedConnectorStatusAuthoritative);
   const [pendingUrls, setPendingUrls] = useState<Record<string, PendingAuthorization>>({});
   const [aliasSlug, setAliasSlug] = useState<string | null>(null);
   const [aliasDraft, setAliasDraft] = useState("");
   const [busySlug, setBusySlug] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [inventoryPhase, setInventoryPhase] = useState<ConnectorInventoryPhase>(
-    cachedConnectorStatus === null ? "loading" : "ready",
-  );
+  const [inventoryPhase, setInventoryPhase] = useState<ConnectorInventoryPhase>(cachedConnectorStatus === null ? "loading" : "ready");
   const [error, setError] = useState<string | { key: LocaleKey } | null>(null);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"marketplace" | "connected">("marketplace");
@@ -256,6 +250,7 @@ export function PluginsPanel() {
   const [category, setCategory] = useState<string | null>(null);
   // Appended after the older state so tests that seed state by call order keep their indices.
   const [highLevelConnected, setHighLevelConnected] = useState<boolean | null>(null);
+  const [catalogLoad, setCatalogLoad] = useState({ attempt: 0, failed: false });
 
   const pollTimers = useRef(new Map<string, ReturnType<typeof setInterval>>());
   const statusGenerations = useRef(new Map<string, number>());
@@ -372,11 +367,10 @@ export function PluginsPanel() {
       .catch((e) => {
         if (!alive) return;
         setError(e.message);
+        setCatalogLoad((load) => ({ ...load, failed: true }));
       });
-    return () => {
-      alive = false;
-    };
-  }, [loadConnectionInventory]);
+    return () => { alive = false; };
+  }, [loadConnectionInventory, catalogLoad.attempt]);
 
   useEffect(() => {
     const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -803,11 +797,13 @@ export function PluginsPanel() {
                 viewAll={allCapped ? { label: t("apps.viewAll"), onClick: () => setShowAllApps(true) } : undefined}
                 after={(
                   <>
-                    {cards === null && (
+                    {cards === null && (catalogLoad.failed ? (
+                      <div className="flex justify-center py-24"><button type="button" onClick={() => { setError(null); setCatalogLoad(({ attempt }) => ({ attempt: attempt + 1, failed: false })); }} className={cn(pill, "bg-control/70 px-4 text-ink hover:bg-raised-hover")}>{t("cloudAdd.tryAgain")}</button></div>
+                    ) : (
                       <div className="flex items-center justify-center gap-2 py-24 text-[13px] text-ink-secondary">
                         <Loader2 size={14} className="animate-spin" /> {t("connectors.loadingCatalog")}
                       </div>
-                    )}
+                    ))}
                     {allCapped && (
                       <div className="mt-4 flex justify-center">
                         <button
