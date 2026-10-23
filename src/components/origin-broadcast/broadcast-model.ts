@@ -182,3 +182,38 @@ export function metricSamples(posts: readonly BroadcastPost[]) {
   return posts.flatMap((post) => post.variants.flatMap((variant) => variant.publishedAt !== undefined && variant.metrics
     ? [{ channel: variant.channel, publishedAt: variant.publishedAt, metrics: variant.metrics }] : []));
 }
+
+export type PublishOverview = { approval: number; upcoming: number; failed: number; published: number; engagement: number };
+
+/** What the Posts tab leads with: decisions waiting, the next week's queue, failures, and the last 30 days out. */
+export function publishOverview(posts: readonly BroadcastPost[], now = Date.now()): PublishOverview {
+  const week = now + 7 * DAY_MS;
+  const month = now - 30 * DAY_MS;
+  const recent = posts.filter((post) => post.status === "published" && (postTime(post) ?? 0) >= month);
+  return {
+    approval: posts.filter((post) => post.needsApproval).length,
+    upcoming: posts.filter((post) => post.status === "scheduled" && (post.scheduledAt ?? 0) <= week).length,
+    failed: posts.filter((post) => post.status === "failed").length,
+    published: recent.length,
+    engagement: recent.reduce((sum, post) => sum + post.variants.reduce((total, variant) => total + (variant.metrics ? variant.metrics.likes + variant.metrics.reposts + variant.metrics.replies : 0), 0), 0),
+  };
+}
+
+/** Every word of the query appears in one of the post's texts, media names or its agent's name. */
+export function matchesSearch(post: BroadcastPost, query: string): boolean {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const haystack = [...post.variants.map((variant) => variant.text), ...post.media.map((item) => item.name), post.agentName ?? ""].join("\n").toLowerCase();
+  return words.every((word) => haystack.includes(word));
+}
+
+export type PostCampaign = { id: string; name: string };
+
+/** The campaigns each post belongs to, from campaign summaries that list their posts. */
+export function campaignsByPost(campaigns: readonly { _id: string; name: string; postIds?: string[] }[]): Map<string, PostCampaign[]> {
+  const byPost = new Map<string, PostCampaign[]>();
+  for (const campaign of campaigns) {
+    for (const postId of campaign.postIds ?? []) byPost.set(postId, [...byPost.get(postId) ?? [], { id: campaign._id, name: campaign.name }]);
+  }
+  return byPost;
+}

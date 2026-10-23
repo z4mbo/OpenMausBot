@@ -14,7 +14,7 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
   { prefix: "origin_studio_", words: "image picture photo illustration logo artwork thumbnail video clip animation audio voice voiceover music sound generate make create render",
     tools: { origin_studio_workflow_list: "workflow workflows pipeline template templates node graph", origin_studio_workflow_run: "run workflow template reel avatar podcast chain steps campaign pack", origin_studio_library: "character characters product style library consistent reference", origin_studio_presets: "preset presets effect effects motion transfer try-on relight angle higgsfield comfyui" } },
   { prefix: "origin_broadcast_", words: "social media post tweet twitter publish share announce linkedin instagram bluesky facebook tiktok",
-    tools: { origin_broadcast_draft: "write compose", origin_broadcast_list: "scheduled queued posts" } },
+    tools: { origin_broadcast_draft: "write compose", origin_broadcast_list: "scheduled queued posts approval", origin_broadcast_unschedule: "cancel stop pull unschedule postpone" } },
   { prefix: "origin_canvas", words: "mockup wireframe layout ui screen frame",
     tools: { origin_canvas_edit: "design build draw create make change section hero pricing landing" } },
   { prefix: "origin_campaign_", words: "campaign launch marketing promotion" },

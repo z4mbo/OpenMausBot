@@ -3017,6 +3017,11 @@
             },
             "description": "Asset names or ids from origin_list_assets; [] removes all."
           },
+          "campaign": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Id or name of a campaign from origin_campaign_get to attach the post to."
+          },
           "project": {
             "type": "string",
             "maxLength": 120,
@@ -3027,7 +3032,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Publish posts, or one campaign's: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3036,13 +3041,19 @@
             "type": "string",
             "enum": [
               "all",
+              "approval",
               "draft",
               "scheduled",
               "publishing",
               "published",
               "failed"
             ],
-            "description": "Default all."
+            "description": "Default all; approval lists the posts an agent wrote that wait for a person."
+          },
+          "campaign": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Id or name of a campaign: only its posts."
           },
           "project": {
             "type": "string",
@@ -3074,6 +3085,29 @@
             "type": "string",
             "maxLength": 40,
             "description": "ISO 8601 time with offset; omit to publish now."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "post_id"
+        ]
+      }
+    },
+    {
+      "name": "origin_broadcast_unschedule",
+      "description": "Take a scheduled Publish post off the calendar so it does not go out; it becomes a draft again. Acts on your team's Origin project unless you pass project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "post_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
           },
           "project": {
             "type": "string",

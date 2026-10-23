@@ -34,4 +34,25 @@ and 375 px dark, and a viewer:
   utm preview and the date-order check) write through the backend;
 - a viewer sees no create, link or plan controls.
 
+The Posts and Campaigns additions run against a fresh launch of the same fixture
+(the check above changes its links):
+
+```sh
+node scripts/testing/check-origin-publish.mjs <previewUrl> docs/verification/evidence/origin-publish
+```
+
+It checks, at 1280 px and 375 px:
+
+- the Posts overview tiles (needs approval, next 7 days, failed, published in
+  30 days) open the list filtered to them;
+- the list searches every word across texts, media names and the agent, filters
+  by campaign, tags each row with its campaigns, and offers Duplicate and, for
+  a failed post, Retry;
+- the composer's Campaign picker links the saved post; New post from a
+  campaign's timeline preselects it;
+- the campaign grid filters by status and shows published progress, the next
+  scheduled post and the posts to approve; the detail adds a Next post tile,
+  an approvals notice whose Review opens that campaign's posts to approve, and
+  detaching a post, generation or issue.
+
 Stop the launcher with Ctrl-C so it removes its temporary data.

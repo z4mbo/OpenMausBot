@@ -69,10 +69,10 @@ export function isReadOnlyTool(name: string): boolean {
   return tokens.length > 0 && READ_VERBS.has(tokens[0]);
 }
 
-/** Security: Origin's built-in Broadcast tools carry the section's name, not its act. They draft, list or schedule a
+/** Security: Origin's built-in Broadcast tools carry the section's name, not its act. They draft, list, schedule or unschedule a
  * post, and a post an agent wrote is published only after a person approves it in the app. Only the built-in agents
  * server's spellings match, so another server's tool of the same name stays classified by its words. */
-const BROADCAST_SECTION_TOOLS = new Set(["origin_broadcast_draft", "origin_broadcast_list", "origin_broadcast_schedule"]);
+const BROADCAST_SECTION_TOOLS = new Set(["origin_broadcast_draft", "origin_broadcast_list", "origin_broadcast_schedule", "origin_broadcast_unschedule"]);
 const AGENTS_SERVER_PREFIXES = ["", "mcp__agents__", "agents__", "agents_"] as const;
 
 function isBroadcastSectionTool(name: string): boolean {

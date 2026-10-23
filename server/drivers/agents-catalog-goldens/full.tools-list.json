@@ -2469,7 +2469,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Publish posts: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
+      "description": "List an Origin project's Publish posts, or one campaign's: id, status, approval, schedule, channels with their published links or errors, media and text. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -2485,6 +2485,15 @@
     {
       "name": "origin_broadcast_schedule",
       "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. Before the first call, get its input schema from find_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      }
+    },
+    {
+      "name": "origin_broadcast_unschedule",
+      "description": "Take a scheduled Publish post off the calendar so it does not go out; it becomes a draft again. Before the first call, get its input schema from find_tool.",
       "inputSchema": {
         "type": "object",
         "properties": {},

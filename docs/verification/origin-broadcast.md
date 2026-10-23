@@ -26,7 +26,8 @@ and light, and a viewer:
 
 - the week view with media thumbnails, the accounts strip (X has a main and a
   Founder account, TikTok a Founder account, LinkedIn is offered to connect)
-  and the approval pill; an agent's draft cannot be scheduled until approved;
+  and the overview's approvals tile, which opens the list on the posts to
+  approve; an agent's draft cannot be scheduled until approved;
 - the post composer: choosing the Founder account for X, adding a hashtag,
   picking an image, the X, LinkedIn (folded caption) and Instagram previews,
   the 280-character limit, a best time from the measured X posts (Tuesday

@@ -3,7 +3,7 @@ import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/s
 import type { Doc, Id } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { canEdit, requireMember } from "./lib/permissions";
-import { broadcastChannel, broadcastFormat, broadcastReel, type broadcastVariant } from "./broadcastTables";
+import { broadcastChannel, broadcastFormat, broadcastReel, needsApproval, type broadcastVariant } from "./broadcastTables";
 import { channelProblems, mediaKindOf, reelProblems, type BroadcastFormat, type BroadcastMediaKind } from "../../shared/broadcast";
 
 type Ctx = QueryCtx | MutationCtx;
@@ -50,7 +50,6 @@ async function mediaOf(ctx: Ctx, projectId: Id<"projects">, assetIds: readonly I
   return media;
 }
 
-const needsApproval = (post: Doc<"broadcastPosts">) => Boolean(post.agentName) && !post.approvedAt;
 
 type VariantInput = { channel: Variant["channel"]; text: string; accountId?: string; accountLabel?: string };
 
