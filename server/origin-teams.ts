@@ -71,7 +71,7 @@ const talked = (store: Store, bot: BotRecord) =>
 export function retireDefaultAgents(store: Store): number {
   const projectTeams = new Set(store.bots.filter(bot => bot.chiefOfStaff && sectionOf(bot) && !isWorkspaceSection(bot.section)).map(sectionOf));
   let retired = 0;
-  for (const bot of [...store.bots]) {
+  for (const bot of store.bots) {
     if (bot.chiefOfStaff || bot.hidden || bot.installedPackage || !projectTeams.has(sectionOf(bot))) continue;
     if (!RETIRED_DEFAULT_ROLES.some(role => role.name === bot.name && role.name === bot.title && role.soul === bot.soul)) continue;
     if (talked(store, bot)) store.patchBot(bot.id, { hidden: true });

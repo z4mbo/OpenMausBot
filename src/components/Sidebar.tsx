@@ -1254,7 +1254,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           className={cn("absolute -right-0.5 -bottom-0.5 rounded-full border-2 border-panel bg-accent", iconOnly ? "size-3" : "size-2.5")} />}
         {!teammateWait && !waiting && !working && queued && <span data-testid="queued-dot" role="status" aria-label={t("task.queued")} title={t("task.queued")}
           className={cn("absolute -right-0.5 -bottom-0.5 rounded-full border-2 border-panel bg-ink-secondary", iconOnly ? "size-3" : "size-2.5")} />}
-        {bot.chiefOfStaff && iconOnly && (
+        {bot.chiefOfStaff && iconOnly && SHOWS_CHIEF_LABEL && (
           <span className="absolute -left-1 -top-1 flex rounded-full bg-raised p-[3px]">
             <Crown size={11} strokeWidth={2.25} className="shrink-0 text-accent" role="img" aria-label={t("sidebar.bot.chiefOfStaff")} data-testid="chief-crown">
               <title>{t("sidebar.bot.chiefOfStaff")}</title>

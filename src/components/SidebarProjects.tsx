@@ -164,9 +164,10 @@ export function SidebarProjectIcons({ projects, row, archived }: { projects: rea
   const rest = shown.filter((item) => !item.bot.pinned);
   if (!shown.length) return null;
   return (
-    <div data-sidebar-project-icons role="list" aria-label="Projects" className="flex flex-col items-center gap-1 pt-1">
+    <div data-sidebar-project-icons role="list" aria-label="Projects" className="flex flex-col items-center gap-1">
+      <span aria-hidden="true" className="mb-1 h-px w-8 bg-hairline/60" />
       {pinned.map(({ id, bot }) => <div key={id} role="listitem" className="w-full">{row(bot)}</div>)}
-      {pinned.length > 0 && rest.length > 0 && <span aria-hidden="true" className="my-1 h-px w-8 bg-hairline/60" />}
+      {pinned.length > 0 && rest.length > 0 && <span aria-hidden="true" className="my-0.5 h-px w-4 bg-hairline/60" />}
       {rest.map(({ id, bot }) => <div key={id} role="listitem" className="w-full">{row(bot)}</div>)}
     </div>
   );
@@ -185,7 +186,7 @@ function ProjectList({ label, items, row, onReorder }: {
   const [moves, setMoves] = useState(0);
   const seed = useRef<(id: string, from: DOMRect) => void>(() => {});
   const drag = useCardDrag({
-    enabled: items.length > 1, root,
+    enabled: items.length > 1, root, ignore: "input, textarea, select, [aria-haspopup]",
     onDrop(id, target, from) {
       seed.current(id, from);
       const ids = items.map((item) => item.id);
@@ -199,8 +200,8 @@ function ProjectList({ label, items, row, onReorder }: {
   const gap = lifted && <span aria-hidden="true" data-drop-gap className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]" style={{ height: lifted.height }} />;
   const ghostBot = lifted && items.find((item) => item.id === lifted.taskId)?.bot;
   return (
-    <div ref={root} role="list" aria-label={label} data-column-id={LANE} className="flex flex-col gap-0.5"
-      onClickCapture={(event) => { if (drag.justDropped()) { event.preventDefault(); event.stopPropagation(); } }}>
+    <div ref={root} onClickCapture={(event) => { if (drag.justDropped()) { event.preventDefault(); event.stopPropagation(); } }}>
+    <div role="list" aria-label={label} data-column-id={LANE} className="flex flex-col gap-0.5">
       {items.map(({ id, bot }) => lifted?.taskId === id ? null : (
         <div key={id} role="listitem" className="flex flex-col gap-0.5">
           {drag.target?.beforeTaskId === id && gap}
@@ -213,6 +214,7 @@ function ProjectList({ label, items, row, onReorder }: {
         </div>
       ))}
       {drag.target && !drag.target.beforeTaskId && gap}
+    </div>
       {lifted && ghostBot && createPortal(
         <div ref={drag.ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]"
           style={{ width: lifted.width, transform: `translate3d(${lifted.x}px, ${lifted.y}px, 0)` }}>

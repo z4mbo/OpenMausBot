@@ -54,7 +54,8 @@ it.each(cases)("places the account before Search and the computer below at $widt
   expect(computerRow!.querySelector('[aria-label="Open account menu"]')).toBeNull();
   expect(computerRow!.querySelectorAll('[data-tour="server-switcher"]')).toHaveLength(1);
   expect(computerRow!.getAttribute("style")).toContain("-webkit-app-region:no-drag");
-  expect(titlebar.querySelector("[data-sidebar-top-slot]")!.getAttribute("style")).toContain("-webkit-app-region:no-drag");
+  expect(titlebar.querySelector("[data-sidebar-top-slot]")!.getAttribute("style")).toBeNull();
+  expect(titlebar.querySelector("[data-sidebar-top-account]")!.getAttribute("style")).toContain("-webkit-app-region:no-drag");
   expect(host.querySelector("[data-sidebar]")!.getAttribute("style")).toContain(`--sidebar-width:${width}px`);
   expect(account!.parentElement!.classList.contains("min-w-0")).toBe(true);
   expect(account!.parentElement!.classList.contains("max-w-full")).toBe(true);

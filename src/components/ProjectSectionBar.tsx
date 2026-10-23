@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { UnreadBadge } from "./UnreadBadge";
 import { SidebarPopoverMenu } from "./SidebarPopoverMenu";
 import { BotAvatar } from "./Avatar";
+import { useCaptionChrome } from "./DesktopCapabilities";
 import { tabSections, toolSections, type ProjectSectionEntry } from "./project-sections";
 
 const TAB_GAP = 2;
@@ -72,19 +73,20 @@ function SectionTabs({ tabs, section, onSection }: { tabs: readonly ProjectSecti
   const shown = tabs.slice(0, visible);
   const hidden = tabs.slice(visible);
   const hiddenCurrent = currentIndex >= visible ? tabs[currentIndex] : undefined;
+  const { noDragStyle } = useCaptionChrome();
   return (
     <div ref={strip} role="group" aria-label="Sections" className="relative flex min-w-0 flex-1 items-center gap-0.5 max-md:order-4 max-md:-ml-8 max-md:basis-full">
       {box && <span aria-hidden="true" className="pointer-events-none absolute left-0 top-1/2 h-9 rounded-xl bg-raised transition-[translate,width] duration-(--motion-base) ease-out motion-reduce:transition-none"
         style={{ width: box.width, translate: `${box.left}px -50%` }} />}
       {shown.map(({ id, label, icon }, index) => (
         <button key={id} type="button" aria-current={section === id ? "page" : undefined} data-current={section === id || undefined} data-chief-section={id}
-          onClick={() => onSection(id)} style={{ animationDelay: `${index * 20}ms` }}
+          onClick={() => onSection(id)} style={{ ...noDragStyle, animationDelay: `${index * 20}ms` }}
           className={cn(tabClass, "motion-safe:animate-[rise_var(--motion-base)_var(--ease-out)_backwards]", section === id ? "text-ink" : "text-ink-secondary hover:bg-raised/50 hover:text-ink", section === id && !box && "bg-raised")}>
           <TabFace icon={icon} label={label} current={section === id} />
         </button>
       ))}
       {hidden.length > 0 && (
-        <div className="shrink-0" data-current={hiddenCurrent ? true : undefined}>
+        <div className="shrink-0" data-current={hiddenCurrent ? true : undefined} style={noDragStyle}>
           <SidebarPopoverMenu
             ariaLabel={hiddenCurrent ? `More sections, ${hiddenCurrent.label} open` : "More sections"}
             triggerClassName={cn(tabClass, hiddenCurrent ? "text-ink" : "text-ink-secondary hover:bg-raised/50 hover:text-ink", hiddenCurrent && !box && "bg-raised")}
@@ -109,9 +111,10 @@ function SectionTabs({ tabs, section, onSection }: { tabs: readonly ProjectSecti
 /** `joined` sits inside a glass header; otherwise the bar wears the same glass on its own. */
 export function ChiefSectionBar({ bot, section, onSection, joined = false }: { bot: Bot; section: ChiefSection; onSection(section: ChiefSection): void; joined?: boolean }) {
   const chief = section === "chat";
+  const { dragProps, noDragStyle } = useCaptionChrome();
   return (
-    <nav aria-label={`${bot.name} sections`} data-chief-sections className={cn("relative flex h-14 shrink-0 items-center gap-1.5 px-3 pl-11 max-md:h-auto max-md:flex-wrap max-md:gap-y-1.5 max-md:py-2 md:pl-3", !joined && "glass-bar z-[25] border-b border-hairline/40 [--glass-tint:var(--color-app)]")}>
-      <button type="button" onClick={() => onSection("chat")} title={`Chat with ${bot.name}`} aria-current={chief ? "page" : undefined} data-chief-section="chat"
+    <nav aria-label={`${bot.name} sections`} data-chief-sections {...dragProps} className={cn("relative flex h-14 shrink-0 items-center gap-1.5 px-3 pl-11 max-md:h-auto max-md:flex-wrap max-md:gap-y-1.5 max-md:py-2 md:pl-3", !joined && "glass-bar z-[25] border-b border-hairline/40 [--glass-tint:var(--color-app)]")}>
+      <button type="button" onClick={() => onSection("chat")} title={`Chat with ${bot.name}`} aria-current={chief ? "page" : undefined} data-chief-section="chat" style={noDragStyle}
         className={cn("flex h-10 min-w-0 items-center gap-2 rounded-xl px-2 text-[14px] font-semibold text-ink transition-colors duration-(--motion-fast) max-md:flex-1 md:shrink-0", focusRing,
           chief ? "bg-raised" : "hover:bg-raised/50")}>
         <BotAvatar bot={bot} size={24} />
@@ -122,7 +125,7 @@ export function ChiefSectionBar({ bot, section, onSection, joined = false }: { b
       </button>
       <span aria-hidden="true" className="mx-1 h-5 w-px shrink-0 bg-hairline max-md:hidden" />
       <SectionTabs tabs={tabSections()} section={section} onSection={onSection} />
-      <div className="flex shrink-0 items-center max-md:order-2" role="group" aria-label="Project tools">
+      <div className="flex shrink-0 items-center max-md:order-2" role="group" aria-label="Project tools" style={noDragStyle}>
         {toolSections().map(({ id, label, icon: Icon }) => (
           <button key={id} type="button" aria-current={section === id ? "page" : undefined} aria-label={label} title={label} data-chief-section={id}
             onClick={() => onSection(id)}
