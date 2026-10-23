@@ -117,6 +117,8 @@ The **Origin desktop** GitHub workflow builds macOS Apple silicon, macOS Intel a
 
 Review new merged OpenMausBot PRs for fixes and functionality that fit Origin. Compare the code first, retain attribution, add Origin-specific regression coverage, and avoid importing upstream branding, service credentials or release settings blindly. Keep each logical change in its own commit and document verification in the PR.
 
+The [October 23 source review](docs/verification/origin-upstream-2026-10-23.md) covers 94 later merged PRs: 10 source candidates requiring isolated regression proof, 28 deferred adaptations, four present equivalents and 52 not applicable. Priorities include long Claude tools, expired OAuth cards and provider-specific MCP schema compatibility. Optional usage traces and interactive chat apps have separate integration gates. This review changes no application code or published 0.7.6 artifacts.
+
 The [additional upstream review](docs/verification/origin-upstream-fit-034.md) records thirty more PRs, their fit and adoption requirements, alongside the previous forty-six scoped reviews. It includes useful automation, recovery, model-discovery and widget ideas, with a selective integration workflow that preserves Origin's permissions and human-approved merges.
 
 ## Contributing and licensing

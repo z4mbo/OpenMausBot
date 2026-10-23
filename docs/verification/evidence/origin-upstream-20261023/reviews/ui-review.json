@@ -1,0 +1,535 @@
+{
+  "review": "Bounded UI/source triage of assigned newly merged upstream PRs",
+  "currentHead": "37000c494966ed529874e5048987f6ad0c21416c",
+  "publishedOriginSource": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "publishedVersion": "0.7.6",
+  "priorCheckpoint": "2026-10-21T04:01:05.255Z",
+  "cutoff": "2026-10-23T08:13:42.930Z",
+  "verificationBoundary": "Read-only local source and collected upstream patches. No tests, fixtures, builds, delivery, provider calls or network mutations. Potential bugs are source scenarios, not runtime reproductions or proven new release regressions. File:line ranges refer to currentHead.",
+  "statusCounts": {
+    "deferred": 12,
+    "potential-bug": 4,
+    "not-applicable": 8,
+    "present": 2
+  },
+  "reviews": [
+    {
+      "number": 3204,
+      "status": "deferred",
+      "reason": "Chief-first is a product/onboarding redesign, not a missing delegation primitive. Origin already has project Chief/specialist conversations and scoped Chief team setup, but its seed remains createBot(), its welcome includes provider setup, and New project/New agent opens a form. Upstream changes autonomous specialist creation and removes review prompts even at other access levels; importing it wholesale would change Origin scope and approval behavior.",
+      "originEvidence": [
+        "src/components/ProjectAgentsPage.tsx:30-52 - project lead and specialist conversation selection",
+        "server/chief-of-staff.ts:42-56 - scoped Chief prompt and authorized team setup",
+        "server/team-setup-requests.ts:134-176 - target/team/peer/busy checks",
+        "server/store.ts:2416-2418 - seed creates a regular bot",
+        "src/lib/onboarding.ts:107-115 - Origin member/provider welcome",
+        "src/components/Sidebar.tsx:1893 - New project opens dialog"
+      ],
+      "upstreamMergeSha": "ff1eb65691024144489d92c384a9e188cba61a81",
+      "upstreamEvidence": "files/3204.json",
+      "compatibilityGates": [
+        "Preserve project/team access, shared agent identity and private/shared thread boundaries",
+        "Preserve Full Access versus reviewed setup semantics and undo behavior",
+        "Keep provider setup and minimal Usage decisions under Origin product policy",
+        "Do not port upstream Cloud welcome or automatic roster changes without an explicit Origin design"
+      ]
+    },
+    {
+      "number": 3203,
+      "status": "deferred",
+      "reason": "High-value optional bot-message reaction UI and reaction-as-answer semantics are absent. Existing core reaction storage/API only toggles emoji records; it does not enqueue a reply or resolve an approval. Origin member chat already has its own reactions. These are partial equivalents, not the upstream feature.",
+      "originEvidence": [
+        "server/index.ts:16657-16664 - legacy reaction route only calls toggleReaction",
+        "server/store.ts:1271-1277 - persists emoji/by array without reply execution",
+        "shared/wire.ts:565-566 - existing simple reaction wire field",
+        "src/components/MessageActions.tsx:34-45 - no reaction picker parameter",
+        "src/components/origin-pages/TeamChatPage.tsx:262-295 - Origin member-chat reactions"
+      ],
+      "upstreamMergeSha": "a0be5f787014295b536db17214ff660ab4e43fc2",
+      "upstreamEvidence": "files/3203.json",
+      "compatibilityGates": [
+        "Derive actor identity from authenticated Origin membership rather than trusting legacy body.by",
+        "Preserve per-person replacement, exactly-once delivery and queued-answer cancellation",
+        "Keep approval-card review requirements, authority and request IDs intact",
+        "Bridge shared project agent threads and local/paired clients consistently"
+      ],
+      "usefulness": "Optional enhancement; explicit approval buttons and normal chat replies remain the current bot-answer paths"
+    },
+    {
+      "number": 3215,
+      "status": "deferred",
+      "reason": "Halloween bodies/skin are absent and optional. Origin uses its established Zap/CssSphere avatar renderer, shared mascot catalog and Origin look overrides; a new CarvedAvatar/body-ID family is not a drop-in visual asset update.",
+      "originEvidence": [
+        "src/components/Avatar.tsx:9-21 - Zap/CssSphere, mascot catalog and Origin appearance override",
+        "src/lib/skins.ts:1-30 - current skin catalog including Meadow; no Halloween",
+        "src/components/bot-settings/SimpleBotPanel.tsx:286-288 - current avatar editor entry"
+      ],
+      "upstreamMergeSha": "ecb7fd898539a11ed348888490d7746f0039a8ec",
+      "upstreamEvidence": "files/3215.json",
+      "compatibilityGates": [
+        "Preserve Origin avatar-look overrides and stored body IDs",
+        "Coordinate server validation, backup/import, Electron skin overlays and other clients",
+        "Keep optional costumes independent of functional release work"
+      ]
+    },
+    {
+      "number": 3205,
+      "status": "deferred",
+      "reason": "Editorial wording is partly present (Bot's screen and Model providers), but a blanket upstream vocabulary sweep is not appropriate for Origin. Origin retains intentional provider/account/server distinctions and inherited Local VM labels. This is a copy/design choice, with no concrete behavior bug established.",
+      "originEvidence": [
+        "src/locales/en.json:1501 - Bot's screen already used",
+        "src/locales/en.json:825-827 - Model providers and Local VM terminology",
+        "src/components/ConnectedWorkspacesSettings.tsx:74 - explicit switching-servers explanation"
+      ],
+      "upstreamMergeSha": "ccd3c6231f9c9bfa536c33db2ef3bda7240c7428",
+      "upstreamEvidence": "files/3205.json",
+      "compatibilityGates": [
+        "Review only user-visible reachable Origin copy",
+        "Keep managed/shared model-host and server-connection meanings precise",
+        "Do not introduce upstream Cloud subscriptions/account language",
+        "Preserve minimal Usage and existing model/provider controls"
+      ]
+    },
+    {
+      "number": 3224,
+      "status": "potential-bug",
+      "reason": "Core local thread deletion still selects the first retained non-routine task without checking archived, closed, snoozed or helper visibility. That can activate a hidden retained thread when deleting the current one even when another normal open thread exists. The Delete all threads menu addition is separately optional.",
+      "originEvidence": [
+        "src/components/SidebarThreadRow.tsx:365-367 - per-thread Delete action and confirmation",
+        "src/components/Sidebar.tsx:978 - Delete dispatch targets local thread",
+        "server/store.ts:2390-2404 - deleteTasks chooses tasks.find(!routineRunId) then mirrors it",
+        "src/components/SidebarThreadRow.tsx:145-150 - archived/closed/snoozed active thread becomes visible"
+      ],
+      "upstreamMergeSha": "86d57558277dfbbf4afe0afef3816df31fcea913",
+      "upstreamEvidence": "files/3224.json",
+      "compatibilityGates": [
+        "Prefer visible normal open retained tasks using the same ordering/visibility policy as the UI",
+        "Preserve transactional deletion, busy/missing responses and last-thread creation",
+        "Check local versus Origin shared-agent deletion paths separately"
+      ],
+      "scope": "Core local bot thread list; not asserted against Origin Convex agent-thread deletion",
+      "sourceScenario": {
+        "input": "Bot tasks in retained order [A current, B archivedAt set (or snoozed/closed), C normal open], all idle; delete A using its thread action",
+        "path": "Sidebar deleteTask -> server Store.deleteTasks -> first non-routine B -> mirrorActiveTask(B)",
+        "wrongResult": "B becomes the active visible conversation although C is a normal open thread and B was hidden"
+      },
+      "confidence": "Source-confirmed branch; no fixture/runtime reproduction performed",
+      "priority": "P2"
+    },
+    {
+      "number": 3225,
+      "status": "deferred",
+      "reason": "Automation delivery has a substantial existing equivalent: Origin resolves chosen/main results destinations and writes/updates routine.run report cards in the source chat. Upstream replaces this presentation with natural bot messages, quiet NOTHING NEW filtering, buffered flushes and copied actionable cards. That extra policy is not currently equivalent and should not replace Origin reporting without review.",
+      "originEvidence": [
+        "server/index.ts:9327-9377 - routine summary card and source-chat synchronization",
+        "server/index.ts:9481-9500 - conversation join flag and chosen/main result destination",
+        "src/lib/feature-flags.ts:63-64 - conversation execution remains opt-in",
+        "src/components/RoutineRunCard.tsx:58-100 - existing status/summary report UI"
+      ],
+      "upstreamMergeSha": "3e4ae2b9268ae394aae7d50c7a7cb5bcc807bf7d",
+      "upstreamEvidence": "files/3225.json",
+      "compatibilityGates": [
+        "Preserve shared/private result destination and sender identity",
+        "Keep execution cards, late answers and source/execution links durable",
+        "Define quiet-result semantics without dropping failures or user questions",
+        "Preserve queue order, fresh execution sessions and existing opt-in conversation execution"
+      ]
+    },
+    {
+      "number": 3218,
+      "status": "deferred",
+      "reason": "Origin already supports taking control from its computer preview and opens the live desktop in an Electron viewer or external tab, with a control lease and failure release. Upstream adds inline drivable desktop rendering plus a new takeover/session lifecycle. Inline takeover is an optional UX improvement, not proof the existing viewer is broken.",
+      "originEvidence": [
+        "src/components/ComputerPanel.tsx:949-998 - takes control, joins provider viewer, opens window/tab, releases on failure",
+        "src/components/ComputerPanel.tsx:1412-1446 - preview opens live desktop",
+        "src/components/DesktopViewer.tsx:45-111 - current noVNC connection lifecycle"
+      ],
+      "upstreamMergeSha": "63fcc06a6b98a14e0e4b9132719d3d65e8297898",
+      "upstreamEvidence": "files/3218.json",
+      "compatibilityGates": [
+        "Preserve Origin computer-control leases and ownership across devices",
+        "Release only holds acquired by this view on panel/tab/thread changes",
+        "Maintain provider-specific viewer/tunnel cleanup and browser-session isolation",
+        "Check local VM, VPS and hosted desktop paths separately"
+      ]
+    },
+    {
+      "number": 3230,
+      "status": "not-applicable",
+      "reason": "Test/documentation alignment for upstream Chief-first seeding and plain-words copy; no new runtime implementation. Origin has different seed/onboarding and deliberate copy choices, so its fixture expectations must follow its own behavior rather than adopting these upstream assertions.",
+      "originEvidence": [
+        "server/store.ts:2416-2418 - Origin seed remains createBot()",
+        "src/lib/onboarding.ts:107-115 - Origin-specific welcome beats",
+        "src/locales/en.json:1501 - screen copy already present where used"
+      ],
+      "upstreamMergeSha": "dd865315ae2a991eecdbfd23f43d19f1a2b84b53",
+      "upstreamEvidence": "files/3230.json",
+      "compatibilityGates": [
+        "Only reconsider affected fixture expectations after intentionally adopting corresponding product changes",
+        "Do not change production seed or disable Chiefs merely to match upstream test assumptions"
+      ]
+    },
+    {
+      "number": 3227,
+      "status": "not-applicable",
+      "reason": "Test-only localStorage reset and Computer-to-Screen selector updates for the upstream inline-takeover test fixture. It introduces no runtime feature or standalone fix for Origin.",
+      "originEvidence": [
+        "src/components/ComputerPanel.tsx:949-998 - Origin current viewer path",
+        "src/components/DesktopViewer.tsx:45-111 - current connection path"
+      ],
+      "upstreamMergeSha": "5eaeec1e67624a8c49ff79f547ef88423a767c80",
+      "upstreamEvidence": "files/3227.json",
+      "compatibilityGates": [
+        "Adapt selector/storage fixture details only if the inline takeover stack is adopted"
+      ]
+    },
+    {
+      "number": 3237,
+      "status": "not-applicable",
+      "reason": "Changes the wrapping and busy/idle sentence of upstream bot-panel/ComputerTab screen tile. Origin does not use that panel component; it keeps SimpleBotPanel plus ComputerPanel, whose actual screen area already has distinct waiting/capturing/ready states. No current Origin working-screen-tile defect was established.",
+      "originEvidence": [
+        "src/components/BotSettingsDialog.tsx:28,59 - Origin SimpleBotPanel selection",
+        "src/components/bot-settings/SimpleBotPanel.tsx:267-284 - existing panel tabs/details surface",
+        "src/components/ComputerPanel.tsx:1456-1475 - actual screen waiting/capturing/ready text"
+      ],
+      "upstreamMergeSha": "c60d2805ea63f7460236dafa0a7fffab31d56381",
+      "upstreamEvidence": "files/3237.json",
+      "compatibilityGates": [
+        "Do not add an upstream screen tile merely to import its copy fix"
+      ]
+    },
+    {
+      "number": 3245,
+      "status": "present",
+      "reason": "Equivalent stacking fix is already present: the ordinary NewBotDialog is z-[70], above Origin Settings glass frame at z-index 50. The upstream patch also raises its ordinary dialog to 70. This is source equivalence, not a fresh runtime verification.",
+      "originEvidence": [
+        "src/components/NewBotDialog.tsx:225-227 - dialog overlay z-[70]",
+        "src/styles.css:1038-1045 - Settings glass frame z-index 50",
+        "src/components/SettingsModal.tsx:933-946 - Settings uses that glass frame"
+      ],
+      "upstreamMergeSha": "f47409f739653b0122f88a2ce89ee055f569681f",
+      "upstreamEvidence": "files/3245.json",
+      "compatibilityGates": [
+        "Preserve nested warning/confirmation stacking and focus restoration"
+      ],
+      "confidence": "Static source comparison only"
+    },
+    {
+      "number": 2871,
+      "status": "deferred",
+      "reason": "High-value optional self-contained HTML/MCP app views are absent as a stack. Origin already has typed show_widget controls, Data result links and Origin chat cards for existing product objects. Those do not execute arbitrary HTML or an MCP app view. No missing generic HTML capability is being labeled a regression.",
+      "originEvidence": [
+        "server/drivers/agents-widget-tools.ts:3-28 - typed show_widget/update_widget tools",
+        "shared/widget.ts:437-469 - allowed widget node schema and Chart",
+        "src/components/ChatView.tsx:921 - Data result chip rendering",
+        "src/components/OriginToolCards.tsx:15 - Origin chat-card dispatch",
+        "src/components/origin-cards/OriginChatCardView.tsx:12-27 - existing product-card kinds"
+      ],
+      "upstreamMergeSha": "eaa983dc3504d6540dd63ba580c8d4994e6d0300",
+      "upstreamEvidence": "files/2871.json",
+      "compatibilityGates": [
+        "Design iframe origin/sandbox/CSP and narrow postMessage bridge before exposing bot-authored script",
+        "Keep Electron permissions/navigation/download/display-capture guards sealed",
+        "Authorize MCP resource/tool calls and assets for the current Origin user/project/thread",
+        "Define frame persistence/pooling, offline behavior, paired clients and fallback text",
+        "Preserve Chief project scope, specialist shared threads and minimal Usage surface"
+      ],
+      "usefulness": "Optional interactive previews/apps can complement Studio/Canvas/Data and typed cards",
+      "dependencies": [
+        "Upstream app wire/message types, app host build, iframe bridge/CSP, chat app storage/routes, MCP app catalog/connections/observer, Electron frame guard and client rendering"
+      ]
+    },
+    {
+      "number": 3266,
+      "status": "deferred",
+      "reason": "Generic folder/HTML publish_page is absent and depends heavily on #2871. Origin has a separate static Canvas-frame publishedPages backend and script-free public-page policy, but bounded inspection found no current src/server pages:publish UI/tool caller. It must not be reported as an already-reachable equivalent to generic app publishing.",
+      "originEvidence": [
+        "backend/convex/pages.ts:64-111 - separate Canvas-frame publish mutation",
+        "backend/convex/pagesHttp.ts:19-25 - Origin public pages intentionally run no script and disallow frames/forms",
+        "src/components/origin-pages/canvas/ExportSection.tsx:1 - current Canvas export module",
+        "server/drivers/agents-widget-tools.ts:3-28 - current typed widget tools, not publish_page"
+      ],
+      "upstreamMergeSha": "0d9075bc7574d346dcf9b87af8cea171aed259c3",
+      "upstreamEvidence": "files/3266.json",
+      "compatibilityGates": [
+        "Use Origin account/project authorization and storage ownership, not upstream Admin/MausBot account tokens",
+        "Obtain explicit requested public scope and prevent asset/secret leakage",
+        "Resolve script-free Origin page policy versus upstream executable page/CSP model",
+        "Preserve stable update/delete ownership, quotas, uploads and backup lifecycle",
+        "Review #2871 app-frame dependency before adopting generic HTML publishing"
+      ],
+      "usefulness": "Optional public interactive previews, separate from current static frame backend"
+    },
+    {
+      "number": 3270,
+      "status": "not-applicable",
+      "reason": "The bug is specific to upstream included-pages/Admin account entitlement sync, where signed-in but not-offered must differ from signed-out. Origin has no included-pages credential/offer stack and its static frame publishing uses Origin project authorization. The upstream false sign-in message is not on a current Origin path.",
+      "originEvidence": [
+        "backend/convex/pages.ts:64-85 - Origin session/project Canvas publishing path",
+        "electron/preload.cjs:43-47 - current remote-safe bridge has no included-pages bridge",
+        "server/drivers/agents-widget-tools.ts:3-28 - no publish_page tool"
+      ],
+      "upstreamMergeSha": "29cdb18e8b14bdbc83f4b9311d748a871dc77e7c",
+      "upstreamEvidence": "files/3270.json",
+      "compatibilityGates": [
+        "Keep signed-in/unavailable distinction if a future generic publishing service is introduced",
+        "Do not port upstream account entitlement flows into Origin"
+      ]
+    },
+    {
+      "number": 3279,
+      "status": "deferred",
+      "reason": "High-value optional dashboard authoring template/skill is absent. Origin already provides DuckDB data tools, parquet ingestion/export, charts/tables and compact Data links; these cover analysis and native results but not a self-contained interactive dashboard app. Upstream template requires the chat-app/publishing stacks and additional executable-CDN policy.",
+      "originEvidence": [
+        "server/data/instructions.ts:4-18 - DuckDB, parquet, native results and export workflow",
+        "shared/data-surface.ts:87-96 - parquet/file/data sources",
+        "shared/data-surface.ts:134-157 - native table/chart/text result cards",
+        "shared/data-surface.ts:231-236 - parquet/png/svg export",
+        "src/components/ChatView.tsx:921 - existing Open in Data card path"
+      ],
+      "upstreamMergeSha": "0979039cc5feeba5fde9c55e4ddeed2b6ecc6fdb",
+      "upstreamEvidence": "files/3279.json",
+      "compatibilityGates": [
+        "Keep native Data as an existing low-overhead option",
+        "For an app template, review #2871 iframe/CSP/assets and #3266 publishing permissions",
+        "Pin dependencies and authorize CDN/WASM/blob-worker/extension origins deliberately",
+        "Aggregate data, enforce output size, validate SQL/filter inputs and compare displayed totals",
+        "Require explicit public sharing and preserve Origin project/private data boundaries"
+      ],
+      "dependencies": [
+        "Upstream template pins DuckDB-WASM 1.32.0 and ECharts 6.1.0",
+        "#2871 show_html for embedded CSV; #3266 for published CSV/parquet assets"
+      ],
+      "usefulness": "Optional dashboard skill can build on existing Data results without replacing Chief/specialist chat or minimal Usage"
+    },
+    {
+      "number": 3256,
+      "status": "deferred",
+      "reason": "Simple mode v3 is a broad panel/navigation/control redesign. Origin intentionally uses its own SimpleBotPanel, project-aware New project/New agent form and model controls. The specific New bot-opens-form-again behavior already exists; the new upstream bot-panel folder and friendly-model changes are not missing bug fixes to adopt wholesale.",
+      "originEvidence": [
+        "src/components/BotSettingsDialog.tsx:28,59 - Origin simple panel",
+        "src/components/bot-settings/SimpleBotPanel.tsx:267-284,397-423 - current tabs, model and effort controls",
+        "src/components/Sidebar.tsx:1893-1898 - New project opens the form",
+        "src/App.tsx:371 - NewBotDialog mount"
+      ],
+      "upstreamMergeSha": "4520894c575562503247e51d275b4696fd1fee8d",
+      "upstreamEvidence": "files/3256.json",
+      "compatibilityGates": [
+        "Keep project/shared-agent creation, permissions and specialist identity",
+        "Preserve deliberate minimal Usage and provider selection",
+        "Choose any control removal/relabeling through Origin UX review"
+      ]
+    },
+    {
+      "number": 3304,
+      "status": "not-applicable",
+      "reason": "Test-only fixes for upstream show_html description and Linux boxed/team-browser fixtures on Windows. No runtime implementation changes. show_html and the new bot-box dependency are absent from this Origin stack.",
+      "originEvidence": [
+        "server/drivers/agents-widget-tools.ts:3-28 - current widget tools differ from upstream show_html description",
+        "server/data/instructions.ts:4-18 - current native Data path"
+      ],
+      "upstreamMergeSha": "6620291639fc80d4e45a69bc99b9aad27b0a6791",
+      "upstreamEvidence": "files/3304.json",
+      "compatibilityGates": [
+        "If upstream app/bot-box stacks are adopted later, adapt platform fixtures without weakening active coverage"
+      ]
+    },
+    {
+      "number": 3306,
+      "status": "not-applicable",
+      "reason": "One upstream test comment removes a PR number. No runtime behavior or feature. The referenced show_html test stack is not present in Origin.",
+      "originEvidence": [
+        "server/drivers/agents-widget-tools.ts:3-28 - current catalog widget tools"
+      ],
+      "upstreamMergeSha": "9f2aaacb138ba88a430850e7cab80f927cb42905",
+      "upstreamEvidence": "files/3306.json",
+      "compatibilityGates": [
+        "Follow current AGENTS.md comment rules when touching tests; no standalone port needed"
+      ]
+    },
+    {
+      "number": 3314,
+      "status": "deferred",
+      "reason": "Upstream proactively reads connected Gmail/Calendar, installs a routine and creates a personal daily brief, with meeting/email cards and presence-triggered opening. Origin already has a narrower opt-in project Chief heartbeat for stale issues, blocked agents and pending PRs. Its project scope and quiet-note behavior should be preserved; replacing it or adding automatic personal connector reads is not implied by upstream availability.",
+      "originEvidence": [
+        "server/origin-chief-heartbeat.ts:40-54 - project self-check prompt/fallback",
+        "server/origin-chief-heartbeat.ts:68-88 - claim and post to Chief heartbeat thread",
+        "src/components/origin-pages/ChiefHeartbeatCard.tsx:21-43 - explicit switch and scope explanation",
+        "src/components/origin-pages/ChiefHeartbeatCard.tsx:59 - owner/admin control"
+      ],
+      "upstreamMergeSha": "f12c56fdccfc6b35ed0892266d32588926691934",
+      "upstreamEvidence": "files/3314.json",
+      "compatibilityGates": [
+        "Require explicit opt-in for personal connector reads and least-privilege scopes",
+        "Preserve workspace/project/account separation and read/draft versus send authority",
+        "Keep pause/delete as off switch, quiet unchanged-state handling, cadence/budget/limit gates",
+        "Do not auto-open personal brief over active shared project work",
+        "Do not replace project Chief heartbeat, shared specialist threads or minimal Usage"
+      ],
+      "usefulness": "Optional personal assistant layer; current Origin project heartbeat is a partial equivalent with different scope"
+    },
+    {
+      "number": 3326,
+      "status": "potential-bug",
+      "reason": "Optional paired companion mode hides General, the only current LanguageRow, and Appearance provides no replacement. Normal local Origin Settings does expose Language. Separately, languageChoice is per-origin localStorage so an explicit choice need not carry to a different saved-server origin; that is a desktop consistency gap, not evidence all Origin language selection fails.",
+      "originEvidence": [
+        "electron/desktop-companion-client.mjs:17-21 - paired access emits --openmausbot-remote-client",
+        "electron/main.mjs:2173 - actual window uses desktopCompanionRendererArguments",
+        "electron/preload.cjs:5,90-91 - exposes remoteClient.active",
+        "src/components/SettingsModal.tsx:725-737 - paired mode hides General",
+        "src/components/SettingsModal.tsx:838 - sole LanguageRow in General",
+        "src/components/SettingsModal.tsx:863-880 - Appearance omits LanguageRow",
+        "src/lib/language-preference.ts:16-26,53-58 - per-origin choice and server-default fallback"
+      ],
+      "upstreamMergeSha": "7679d82f43127f0fd2261ec5f9c9cef2aeca8159",
+      "upstreamEvidence": "files/3326.json",
+      "compatibilityGates": [
+        "Place exactly one local language control on every reachable mode",
+        "If unifying desktop preference, authorize own-window senders and expose only safe locale values",
+        "Migrate existing per-origin choices without clobbering explicit System selection",
+        "Broadcast preference changes to eligible windows; preserve web-only per-origin fallback"
+      ],
+      "scope": "Optional paired companion and cross-origin saved-server desktop paths; normal local Origin Language control is present",
+      "sourceScenario": {
+        "input": "A configured paired companion starts a desktop window with remoteAccess set; system language is German and user wants English",
+        "path": "desktopCompanionRendererArguments -> remoteClient.active -> SettingsModal section filter -> only companion/appearance/desktopWorkspaces available",
+        "wrongResult": "General (and the only LanguageRow) cannot be selected, and Appearance has no language control"
+      },
+      "confidence": "Source-confirmed optional-mode branch; no runtime pairing performed",
+      "priority": "P2"
+    },
+    {
+      "number": 3332,
+      "status": "not-applicable",
+      "reason": "Pure upstream error-page extraction to satisfy that revision's main.mjs size ratchet. Origin keeps equivalent builders in main.mjs with existing startup/log/retry functionality. Their location alone is not a runtime defect; there is no standalone feature to import.",
+      "originEvidence": [
+        "electron/main.mjs:1333-1346 - escaped startup error/log page builder",
+        "electron/main.mjs:1376-1396 - live-desktop error/retry page builder",
+        "electron/main.mjs:1483-1489 - viewer failure uses retry page",
+        "electron/main.mjs:2385-2389 - startup failure uses error page"
+      ],
+      "upstreamMergeSha": "480185d37b0d7a412313ae01866a65380c7f79c2",
+      "upstreamEvidence": "files/3332.json",
+      "compatibilityGates": [
+        "A future extraction must preserve Origin wording, startup port diagnostics, log links and packaged imports",
+        "Evaluate against Origin's own ratchet rather than upstream line pins"
+      ]
+    },
+    {
+      "number": 3220,
+      "status": "potential-bug",
+      "reason": "Reachable bot connector cards still stop status checks after 75 four-second intervals (five minutes), while reusable auth links live ten minutes. A link still INITIALIZING at the cutoff can later become EXPIRED or ACTIVE with no further check or focus listener; the mounted card remains Waiting/Open again. Its Open again icon also spins merely because authorizing is true.",
+      "originEvidence": [
+        "src/components/ChatView.tsx:908-909 - connector messages mount ConnectorCard",
+        "src/components/ConnectorCard.tsx:39-67 - 75 x 4000ms polling cutoff; no focus/visibility recheck",
+        "src/lib/connector-oauth.ts:6-8 - ten-minute link life",
+        "src/components/ConnectorCard.tsx:170-185 - authorizing status/spinner/Open again",
+        "server/index.ts:17136-17155 - status GET is what maps EXPIRED to failed and ACTIVE to connected"
+      ],
+      "upstreamMergeSha": "d28c9a4dd6329e81e21eff8527d2bace6e856fbd",
+      "upstreamEvidence": "files/3220.json",
+      "compatibilityGates": [
+        "Bound watch interval to authorization-link lifetime plus grace and avoid overlapping requests",
+        "Recheck on focus/visibility and stop after settled/dismissed states",
+        "Keep per-target/thread request cancellation and account-alias ownership",
+        "Display request spinner only while a new link request is in flight"
+      ],
+      "scope": "Bot-authored core connector card, also rendered by Origin ChatView; not claimed for every Origin Integrations flow",
+      "sourceScenario": {
+        "input": "A bot connector card is authorizing; provider returns INITIALIZING during first five minutes, then EXPIRED after ten minutes (or ACTIVE after the cutoff)",
+        "path": "ConnectorCard checkStatus -> tries reaches75 -> interval cleared; connector.status remains authorizing; no focus recheck",
+        "wrongResult": "Mounted card never requests the later settled status and continues Waiting for sign-in/Open again with an animation"
+      },
+      "confidence": "Source-confirmed timing branch; no provider or live OAuth calls performed",
+      "priority": "P2"
+    },
+    {
+      "number": 3322,
+      "status": "not-applicable",
+      "reason": "The changed needsYou digest suppression lives in upstream Today/brief, neither of which exists here. Origin exposes pending attention through task activity/sidebar and its separate Inbox/project heartbeat; no equivalent digest-after-question filter was found on those inspected paths. This upstream bug is not evidence Origin loses unanswered questions.",
+      "originEvidence": [
+        "src/components/SidebarBotActivity.tsx:11-21 - attention includes waiting-on-you tasks",
+        "server/store.ts:1808-1812 - waiting-on-you activity aggregation",
+        "src/components/origin-pages/WorkspaceInboxPage.tsx:90-98 - separate Origin Inbox notifications API",
+        "server/origin-chief-heartbeat.ts:40-54 - project heartbeat rather than personal Today brief"
+      ],
+      "upstreamMergeSha": "c4829cad21213f57e92312533a98e0a4b6c676b0",
+      "upstreamEvidence": "files/3322.json",
+      "compatibilityGates": [
+        "Retain unanswered-card lifetime and late-answer delivery if adding any summary/brief layer",
+        "Do not clear a persistent question merely because its turn emitted a digest"
+      ]
+    },
+    {
+      "number": 3246,
+      "status": "deferred",
+      "reason": "Useful local thread-navigation improvement: Origin ChatHeaderMenu does not list threads, while with Threads off the sidebar exposes attention/pinned rows only. The submenu-dismiss/position fix is partially present already, but menu rendering/blur and scrolling still differ. Origin project specialists have their own conversation selector; do not assume upstream header UX should replace it.",
+      "originEvidence": [
+        "src/components/ChatHeaderMenu.tsx:26-86 - current header menu lacks thread list/New thread",
+        "src/lib/thread-preferences.ts:64-66 - hidden in Simple or when Advanced Threads disabled",
+        "src/components/SidebarBotActivity.tsx:24-30 - hidden tree fallback lists attention/pinned threads",
+        "src/components/SidebarPopoverMenu.tsx:222-238 - below-placement positioning/dismiss fix partly present",
+        "src/components/SidebarPopoverMenu.tsx:363-386 - current submenu lacks scroll bound and root-only blur check",
+        "src/components/ProjectAgentsPage.tsx:30-52 - Origin specialist conversation selection"
+      ],
+      "upstreamMergeSha": "93e2fdfb128fc0ef82251f1d881ed036344d36eb",
+      "upstreamEvidence": "files/3246.json",
+      "compatibilityGates": [
+        "Preserve main-thread behavior and shared/local conversation visibility",
+        "If adding All threads, use a complete scrollable authorized list and New thread routing",
+        "Verify portaled below menus keep focus/clicks and fit narrow viewports",
+        "Do not duplicate or replace the shared specialist conversation selector"
+      ],
+      "usefulness": "Optional improvement to local/core navigation when sidebar thread tree is hidden; no standalone Origin shared-thread regression asserted"
+    },
+    {
+      "number": 3198,
+      "status": "potential-bug",
+      "reason": "The optional core notification feed remains unread when the person opens its bot/group conversation normally. The read routes only update task/group unread, and notification_log has only single-entry/read-all updates. This does not establish a bug in Origin WorkspaceInbox or shared-thread Convex notification APIs, which are separate. The core feed is off by default.",
+      "originEvidence": [
+        "src/lib/notification-preferences.ts:71-77 - core feed opt-in, default false",
+        "src/components/SettingsModal.tsx:878 - reachable Appearance notification settings",
+        "src/components/NotificationSettingsRows.tsx:80-85 - core feed switch",
+        "src/App.tsx:112,363-364 - core feed mounted only when enabled and not paired",
+        "src/components/ChatView.tsx:1085 - opening conversation POSTs bot read route",
+        "server/routes/bot-settings.ts:162-171 - bot read updates only task unread",
+        "server/routes/channels.ts:258-264 - group read updates only group unread",
+        "server/message-db.ts:321-326 - only individual/all notification read functions",
+        "src/components/NotificationsPanel.tsx:119-129 - feed entry clicks/read-all are separate read operations",
+        "src/components/origin-pages/WorkspaceInboxPage.tsx:90-98 - separate Origin notifications:list/markRead APIs"
+      ],
+      "upstreamMergeSha": "d393b7a728068cd6b0e9e96fd6997c13b6b10ba6",
+      "upstreamEvidence": "files/3198.json",
+      "compatibilityGates": [
+        "Scope fix to notification_log feed unless independently auditing Origin Inbox semantics",
+        "Mark only authorized visible conversation entries and broadcast safe thread-scoped read frames",
+        "Prevent stale in-flight snapshots resurrecting unread feed items",
+        "Preserve separate Origin notifications and shared-agent read cursors"
+      ],
+      "scope": "Opt-in legacy/core notification feed only; normal Origin Inbox/shared-agent notification behavior is outside this finding",
+      "sourceScenario": {
+        "input": "User enables Notification feed in Appearance; a bot thread has unread notification_log entries; user opens that thread via sidebar rather than clicking its feed entry",
+        "path": "ChatView read POST -> bot-settings read route -> task unread false; notification_log untouched; feed reducer has no thread-read action",
+        "wrongResult": "Core feed count still includes already-seen conversation notifications until a feed entry or Mark all read is used"
+      },
+      "confidence": "Source-confirmed opt-in path; not an observed default Origin Inbox bug",
+      "priority": "P2"
+    },
+    {
+      "number": 3298,
+      "status": "present",
+      "reason": "Origin already uses each saved routine name as the visible label in its calendar chip and all-schedules list, with schedule information beneath. It does not use upstream TriggersPage sentence-only automation rows. The concrete indistinguishable-row defect is already avoided by the existing Origin UI.",
+      "originEvidence": [
+        "src/components/RoutineCalendarPage.tsx:1319-1320 - calendar chip name then time/status",
+        "src/components/RoutineCalendarPage.tsx:1746-1747 - routine.name then schedule label",
+        "src/components/RoutineCalendarPage.tsx:2033-2035 - all schedules and named calls list"
+      ],
+      "upstreamMergeSha": "30b62aaf18adc22099c24a7181abf5e9ddead980",
+      "upstreamEvidence": "files/3298.json",
+      "compatibilityGates": [
+        "Preserve saved names in any future condensed automation list"
+      ],
+      "confidence": "Static source equivalence only"
+    }
+  ]
+}

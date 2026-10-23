@@ -1,0 +1,665 @@
+{
+  "after": "2026-10-21T04:01:05.255Z",
+  "until": "2026-10-23T08:13:42.930Z",
+  "count": 94,
+  "items": [
+    {
+      "number": 3204,
+      "title": "Chief first: one assistant that adds its own specialists, and a welcome that asks for nothing up front",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3204",
+      "mergeCommit": "ff1eb65691024144489d92c384a9e188cba61a81",
+      "mergedAt": "2026-10-21T08:07:36Z"
+    },
+    {
+      "number": 3215,
+      "title": "feat(mascots): Halloween bodies, carved face and a Halloween skin",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3215",
+      "mergeCommit": "ecb7fd898539a11ed348888490d7746f0039a8ec",
+      "mergedAt": "2026-10-21T08:08:21Z"
+    },
+    {
+      "number": 3203,
+      "title": "React to a bot's message to answer it",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3203",
+      "mergeCommit": "a0be5f787014295b536db17214ff660ab4e43fc2",
+      "mergedAt": "2026-10-21T08:21:42Z"
+    },
+    {
+      "number": 3214,
+      "title": "test(browser): accept metadata blocks after other refused targets",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3214",
+      "mergeCommit": "715b80f1f5c180881220c459c88a68f346698241",
+      "mergedAt": "2026-10-21T08:45:58Z"
+    },
+    {
+      "number": 3213,
+      "title": "fix(limits): out-of-credits refusals say so, and a working turn clears a stale limit",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3213",
+      "mergeCommit": "cafd4aa2e11ecf960209b32b1195fda50c690644",
+      "mergedAt": "2026-10-21T08:46:48Z"
+    },
+    {
+      "number": 3212,
+      "title": "fix(lending): a lent screen is free for My Cloud's next call once a call ends, not refused as \"in use locally\" for 40 s",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3212",
+      "mergeCommit": "6dd10206d9e0819f18fac8b8958a37d01e4d7e30",
+      "mergedAt": "2026-10-21T08:47:07Z"
+    },
+    {
+      "number": 3205,
+      "title": "Everyday screens say AI, Cloud desktop and Screen, not engine, server or Local VM",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3205",
+      "mergeCommit": "ccd3c6231f9c9bfa536c33db2ef3bda7240c7428",
+      "mergedAt": "2026-10-21T09:10:26Z"
+    },
+    {
+      "number": 3222,
+      "title": "fix(cloud): a burst of browsing bots waits for memory instead of being stopped, and a stopped bot's browser closes at once",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3222",
+      "mergeCommit": "1123705e6e70741e3e8b92925266d0604257b9a7",
+      "mergedAt": "2026-10-21T09:35:25Z"
+    },
+    {
+      "number": 3224,
+      "title": "Threads: deleting one no longer pulls hidden threads into view; Delete all threads… in the bot menu",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3224",
+      "mergeCommit": "86d57558277dfbbf4afe0afef3816df31fcea913",
+      "mergedAt": "2026-10-21T10:20:17Z"
+    },
+    {
+      "number": 3225,
+      "title": "Automations report into the bot's chat",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3225",
+      "mergeCommit": "3e4ae2b9268ae394aae7d50c7a7cb5bcc807bf7d",
+      "mergedAt": "2026-10-21T10:28:02Z"
+    },
+    {
+      "number": 3223,
+      "title": "feat(cloud): plan cards sell on hours, in the website's words",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3223",
+      "mergeCommit": "623f463853a7c217fa89477600ad45a71980c645",
+      "mergedAt": "2026-10-21T10:29:19Z"
+    },
+    {
+      "number": 3218,
+      "title": "Take control right where you watch the bot's computer",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3218",
+      "mergeCommit": "63fcc06a6b98a14e0e4b9132719d3d65e8297898",
+      "mergedAt": "2026-10-21T10:39:55Z"
+    },
+    {
+      "number": 3201,
+      "title": "Use my Mac: bots on My Cloud open the sites that refuse data centres through this computer",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3201",
+      "mergeCommit": "85f42505bded61d390e3d39938eba54116ec9da8",
+      "mergedAt": "2026-10-21T10:55:28Z"
+    },
+    {
+      "number": 3230,
+      "title": "Make main green: tests for Chief first (#3204) and plain words (#3205)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3230",
+      "mergeCommit": "dd865315ae2a991eecdbfd23f43d19f1a2b84b53",
+      "mergedAt": "2026-10-21T11:17:20Z"
+    },
+    {
+      "number": 3189,
+      "title": "Prefetch a window of three blocks in the Speaker",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3189",
+      "mergeCommit": "f2e8fdaf2067f7da16f437f98f210fb551c0c9e7",
+      "mergedAt": "2026-10-21T11:23:43Z"
+    },
+    {
+      "number": 3227,
+      "title": "test(take-control): the panel's Computer tab is called Screen now",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3227",
+      "mergeCommit": "5eaeec1e67624a8c49ff79f547ef88423a767c80",
+      "mergedAt": "2026-10-21T11:25:36Z"
+    },
+    {
+      "number": 3228,
+      "title": "Control plane: mausbot.si zone is on Pro (3,500 DNS records)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3228",
+      "mergeCommit": "c00112be395632a40d79bd9dbdcf7688cc098ecf",
+      "mergedAt": "2026-10-21T11:31:50Z"
+    },
+    {
+      "number": 3231,
+      "title": "chore(release): bump version to 0.1.121",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3231",
+      "mergeCommit": "97a4a1cab96ab3d07b0c7dac275f69afc6e7a8dc",
+      "mergedAt": "2026-10-21T11:35:18Z"
+    },
+    {
+      "number": 3239,
+      "title": "Cloud asleep: Wake it now no longer falls back asleep, and replies show",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3239",
+      "mergeCommit": "d464891245c7f94c0f94c26d812ef2ba0de8a166",
+      "mergedAt": "2026-10-21T15:32:03Z"
+    },
+    {
+      "number": 3237,
+      "title": "fix(bot-panel): a working bot's screen tile says its screen comes soon and how to watch it live",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3237",
+      "mergeCommit": "c60d2805ea63f7460236dafa0a7fffab31d56381",
+      "mergedAt": "2026-10-21T15:39:38Z"
+    },
+    {
+      "number": 3236,
+      "title": "fix(lending): tick Apps and screen on My Cloud's page, and a bot says where to tick it",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3236",
+      "mergeCommit": "fbf4a89f3d324f2c4119cc03a7b6b75d9b583571",
+      "mergedAt": "2026-10-21T15:39:50Z"
+    },
+    {
+      "number": 3241,
+      "title": "Cloud: three plans (Starter $15, Pro, Max); Personal only for its subscribers",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3241",
+      "mergeCommit": "f3d7f80337bdd34e5ed8b7ee8612852abee28867",
+      "mergedAt": "2026-10-21T15:59:10Z"
+    },
+    {
+      "number": 3242,
+      "title": "My Cloud becomes the only home: the move runs by itself, and everything comes back if My Cloud ends (S3)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3242",
+      "mergeCommit": "bdcfc44044bc1f59fb49b0315aae85fb3c502e93",
+      "mergedAt": "2026-10-21T16:08:43Z"
+    },
+    {
+      "number": 3195,
+      "title": "My Cloud can take the move from this computer, and Send everything no longer runs by itself (S1; merge only with S3)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3195",
+      "mergeCommit": "6e66076a1bb266aef7f72f9fbc5c42642550d542",
+      "mergedAt": "2026-10-21T16:08:45Z"
+    },
+    {
+      "number": 3226,
+      "title": "One home S2: a move carries everything else (automations, bot files, memory, left-out fields, rows whole, skill extras)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3226",
+      "mergeCommit": "6e66076a1bb266aef7f72f9fbc5c42642550d542",
+      "mergedAt": "2026-10-21T16:08:46Z"
+    },
+    {
+      "number": 3244,
+      "title": "Make main green: main.mjs back under its pin, move test follows the lending bridge",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3244",
+      "mergeCommit": "c8b4f16f69effbbd1998b2671550329a6e117a8b",
+      "mergedAt": "2026-10-21T18:18:13Z"
+    },
+    {
+      "number": 3243,
+      "title": "Cloud: plan cards in Add a Cloud, one button each and the same rows on every card",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3243",
+      "mergeCommit": "4fe3999211d0098082c2869b6877b1a0b0540d70",
+      "mergedAt": "2026-10-21T18:33:54Z"
+    },
+    {
+      "number": 3249,
+      "title": "One home S4: the desktop is one window onto My Cloud",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3249",
+      "mergeCommit": "be5410c13364a98dd4f25d0f9368484724da43c7",
+      "mergedAt": "2026-10-21T19:12:56Z"
+    },
+    {
+      "number": 3250,
+      "title": "T0a: the bot box, every bot turn in bubblewrap on a Cloud home",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3250",
+      "mergeCommit": "6e26b34a2e0184352744491b97ed95eb404c1743",
+      "mergedAt": "2026-10-21T19:16:38Z"
+    },
+    {
+      "number": 3251,
+      "title": "T0b: the credential broker, keys stay out of the bot box",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3251",
+      "mergeCommit": "ef5dfb58fbeacbb427d41c57aad4fca21aaa637b",
+      "mergedAt": "2026-10-21T19:16:47Z"
+    },
+    {
+      "number": 3252,
+      "title": "T0c: box hardening, a seccomp filter in every box and a hardened host",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3252",
+      "mergeCommit": "ea06dbb9cb2829ae6cc27974012fc44963f1eb04",
+      "mergedAt": "2026-10-21T19:17:59Z"
+    },
+    {
+      "number": 3245,
+      "title": "Fix/new bot dialog behind settings",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3245",
+      "mergeCommit": "f47409f739653b0122f88a2ce89ee055f569681f",
+      "mergedAt": "2026-10-21T19:27:31Z"
+    },
+    {
+      "number": 3253,
+      "title": "feat(cloud-lending): terminal toggle for My Cloud, off by default",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3253",
+      "mergeCommit": "29e7f0f8c954f1db4ce1459df780dd536c96984c",
+      "mergedAt": "2026-10-21T20:16:28Z"
+    },
+    {
+      "number": 3258,
+      "title": "T3: the team switcher, My Cloud | Acme in one window",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3258",
+      "mergeCommit": "7a4190d3015386d17799dd9aeb4a70fd47721173",
+      "mergedAt": "2026-10-21T21:02:32Z"
+    },
+    {
+      "number": 3259,
+      "title": "T2: Team Cloud role and the audience rule (private chats, three memory layers, per-person About you)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3259",
+      "mergeCommit": "e45381cf28e25530f4a8a5ee72fc7712f760960c",
+      "mergedAt": "2026-10-21T21:02:58Z"
+    },
+    {
+      "number": 3256,
+      "title": "feat(desktop): Simple mode v3 — a control only where a person must decide; New bot opens the form again",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3256",
+      "mergeCommit": "4520894c575562503247e51d275b4696fd1fee8d",
+      "mergedAt": "2026-10-21T21:19:05Z"
+    },
+    {
+      "number": 2871,
+      "title": "Chat apps: pages a bot makes and MCP app views (Excalidraw and others), inline in the chat",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/2871",
+      "mergeCommit": "eaa983dc3504d6540dd63ba580c8d4994e6d0300",
+      "mergedAt": "2026-10-21T21:41:56Z"
+    },
+    {
+      "number": 3257,
+      "title": "One home: a move whose check can never pass (a bot on both sides, or one made as the app stopped)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3257",
+      "mergeCommit": "af7efc42ca3d85cd80ce1e0910045c9f1feb2fd5",
+      "mergedAt": "2026-10-21T21:46:57Z"
+    },
+    {
+      "number": 3261,
+      "title": "One home: what a move carries last is never taken for removed on My Cloud",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3261",
+      "mergeCommit": "10567323b98db95d69128c86f7f665cfe5cacbc1",
+      "mergedAt": "2026-10-21T21:47:23Z"
+    },
+    {
+      "number": 3265,
+      "title": "Cloud backups leave the bot box's live sockets out, so an ended Cloud can bring its chats home",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3265",
+      "mergeCommit": "9021988abf761236478b625199bc9d1821ff3779",
+      "mergedAt": "2026-10-21T21:47:44Z"
+    },
+    {
+      "number": 3260,
+      "title": "One home: the move's quiet moment counts keys pressed before it first asks",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3260",
+      "mergeCommit": "31cae37db2841d848378eee65f8fd87e691a0b44",
+      "mergedAt": "2026-10-21T21:47:50Z"
+    },
+    {
+      "number": 3267,
+      "title": "Cloud homes pass OMB_CLOUD_EXPORT_ONLY to the server, so an ended Cloud started for its export runs frozen",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3267",
+      "mergeCommit": "7b44abc72ed1a5b1e4c4620ca6cbfbb981c287d7",
+      "mergedAt": "2026-10-21T21:48:23Z"
+    },
+    {
+      "number": 3266,
+      "title": "Publish a page to a link (publish_page)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3266",
+      "mergeCommit": "0d9075bc7574d346dcf9b87af8cea171aed259c3",
+      "mergedAt": "2026-10-21T21:48:54Z"
+    },
+    {
+      "number": 3269,
+      "title": "chore(release): bump version to 0.1.122",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3269",
+      "mergeCommit": "087f01f31a341adf3686a7ffe086df77a4e42b6d",
+      "mergedAt": "2026-10-21T22:01:14Z"
+    },
+    {
+      "number": 3270,
+      "title": "Pages: a signed-in desktop whose Admin has no pages yet is told so, never asked to sign in",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3270",
+      "mergeCommit": "29cdb18e8b14bdbc83f4b9311d748a871dc77e7c",
+      "mergedAt": "2026-10-21T22:13:13Z"
+    },
+    {
+      "number": 3254,
+      "title": "feat(cloud-lending): share a whole drive, and the home folder after a warning",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3254",
+      "mergeCommit": "eb01b140da79cf45cbf90d5d4d13abed406e187e",
+      "mergedAt": "2026-10-21T22:19:19Z"
+    },
+    {
+      "number": 3271,
+      "title": "T4: Move to Acme, one bot from My Cloud into a team; an Admin's own chat on any device",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3271",
+      "mergeCommit": "a71f6ef27bb09804b0ef24554511748754eb90bb",
+      "mergedAt": "2026-10-21T22:31:46Z"
+    },
+    {
+      "number": 3272,
+      "title": "Lending the home folder: the warning says what really stays private, and a test proves it",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3272",
+      "mergeCommit": "bd5e209250957308305d4eb9d66ca17813008cf6",
+      "mergedAt": "2026-10-21T22:32:51Z"
+    },
+    {
+      "number": 3281,
+      "title": "Make main green for 0.1.122: tests caught up with the product, the Linux-only box off Windows",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3281",
+      "mergeCommit": "df708e744391b4bd044cb3381443aea5a1fdc23b",
+      "mergedAt": "2026-10-22T02:53:24Z"
+    },
+    {
+      "number": 3284,
+      "title": "One home: one owner session for the whole move, so retries and a second computer stay within the Admin's codes",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3284",
+      "mergeCommit": "a0b9cbe8a1c471fbf7934f09509fd5528ff258b8",
+      "mergedAt": "2026-10-22T02:53:43Z"
+    },
+    {
+      "number": 3285,
+      "title": "One home: a routine changed on both sides is one routine, with the definition changed last and both sides' runs",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3285",
+      "mergeCommit": "885c0f9aced1493e941bd649c4bcedf91420e008",
+      "mergedAt": "2026-10-22T02:53:55Z"
+    },
+    {
+      "number": 3286,
+      "title": "One home: \"My Cloud is updating\" while it can't take the move, a skipped Bring your stuff is not Done, and \"live on My Cloud\" only once it is home",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3286",
+      "mergeCommit": "3cac6294dbec2b307867af079e7839c4f7b1580b",
+      "mergedAt": "2026-10-22T02:54:04Z"
+    },
+    {
+      "number": 3279,
+      "title": "Data dashboards: a bundled skill with a tested template, and parquet pages",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3279",
+      "mergeCommit": "0979039cc5feeba5fde9c55e4ddeed2b6ecc6fdb",
+      "mergedAt": "2026-10-22T02:56:21Z"
+    },
+    {
+      "number": 3280,
+      "title": "One home: a routine on both sides whose only difference is its runs goes in a move",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3280",
+      "mergeCommit": "5db5d06d4392385f7b10d530caaf8ab2e32d0d1a",
+      "mergedAt": "2026-10-22T02:59:09Z"
+    },
+    {
+      "number": 3276,
+      "title": "One home: a frozen pass the Admin refused for too many requests goes again in minutes, not an hour",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3276",
+      "mergeCommit": "f5b6086584eaca2b37064fc01988d9042780e486",
+      "mergedAt": "2026-10-22T03:00:03Z"
+    },
+    {
+      "number": 3277,
+      "title": "One home: a window that showed My Cloud as a saved server is opened again as home, and goes home when My Cloud ends",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3277",
+      "mergeCommit": "cdfa202d5fc68211b5939bac75ef6cbe4627af03",
+      "mergedAt": "2026-10-22T03:06:05Z"
+    },
+    {
+      "number": 3278,
+      "title": "One home: the words a person sees during and after the move",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3278",
+      "mergeCommit": "0efb9d9cf1f68f00543a1818270b79b583a4fc03",
+      "mergedAt": "2026-10-22T03:06:16Z"
+    },
+    {
+      "number": 3275,
+      "title": "Team Cloud: a browser per member and per group chat, each Chrome boxed; open the team on your phone",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3275",
+      "mergeCommit": "c12c8b605f8ac15915a4fc7ef8bf45babc05b664",
+      "mergedAt": "2026-10-22T03:07:34Z"
+    },
+    {
+      "number": 3273,
+      "title": "One home: when My Cloud ends, everything comes home to the computer used most recently",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3273",
+      "mergeCommit": "dbb73a73ae2cba48fdf608e9e22d1d5d91608532",
+      "mergedAt": "2026-10-22T03:23:17Z"
+    },
+    {
+      "number": 3304,
+      "title": "Make main green for 0.1.122 (2): show_html's dashboard sentence, the boxed Chrome and the team browser stub off Windows",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3304",
+      "mergeCommit": "6620291639fc80d4e45a69bc99b9aad27b0a6791",
+      "mergedAt": "2026-10-22T10:09:44Z"
+    },
+    {
+      "number": 3306,
+      "title": "Make main green for 0.1.122 (3): a test comment names no pull request",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3306",
+      "mergeCommit": "9f2aaacb138ba88a430850e7cab80f927cb42905",
+      "mergedAt": "2026-10-22T10:32:38Z"
+    },
+    {
+      "number": 3307,
+      "title": "Composio: toolkits that need your own OAuth app (Xero, Buffer) connect using your enabled custom auth config",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3307",
+      "mergeCommit": "5dd737b5be91fcb047dd8d22d8051526b92c7ab7",
+      "mergedAt": "2026-10-22T10:48:51Z"
+    },
+    {
+      "number": 3312,
+      "title": "Make main green for 0.1.122 (4): the Composio test's file-mode check skips Windows",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3312",
+      "mergeCommit": "23ed2ef13c3ddadf0a8c37ad5d754b0cd02bfb29",
+      "mergedAt": "2026-10-22T12:02:51Z"
+    },
+    {
+      "number": 3315,
+      "title": "Cloud image: clean the build caches after pnpm --version, so the image publishes",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3315",
+      "mergeCommit": "ce3d690c0182f85a773bff1f2f1669e6b3918a21",
+      "mergedAt": "2026-10-22T14:18:46Z"
+    },
+    {
+      "number": 3314,
+      "title": "feat: proactive routines — the Chief keeps an eye on your day",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3314",
+      "mergeCommit": "f12c56fdccfc6b35ed0892266d32588926691934",
+      "mergedAt": "2026-10-22T15:14:24Z"
+    },
+    {
+      "number": 3317,
+      "title": "chore: add .well-known/funding-manifest-urls for funding.json provenance",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3317",
+      "mergeCommit": "8a83864e9004e809ff79333e1480d830e2b1d1c8",
+      "mergedAt": "2026-10-22T15:14:49Z"
+    },
+    {
+      "number": 3316,
+      "title": "feat: usage as traces — see where each job's time and money went",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3316",
+      "mergeCommit": "d7a16d2978235b3942718b076200ef15d74da317",
+      "mergedAt": "2026-10-22T15:19:04Z"
+    },
+    {
+      "number": 3320,
+      "title": "fix(cloud): a Team plan's sign-in sheet opens the team's Cloud instead of waiting for a My Cloud",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3320",
+      "mergeCommit": "f1a1a9442207e18d01c114478f6fa5fbd4ce2bd0",
+      "mergedAt": "2026-10-22T17:06:26Z"
+    },
+    {
+      "number": 3310,
+      "title": "My Cloud's first open: never looked up before it is ready, and a brand-new Cloud's missing name is waited out",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3310",
+      "mergeCommit": "f799ce45614dc0d2c9865106ca48144d4853d1d1",
+      "mergedAt": "2026-10-22T17:07:56Z"
+    },
+    {
+      "number": 3313,
+      "title": "One home: coming home waits seconds, not five minutes, for this computer's own turns",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3313",
+      "mergeCommit": "162a8933c3e068857e6aa594d74a1b1fb3ba05cc",
+      "mergedAt": "2026-10-22T17:08:17Z"
+    },
+    {
+      "number": 3331,
+      "title": "fix(team): a new team bot opens your private chat; Team Settings points to People and plan",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3331",
+      "mergeCommit": "3b02c819a37a4de8da5a3e0ef710a8e1687118c2",
+      "mergedAt": "2026-10-22T17:50:30Z"
+    },
+    {
+      "number": 3329,
+      "title": "fix(move): every room that can go reaches My Cloud, and the check counts only those",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3329",
+      "mergeCommit": "4054972630af264ddff4f2af1459d89de8c80acd",
+      "mergedAt": "2026-10-22T17:50:42Z"
+    },
+    {
+      "number": 3326,
+      "title": "fix(settings): one app language on this computer, reachable from every place",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3326",
+      "mergeCommit": "7679d82f43127f0fd2261ec5f9c9cef2aeca8159",
+      "mergedAt": "2026-10-22T17:50:57Z"
+    },
+    {
+      "number": 3309,
+      "title": "X (Twitter) is a card in Apps: included with a Cloud plan, or your own treg key",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3309",
+      "mergeCommit": "160e024afa46f6208f8f191bf5ecd33b0b73995c",
+      "mergedAt": "2026-10-22T17:51:16Z"
+    },
+    {
+      "number": 3327,
+      "title": "chore(release): bump version to 0.1.123",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3327",
+      "mergeCommit": "de036d1648f53c5e03e51d836f75a92a7bcaf99f",
+      "mergedAt": "2026-10-22T17:54:25Z"
+    },
+    {
+      "number": 3332,
+      "title": "fix(electron): move the error pages out of main.mjs so main passes the size check",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3332",
+      "mergeCommit": "480185d37b0d7a412313ae01866a65380c7f79c2",
+      "mergedAt": "2026-10-22T19:50:27Z"
+    },
+    {
+      "number": 3328,
+      "title": "fix(claude): a bot running a long tool is no longer stopped as stalled after 20 minutes",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3328",
+      "mergeCommit": "e1be06a9f4b72f7dbff0f40a2dea2bc5808237f8",
+      "mergedAt": "2026-10-22T20:01:55Z"
+    },
+    {
+      "number": 3335,
+      "title": "Team Cloud: the Admin's Team admin read, the team's default language, and links to apps, MCP, keys and AI",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3335",
+      "mergeCommit": "7594ec724be5afe8d2dd7abfd41a5c13f7ed38e4",
+      "mergedAt": "2026-10-22T20:02:22Z"
+    },
+    {
+      "number": 3311,
+      "title": "Fit MCP tool schemas to each provider's limits (fixes Kimi \"tool schema is too large\")",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3311",
+      "mergeCommit": "c0776c450ece1301295bedc74929cdd0b3b6bfce",
+      "mergedAt": "2026-10-22T20:03:31Z"
+    },
+    {
+      "number": 3301,
+      "title": "fix(hermes): a reply with reasoning shows once, not twice",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3301",
+      "mergeCommit": "40deb33ce5153f5f6ae7c5e4998a63c657a45fa7",
+      "mergedAt": "2026-10-22T20:04:13Z"
+    },
+    {
+      "number": 3337,
+      "title": "Count daily active installs with a once-a-day app_active event",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3337",
+      "mergeCommit": "09f39e5e36b1cdcad4f3c32ce87a98f7aa03093a",
+      "mergedAt": "2026-10-22T20:05:35Z"
+    },
+    {
+      "number": 3338,
+      "title": "fix(server): move the admin audit plan and project MCP reader out so main passes the size checks",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3338",
+      "mergeCommit": "a1be5d016b6da2ed8fdb2a56bd6bbfd22041cded",
+      "mergedAt": "2026-10-22T21:12:17Z"
+    },
+    {
+      "number": 3339,
+      "title": "Move to My Cloud: lend apps and screen too, with one Use my Mac popup",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3339",
+      "mergeCommit": "0989c82c0d37f0aa60bd7c7de778d9a91f813dad",
+      "mergedAt": "2026-10-22T21:13:52Z"
+    },
+    {
+      "number": 3325,
+      "title": "Record a turn the stall watchdog stopped as stalled, not as a provider error",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3325",
+      "mergeCommit": "b0b48057d4462c6db9f8a7600f5be9f4b00d5fb3",
+      "mergedAt": "2026-10-22T21:18:05Z"
+    },
+    {
+      "number": 3299,
+      "title": "Google's remote MCP servers mount in chat: accept the x-google-enum-descriptions annotation",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3299",
+      "mergeCommit": "556654bcbe1b1c5fc4703161a85060dd8ff8c70a",
+      "mergedAt": "2026-10-22T21:18:36Z"
+    },
+    {
+      "number": 3300,
+      "title": "perf(mcp): shape an oversized tool result instead of cutting it blind",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3300",
+      "mergeCommit": "9d7379cc30174eca4ce721a31f2655c8f99afb74",
+      "mergedAt": "2026-10-22T21:19:58Z"
+    },
+    {
+      "number": 3220,
+      "title": "fix(connectors): a sign-in card no longer waits forever after its link expires",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3220",
+      "mergeCommit": "d28c9a4dd6329e81e21eff8527d2bace6e856fbd",
+      "mergedAt": "2026-10-22T21:20:39Z"
+    },
+    {
+      "number": 3322,
+      "title": "fix(today): a question nobody answered stays in Needs you after its turn ends",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3322",
+      "mergeCommit": "c4829cad21213f57e92312533a98e0a4b6c676b0",
+      "mergedAt": "2026-10-22T21:21:23Z"
+    },
+    {
+      "number": 3246,
+      "title": "fix(chat): reach every thread from the ⋯ menu when the sidebar hides …",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3246",
+      "mergeCommit": "93e2fdfb128fc0ef82251f1d881ed036344d36eb",
+      "mergedAt": "2026-10-22T22:11:14Z"
+    },
+    {
+      "number": 3198,
+      "title": "fix(notifications): opening a conversation reads its notifications",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3198",
+      "mergeCommit": "d393b7a728068cd6b0e9e96fd6997c13b6b10ba6",
+      "mergedAt": "2026-10-22T22:17:39Z"
+    },
+    {
+      "number": 3298,
+      "title": "Fix/automation names in list",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3298",
+      "mergeCommit": "30b62aaf18adc22099c24a7181abf5e9ddead980",
+      "mergedAt": "2026-10-22T22:47:36Z"
+    },
+    {
+      "number": 3354,
+      "title": "Team Cloud: list the phones members paired, with Remove",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3354",
+      "mergeCommit": "ad896918bdfd5e6ef990dfade9a91858403a3258",
+      "mergedAt": "2026-10-23T05:54:46Z"
+    },
+    {
+      "number": 3355,
+      "title": "chore(release): bump version to 0.1.124",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3355",
+      "mergeCommit": "b18e8eaa795c198000d10169032dcdcadf183229",
+      "mergedAt": "2026-10-23T06:25:24Z"
+    },
+    {
+      "number": 3363,
+      "title": "test(chat-apps): expect query_result on the board gate (fixes 0.1.124 CI)",
+      "url": "https://github.com/milind-soni/OpenMausBot/pull/3363",
+      "mergeCommit": "3dbf0f79b318799d4868458312952b0c2d4e47ff",
+      "mergedAt": "2026-10-23T07:37:50Z"
+    }
+  ]
+}

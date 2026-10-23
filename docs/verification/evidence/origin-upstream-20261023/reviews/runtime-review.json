@@ -1,0 +1,572 @@
+{
+  "reviewKind": "read-only assigned upstream runtime review",
+  "originSource": "37000c494966ed529874e5048987f6ad0c21416c",
+  "originReleaseSource": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "after": "2026-10-21T04:01:05.255Z",
+  "until": "2026-10-23T08:13:42.930Z",
+  "verificationBoundary": "Static comparison of canonical pinned PR patches with actual current Origin source only. No tests, fixtures, builds, paid/network provider calls, release actions, tracked edits or production mutations were performed. potential-bug means a concrete source-reachable scenario, not a runtime reproduction.",
+  "summary": {
+    "assigned": 16,
+    "potentialBug": 6,
+    "deferred": 6,
+    "notApplicable": 4
+  },
+  "rows": [
+    {
+      "number": 3213,
+      "status": "potential-bug",
+      "reason": "The out-of-credits wording fix is missing on the active Claude path. Origin already omits limitResetsAt from runtime.error and has no LimitResetClock, so the upstream stale engine-hold changes do not apply.",
+      "originEvidence": [
+        {
+          "file": "server/drivers/claude-limits.ts",
+          "line": 16,
+          "detail": "claudeLimitRefusal drops errorCode and overageDisabledReason, retaining only window/reset."
+        },
+        {
+          "file": "server/drivers/claude-limits.ts",
+          "line": 46,
+          "detail": "claudeLimitMessage treats any retained reset as an account usage window and prints its date."
+        },
+        {
+          "file": "server/drivers/claude.ts",
+          "line": 1286,
+          "detail": "noteLimit reads api_error_params.rate_limit_info and emits that message at line 1293."
+        }
+      ],
+      "scenario": "A Claude API-error frame with rate_limit_info={status:'rejected',resetsAt:<future billing reset>,overageDisabledReason:'out_of_credits',errorCode:'credits_required',isUsingOverage:false} becomes {window:null,resetsAt}; Origin tells the user the whole account reached its usage limit until the billing date even when plan-included models still work.",
+      "upstreamEvidence": [
+        "files/3213.json: server/drivers/claude-limits.ts and claude.ts patches"
+      ],
+      "scope": "Useful small adaptation: recognize credit refusals and unknown model-family weekly windows; do not import a limit-clock subsystem just for this wording fix.",
+      "compatibilityGates": [
+        "Preserve Origin fallback selection, per-account identity, and quota stopReason.",
+        "Before a future change is claimed working, isolated fake-Claude cases must distinguish shared plan windows, model-only windows, exhausted overage, and successful fallback. No such checks were run in this review."
+      ],
+      "upstreamMergeSha": "cafd4aa2e11ecf960209b32b1195fda50c690644",
+      "title": "fix(limits): out-of-credits refusals say so, and a working turn clears a stale limit"
+    },
+    {
+      "number": 3214,
+      "status": "not-applicable",
+      "reason": "The upstream change only loosens a checklist.e2e.test.ts assertion so a metadata block may follow another refusal. Origin has no such checklist suite; its active egress formatter already joins multiple refusals and its registry test explicitly includes the metadata host second.",
+      "originEvidence": [
+        {
+          "file": "server/browser/egress/registry.ts",
+          "line": 151,
+          "detail": "Formats all shown refusal targets as a comma-separated line."
+        },
+        {
+          "file": "server/browser/egress/registry.test.ts",
+          "line": 126,
+          "detail": "Expected line lists loopback first, metadata second, and local network third."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3214.json: server/browser/checklist.e2e.test.ts @@238"
+      ],
+      "scope": "No product change to adopt. If importing the upstream browser checklist suite later, carry its order-tolerant assertion.",
+      "compatibilityGates": [
+        "Do not alter Origin's own-service refusal label or weaken actual egress policy assertions."
+      ],
+      "upstreamMergeSha": "715b80f1f5c180881220c459c88a68f346698241",
+      "title": "test(browser): accept metadata blocks after other refused targets"
+    },
+    {
+      "number": 3189,
+      "status": "deferred",
+      "reason": "Origin's Speaker still renders the current and next utterance rather than a three-block window, and ElevenLabs waits for a complete non-streaming response. This is a latency/performance feature, not evidence that current speech is incorrect.",
+      "originEvidence": [
+        {
+          "file": "src/lib/tts/index.ts",
+          "line": 128,
+          "detail": "One next promise is advanced in the utterance loop at lines 134-139."
+        },
+        {
+          "file": "server/tts/elevenlabs.ts",
+          "line": 74,
+          "detail": "synthesize returns Promise<Audio> after res.arrayBuffer()."
+        },
+        {
+          "file": "server/tts/index.ts",
+          "line": 144,
+          "detail": "speak returns that existing synthesize promise."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3189.json: src/lib/tts/index.ts PREFETCH_WINDOW=3; server/tts/elevenlabs.ts Synthesis firstAudio/audio; latency probe/fixture additions"
+      ],
+      "scope": "Optional Speaker prefetch and passive latency measurement are useful. Keep the existing final-audio contract for callers; the first-byte promise mainly enables measurement in this PR and is not by itself progressive playback.",
+      "compatibilityGates": [
+        "Preserve Origin local system voice, Chatterbox, Fish, ElevenLabs and personal-key routes.",
+        "Bound queued paid renders to three, abort outstanding work on stop/error, preserve ordered playback and stale-token cancellation.",
+        "Use stub-provider isolated fixtures for any future verification; do not make paid voice calls."
+      ],
+      "upstreamMergeSha": "f2e8fdaf2067f7da16f437f98f210fb551c0c9e7",
+      "title": "Prefetch a window of three blocks in the Speaker"
+    },
+    {
+      "number": 3307,
+      "status": "deferred",
+      "reason": "Core BYO OAuth-app support is already present: Origin lists custom configs, filters disabled/Tool-Router-off entries, places auth_configs in new Sessions, and recreates a Session after no-managed-auth link failures. The new PR additionally adds explicit per-toolkit picks, cached reads/fallbacks, clearer hints, and isolation of a refused config; those additions are absent.",
+      "originEvidence": [
+        {
+          "file": "server/composio.ts",
+          "line": 396,
+          "detail": "listCustomAuthConfigs chooses the latest eligible config per toolkit."
+        },
+        {
+          "file": "server/composio.ts",
+          "line": 443,
+          "detail": "prepareProjectSession reads configs before reuse and names them at line 475."
+        },
+        {
+          "file": "server/composio.ts",
+          "line": 1125,
+          "detail": "No-managed-auth failure refreshes custom configs and retries a recreated Session at lines 1129-1139."
+        },
+        {
+          "file": "shared/connector-availability.ts",
+          "line": 11,
+          "detail": "Managed Twitter/X restriction is mode-specific."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3307.json: new composio-project.ts, connector-request-items.ts, connector-auth-config-hint.ts; createProjectSession refusal loop"
+      ],
+      "scope": "Adopt as a separate Composio follow-up if users need multiple OAuth apps or resilience when one saved config is rejected. Avoid reporting Xero/Buffer support as wholly missing.",
+      "compatibilityGates": [
+        "Keep project-key state separate from the managed broker, and picks partitioned by project fingerprint.",
+        "Preserve existing connected-account aliases, userId/grants, URL allowlist, credential isolation, and Origin request authorization.",
+        "A rejected custom config must not block unrelated toolkits; malformed/unowned config IDs must fail closed; Windows does not prove POSIX permission bits."
+      ],
+      "upstreamMergeSha": "5dd737b5be91fcb047dd8d22d8051526b92c7ab7",
+      "title": "Composio: toolkits that need your own OAuth app (Xero, Buffer) connect using your enabled custom auth config"
+    },
+    {
+      "number": 3312,
+      "status": "not-applicable",
+      "reason": "This is a Windows-only test portability adjustment for the new server/composio-auth-configs.test.ts from #3307. That test and its composio-auth-configs.json pick store do not exist in current Origin; no current failing assertion is fixed by applying this hunk alone.",
+      "originEvidence": [
+        {
+          "file": "server/composio.ts",
+          "line": 396,
+          "detail": "Current custom-auth implementation remains in composio.ts and selects configs without the new persisted pick file."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3312.json: guard statSync(file).mode & 0777 assertion with process.platform !== 'win32'"
+      ],
+      "scope": "Carry with #3307's tests if that feature is adapted.",
+      "compatibilityGates": [
+        "Continue enforcing the 0600 write intent on POSIX; skip only the POSIX mode assertion on Windows, not content/no-secret checks."
+      ],
+      "upstreamMergeSha": "23ed2ef13c3ddadf0a8c37ad5d754b0cd02bfb29",
+      "title": "Make main green for 0.1.122 (4): the Composio test's file-mode check skips Windows"
+    },
+    {
+      "number": 3316,
+      "status": "deferred",
+      "reason": "Origin has aggregate usage rows and grouped history, but no trace recorder, spans, trace wire types, or /api/usage/traces routes. The PR is a substantial optional attribution feature spanning drivers, persistence, authorization and UI.",
+      "originEvidence": [
+        {
+          "file": "server/usage-ledger.ts",
+          "line": 16,
+          "detail": "UsageRow has aggregate counts/cost/trigger only, ending at line 31."
+        },
+        {
+          "file": "server/routes/usage.ts",
+          "line": 20,
+          "detail": "Route accepts only /api/usage and /api/usage.csv."
+        },
+        {
+          "file": "src/components/UsageHistory.tsx",
+          "line": 92,
+          "detail": "Existing history presents grouped turns, tokens and costs."
+        },
+        {
+          "file": "server/daily-api-budget.ts",
+          "line": 244,
+          "detail": "Origin separately reserves bounded request cost and settles reservations at lines 258-259."
+        },
+        {
+          "file": "server/origin-model-host.ts",
+          "line": 97,
+          "detail": "Hosted execution validates confined capability and offered source/provider/model eligibility."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3316.json: shared/usage-trace.ts; usage-trace/recorder.ts, build.ts, service.ts; trace routes; TraceView/TraceWaterfall"
+      ],
+      "scope": "Useful as an opt-in deeper drill-down from the user's preferred minimal Claude-desktop-style Usage popover; preserve that minimal default. It could expose tool latency, delegated child costs, cache/reasoning usage and partial/unavailable usage without fabricating zeroes.",
+      "compatibilityGates": [
+        "Trace aggregation must observe Origin settlement, not charge again: reconcile daily reservations/unknown cost, owner-host settlement, helper rows, retries and delegated child totals exactly once.",
+        "Use Origin's actual eligible confined Claude/Codex hosting model and per-viewer project/thread visibility, not upstream Team/Cloud assumptions.",
+        "Keep old rows readable as untimed; bound span retention and receipt sizes; redact details and never persist full prompts/tool payloads or secret URLs.",
+        "Maintain provider-reported versus estimated/unknown costs and partial token semantics. New endpoints, persistence and UI require separate isolated verification before release."
+      ],
+      "upstreamMergeSha": "d7a16d2978235b3942718b076200ef15d74da317",
+      "title": "feat: usage as traces — see where each job's time and money went"
+    },
+    {
+      "number": 3328,
+      "status": "potential-bug",
+      "reason": "Origin discards Claude Code tool_progress frames, so a long tool's heartbeat does not reach the stall watchdog.",
+      "originEvidence": [
+        {
+          "file": "server/drivers/claude.ts",
+          "line": 1452,
+          "detail": "Switch proceeds directly from rate_limit_event to result at line 1455, without tool_progress handling."
+        },
+        {
+          "file": "server/index.ts",
+          "line": 5442,
+          "detail": "TURN_STALL_MS defaults to 20 minutes."
+        },
+        {
+          "file": "server/index.ts",
+          "line": 5533,
+          "detail": "Only emitted RuntimeEvents reach watchdog.touch at line 5558."
+        },
+        {
+          "file": "server/turn-watchdog.ts",
+          "line": 83,
+          "detail": "A nonparked turn with no refreshed lastEventAt invokes onStall."
+        },
+        {
+          "file": "server/index.ts",
+          "line": 5472,
+          "detail": "onStall interrupts the running adapter."
+        }
+      ],
+      "scenario": "A nonparked Claude turn starts a tool lasting over 20 minutes. Claude Code 2.1.306 emits tool_progress every 30 seconds, but no assistant/tool_result frames arrive until completion. Origin emits no RuntimeEvent for those progress frames, lastEventAt ages past TURN_STALL_MS, and onStall interrupts a live tool as stalled.",
+      "upstreamEvidence": [
+        "files/3328.json: claude.ts adds tool_progress -> item.updated(tool); fake-CLI/test verifies heartbeat emission"
+      ],
+      "scope": "High-value, narrowly scoped adaptation: translate the vendor heartbeat into a non-content activity event. This review establishes source reachability only, not a live reproduction.",
+      "compatibilityGates": [
+        "Scope the event to the current provider turn/generation so helper or retired frames cannot keep another turn alive.",
+        "Do not create a completed tool/chat row, invent success, or defeat legitimate no-heartbeat stalls.",
+        "Preserve human/computer parked states and existing interruption/resource ownership guards."
+      ],
+      "upstreamMergeSha": "e1be06a9f4b72f7dbff0f40a2dea2bc5808237f8",
+      "title": "fix(claude): a bot running a long tool is no longer stopped as stalled after 20 minutes"
+    },
+    {
+      "number": 3311,
+      "status": "potential-bug",
+      "reason": "Origin normalizes root object schemas but has no provider-specific byte/depth fitting. Its chat mount accepts schemas up to 64 KB and passes them to the provider unchanged; Kimi ACP also receives unprofiled MCP lists.",
+      "originEvidence": [
+        {
+          "file": "server/mcp-tool-schema.ts",
+          "line": 43,
+          "detail": "providerSafeInputSchema handles root shape/combinators only."
+        },
+        {
+          "file": "server/drivers/chat-mcp-tools.ts",
+          "line": 315,
+          "detail": "Schemas below 64 KB compile and are copied unchanged at line 317."
+        },
+        {
+          "file": "server/drivers/openai-chat.ts",
+          "line": 643,
+          "detail": "mountChatTools has no target schema profile; definitions go to the request at line 685."
+        },
+        {
+          "file": "server/drivers/turn-mcp.ts",
+          "line": 16,
+          "detail": "No schema profile on custom/own MCP mounts."
+        },
+        {
+          "file": "server/drivers/acp/kimi.ts",
+          "line": 477,
+          "detail": "Kimi is an active supported ACP driver."
+        }
+      ],
+      "scenario": "An enabled custom MCP server advertises a valid object inputSchema of about 20 KB (for example many described nested fields). Origin accepts it below 64 KB and sends it through Moonshot or Kimi Code unchanged. For the Moonshot size refusal documented in the pinned upstream patch, the provider rejects the whole request before any tool runs; Origin currently cannot reduce that schema or explain the schema-specific cause.",
+      "upstreamEvidence": [
+        "files/3311.json: tool-schema-profile.ts Moonshot profile maxSchemaBytes=12000/maxDepth=30/measureInlined; fitToolSchema; all gate/proxy/chat wiring; tool_schema error classification"
+      ],
+      "scope": "Useful targeted adaptation for Kimi/Moonshot and OpenRouter moonshotai routes, including clear request-failure wording. This is conditional on the provider limit described upstream and is not a measured Origin provider call.",
+      "compatibilityGates": [
+        "Fit only the model-visible schema; execute against the original validator and original tool name/selection permissions.",
+        "Retain Origin root normalization and propagate profiles through every actual Origin mount path, including own HTTP proxies if used.",
+        "Do not simplify unrelated providers/local endpoints by model-name guess; account for ref inlining, bytes and depth; bound recursion and drop only tools that cannot fit."
+      ],
+      "upstreamMergeSha": "c0776c450ece1301295bedc74929cdd0b3b6bfce",
+      "title": "Fit MCP tool schemas to each provider's limits (fixes Kimi \"tool schema is too large\")"
+    },
+    {
+      "number": 3301,
+      "status": "potential-bug",
+      "reason": "The active ACP handler appends every agent_message_chunk and the Hermes support object lacks the vendor-specific same-message reasoning replay filter.",
+      "originEvidence": [
+        {
+          "file": "server/drivers/acp/core.ts",
+          "line": 1066,
+          "detail": "Only _meta.isReplay notifications are suppressed."
+        },
+        {
+          "file": "server/drivers/acp/core.ts",
+          "line": 1091,
+          "detail": "Every nonempty text chunk is appended and emitted as assistant_text at line 1097."
+        },
+        {
+          "file": "server/drivers/acp/hermes.ts",
+          "line": 370,
+          "detail": "Hermes support has restartOnMcpChange but no resendsReasoningReply flag."
+        }
+      ],
+      "scenario": "Hermes 0.22.4 sends messageId M chunks 'The answer' then ' is 42.', followed by the same messageId's full '💭 **Reasoning:**\\n...\\n\\nThe answer is 42.' without _meta.isReplay. Current Origin appends/emits the full replay after the streamed answer, so the reply appears twice and reasoning leaks into the answer body.",
+      "upstreamEvidence": [
+        "files/3301.json: isHermesReasoningReplay, per-turn textMessageId, resendsReasoningReply on Hermes; exact fixture chunks in acp.test.ts"
+      ],
+      "scope": "Useful small Hermes-specific compatibility fix. The accompanying bounded tool-log extraction is already-existing logic moved to a helper, not a new runtime capability.",
+      "compatibilityGates": [
+        "Gate on Hermes vendor behavior plus matching nonempty messageId and exact suffix/blank-line structure.",
+        "Keep ordinary deltas such as a+ba=aba, distinct messages, other ACP engines and genuine follow-up explanations unchanged.",
+        "Preserve native-log image removal/text budgets when moving the helper."
+      ],
+      "upstreamMergeSha": "40deb33ce5153f5f6ae7c5e4998a63c657a45fa7",
+      "title": "fix(hermes): a reply with reasoning shows once, not twice"
+    },
+    {
+      "number": 3337,
+      "status": "deferred",
+      "reason": "Origin records app_first_open and app_opened only; no once-per-local-day app_active heartbeat exists. This is optional telemetry, not a runtime correctness repair.",
+      "originEvidence": [
+        {
+          "file": "src/lib/analytics.ts",
+          "line": 68,
+          "detail": "start checks opt-out, initializes analytics, and captures first/open events at lines 87-91."
+        },
+        {
+          "file": "src/lib/analytics.ts",
+          "line": 18,
+          "detail": "analyticsEnabled is the existing opt-out gate."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3337.json: local-day key, visible/focused-page checks, 10-minute timer, tests and analytics disclosures"
+      ],
+      "scope": "Adopt only if Origin wants this metric; keep event fields minimal and explain the added activity event in Origin's own analytics disclosure.",
+      "compatibilityGates": [
+        "Honor opt-out before any initialization/capture, including opt-out during an asynchronous load and later opt-in.",
+        "Retain privacy filtering as an explicit prerequisite; this patch assumes newer upstream PostHog URL/person-property suppression that current Origin start() does not contain.",
+        "Deduplicate across same-origin tabs and storage failures; do not attach conversation/project/tenant identifiers; avoid turning this into server/provider liveness telemetry."
+      ],
+      "upstreamMergeSha": "09f39e5e36b1cdcad4f3c32ce87a98f7aa03093a",
+      "title": "Count daily active installs with a once-a-day app_active event"
+    },
+    {
+      "number": 3338,
+      "status": "deferred",
+      "reason": "The audit-plan extraction goal is already substantially met by Origin's createAdminActivityHost in server/host/admin-activity.ts, including Origin-specific import audit cases. projectMcpServers still lives inline in Claude; extracting it is an optional size-only cleanup with no behavioral repair demonstrated.",
+      "originEvidence": [
+        {
+          "file": "server/host/admin-activity.ts",
+          "line": 51,
+          "detail": "AuditPlan and adminAuditPlan live outside index.ts."
+        },
+        {
+          "file": "server/host/admin-activity.ts",
+          "line": 72,
+          "detail": "Origin adds originImportKind(path) to createsBots auditing."
+        },
+        {
+          "file": "server/index.ts",
+          "line": 1333,
+          "detail": "Host supplies beginAdminAudit to the server."
+        },
+        {
+          "file": "server/drivers/claude.ts",
+          "line": 191,
+          "detail": "projectMcpServers is still an inline helper, used at line 986."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3338.json: extracts unchanged adminAuditPlan and projectMcpServers to standalone files; size ratchet baseline updates"
+      ],
+      "scope": "No need to transplant upstream's server-index refactor. Consider extracting only the small remaining project MCP reader if current Origin size policy requires it.",
+      "compatibilityGates": [
+        "Preserve Origin import auditing, per-request async actor ownership and lendingEnabled dependency.",
+        "Preserve .mcp.json malformed/array handling, strict-mcp-config semantics, Origin tool scope/guest restrictions and built-in-name collision behavior.",
+        "Do not copy upstream size ratchet pins as proof of Origin's policy passing."
+      ],
+      "upstreamMergeSha": "a1be5d016b6da2ed8fdb2a56bd6bbfd22041cded",
+      "title": "fix(server): move the admin audit plan and project MCP reader out so main passes the size checks"
+    },
+    {
+      "number": 3325,
+      "status": "potential-bug",
+      "reason": "The host watchdog knows a turn stalled but settles it with {ok:false,text} only. The active coordinator/runtime converts that result to provider_error, losing the host cause; room setup-finally has the same loss.",
+      "originEvidence": [
+        {
+          "file": "server/index.ts",
+          "line": 5486,
+          "detail": "Watchdog settles direct follow-up with no stalled flag."
+        },
+        {
+          "file": "server/coordinator.ts",
+          "line": 55,
+          "detail": "HostTurnResult has no stalled field."
+        },
+        {
+          "file": "server/runtime-coordinator.ts",
+          "line": 491,
+          "detail": "Every !result.ok without cards/cap becomes provider_error."
+        },
+        {
+          "file": "server/runtime/runtime.ts",
+          "line": 155,
+          "detail": "Runtime.end likewise maps failure to provider_error."
+        },
+        {
+          "file": "server/index.ts",
+          "line": 11474,
+          "detail": "Room finally records only ok/text, even when roomOutcome is stalled."
+        },
+        {
+          "file": "server/index.ts",
+          "line": 2045,
+          "detail": "hostTurnResult can still return cards after a failed result."
+        }
+      ],
+      "scenario": "A coordinator-owned direct turn, or a room turn stalled during setup before a provider result, reaches the host watchdog. The watchdog stops it for inactivity and resolves the pending host outcome with ok:false. RuntimeCoordinator.run/end receives no cause and persists outcome:'provider_error' instead of 'stalled'; if resumable cards remain, hostTurnResult can instead park a turn already declared stopped.",
+      "upstreamEvidence": [
+        "files/3325.json: stalled flag through HostTurnResult/EndResult, watchdog/room propagation, stalled outcome mapping, stopCards on stalled result"
+      ],
+      "scope": "Useful cause-preservation fix across direct and room coordination. Origin's own runtime watchdog already has native stalled paths; patch only the host-watchdog settlement gap.",
+      "compatibilityGates": [
+        "Preserve Origin direct-turn generation/resource ownership, retired-provider guards, setup-stall latching, computer parks and cap continuation behavior.",
+        "A stall must close its owned pending cards without cancelling another generation's cards; stopped/cancelled/provider-error outcomes must remain distinct.",
+        "Future isolated cases must include direct, room setup, late provider completion and owned cards; no fixture was run here."
+      ],
+      "upstreamMergeSha": "b0b48057d4462c6db9f8a7600f5be9f4b00d5fb3",
+      "title": "Record a turn the stall watchdog stopped as stalled, not as a provider error"
+    },
+    {
+      "number": 3299,
+      "status": "potential-bug",
+      "reason": "Origin's strict chat schema compiler does not register Google's x-google-enum-descriptions annotation. A valid tool containing it is rejected during mount rather than offered to chat-completion models.",
+      "originEvidence": [
+        {
+          "file": "server/mcp-schema-validator.ts",
+          "line": 19,
+          "detail": "Ajv compiler defaults to strict and registers formats only before compile at line 25."
+        },
+        {
+          "file": "server/drivers/chat-mcp-tools.ts",
+          "line": 316,
+          "detail": "Every mounted tool's original schema goes through compileToolSchema."
+        },
+        {
+          "file": "server/drivers/chat-mcp-tools.ts",
+          "line": 334,
+          "detail": "Schema error skips an optional server's staged tools, or throws for a required mount."
+        }
+      ],
+      "scenario": "A remote MCP tool advertises {type:'object',properties:{mode:{type:'string',enum:['a','b'],'x-google-enum-descriptions':['A','B']}}. Strict Ajv sees an unregistered keyword, compileToolSchema throws the generic validation error, and mountChatTools removes that optional server's tools for the turn. The annotation supplies descriptions rather than an extra input constraint.",
+      "upstreamEvidence": [
+        "files/3299.json: register keyword with schemaType:'array'; chat tool test preserves enum validation"
+      ],
+      "scope": "Small useful compatibility adaptation on the strict chat mount. Origin's lenient remote-proxy validator uses strict:false and is not the same failure path.",
+      "compatibilityGates": [
+        "Register only this known annotation type; retain strict rejection of unknown constraint keywords and actual enum/type checks.",
+        "Do not globally disable strict validation or drop input validation; keep draft-07/2020-12 isolation and no external reference fetching."
+      ],
+      "upstreamMergeSha": "556654bcbe1b1c5fc4703161a85060dd8ff8c70a",
+      "title": "Google's remote MCP servers mount in chat: accept the x-google-enum-descriptions annotation"
+    },
+    {
+      "number": 3300,
+      "status": "deferred",
+      "reason": "Origin already bounds oversized stdio results and preserves valid shortened structuredContent, with optional spill files. It does not hold JSON in memory or offer query_result. The PR adds queryable retained data, not a missing result-size safety boundary.",
+      "originEvidence": [
+        {
+          "file": "server/mcp-trim.ts",
+          "line": 1,
+          "detail": "Default result budget is 8000 characters."
+        },
+        {
+          "file": "server/mcp-gate.ts",
+          "line": 146,
+          "detail": "trimCallResult divides the budget, optionally spills full text, and trims text at line 165."
+        },
+        {
+          "file": "server/mcp-gate.ts",
+          "line": 172,
+          "detail": "Trims structuredContent as well."
+        },
+        {
+          "file": "server/mcp-trim.ts",
+          "line": 32,
+          "detail": "Structural array trimming already exists."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3300.json: mcp-shape.ts ResultStore/JMESPath query_result, mcp-gate injection, gateQueryTools preallow, jmespath dependencies"
+      ],
+      "scope": "Useful for large JSON queries when repeated narrower upstream calls are expensive or impossible. Can be adapted independently of upstream chat-app observation; plain text can retain the current cut/spill behavior.",
+      "compatibilityGates": [
+        "Keep query results budgeted, cap retention to the upstream 64 MB/session bound or stricter, and evict/clean per gate session.",
+        "Reserve/collision-handle query_result, preserve actual Origin tool selection and guest confinement, and preallow only that gate's read-only held-result tool.",
+        "Held results contain potentially sensitive data; never persist or share them across sessions/accounts/threads; keep structuredContent from bypassing the result budget.",
+        "Review the new JMESPath dependencies and query CPU/memory limits; do not apply the #3363 app-only test before its owning feature exists."
+      ],
+      "upstreamMergeSha": "9d7379cc30174eca4ce721a31f2655c8f99afb74",
+      "title": "perf(mcp): shape an oversized tool result instead of cutting it blind"
+    },
+    {
+      "number": 3363,
+      "status": "not-applicable",
+      "reason": "This only updates the tools/list expectation of an upstream chat-app board fixture for #3300's injected query_result. Origin has neither server/chat-apps-mcp.e2e.test.ts nor the upstream mcp-app-observer path, and its current gate does not inject query_result.",
+      "originEvidence": [
+        {
+          "file": "server/mcp-gate.ts",
+          "line": 257,
+          "detail": "Current gate processes tools/list scope enforcement without query tool insertion."
+        },
+        {
+          "file": "server/mcp-trim.ts",
+          "line": 1,
+          "detail": "Current trim module has budget/trim types but no QUERY_TOOL_NAME."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3363.json: add query_result to show_board/paint_board/peek_board/plain_echo expected list"
+      ],
+      "scope": "Carry the assertion only when adapting the corresponding app fixture and query-result feature.",
+      "compatibilityGates": [
+        "Do not alter current Origin tool catalogs merely to satisfy an absent upstream test; preserve exact existing app-only/selection rules."
+      ],
+      "upstreamMergeSha": "3dbf0f79b318799d4868458312952b0c2d4e47ff",
+      "title": "test(chat-apps): expect query_result on the board gate (fixes 0.1.124 CI)"
+    },
+    {
+      "number": 3317,
+      "status": "not-applicable",
+      "reason": "The only change is upstream repository funding provenance pointing to https://mausbot.com/funding.json. It has no runtime behavior and that upstream-domain manifest must not be presented as Origin's own funding provenance.",
+      "originEvidence": [
+        {
+          "file": "package.json",
+          "line": 6,
+          "detail": "Origin homepage and repository are origin.imbored.fun and z4mbo/Origin."
+        },
+        {
+          "file": ".github/FUNDING.yml",
+          "line": 1,
+          "detail": "Existing upstream GitHub funding attribution is a separate repository-level setting."
+        }
+      ],
+      "upstreamEvidence": [
+        "files/3317.json: add .well-known/funding-manifest-urls with upstream MausBot URL"
+      ],
+      "scope": "No runtime adaptation. Any Origin funding provenance is a separate owner decision.",
+      "compatibilityGates": [
+        "Keep upstream license/attribution intact; do not publish an Origin funding manifest by copying this URL implicitly."
+      ],
+      "upstreamMergeSha": "8a83864e9004e809ff79333e1480d830e2b1d1c8",
+      "title": "chore: add .well-known/funding-manifest-urls for funding.json provenance"
+    }
+  ]
+}

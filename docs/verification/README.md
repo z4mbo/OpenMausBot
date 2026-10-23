@@ -369,6 +369,7 @@ Origin's inspection and delivery records:
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
 - [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)
+- [October 23 upstream review: 94 merged PRs and qualified adoption candidates](origin-upstream-2026-10-23.md)
 - [Website themes and release history](origin-site.md)
 - [Before/after screenshot index](origin-screenshots.md)
 

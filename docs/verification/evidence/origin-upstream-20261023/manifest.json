@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "source": "37000c494966ed529874e5048987f6ad0c21416c",
+  "releaseSource": "eb829c152ce3cd4359eeb58bca3dd2e55abff879",
+  "after": "2026-10-21T04:01:05.255Z",
+  "until": "2026-10-23T08:13:42.930Z",
+  "reviewedPrs": 94,
+  "payloadFiles": 8,
+  "payloadBytes": 1160310,
+  "excluded": [
+    "manifest.json itself",
+    "the separately authored Markdown review"
+  ],
+  "files": [
+    {
+      "name": "reviews/runtime-review.json",
+      "bytes": 32677,
+      "sha256": "8f431c9b96c5f7d6dccbea7b88c838646b8b1bb1500fdc7599b8a15e8824a87c",
+      "provenance": ".omb-scratch/upstream-review-20261023T081342Z/runtime-review.json"
+    },
+    {
+      "name": "reviews/ui-review.json",
+      "bytes": 37308,
+      "sha256": "a48c42cdfe28dcb6338142d118eaa4077b5b7f2854217ab0e7e0e47d01403850",
+      "provenance": ".omb-scratch/upstream-review-20261023T081342Z/ui-review.json"
+    },
+    {
+      "name": "reviews/cloud-review.json",
+      "bytes": 127388,
+      "sha256": "29b6e5cc9694a4454397e031dc85e946de75a3093a118486c81992e916e3248d",
+      "provenance": ".omb-scratch/upstream-review-20261023T081342Z/cloud-review.json"
+    },
+    {
+      "name": "source-bindings.json",
+      "bytes": 46134,
+      "sha256": "bc52eac3d16bf7a1fa081f769c4015c40ef1181caa023d69af9fdf9292cdc2eb",
+      "provenance": "root-derived source review aggregate"
+    },
+    {
+      "name": "merged-prs.json",
+      "bytes": 29084,
+      "sha256": "873766cd284e2f6a461b773b9f4e2256c48e1193da4c0d374cc67d6d5e5ccc3e",
+      "provenance": "root-derived source review aggregate"
+    },
+    {
+      "name": "coverage.json",
+      "bytes": 14094,
+      "sha256": "4a551674d04ac753b251668a59dbf461d33232a3e18c98081ceef3bc6049f0aa",
+      "provenance": "root-derived source review aggregate"
+    },
+    {
+      "name": "patch-fingerprints.json",
+      "bytes": 665507,
+      "sha256": "59e83aa79cdf72dc82149dda0fbfc3e046a385ac5baac29bee8eeda318602cfa",
+      "provenance": "root-derived source review aggregate"
+    },
+    {
+      "name": "review-ledger.json",
+      "bytes": 208118,
+      "sha256": "69f092ec4c4bd8cdace5702ee46369ff8c8fbcdf637b39df78c3e8d1e1076016",
+      "provenance": "root-derived source review aggregate"
+    }
+  ]
+}
