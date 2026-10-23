@@ -696,6 +696,7 @@ describe("agents-proxy MCP surface", () => {
       "origin_broadcast_draft",
       "origin_broadcast_list",
       "origin_broadcast_schedule",
+      "origin_broadcast_unschedule",
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
