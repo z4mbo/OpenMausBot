@@ -278,8 +278,8 @@ function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
     <div className="flex h-full flex-col">
       <UpdateBanner sidebarIndicator={!calendarFocus && (sidebarInline || drawerOpen)} />
       <AppNotices quiet={paletteOpen || drawerOpen || Boolean(localVmWorkspaceBotId)} viewer={viewer} />
-      <div className="relative flex min-h-0 flex-1" data-origin-inset={INSET_PAGE ? "" : undefined}>
-      {INSET_PAGE && captionChrome.draggable && <div aria-hidden data-window-drag-inset {...captionChrome.dragProps} className="pointer-events-none absolute inset-x-0 top-0 z-0 h-2" />}
+      <div className="relative flex min-h-0 flex-1" data-origin-inset={INSET_PAGE ? "" : undefined} data-window-draggable={captionChrome.draggable ? "" : undefined}>
+      {INSET_PAGE && captionChrome.draggable && <div aria-hidden data-window-drag-inset {...captionChrome.dragProps} className="pointer-events-none absolute inset-x-0 top-0 z-0 h-4" />}
       {!calendarFocus && <button
         type="button"
         ref={menuButtonRef}

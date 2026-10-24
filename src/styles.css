@@ -2232,6 +2232,8 @@ button:disabled.bg-danger {
     border: 1px solid color-mix(in srgb, var(--color-hairline) 35%, transparent);
   }
   [data-origin-inset] > aside:not([data-sidebar]):not([aria-label="Notifications"]) { background: var(--color-app); }
+  [data-origin-inset][data-window-draggable] > main,
+  [data-origin-inset][data-window-draggable] > aside:not([data-sidebar]):not([aria-label="Notifications"]) { margin-top: 16px; }
 }
 
 @keyframes team-link-flow {
