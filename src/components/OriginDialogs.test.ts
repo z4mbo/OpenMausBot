@@ -11,7 +11,7 @@ import type { Bot } from "@/state/store";
 vi.mock("./Avatar", () => ({ BotAvatar: () => createElement("span", null, "Avatar") }));
 vi.mock("./origin-members", () => ({ WorkspaceMembersPanel: () => createElement("button", null, "Manage members"), RuntimeHelp: () => null }));
 vi.mock("@/lib/origin-cloud-links", () => ({ useCloudLinks: () => ({ workspaces: {}, projects: {} }) }));
-vi.mock("@/lib/origin-cloud", () => ({ cloudUrl: () => null, setCloudUrl: vi.fn(), useCloudSession: () => ({ user: null, login: vi.fn(), logout: vi.fn() }) }));
+vi.mock("@/lib/origin-cloud", () => ({ cloudUrl: () => null, setCloudUrl: vi.fn(), useCloudQuery: () => undefined, useCloudSession: () => ({ user: null, login: vi.fn(), logout: vi.fn() }) }));
 
 let host: HTMLDivElement;
 let opener: HTMLButtonElement;

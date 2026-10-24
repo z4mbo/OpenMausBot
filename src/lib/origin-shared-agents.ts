@@ -56,7 +56,11 @@ export interface SharedSyncDeps {
   driverKindOf(instanceId: string): string | undefined;
 }
 
-export interface SharedSyncResult { published: number; adopted: number; created: number; pulled: number; pushed: number; reviews: number; unbound: number }
+export interface SharedSyncResult {
+  published: number; adopted: number; created: number; pulled: number; pushed: number; reviews: number; unbound: number;
+  /** Teams whose step failed this round; the others still synced. */
+  failures: { teamId: string; projectId?: string; error: string }[];
+}
 
 const cloudDefinition = (agent: CloudAgent): SharedDefinition => definitionOf({
   name: agent.name, title: agent.title, description: agent.description, soul: agent.soul, color: agent.color,
@@ -141,13 +145,14 @@ const intentOf = (bot: LocalBot, driverKindOf: SharedSyncDeps["driverKindOf"]) =
 };
 
 /** One sync round for workspaces that share their agents: publish a project's team once, adopt the published copies,
- * create the missing ones, then pull or push definition changes. Never deletes a cloud agent. */
-export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly { _id: string; teamId: string }[]): Promise<SharedSyncResult> {
+ * create the missing ones, then pull or push definition changes. Never deletes a cloud agent. With `teams`, links to
+ * other teams are left alone. */
+export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly { _id: string; teamId: string }[], teams?: readonly string[]): Promise<SharedSyncResult> {
   const { cloud, call } = deps;
   const looks = { ...deps.looks };
-  const result: SharedSyncResult = { published: 0, adopted: 0, created: 0, pulled: 0, pushed: 0, reviews: 0, unbound: 0 };
+  const result: SharedSyncResult = { published: 0, adopted: 0, created: 0, pulled: 0, pushed: 0, reviews: 0, unbound: 0, failures: [] };
   const projectTeam = new Map(projects.map((project) => [project._id, project.teamId]));
-  const groups = teamsOf(deps.bots, deps.links, projectTeam);
+  const groups = teamsOf(deps.bots, deps.links, projectTeam).filter((group) => !teams || teams.includes(group.teamId));
   let state = (await call<{ bots: Record<string, BotMeta> }>("/api/origin/shared-agents")).bots;
   const bound = new Map(Object.entries(deps.links.agents ?? {}));
   const byId = new Map(deps.bots.map((bot) => [bot.id, bot]));
@@ -194,14 +199,14 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
   const settings = new Map<string, { sharedAgents: boolean; userId: string }>();
   const agentsByTeam = new Map<string, CloudAgent[]>();
   const names = new Map<string, string>();
-  for (const group of groups) {
+  const syncGroup = async (group: (typeof groups)[number]) => {
     if (!settings.has(group.teamId)) {
       settings.set(group.teamId, await cloud.query("agents:teamSettings", { teamId: group.teamId }));
     }
     const setting = settings.get(group.teamId)!;
     if (!setting.sharedAgents) {
       for (const bot of group.local) if (bound.has(bot.id)) await unbind(bot);
-      continue;
+      return;
     }
     if (!agentsByTeam.has(group.teamId)) {
       agentsByTeam.set(group.teamId, await cloud.query<CloudAgent[]>("agents:listForTeam", { teamId: group.teamId }));
@@ -238,7 +243,7 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
         if (bot && agent && !bound.has(bot.id)) await bind(bot, agent, definitionHash(definitionOf(bot, looks[bot.id])));
       }
       state = (await call<{ bots: Record<string, BotMeta> }>("/api/origin/shared-agents")).bots;
-      continue;
+      return;
     }
     const claimed = new Set(bound.values());
     const unboundLocal = group.local.filter((bot) => !bound.has(bot.id));
@@ -299,6 +304,13 @@ export async function syncSharedAgents(deps: SharedSyncDeps, projects: readonly 
         await call("/api/origin/shared-agents/meta", { method: "PUT", body: JSON.stringify({ botId: bot.id, canEdit: agent.canEdit }) });
       }
     }
+  };
+  for (const group of groups) {
+    try {
+      await syncGroup(group);
+    } catch (error) {
+      result.failures.push({ teamId: group.teamId, ...(group.projectId ? { projectId: group.projectId } : {}), error: error instanceof Error ? error.message : String(error) });
+    }
   }
   return result;
 }
@@ -331,6 +343,8 @@ export async function sharedAgentsRound(input: {
   bots: readonly LocalBot[];
   instances: readonly { instanceId: string; driverKind: string }[];
   projects: readonly { _id: string; teamId: string }[];
+  /** The signed-in account's workspaces; links to any other team are skipped. */
+  teams?: readonly string[];
 }): Promise<SharedSyncResult> {
   const { cloudMutation, cloudQueryOnce } = await import("./origin-cloud/client");
   const links = await input.call<CloudLinks>("/api/origin/cloud-links");
@@ -339,5 +353,5 @@ export async function sharedAgentsRound(input: {
     cloud: input.cloud ?? { query: (name, args) => cloudQueryOnce(name, args), mutation: (name, args) => cloudMutation(name, args) },
     call: input.call, bots: input.bots, links, looks,
     driverKindOf: (instanceId) => input.instances.find((instance) => instance.instanceId === instanceId)?.driverKind,
-  }, input.projects);
+  }, input.projects, input.teams);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeWorkspace, inWorkspace, movedOrder, sortProjects, workspaceHeadsOf, workspaceSectionKeys } from "./origin-workspaces";
+import { activeWorkspace, inWorkspace, movedOrder, sortProjects, switchableWorkspaceHeads, workspaceHeadsOf, workspaceSectionKeys } from "./origin-workspaces";
 
 const view = { order: ["yuki", "kai"], sort: "custom" as const, collapsed: false };
 const projects = [
@@ -16,6 +16,17 @@ describe("Origin workspaces", () => {
       { id: "rio", section: "Workspace: Rio", chiefOfStaff: true },
     ];
     expect(workspaceHeadsOf(bots).map((bot) => bot.id)).toEqual(["rio", "ggs"]);
+  });
+
+  it("keeps a pinned head switchable so its workspace stays the open one", () => {
+    const bots = [
+      { id: "ggs", section: "Workspace: GGs", chiefOfStaff: true },
+      { id: "rio", section: "Workspace: Rio", chiefOfStaff: true, pinned: true },
+      { id: "old", section: "Workspace: Old", chiefOfStaff: true, hidden: true },
+    ];
+    const heads = switchableWorkspaceHeads(bots);
+    expect(heads.map((bot) => bot.id)).toEqual(["rio", "ggs"]);
+    expect(activeWorkspace({ ...view, active: "rio" }, heads)).toBe("rio");
   });
 
   it("falls back to the first head when the saved one is gone", () => {

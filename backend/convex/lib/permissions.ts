@@ -22,7 +22,8 @@ export async function getActiveTeamMember(ctx: Ctx, teamId: Id<"teams">, email: 
     .query("teamMembers")
     .withIndex("by_team_email", (q) => q.eq("teamId", teamId).eq("email", normalizeEmail(email)))
     .unique();
-  return member?.status === "active" ? member : null;
+  if (member?.status !== "active") return null;
+  return (await ctx.db.get(teamId))?.deletingAt === undefined ? member : null;
 }
 
 export async function requireTeamMember(ctx: Ctx, teamId: Id<"teams">, sessionToken: string) {

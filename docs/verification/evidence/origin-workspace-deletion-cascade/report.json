@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Both imported workspaces stay switchable (Shop's head pinned); after switching to Shop its project is listed and Studio's is not",
+    "After switching, Shop's project agent Crumb answers the question: \"Bakery's pre-orders are next.\"",
+    "Deleting Studio removed it from the account's workspace list at once",
+    "No Origin row names Studio or Walkies after the scheduled purge; Shop keeps 11 rows",
+    "On this computer Studio's head, the Walkies Chief and Nova, their links and teams are gone; Shop, Bakery, Crumb and the standalone Scout remain",
+    "The temporary harness data directory and the in-memory backend are closed and removed"
+  ],
+  "harness": {
+    "logPath": "(temporary)"
+  },
+  "leftovers": []
+}

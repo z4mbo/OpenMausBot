@@ -55,6 +55,11 @@ export function workspaceHeadsOf<T extends Head>(bots: readonly T[]): T[] {
   return bots.filter((bot) => bot.chiefOfStaff && isWorkspaceSection(bot.section) && (!account || account.includes(bot.id))).reverse();
 }
 
+/** The workspaces the switcher offers: every visible head, whatever the sidebar search matches or pins show. */
+export function switchableWorkspaceHeads<T extends Head & { hidden?: boolean }>(bots: readonly T[]): T[] {
+  return workspaceHeadsOf(bots.filter((bot) => !bot.hidden));
+}
+
 export function setAccountWorkspaces(headIds: string[]) {
   const current = read().account;
   if (current && current.length === headIds.length && current.every((id, index) => id === headIds[index])) return;

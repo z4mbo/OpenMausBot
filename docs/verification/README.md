@@ -89,6 +89,7 @@ Use only mapped, tested commands:
 - [Issue dragging after permission or project changes](origin-issue-drag-permission.md)
 - [Legacy Idea privacy during Draft repair](origin-draft-mirror.md)
 - [Local workspace deletion and residual sidebar sections](origin-workspace-deletion.md)
+- [Deleting a workspace and switching between workspaces](origin-workspace-delete-cascade.md)
 - [Origin 0.2.11 source and delivery acceptance](origin-candidate-031.md) ([delivery receipt](evidence/origin-delivery-031/delivery-receipt.json))
 - [Origin 0.2.13 integration batch and acceptance boundary](origin-candidate-034.md)
 - [Origin 0.2.13 failed CI, descriptor compatibility and verified follow-up](origin-ci-followup-034.md)
