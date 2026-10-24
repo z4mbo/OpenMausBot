@@ -24,7 +24,7 @@ subscription?, offline? }`; `SharedAgentRunsOn({ bot })` fills it from `agentHos
 ## Checks
 
 ```sh
-pnpm --filter @origin/backend exec vitest run convex/agentHosts.test.ts
+pnpm --filter @origin/backend exec vitest run convex/agentHosts
 pnpm exec vitest run src/components/RunsOnBadge.test.ts server/agent-subscriptions.test.ts server/origin-shared.test.ts
 OMB_VERIFY_PLAYWRIGHT=/path/to/playwright/index.mjs node --experimental-strip-types scripts/verify-origin-runs-on.ts
 ```
