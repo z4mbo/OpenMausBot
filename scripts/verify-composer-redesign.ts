@@ -13,6 +13,8 @@ const label = process.argv[2] === "before" ? "before" : "after";
 const EVIDENCE = join(REPO_ROOT, "docs", "verification", "evidence", "composer-redesign", label);
 const THEMES: Theme[] = [{ id: "dark", skin: "midnight", scheme: "dark" }, { id: "light", skin: "meadow", scheme: "light" }];
 const SIZES = [{ width: 1280, height: 860 }, { width: 375, height: 812 }];
+const SKINS = ["midnight", "atelier", "foundry", "lagoon", "graphite", "linen", "dusk", "daylight", "meadow"];
+const LIGHT_SKINS = new Set(["atelier", "lagoon", "linen", "daylight", "meadow"]);
 const COMPOSER = 'textarea[aria-label="Message Pepper"]';
 const REPLIES = [
   "Here is the plan for the launch week:\n\n1. **Monday** — freeze the landing page copy and record the demo.\n2. **Tuesday** — run the pricing check with two customers.\n3. **Wednesday** — ship the release and post the announcement.\n\nI kept the checklist short so it fits on one screen. Tell me which step to start with.",
@@ -153,6 +155,19 @@ try {
       memberIds: [main.pepper.id], name: "Launch room",
       setup: { bulletin: "", defaultResponder: { kind: "member", botId: main.pepper.id } },
     });
+    mkdirSync(join(EVIDENCE, "skins"), { recursive: true });
+    for (const skin of SKINS) {
+      const theme: Theme = { id: LIGHT_SKINS.has(skin) ? "light" : "dark", skin, scheme: LIGHT_SKINS.has(skin) ? "light" : "dark" };
+      const { context, page } = await openChat(browser, main.preview.previewUrl, theme, SIZES[0]!);
+      await page.locator('[data-tour="model"]').first().click();
+      await page.locator("[data-model-picker-content]").waitFor();
+      await page.waitForTimeout(400);
+      const file = join(EVIDENCE, "skins", `${skin}-picker.png`);
+      await page.screenshot({ path: file, clip: { x: 440, y: 120, width: 720, height: 740 } });
+      (report.screenshots as string[]).push(file.slice(REPO_ROOT.length + 1).replaceAll("\\", "/"));
+      await context.close();
+    }
+
     for (const theme of THEMES) {
       const { context, page } = await openChat(browser, main.preview.previewUrl, theme, SIZES[0]!);
       await page.getByText("Launch room", { exact: true }).first().click();

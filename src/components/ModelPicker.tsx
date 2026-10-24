@@ -664,7 +664,7 @@ export function ModelPicker({
           {...motion.exitProps}
           style={contained ? undefined : { width: popoverWidth, maxHeight: space }}
           className={cn(
-            "flex flex-col overflow-hidden rounded-2xl border border-hairline/60 bg-menu",
+            "@container/picker flex flex-col overflow-hidden rounded-2xl border border-hairline/60 bg-menu",
             contained
               ? "relative mt-3 w-full max-h-[min(460px,60dvh)]"
               : "absolute bottom-full left-0 z-40 mb-2 max-w-full origin-bottom-left",

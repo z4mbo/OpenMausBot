@@ -60,9 +60,9 @@ repository's fake Claude and Codex, creates Pepper, sends two turns, and serves
 the full app (`scripts/testing/threads-preview.tsx`) with a synthetic
 `/api/plan-usage` report. Headless Chromium captures Midnight and Meadow at
 1280 and 375 px: the chat, a focused draft, the model picker and the usage
-panel; at 1280 also a search, the update page and attachment chips. A second
-server in the fake engine's `slow` mode holds a turn open for the working
-composer. Screenshots and `report.json` land in
+panel; at 1280 also a search, the update page, attachment chips, a group
+chat's composer and the open picker in every skin. A second server in the fake
+engine's `slow` mode holds a turn open for the working composer. Screenshots and `report.json` land in
 `docs/verification/evidence/composer-redesign/after/`; `before` runs the same
 script on the parent commit. `report.json` must show `noPageErrors: true`,
 no horizontal overflow and both popovers inside the viewport.
@@ -96,15 +96,19 @@ pnpm check:contrast
 | Update behind one row | — | [PNG](evidence/composer-redesign/after/dark-1280-picker-update.png) |
 | Attachment chips | — | [PNG](evidence/composer-redesign/after/light-1280-composer-attachments.png) |
 | Stop while working | — | [PNG](evidence/composer-redesign/after/dark-1280-composer-working.png) |
+| Stop beside a draft | — | [PNG](evidence/composer-redesign/after/light-1280-composer-working-draft.png) |
+| Group chat composer | — | [PNG](evidence/composer-redesign/after/dark-1280-group-composer.png) |
+| Picker in Foundry | — | [PNG](evidence/composer-redesign/after/skins/foundry-picker.png) |
 
-The rest of each matrix sits beside these files.
+The rest of each matrix sits beside these files; `after/skins/` holds the open
+picker and composer in each of the nine skins.
 
 ## What this proves, and what it does not
 
 Proven: the real renderer and store against disposable fake-engine servers,
-in headless Chromium, in two skins and two widths, with real model switching,
-effort, scope and Stop; the renderer tests cover the picker's groups, pages
-and keyboard model, the usage ring's pin, peek and compact action, and the
-composer's structure. Not proven: a real provider's catalog, the Electron
-shell's dictation and calls, or the remaining seven skins beyond the contrast
-check.
+in headless Chromium, in two skins and two widths (and the open picker in all
+nine skins), with real model switching, effort, scope and Stop; the renderer
+tests cover the picker's groups, pages and keyboard model, the usage ring's
+pin, peek and compact action, and the composer's structure. Not proven: a real
+provider's catalog, the Electron shell's dictation and calls, or the packaged
+desktop app.

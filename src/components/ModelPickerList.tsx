@@ -284,14 +284,14 @@ export function ModelPickerList({
           const update = group.instance.snapshot.update;
           const local = offersLocalModels(group.instance, group.local.length) && group.status !== "setup" && group.status !== "policy";
           return (
-            <section key={group.key} data-model-group={group.key} aria-label={group.label}>
+            <div key={group.key} role="group" data-model-group={group.key} aria-label={`${group.label} · ${status ?? t(ACCESS_LABEL[group.access])}`}>
               <div className="sticky top-0 z-[1] flex min-h-9 items-center gap-1 bg-menu pb-0.5 pl-3 pr-1.5 pt-2">
                 <button type="button" onClick={() => setPage({ kind: "provider", key: group.key })}
                   aria-label={t("model.providerDetails", { name: group.label })}
                   className={cn("group/head flex min-w-0 items-center gap-2.5 rounded-lg py-0.5 pr-1.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", group.status === "policy" && "opacity-60")}>
                   <span className={SLOT}><InstanceProviderMark instance={group.instance} size={15} /></span>
                   <span className="shrink-0 text-[12px] font-semibold text-ink">{group.label}</span>
-                  <span className={cn("min-w-0 truncate text-[11px]", status ? "text-warning" : "text-ink-tertiary")}>{status ?? t(ACCESS_LABEL[group.access])}</span>
+                  <span className={cn("min-w-0 truncate text-[11px]", status ? "text-warning" : "text-ink-tertiary", group.accounts.length > 1 && "@max-[24rem]/picker:hidden")}>{status ?? t(ACCESS_LABEL[group.access])}</span>
                   <ChevronRight size={13} className="shrink-0 text-ink-tertiary opacity-0 transition-opacity group-hover/head:opacity-100 group-focus-visible/head:opacity-100 touch:opacity-100" aria-hidden="true" />
                 </button>
                 <span className="min-w-0 flex-1" />
@@ -351,7 +351,7 @@ export function ModelPickerList({
                   ariaLabel={group.local.length > 0 ? t("model.useLocalCount", { count: group.local.length }) : t("model.useLocal")}
                   disabled={needsCli(group.instance)} onClick={() => openLocal(group)} />
               )}
-            </section>
+            </div>
           );
         })}
         {q && blocks.length === 0 && (
