@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject } from "react";
 import {
   Bot as BotIcon, CalendarDays, CheckCircle2, ChevronRight, Circle, CircleDashed, Columns3, ExternalLink, GitBranch, GitPullRequest, GripVertical,
-  List, Loader2, MessageCircle, MoreHorizontal, Plus, Rocket, Search, SignalMedium, Trash2, UserRound,
+  List, Loader2, MessageCircle, MoreHorizontal, Plus, Search, SignalMedium, Trash2, UserRound,
 } from "lucide-react";
 import { cloudMutation, useCloudQuery } from "@/lib/origin-cloud";
 import { ApiError } from "@/state/store";
@@ -30,10 +30,9 @@ import { originGitHub } from "@/lib/origin-github";
 import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
 import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
+import { DropGap } from "./DropGap";
 import { openIssueColumns } from "./issue-columns";
-import { MilestoneChip, MilestoneStrip, useMilestones } from "./milestones";
 import { SidebarPopoverMenu, type SidebarMenuItem } from "../SidebarPopoverMenu";
-import { useMilestoneFilter } from "@/lib/origin-milestone-filter";
 
 /** What the Issues page hands to `onAssignToAgent`. */
 export type AssignableIssue = {
@@ -60,8 +59,6 @@ export type IssuesPageProps = OriginPageProps & {
   /** Hands an issue to an agent; without `agentId` the host asks which one. */
   onAssignToAgent?(issue: AssignableIssue, agentId?: string): void;
   chief?: IssueChief;
-  /** Starts Launchpad for this project; offered while it has no issues. */
-  onLaunch?(): void;
 };
 
 function dueInfo(value?: string): { label: string; tone: string } | null {
@@ -90,10 +87,10 @@ export function createdToAssignable(issue: CreatedIssue, projectName: string): A
   };
 }
 
-export function IssuesPage({ onAssignToAgent, agents, chief, onLaunch, ...props }: IssuesPageProps) {
+export function IssuesPage({ onAssignToAgent, agents, chief, ...props }: IssuesPageProps) {
   return (
     <CloudGate {...props} label="Issues">
-      {({ project, projectId, canEdit }) => <IssuesBoard project={project} projectId={projectId} canEdit={canEdit} agents={agents ?? []} onAssignToAgent={onAssignToAgent} chief={chief} onLaunch={onLaunch} />}
+      {({ project, projectId, canEdit }) => <IssuesBoard project={project} projectId={projectId} canEdit={canEdit} agents={agents ?? []} onAssignToAgent={onAssignToAgent} chief={chief} />}
     </CloudGate>
   );
 }
@@ -136,12 +133,10 @@ async function deleteIssue(projectId: string, task: CloudTask): Promise<string> 
   }
 }
 
-function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chief, onLaunch }: {
-  project: CloudProject; projectId: string; canEdit: boolean; agents: readonly IssueAgent[]; onAssignToAgent?(issue: AssignableIssue, agentId?: string): void; chief?: IssueChief; onLaunch?(): void;
+function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chief }: {
+  project: CloudProject; projectId: string; canEdit: boolean; agents: readonly IssueAgent[]; onAssignToAgent?(issue: AssignableIssue, agentId?: string): void; chief?: IssueChief;
 }) {
   const board = useCloudQuery<CloudBoard>("tasks:board", { projectId });
-  const milestones = useMilestones(projectId);
-  const [chosenMilestone, setMilestone] = useMilestoneFilter(projectId);
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
   const [view, setView] = useState<"active" | "completed">("active");
   const [layout, setLayout] = useState<"board" | "list">("board");
@@ -208,10 +203,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const draftIds = new Set(columns.filter(isDraftColumn).map((column) => column._id));
   const laneOf = (task: CloudTask) => (visibleIds.has(task.columnId) ? task.columnId : fallback?._id);
   const needle = query.trim().toLowerCase();
-  const milestone = milestones?.milestones.some((row) => row._id === chosenMilestone) ? chosenMilestone : null;
-  const matches = (task: CloudTask) => (!milestone || task.milestoneId === milestone)
-    && (!needle || `${taskKey(task._id)} ${task.title} ${task.description ?? ""} ${task.assignedToName ?? ""}`.toLowerCase().includes(needle));
-  const launchable = Boolean(onLaunch) && canEdit && !board.tasks.length;
+  const matches = (task: CloudTask) => !needle || `${taskKey(task._id)} ${task.title} ${task.description ?? ""} ${task.assignedToName ?? ""}`.toLowerCase().includes(needle);
   const active = tasks.filter((task) => !task.done && matches(task));
   const completed = tasks.filter((task) => task.done && matches(task)).sort((a, b) => b.updatedAt - a.updatedAt);
   const assignees = new Map([...(board.assignees ?? []), ...(people ?? [])].map((person) => [person.email, person]));
@@ -287,20 +279,6 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
         </label>
         {canEdit && <button type="button" className={primaryButton} onClick={() => setComposer("")} title="New issue (C)"><Plus size={14} />New issue</button>}
       </PageHeader>
-      {(launchable || (milestones && (milestones.milestones.length > 0 || (milestones.canEdit && board.tasks.length > 0)))) && (
-        <GlassHeader>
-          <div className={cn("flex flex-col gap-2", glassHeaderRow)}>
-            {launchable && (
-              <div className={cn(cardClass, "flex flex-wrap items-center gap-3 px-3 py-2.5")} data-launchpad-cta>
-                <Rocket size={16} aria-hidden="true" className="shrink-0 text-accent-text" />
-                <span className="min-w-0 flex-1 text-[13px] text-ink-secondary">Start from an idea: the Chief drafts the Brief, milestones and the MVP's issues.</span>
-                <button type="button" className={primaryButton} onClick={onLaunch}><Rocket size={14} />Plan from an idea</button>
-              </div>
-            )}
-            {milestones && !launchable && <MilestoneStrip projectId={projectId} list={milestones} selected={milestone} onSelect={setMilestone} />}
-          </div>
-        </GlassHeader>
-      )}
       {(!canEdit || notice || info) && (
         <GlassHeader>
           <div className={cn("flex flex-col gap-2", glassHeaderRow)}>
@@ -450,10 +428,6 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
         onDelete={(task) => remove(task)} onAssign={assign} />}
     </section>
   );
-}
-
-function DropGap({ height }: { height: number }) {
-  return <span aria-hidden="true" data-drop-gap className="block rounded-xl border-2 border-dashed border-accent/45 bg-accent/[0.06] motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]" style={{ height }} />;
 }
 
 type Assignee = { email: string; name: string; username?: string; avatarUrl?: string | null };
@@ -693,7 +667,6 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
           <ChipSelect label="Assignee" value={task.assignedToEmail ?? ""} options={memberOptions(details.members)} icon={<UserRound size={14} aria-hidden="true" />} disabled={!canEdit}
             onChange={(assignedToEmail) => update({ assignedToEmail }, "Could not change the assignee")} />
           <DateChip value={task.dueDate ?? ""} disabled={!canEdit} onChange={(dueDate) => { if (dueDate) update({ dueDate }, "Could not change the due date"); }} />
-          <MilestoneChip projectId={projectId} taskId={taskId} milestoneId={task.milestoneId} canEdit={canEdit} onError={action.setError} />
           {onAssign && !task.done && <AgentChip agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
           <GitHubChips project={project} projectId={projectId} task={task} canEdit={canEdit} draft={inDraft(task.columnId)} />
           <DesignChips projectId={projectId} taskId={task._id} onOpen={chief?.openCanvas} className={chipButton} />

@@ -2570,30 +2570,6 @@
       }
     },
     {
-      "name": "origin_milestone_list",
-      "description": "List an Origin project's milestones with target day, progress and issues. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      }
-    },
-    {
-      "name": "origin_milestone_set",
-      "description": "Create, change or delete an Origin project milestone such as MVP or Launch; issues puts issues in it, remove_issues takes them out. Before the first call, get its input schema from find_tool.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      }
-    },
-    {
       "name": "origin_brand_get",
       "description": "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Before the first call, get its input schema from find_tool.",
       "inputSchema": {

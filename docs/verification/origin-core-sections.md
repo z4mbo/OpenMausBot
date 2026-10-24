@@ -16,7 +16,7 @@ OMB_VERIFY_PLAYWRIGHT=<path to playwright's index.mjs> \
 Nothing leaves this computer. The real Convex functions of `backend/convex`
 run in memory (`scripts/testing/origin-campaigns-backend.ts`), seeded with a
 project "Walkies": two members, seven issues across Draft, Todo and In
-progress, the MVP and Launch milestones, assets, two vault items encrypted
+progress, assets, two vault items encrypted
 with the fixture passphrase, a feedback portal with two reports, a pull
 request, call notes and a team chat thread. The server is the disposable
 fake-engine fixture with a Chief, Atlas, and two agents, Nova and Echo.

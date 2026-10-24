@@ -25,7 +25,6 @@ export const DEFERRED_TOOL_DOMAINS: readonly DeferredToolDomain[] = [
   { prefix: "origin_brand_", words: "brand kit identity colours colors palette fonts typography voice tone style guide" },
   { prefix: "origin_standup", words: "standup daily update status report" },
   { prefix: "origin_call_", words: "call meeting recap summary notes minutes action items decisions follow-ups what did we decide" },
-  { prefix: "origin_milestone_", words: "milestone roadmap mvp launch deadline target date progress plan" },
 ];
 
 export function deferredToolDomain(name: string): DeferredToolDomain | undefined {

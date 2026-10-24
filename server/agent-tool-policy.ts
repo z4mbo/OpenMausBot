@@ -29,7 +29,6 @@ export const READ_ONLY_AGENT_TOOL_NAMES: ReadonlySet<string> = new Set([
   "origin_studio_presets",
   "origin_campaign_get",
   "origin_brand_get",
-  "origin_milestone_list",
 ]);
 
 export const READ_ONLY_ANNOTATIONS = Object.freeze({

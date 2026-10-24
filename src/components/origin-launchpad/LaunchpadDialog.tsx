@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { ChevronRight, Loader2, Rocket, Settings2 } from "lucide-react";
-import { useStore, type Bot } from "@/state/store";
+import { useStore } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { handOff } from "@/lib/origin-handoff";
 import { useShowThreads } from "@/lib/thread-preferences";
@@ -16,9 +16,6 @@ import { RepositoryPicker, repositoryChoiceReady } from "../origin-members/Repos
 import { Notice, ghostButton, inputClass, primaryButton } from "../origin-pages/ui";
 import { errorText } from "../origin-pages/repo-url";
 
-/** Launchpad for a new project in a workspace, or for an existing project's Chief. */
-export type LaunchTarget = { kind: "new"; onManual?(): void } | { kind: "project"; chief: Bot; projectName: string };
-
 const REPOSITORY_SUMMARY: Record<RepositoryChoice["mode"], string> = { new: "new private GitHub repository", existing: "existing repository", later: "no repository yet" };
 
 function Text({ label, hint, value, onChange, max, rows = 2, autoFocus }: { label: string; hint?: string; value: string; onChange(value: string): void; max: number; rows?: number; autoFocus?: boolean }) {
@@ -30,11 +27,12 @@ function Text({ label, hint, value, onChange, max, rows = 2, autoFocus }: { labe
   );
 }
 
-export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onClose(): void }) {
+/** Launchpad: a new shared project, planned by its new Chief from an idea. */
+export function LaunchpadDialog({ onManual, onClose }: { onManual?(): void; onClose(): void }) {
   const { dispatch } = useStore();
   const showThreads = useShowThreads();
   const workspace = useActiveOriginWorkspace();
-  const people = useWorkspacePeople(target.kind === "new" ? workspace.teamId : null);
+  const people = useWorkspacePeople(workspace.teamId);
   const [input, setInput] = useState<Required<LaunchIdea>>({ idea: "", audience: "", constraints: "", links: "" });
   const [name, setName] = useState<string | null>(null);
   const [access, setAccess] = useState<ProjectAccess>({ mode: "everyone", emails: [] });
@@ -47,8 +45,8 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
   const projectName = (name ?? projectNameFromIdea(input.idea)).trim();
   const busy = Boolean(progress);
   const teamId = workspace.teamId;
-  const ready = input.idea.trim().length > 0 && (target.kind === "project" || (Boolean(projectName) && Boolean(teamId) && people.members !== undefined
-    && (access.mode !== "people" || access.emails.length > 0) && repositoryChoiceReady(repository, projectName)));
+  const ready = input.idea.trim().length > 0 && Boolean(projectName) && Boolean(teamId) && people.members !== undefined
+    && (access.mode !== "people" || access.emails.length > 0) && repositoryChoiceReady(repository, projectName);
 
   const create = async (draft: BotCreationDraft) => {
     if (!teamId || !people.members) return;
@@ -66,11 +64,6 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
     event.preventDefault();
     if (!ready || busy) return;
     setError("");
-    if (target.kind === "project") {
-      handOff(dispatch, target.chief, kickoffBrief(target.projectName, input), showThreads);
-      onClose();
-      return;
-    }
     setProgress("Preparing…");
     try {
       const draft = await chiefDraft(projectName);
@@ -82,7 +75,7 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
     }
   };
 
-  const title = target.kind === "new" ? "New project from an idea" : `Plan ${target.projectName} from an idea`;
+  const title = "New project from an idea";
   return (
     <CenteredDialog label={title} onClose={onClose} canClose={() => !busy} className="sm:max-w-xl">
       {(dismiss) => (
@@ -91,7 +84,7 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent-text" aria-hidden="true"><Rocket size={16} /></span>
             <div className="min-w-0 flex-1">
               <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
-              <p className="text-[12.5px] text-ink-secondary">{target.kind === "new" ? "Its Chief" : target.chief.name} writes the Brief, milestones and the MVP's Draft issues.</p>
+              <p className="text-[12.5px] text-ink-secondary">Its Chief writes the Brief and the MVP's Draft issues.</p>
             </div>
           </div>
           <fieldset disabled={busy} className="flex min-w-0 flex-col gap-3">
@@ -101,7 +94,7 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
               <Text label="Constraints" hint="budget, timeline, stack" value={input.constraints} onChange={set("constraints")} max={LAUNCH_LIMITS.constraints} />
             </div>
             <Text label="Links" hint="competitors, references" value={input.links} onChange={set("links")} max={LAUNCH_LIMITS.links} rows={1} />
-            {target.kind === "new" && (teamId ? (
+            {teamId ? (
               <>
                 <label className="flex min-w-0 flex-col gap-1 text-[12px] font-medium text-ink-secondary">Project name
                   <input className={inputClass} maxLength={LAUNCH_LIMITS.name} value={name ?? projectNameFromIdea(input.idea)} placeholder="Named from the idea" onChange={(event) => setName(event.target.value)} />
@@ -112,18 +105,18 @@ export function LaunchpadDialog({ target, onClose }: { target: LaunchTarget; onC
                   <RepositoryPicker teamId={teamId} projectName={projectName} value={repository} onChange={setRepository} disabled={busy} />
                 </Disclosure>
               </>
-            ) : <Notice>Launchpad creates shared projects. Open a workspace connected to Origin first.</Notice>)}
+            ) : <Notice>Launchpad creates shared projects. Open a workspace connected to Origin first.</Notice>}
           </fieldset>
           {error && <Notice tone="danger">{error}</Notice>}
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            {target.kind === "new" && target.onManual && (
-              <button type="button" className="mr-auto rounded-lg px-2 py-1.5 text-[12.5px] text-ink-secondary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60" disabled={busy} onClick={target.onManual}>
+            {onManual && (
+              <button type="button" className="mr-auto rounded-lg px-2 py-1.5 text-[12.5px] text-ink-secondary outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/60" disabled={busy} onClick={onManual}>
                 Set up manually
               </button>
             )}
-            <button type="button" className={cn(ghostButton, !(target.kind === "new" && target.onManual) && "ml-auto")} disabled={busy} onClick={dismiss}>Cancel</button>
+            <button type="button" className={cn(ghostButton, !onManual && "ml-auto")} disabled={busy} onClick={dismiss}>Cancel</button>
             <button type="submit" className={primaryButton} disabled={!ready || busy}>
-              {busy ? <><Loader2 size={14} className="animate-spin" />{progress}</> : <><Rocket size={14} />{target.kind === "new" ? "Create and plan" : `Send to ${target.chief.name}`}</>}
+              {busy ? <><Loader2 size={14} className="animate-spin" />{progress}</> : <><Rocket size={14} />Create and plan</>}
             </button>
           </div>
           <LocalComputerAutoWarning open={consent !== null} onCancel={() => setConsent(null)}

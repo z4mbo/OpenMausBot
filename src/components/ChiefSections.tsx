@@ -15,7 +15,6 @@ import { handOff as handIssueTo } from "@/lib/origin-handoff";
 import { StudioPage } from "./origin-studio/StudioPage";
 import { DesignPage } from "./origin-design/DesignPage";
 import { BroadcastPage } from "./origin-broadcast/BroadcastPage";
-import { LaunchpadDialog } from "./origin-launchpad/LaunchpadDialog";
 import { ChiefSectionBar } from "./ProjectSectionBar";
 import { teamAgents } from "./project-sections";
 
@@ -45,8 +44,6 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
   const cloudTeamId = useCloudWorkspaceFor(bot);
   const showThreads = useShowThreads();
   const [assigning, setAssigning] = useState<AssignableIssue | null>(null);
-  const [launching, setLaunching] = useState(false);
-  const launchpad = launching && <LaunchpadDialog target={{ kind: "project", chief: bot, projectName: bot.name }} onClose={() => setLaunching(false)} />;
   const page = { cloudProjectId: cloudProjectId ?? null, projectName: bot.name, link: { botId: bot.id, teamId: cloudTeamId ?? null } };
   if (section === "issues") {
     const team = [bot, ...teamAgents(state.bots, bot)];
@@ -61,9 +58,8 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
           const agent = agentId ? team.find((candidate) => candidate.id === agentId) : undefined;
           if (agent) handOff(issue, agent);
           else setAssigning(issue);
-        }} chief={{ name: bot.name, implement: (issue) => dispatch({ type: "send", botId: bot.id, text: implementBrief(issue) }), openCanvas: () => setChiefSectionOf(bot.id, "draw") }} onLaunch={() => setLaunching(true)} />
+        }} chief={{ name: bot.name, implement: (issue) => dispatch({ type: "send", botId: bot.id, text: implementBrief(issue) }), openCanvas: () => setChiefSectionOf(bot.id, "draw") }} />
         {assigning && <AssignIssueDialog issue={assigning} agents={team} onPick={(agent) => handOff(assigning, agent)} onClose={() => setAssigning(null)} />}
-        {launchpad}
       </>
     );
   }

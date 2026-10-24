@@ -700,8 +700,6 @@ describe("agents-proxy MCP surface", () => {
       "origin_campaign_create",
       "origin_campaign_get",
       "origin_campaign_link",
-      "origin_milestone_list",
-      "origin_milestone_set",
       "origin_brand_get",
       "origin_brand_update",
     ]);
@@ -785,7 +783,7 @@ describe("agents-proxy MCP surface", () => {
       "session_search", "session_read", "list_routines", "skills_list",
       "origin_list_projects", "origin_list_issues", "origin_get_issue", "origin_list_assets", "origin_vault_list", "origin_repo_status",
       "origin_team_chat", "origin_feedback", "origin_canvas", "origin_canvas_screenshot", "origin_call_notes", "origin_studio_list", "origin_studio_workflow_list", "origin_studio_presets", "origin_broadcast_list",
-      "origin_campaign_get", "origin_milestone_list", "origin_brand_get",
+      "origin_campaign_get", "origin_brand_get",
     ];
     expect(list.result.tools.filter((tool: any) => tool.annotations?.readOnlyHint)
       .map((tool: any) => tool.name)).toEqual(readNames);

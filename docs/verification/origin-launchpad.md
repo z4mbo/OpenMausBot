@@ -1,4 +1,4 @@
-# Launchpad and milestones
+# Launchpad
 
 Launchpad runs against the real Convex functions of `backend/convex`, held in
 memory by convex-test and served over the HTTP wire `ConvexHttpClient` speaks,
@@ -11,9 +11,8 @@ Start the fixture in one terminal:
 node --experimental-strip-types scripts/verify-origin-launchpad.ts
 ```
 
-It seeds a workspace with two projects. In Walkies the Chief's kickoff already
-ran through the real `origin_milestone_set` tool: MVP and Launch milestones
-over seven Draft issues. Empty idea has no issues. It prints `previewUrl`.
+It seeds a workspace with two projects. Walkies holds the seven Draft issues
+a kickoff produces. Empty idea has no issues. It prints `previewUrl`.
 Drive it from a second terminal:
 
 ```sh
@@ -23,16 +22,12 @@ node scripts/testing/check-origin-launchpad.mjs <previewUrl> docs/verification/e
 Set `OMB_VERIFY_PLAYWRIGHT` to Playwright's `index.mjs` when it is not
 resolvable from the repository root. The check covers 375 px and 1280 px:
 
-- the Issues strip shows each milestone with its progress, and selecting one
-  filters Issues to it; an issue's Milestone chip moves it and the strip's
-  count follows; a new milestone is selected;
-- Empty idea offers "Plan from an idea" in Issues, and Launchpad sends the
-  Chief the kickoff brief with only the fields given;
+- the Issues board lists the kickoff issues and shows no milestones;
+- Empty idea shows no "Start from an idea" banner in Issues;
 - New project creates the shared project (repository later), the Chief with
   the project-lead role on the fixture server, links them and sends the
-  kickoff.
+  kickoff, with no milestone step.
 
-The backend rules are in `backend/convex/launchpad.test.ts` and the agent
-tools in `server/origin-launchpad-tools.test.ts`. Run the check once per
+The backend rules are in `backend/convex/launchpad.test.ts`. Run the check once per
 fixture start, since it edits the seeded data, and stop the launcher with
 Ctrl-C so it removes its temporary data.

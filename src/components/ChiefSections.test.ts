@@ -12,7 +12,6 @@ vi.mock("./origin-pages", () => ({ IssuesPage: Page, AssetsPage: Page, VaultPage
 vi.mock("./OriginDraw", () => ({ ProjectDrawPage: () => null }));
 vi.mock("./origin-studio/StudioPage", () => ({ StudioPage: () => null }));
 vi.mock("./origin-broadcast/BroadcastPage", () => ({ BroadcastPage: () => null }));
-vi.mock("./origin-launchpad/LaunchpadDialog", () => ({ LaunchpadDialog: () => null }));
 vi.mock("./ProjectSectionBar", () => ({ ChiefSectionBar: () => null }));
 vi.mock("@/lib/origin-cloud-links", () => ({ useCloudProjectFor: () => undefined, useCloudWorkspaceFor: () => undefined }));
 vi.mock("@/state/store", () => ({ useStore: () => ({ state: { bots: [] }, dispatch: vi.fn() }) }));

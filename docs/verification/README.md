@@ -85,7 +85,7 @@ Use only mapped, tested commands:
 - [Workspace pages and workspace context](origin-workspace.md)
 - [Brand kit across Canvas, Pages and Studio](origin-brand-kit.md)
 - [Canvas design tools, collaboration and agents](origin-canvas-pro.md)
-- [Launchpad and milestones](origin-launchpad.md)
+- [Launchpad](origin-launchpad.md)
 - [A Chief runs a launch with a cheap real model](origin-agentic-launch.md)
 - [Draft-first boards and default issue creation](origin-draft-defaults.md)
 - [Issue cards remain visible during rapid dragging](origin-issue-drag.md)

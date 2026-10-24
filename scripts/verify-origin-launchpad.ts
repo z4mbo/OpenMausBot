@@ -4,13 +4,12 @@ import { fileURLToPath } from "node:url";
 import { launchVerificationServer } from "./control-omb.ts";
 import { mountPreview, parkUntilSignal } from "./testing/preview-fixture.ts";
 import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
-import { launchpadTools, type LaunchpadToolScope } from "../server/origin-launchpad-tools.ts";
 
 type Json = Record<string, unknown>;
 
 const day = (offset: number) => { const at = new Date(); at.setDate(at.getDate() + offset); return at.toISOString().slice(0, 10); };
 
-/** Two projects: Walkies after its Chief ran the kickoff through the real Milestone tool, and an empty one. */
+/** Two projects: Walkies with its kickoff issues on the board, and an empty one. */
 async function seed(convex: FakeConvex) {
   const { t, ref } = convex;
   const { createSession } = await convex.load<{ createSession(ctx: unknown, userId: string): Promise<string> }>("convex/lib/auth.ts");
@@ -26,20 +25,11 @@ async function seed(convex: FakeConvex) {
   const walkies = String(await o.mutation("projects:create", { teamId, name: "Walkies" }));
   const empty = String(await o.mutation("projects:create", { teamId, name: "Empty idea" }));
 
-  const scope: LaunchpadToolScope = { client: { query, mutation }, sessionToken: owner.token, projectId: walkies, projectName: "Walkies", caller: { id: "fixture-chief", name: "Atlas" } };
-  const tools = launchpadTools(async () => scope);
-  const run = async (name: string, args: Json) => {
-    const result = await tools[name]!(args, null);
-    if (result.isError) throw new Error(`${name}: ${result.text}`);
-    return result.text;
-  };
   await o.mutation("tasks:ensureDefaultColumns", { projectId: walkies });
   const issue = (title: string) => o.mutation("tasks:createTask", { projectId: walkies, title, priority: "medium", assignedToEmail: "ada@fixture.test", dueDate: day(10) }).then(String);
   const mvp = await Promise.all(["Walker sign-up and vetting", "Book a walk for today", "Live walk map", "Pay in the app"].map(issue));
-  const launch = await Promise.all(["Launch landing page", "Launch week posts"].map(issue));
+  await Promise.all(["Launch landing page", "Launch week posts"].map(issue));
   await issue("Pick a name for the push notifications");
-  await run("origin_milestone_set", { milestone: "MVP", target_date: day(14), issues: mvp });
-  await run("origin_milestone_set", { milestone: "Launch", target_date: day(30), issues: launch });
   await o.mutation("tasks:updateTask", { projectId: walkies, taskId: mvp[0], done: true });
   return { ownerToken: owner.token, teamId, projects: { walkies, empty } };
 }

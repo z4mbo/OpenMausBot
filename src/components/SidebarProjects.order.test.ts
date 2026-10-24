@@ -24,7 +24,7 @@ vi.mock("@/lib/origin-members", () => ({ useWorkspaceAccess: () => ({ role: fixt
 vi.mock("./lazy-screens", () => ({ NewBotDialog: () => null }));
 vi.mock("./origin-pages/ui", () => ({ iconButton: "" }));
 
-import { SidebarProjects } from "./SidebarProjects";
+import { SidebarProjects, projectDropTarget, reorderAnchor } from "./SidebarProjects";
 
 type Node = ReactElement<Record<string, unknown> & { children?: ReactNode }>;
 const nodes = (value: ReactNode): Node[] => Children.toArray(value).flatMap(child => isValidElement(child) ? [child as Node, ...nodes((child as Node).props.children)] : []);
@@ -96,20 +96,22 @@ describe("shared sidebar project order", () => {
     expect(fixture.mutate).not.toHaveBeenCalled();
   });
 
-  it("does not save on pointer movement and commits once on pointer release", async () => {
-    const list = { contains: () => true, getBoundingClientRect: () => ({ left: 0, top: 0, right: 300, bottom: 300 }) };
-    const document = { elementsFromPoint: () => [{ closest: () => ({ dataset: { reorderKey: "b" }, closest: () => list }) }] };
-    const handle = { ownerDocument: document, focus: vi.fn(), setPointerCapture: vi.fn(), hasPointerCapture: () => true, releasePointerCapture: vi.fn() };
-    const event = (y: number) => ({ pointerId: 1, isPrimary: true, button: 0, clientX: 10, clientY: y, currentTarget: handle, preventDefault: vi.fn(), stopPropagation: vi.fn() });
-    const root = render().all.find(node => node.props["data-sidebar-projects"] !== undefined)!;
-    (root.props.ref as { current: unknown }).current = list;
-    (render().grip("c").props.onPointerDown as (event: unknown) => void)(event(150));
-    (render().grip("c").props.onPointerMove as (event: unknown) => void)(event(100));
-    expect(render().rows.map(row => row.props["data-sidebar-project-row"])).toEqual(["a", "b", "c"]);
-    expect(fixture.mutate).not.toHaveBeenCalled();
-    (render().grip("c").props.onPointerUp as (event: unknown) => void)(event(100)); await flush();
-    expect(fixture.mutate).toHaveBeenCalledOnce();
-    expect(fixture.mutate.mock.calls[0][1].projectIds).toEqual(["pa", "pc", "pb"]);
+  it("drops a dragged row before the first row of its own section whose middle is below the pointer", () => {
+    const row = (id: string, top: number) => ({ dataset: { sidebarProjectRow: id }, getBoundingClientRect: () => ({ top, height: 40 }) });
+    const lane = (name: string, rows: ReturnType<typeof row>[]) => ({ dataset: { projectLane: name }, querySelectorAll: () => rows });
+    const root = { querySelectorAll: () => [lane("pinned", [row("p", 0)]), lane("live", [row("a", 50), row("b", 90), row("c", 130)])] } as unknown as HTMLElement;
+    expect(projectDropTarget(root, "c", 0, 60)).toEqual({ columnId: "live", beforeTaskId: "a" });
+    expect(projectDropTarget(root, "a", 0, 200)).toEqual({ columnId: "live" });
+    expect(projectDropTarget(root, "a", 0, 10)).toEqual({ columnId: "live", beforeTaskId: "b" });
+    expect(projectDropTarget(root, "missing", 0, 10)).toBeNull();
+  });
+
+  it("turns a drop position into the neighbour to move next to, and nothing when the row stays put", () => {
+    expect(reorderAnchor(["a", "b", "c"], "c", "a")).toBe("a");
+    expect(reorderAnchor(["a", "b", "c"], "a", "c")).toBe("b");
+    expect(reorderAnchor(["a", "b", "c"], "a")).toBe("c");
+    expect(reorderAnchor(["a", "b", "c"], "b", "c")).toBeNull();
+    expect(reorderAnchor(["a", "b", "c"], "c")).toBeNull();
   });
 
   it("keeps one save in flight and ignores a failure from a previous account", async () => {

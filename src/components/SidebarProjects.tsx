@@ -6,7 +6,9 @@ import type { Bot } from "@/state/store";
 import { UnreadBadge } from "./UnreadBadge";
 import { cn } from "@/lib/cn";
 import { useOriginProjectOrder } from "@/lib/origin-project-order";
-import { usePointerReorder } from "@/lib/use-pointer-reorder";
+import { useCardDrag, type DropTarget } from "./origin-pages/use-card-drag";
+import { useFlip } from "./origin-pages/issue-order";
+import { DropGap } from "./origin-pages/DropGap";
 import {
   movedOrder, orderedGroups, setGroupOrder, setProjectSort, setProjectsCollapsed, sortProjects, switchWorkspace, toggleGroup, useWorkspaces, type ProjectSort,
 } from "@/lib/origin-workspaces";
@@ -86,6 +88,29 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
   );
 }
 
+type ProjectLane = "pinned" | "live" | "archived";
+
+/** Where a project row dropped at height y lands: before the first other row of its own section whose middle is below y. */
+export function projectDropTarget(root: HTMLElement, id: string, _x: number, y: number): DropTarget | null {
+  const lane = [...root.querySelectorAll<HTMLElement>("[data-project-lane]")]
+    .find((element) => [...element.querySelectorAll<HTMLElement>("[data-sidebar-project-row]")].some((row) => row.dataset.sidebarProjectRow === id));
+  if (!lane) return null;
+  const before = [...lane.querySelectorAll<HTMLElement>("[data-sidebar-project-row]")]
+    .filter((row) => row.dataset.sidebarProjectRow !== id)
+    .find((row) => { const rect = row.getBoundingClientRect(); return rect.height > 0 && rect.top + rect.height / 2 > y; });
+  return { columnId: lane.dataset.projectLane!, ...(before ? { beforeTaskId: before.dataset.sidebarProjectRow } : {}) };
+}
+
+/** The row `id` is moved next to so it lands before `beforeId` (or last), or null when it would not move. */
+export function reorderAnchor(ids: readonly string[], id: string, beforeId?: string): string | null {
+  const from = ids.indexOf(id);
+  if (from < 0) return null;
+  const rest = ids.filter((other) => other !== id);
+  const at = beforeId ? rest.indexOf(beforeId) : rest.length;
+  if (at < 0 || at === from) return null;
+  return at > from ? rest[at - 1]! : rest[at]!;
+}
+
 export function SidebarProjects({ projects, row, onNewProject, archived, selectedId, cloudTeamId = null }: {
   projects: readonly Bot[];
   row(bot: Bot): ReactNode;
@@ -100,22 +125,42 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
   const links = useCloudLinks();
   const order = useOriginProjectOrder(projects.map(bot => ({ id: bot.id, name: bot.name, updatedAt: lastUpdate(bot), bot })), links.projects, workspaces, cloudTeamId);
   const { ordered } = order;
-  const reorder = usePointerReorder<HTMLDivElement>(ordered.map(project => project.id), order.saving || workspaces.sort !== "custom", (from, to) => void order.move(from, to));
   const open = !workspaces.collapsed;
   const shelved = archived ? ordered.filter(({ bot }) => archived(bot)) : [];
   const pinned = ordered.filter((item) => item.bot.pinned && !shelved.includes(item));
   const live = ordered.filter((item) => !item.bot.pinned && !shelved.includes(item));
+  const lanes: Record<ProjectLane, typeof ordered> = { pinned, live, archived: shelved };
   const holdsSelection = shelved.some(({ id }) => id === selectedId);
   const [shelfOpen, setShelfOpen] = useState(holdsSelection);
   useEffect(() => { if (holdsSelection) setShelfOpen(true); }, [holdsSelection]);
+  const listRef = useRef<HTMLDivElement>(null);
+  const seed = useRef<(id: string, from: DOMRect) => void>(() => {});
+  const drag = useCardDrag({
+    enabled: workspaces.sort === "custom" && !order.saving, root: listRef, targetAt: projectDropTarget, ignore: "input, textarea, select, [contenteditable=true]",
+    onDrop: (id, target, from) => {
+      const to = reorderAnchor((lanes[target.columnId as ProjectLane] ?? []).map((item) => item.id), id, target.beforeTaskId);
+      if (!to) return;
+      seed.current(id, from);
+      void order.move(id, to);
+    },
+  });
+  const lifted = drag.drag;
+  const target = drag.target;
+  seed.current = useFlip(listRef, `${ordered.map((item) => item.id).join()}:${target?.columnId ?? ""}:${target?.beforeTaskId ?? ""}`);
+  const ghost = lifted && ordered.find((item) => item.id === lifted.taskId);
+  const laneRows = (lane: ProjectLane) => <>
+    {lanes[lane].map(({ id, bot }) => projectRow(id, bot, lane))}
+    {lifted && target?.columnId === lane && !target.beforeTaskId && <DropGap height={lifted.height} />}
+  </>;
   return (
-    <div ref={reorder.listRef} data-reorder-list data-sidebar-projects onKeyDown={reorder.onKeyDown} className="flex flex-col gap-0.5 pt-2">
+    <div ref={listRef} data-sidebar-projects onClickCapture={(event) => { if (drag.justDropped()) { event.preventDefault(); event.stopPropagation(); } }}
+      className="flex flex-col gap-0.5 pt-2">
       {pinned.length > 0 && (
-        <div data-sidebar-pinned-projects className="mb-2 flex flex-col gap-0.5">
+        <div data-sidebar-pinned-projects data-project-lane="pinned" className="mb-2 flex flex-col gap-0.5">
           <div className="flex h-6 items-center gap-1.5 px-2 pb-1 text-[12px] font-medium text-ink-secondary">
             <Pin size={11} className="shrink-0" aria-hidden="true" />Pinned
           </div>
-          {pinned.map(({ id, bot }) => projectRow(id, bot))}
+          {laneRows("pinned")}
         </div>
       )}
       <div className="flex items-center gap-1 px-2 pb-1">
@@ -133,7 +178,7 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
         {onNewProject && <button type="button" aria-label="New project" title="New project" onClick={onNewProject}
           className="flex size-6 items-center justify-center rounded text-ink-secondary hover:bg-raised hover:text-ink"><Plus size={14} /></button>}
       </div>
-      {open && live.map(({ id, bot }) => projectRow(id, bot))}
+      {open && <div data-project-lane="live" className="flex flex-col gap-0.5">{laneRows("live")}</div>}
       {open && shelved.length > 0 && (
         <div data-sidebar-archived-projects className="mt-1 flex flex-col gap-0.5">
           <button type="button" aria-expanded={shelfOpen} onClick={() => setShelfOpen((value) => !value)}
@@ -143,26 +188,39 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
             <span className="flex-1 text-left">Archived</span>
             <span className="rounded-full bg-raised/70 px-1.5 text-[10.5px] tabular-nums leading-4 text-ink-tertiary">{shelved.length}</span>
           </button>
-          {shelfOpen && <div className="flex origin-top animate-pop-in flex-col gap-0.5 opacity-75 transition-opacity hover:opacity-100 focus-within:opacity-100">
-            {shelved.map(({ id, bot }) => projectRow(id, bot))}
+          {shelfOpen && <div data-project-lane="archived" className="flex origin-top animate-pop-in flex-col gap-0.5 opacity-75 transition-opacity hover:opacity-100 focus-within:opacity-100">
+            {laneRows("archived")}
           </div>}
         </div>
       )}
       {order.error && <p role="alert" className="break-words px-2 py-1 text-[12px] text-danger">{order.error}</p>}
       {order.saving && <span role="status" className="sr-only">Saving workspace project order…</span>}
+      {ghost && lifted && createPortal(
+        <div ref={drag.ghost} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[60]"
+          style={{ width: lifted.width, transform: `translate3d(${lifted.x}px, ${lifted.y}px, 0)` }}>
+          <div className="rotate-[1.5deg] scale-[1.03] rounded-xl bg-raised shadow-2xl shadow-black/40 motion-safe:animate-[pop-in_var(--motion-base)_var(--ease-out)]">{row(ghost.bot)}</div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 
-  function projectRow(id: string, bot: Bot) {
-    const handle = reorder.handleProps(id);
+  function projectRow(id: string, bot: Bot, lane: ProjectLane) {
+    const locked = order.disabledFor(id);
     return (
-        <div key={id} data-sidebar-project-row={id} data-reorder-key={id} className={cn("flex min-w-0 items-center rounded-lg", reorder.targetKey === id && "ring-1 ring-inset ring-accent")}>
-          <button type="button" {...handle} disabled={order.disabledFor(id)} aria-label={`Reorder ${bot.name}`} title="Drag to reorder, or use the Up and Down arrow keys"
-            onPointerDown={event => { if (!order.disabledFor(id)) handle.onPointerDown(event); }}
-            onKeyDown={event => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); event.stopPropagation(); reorder.cancel(); order.moveBy(id, event.key === "ArrowUp" ? -1 : 1); } }}
-            className="shrink-0 touch-none select-none cursor-grab rounded p-1 text-ink-tertiary hover:text-ink-secondary active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-default disabled:opacity-30"><GripVertical size={12} /></button>
-          <div className="min-w-0 flex-1">{row(bot)}</div>
+      <div key={id} className={cn("flex flex-col gap-0.5", lifted?.taskId === id && "hidden")}>
+        {lifted && target?.columnId === lane && target.beforeTaskId === id && <DropGap height={lifted.height} />}
+        <div data-sidebar-project-row={id} data-flip-id={id} onPointerDown={(event) => { if (!locked) drag.press(event, id); }}
+          className="group/project relative min-w-0 rounded-xl">
+          {row(bot)}
+          <button type="button" disabled={locked} aria-label={`Reorder ${bot.name}`} title="Drag to reorder, or use the Up and Down arrow keys"
+            onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); event.stopPropagation(); order.moveBy(id, event.key === "ArrowUp" ? -1 : 1); } }}
+            className={cn("absolute left-0.5 top-1/2 z-10 flex h-6 w-3.5 -translate-y-1/2 touch-none select-none items-center justify-center rounded text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+              locked ? "pointer-events-none" : "cursor-grab hover:text-ink-secondary active:cursor-grabbing group-hover/project:opacity-100 focus-visible:opacity-100 touch:opacity-100")}>
+            <GripVertical size={12} aria-hidden="true" />
+          </button>
         </div>
+      </div>
     );
   }
 }

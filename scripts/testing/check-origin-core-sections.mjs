@@ -47,9 +47,6 @@ async function issues(page, shoot) {
   await board.getByRole("textbox", { name: "Search issues" }).fill("map");
   assert.equal(await board.locator("[data-task-id]").count(), 1, "search narrows the board");
   await board.getByRole("textbox", { name: "Search issues" }).fill("");
-  await board.getByRole("button", { name: /MVP/ }).click();
-  assert.equal(await board.locator("[data-task-id]").count(), 3, "milestone filter keeps its open issues");
-  await board.getByRole("button", { name: "All issues" }).click();
   await board.getByTitle("List", { exact: true }).click();
   const rows = board.getByRole("button", { name: /^Actions for / });
   await rows.last().click();

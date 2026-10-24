@@ -42,7 +42,6 @@ export interface CloudTask {
   done: boolean;
   dueDate?: string;
   labels?: string[];
-  milestoneId?: string;
   githubIssueNumber?: number;
   githubIssueUrl?: string;
   githubIssueState?: "open" | "closed";

@@ -7,7 +7,6 @@ import { CANVAS_TOOL_DEFINITIONS } from "./agents-canvas-tools.ts";
 import { STANDUP_TOOL_DEFINITIONS } from "./agents-standup-tools.ts";
 import { CAMPAIGN_TOOL_DEFINITIONS } from "./agents-campaign-tools.ts";
 import { BROADCAST_TOOL_DEFINITIONS } from "./agents-broadcast-tools.ts";
-import { LAUNCHPAD_TOOL_DEFINITIONS } from "./agents-launchpad-tools.ts";
 import { BRAND_TOOL_DEFINITIONS } from "./agents-brand-tools.ts";
 import { STUDIO_TOOL_DEFINITIONS } from "./agents-studio-tools.ts";
 import { ORIGIN_PROJECT, ORIGIN_SCOPE } from "./agents-origin-scope.ts";
@@ -373,7 +372,7 @@ const ORIGIN_TOOL_DEFINITIONS = [
   ...CANVAS_TOOL_DEFINITIONS, ...STANDUP_TOOL_DEFINITIONS,
   ...STUDIO_TOOL_DEFINITIONS,
   ...BROADCAST_TOOL_DEFINITIONS,
-  ...CAMPAIGN_TOOL_DEFINITIONS, ...LAUNCHPAD_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS,
+  ...CAMPAIGN_TOOL_DEFINITIONS, ...BRAND_TOOL_DEFINITIONS,
 ];
 
 export const ORIGIN_TOOL_NAMES: ReadonlySet<string> = new Set(ORIGIN_TOOL_DEFINITIONS.map((tool) => tool.name));

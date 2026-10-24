@@ -27,12 +27,13 @@ export function dropTargetAt(root: HTMLElement, taskId: string, x: number, y: nu
  * Pointer-driven card dragging: a floating copy follows the pointer (written straight to the DOM, so moving re-renders nothing)
  * and the board re-renders only when the drop target changes. Touch starts after a short hold so a swipe still scrolls.
  */
-export function useCardDrag({ enabled, root, onDrop, ignore = "button, a, input, textarea, select" }: {
+export function useCardDrag({ enabled, root, onDrop, ignore = "button, a, input, textarea, select", targetAt = dropTargetAt }: {
   enabled: boolean;
   root: RefObject<HTMLElement | null>;
   onDrop(taskId: string, target: DropTarget, from: DOMRect): void;
   /** Where a press does not start a drag. */
   ignore?: string;
+  targetAt?(root: HTMLElement, taskId: string, x: number, y: number): DropTarget | null;
 }) {
   const [drag, setDrag] = useState<CardDrag | null>(null);
   const [target, setTarget] = useState<DropTarget | null>(null);
@@ -40,8 +41,10 @@ export function useCardDrag({ enabled, root, onDrop, ignore = "button, a, input,
   const live = useRef<{ drag: CardDrag; offsetX: number; offsetY: number; x: number; y: number; target: DropTarget | null } | null>(null);
   const dropped = useRef(false);
   const handler = useRef(onDrop);
+  const locate = useRef(targetAt);
   const permitted = useRef(enabled);
   handler.current = onDrop;
+  locate.current = targetAt;
   permitted.current = enabled;
 
   const active = drag !== null;
@@ -68,7 +71,7 @@ export function useCardDrag({ enabled, root, onDrop, ignore = "button, a, input,
         if (state.y < rect.top + EDGE) list.scrollTop -= EDGE_SPEED;
         else if (state.y > rect.bottom - EDGE) list.scrollTop += EDGE_SPEED;
       }
-      const next = dropTargetAt(board, state.drag.taskId, state.x, state.y);
+      const next = locate.current(board, state.drag.taskId, state.x, state.y);
       if (next?.columnId !== state.target?.columnId || next?.beforeTaskId !== state.target?.beforeTaskId) {
         state.target = next;
         setTarget(next);

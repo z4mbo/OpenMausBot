@@ -39,63 +39,25 @@ const sent = (page) => page.evaluate(() => window.originLaunchpadDispatched.filt
 try {
   for (const width of [375, 1280]) {
     const page = await open(width);
-    const strip = page.getByRole("group", { name: "Milestones" });
-    await strip.getByRole("button", { name: /MVP.*1\/4/ }).waitFor();
-    await strip.getByRole("button", { name: /Launch.*0\/2/ }).waitFor();
+    await page.getByText("Book a walk for today").waitFor();
+    assert.equal(await page.getByRole("group", { name: "Milestones" }).count(), 0, "Issues shows no milestones");
     await capture(page, `issues-${width}`);
-    evidence.cases.push({ width, step: "milestones written by the Chief's origin_milestone_set show on the Issues strip with their progress" });
-
-    if (width === 1280) {
-      await strip.getByRole("button", { name: /MVP/ }).click();
-      await page.getByRole("button", { name: /MVP.*1\/4/, pressed: true }).waitFor();
-      await page.getByText("Book a walk for today").waitFor();
-      assert.equal(await page.getByText("Pick a name for the push notifications").count(), 0, "the milestone filter hides other issues");
-      await capture(page, "issues-mvp-1280");
-      evidence.cases.push({ width, step: "a milestone on the strip filters Issues to it" });
-
-      await page.getByRole("button", { name: "All issues" }).click();
-      await page.getByText("Pick a name for the push notifications").click();
-      const detail = page.getByRole("dialog");
-      await detail.getByRole("button", { name: /Milestone/ }).click();
-      await page.getByRole("option", { name: /Launch/ }).click();
-      await page.getByRole("button", { name: /Launch.*0\/3/ }).waitFor();
-      await capture(page, "issue-milestone-1280");
-      await detail.getByRole("button", { name: "Close" }).first().click();
-      evidence.cases.push({ width, step: "an issue's Milestone chip moves it into Launch; the strip's count follows" });
-
-      await page.getByRole("button", { name: "Milestone", exact: true }).click();
-      const dialog = page.getByRole("dialog", { name: "New milestone" });
-      await dialog.getByLabel("Name").fill("Beta");
-      await dialog.getByRole("button", { name: "Create" }).click();
-      await page.getByRole("button", { name: /Beta.*0\/0/, pressed: true }).waitFor();
-      evidence.cases.push({ width, step: "creating a milestone from Issues selects it" });
-    }
+    evidence.cases.push({ width, step: "the Issues board lists the kickoff issues without a milestone strip" });
     await page.close();
   }
 
   for (const width of [1280, 375]) {
     const page = await open(width, { project: "empty" });
-    await page.locator("[data-launchpad-cta]").waitFor();
+    await page.getByRole("button", { name: "New project" }).waitFor();
+    assert.equal(await page.getByRole("button", { name: "Plan from an idea" }).count(), 0, "an empty project offers no Plan from an idea");
+    assert.equal(await page.getByText("Start from an idea").count(), 0, "an empty project shows no Start from an idea banner");
     await capture(page, `empty-issues-${width}`);
-    await page.getByRole("button", { name: "Plan from an idea" }).click();
-    const dialog = page.getByRole("dialog", { name: /Plan Empty idea from an idea/ });
-    await dialog.getByLabel("Idea").fill("A marketplace that matches retired engineers with student hardware teams for weekly mentoring calls.");
-    await dialog.getByLabel(/Audience/).fill("University robotics clubs in Europe");
-    await capture(page, `launchpad-project-${width}`);
-    await dialog.getByRole("button", { name: "Send to Atlas" }).click();
-    const [kickoff] = await sent(page);
-    assert.equal(kickoff.botId, "fixture-chief");
-    assert.match(kickoff.text, /Kickoff for Empty idea/);
-    assert.match(kickoff.text, /Audience:\nUniversity robotics clubs in Europe/);
-    assert.doesNotMatch(kickoff.text, /Constraints:/);
-    for (const tool of ["origin_milestone_set", "origin_create_issue"]) assert.match(kickoff.text, new RegExp(tool));
-    evidence.cases.push({ width, step: "an empty project offers Launchpad; it sends the Chief the kickoff brief with only the fields given" });
+    evidence.cases.push({ width, step: "an empty project's Issues shows no Start from an idea banner" });
     await page.close();
   }
 
   {
     const page = await open(1280, { project: "empty" });
-    await page.locator("[data-launchpad-cta]").waitFor();
     await page.getByRole("button", { name: "New project" }).click();
     const dialog = page.getByRole("dialog", { name: "New project from an idea" });
     await dialog.getByLabel("Idea").fill("Habit tracker for students that turns study streaks into a shared class leaderboard.");
@@ -112,6 +74,9 @@ try {
     const [kickoff] = await sent(page);
     assert.match(kickoff.text, /Kickoff for Streaks/);
     assert.match(kickoff.text, /Constraints:\nTwo months, solo developer, React Native/);
+    assert.doesNotMatch(kickoff.text, /Audience:/);
+    assert.match(kickoff.text, /origin_create_issue/);
+    assert.doesNotMatch(kickoff.text, /milestone/i);
     const projects = await convex("query", "projects:listForUser", { teamId: config.teamId });
     assert.ok(projects.some((project) => project.name === "Streaks"), "the shared project exists in the backend");
     const bots = await page.evaluate(() => fetch("/api/bots").then((response) => response.json()));

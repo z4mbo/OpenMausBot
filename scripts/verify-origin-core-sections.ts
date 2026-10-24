@@ -48,9 +48,6 @@ async function seed(convex: FakeConvex) {
   if (todo) for (const taskId of [mvp[2], mvp[3], launch[0]]) await as("tasks:moveTask", { projectId, taskId, columnId: todo });
   await t.run((ctx) => ctx.db.patch(mvp[0] as never, { done: true, updatedAt: now }));
   await as("tasks:addComment", { projectId, taskId: mvp[1], body: "The booking sheet works on phones; the calendar picker still needs a pass." });
-  const milestone = (title: string, targetDate: string) => as("projectMilestones:save", { projectId, title, targetDate }).then(String);
-  await as("projectMilestones:assign", { projectId, milestoneId: await milestone("MVP", day(14)), taskIds: mvp });
-  await as("projectMilestones:assign", { projectId, milestoneId: await milestone("Launch", day(30)), taskIds: launch });
   const swatch = (fill: string, label: string) => `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="${fill}"/><circle cx="440" cy="160" r="100" fill="white" fill-opacity="0.18"/><text x="24" y="370" font-family="sans-serif" font-size="28" fill="white">${label}</text></svg>`)}`;
   await insert("designAssets", { projectId, type: "image", name: "Launch hero.png", url: swatch("#3b5bdb", "hero"), contentType: "image/svg+xml", folder: "Brand", createdAt: now, updatedAt: now });
   await insert("designAssets", { projectId, type: "image", name: "App icon", url: swatch("#2b8a3e", "icon"), contentType: "image/svg+xml", folder: "Brand", createdAt: now - 1, updatedAt: now - 1 });
@@ -79,7 +76,7 @@ const convex = await startFakeConvex();
 const seeded = await seed(convex);
 const live = await launchVerificationServer({
   ...process.env,
-  FAKE_CLAUDE_REPLIES: JSON.stringify(["Walkies is on track. Book a walk for today is in progress with Nova, and the MVP milestone is one issue in. I suggest we finish the walk map before the landing page."]),
+  FAKE_CLAUDE_REPLIES: JSON.stringify(["Walkies is on track. Book a walk for today is in progress with Nova, and one MVP issue is done. I suggest we finish the walk map before the landing page."]),
 });
 let preview: Awaited<ReturnType<typeof mountPreview>> | undefined;
 try {

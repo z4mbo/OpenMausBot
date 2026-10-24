@@ -51,8 +51,8 @@ export function nextJourneyStep(facts: JourneyFacts): JourneyStep {
   switch (stepId(facts)) {
     case "brief": return {
       id: "brief", phase: "plan", section: "docs", action: "Open Docs",
-      title: "Write the Brief", detail: "Problem, audience, core features and the first milestone.",
-      brief: `Draft the Brief for ${name} in Docs: problem, audience, core features, success metric and milestones. Ask me what you need to know first.`,
+      title: "Write the Brief", detail: "Problem, audience, core features and the success metric.",
+      brief: `Draft the Brief for ${name} in Docs: problem, audience, core features and success metric. Ask me what you need to know first.`,
     };
     case "sketch": return {
       id: "sketch", phase: "plan", section: "draw", action: "Open Canvas",

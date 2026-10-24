@@ -11,5 +11,5 @@ export function LaunchpadFirst({ enabled, onClose, children }: { enabled: boolea
   const canCreate = useCanCreateProject(teamId);
   const [manual, setManual] = useState(false);
   if (!NEW_PROJECT_DIALOG || !enabled || !teamId || canCreate === false || manual) return children;
-  return <LaunchpadDialog target={{ kind: "new", onManual: () => setManual(true) }} onClose={onClose ?? (() => dispatch({ type: "toggleNewBot", open: false }))} />;
+  return <LaunchpadDialog onManual={() => setManual(true)} onClose={onClose ?? (() => dispatch({ type: "toggleNewBot", open: false }))} />;
 }

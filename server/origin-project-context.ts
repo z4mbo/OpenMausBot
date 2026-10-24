@@ -49,7 +49,6 @@ export interface ProjectSnapshot {
   studio: string[];
   workflows: string[];
   publish: string[];
-  milestones: string[];
   call: string;
   brand: string;
   members: string[];
@@ -67,7 +66,6 @@ const CHAT_SHOWN = 8;
 const STUDIO_SHOWN = 4;
 const PUBLISH_SHOWN = 4;
 const WORKFLOWS_SHOWN = 6;
-const MILESTONES_SHOWN = 5;
 const MEMBERS_SHOWN = 10;
 const HEAD_PROJECTS_SHOWN = 25;
 const WORKSPACE_DETAILED_PROJECTS = 8;
@@ -93,7 +91,7 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
   const teamId = text(doc.teamId);
   const repo = repoCoordinates(text(doc.repoUrl));
   const github = repo ? deps.github?.() : undefined;
-  const [board, vault, design, people, canvases, portals, repository, brand, studio, workflows, publish, milestones, call] = await Promise.all([
+  const [board, vault, design, people, canvases, portals, repository, brand, studio, workflows, publish, call] = await Promise.all([
     optional(client.query("tasks:board", base)),
     optional(client.query("credentials:list", base)),
     optional(client.query("design:list", base)),
@@ -105,7 +103,6 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     optional(client.query("studio:list", base)),
     optional(client.query("studioWorkflows:list", base)),
     optional(client.query("broadcast:list", base)),
-    optional(client.query("projectMilestones:list", base)),
     optional(client.query("callNotes:latest", base)),
   ]);
   const columns = list(record(board).columns);
@@ -149,8 +146,6 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
       const when = typeof post.scheduledAt === "number" ? `, for ${new Date(post.scheduledAt).toISOString().slice(0, 16).replace("T", " ")} UTC` : "";
       return `[${text(post.status)}${when}] ${variants.map((variant) => text(variant.channel)).join("/")}: ${quoted(text(variants[0]?.text), 90)}`;
     }),
-    milestones: list(record(milestones).milestones).filter((row) => text(row.status) !== "done").slice(0, MILESTONES_SHOWN)
-      .map((row) => `${quoted(text(row.title), 60)} ${Number(row.done) || 0}/${Number(row.total) || 0}${text(row.targetDate) ? ` by ${text(row.targetDate)}` : ""}`),
     call: call && typeof call === "object" ? (() => {
       const note = record(call);
       const items = list(note.actionItems).map((item) => oneLine(text(item.title), 60)).slice(0, 3);
@@ -216,7 +211,6 @@ export function projectStatusPrompt(snapshot: ProjectSnapshot, folder: OriginPro
     `- Design page (design files, boards, presentations): ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
     `- Studio: ${snapshot.studio.length ? `latest ${snapshot.studio.join("; ")}` : "nothing generated yet"}${snapshot.workflows.length ? `; workflows ${snapshot.workflows.join(", ")}` : ""}`,
     `- Publish: ${snapshot.publish.length ? snapshot.publish.join("; ") : "no posts yet"}`,
-    snapshot.milestones.length ? `- Milestones: ${snapshot.milestones.join("; ")}` : "",
     snapshot.call ? `- Last call: ${snapshot.call}` : "",
     snapshot.brand ? `- Brand: ${snapshot.brand}` : "- Brand: no kit yet (draft one with origin_brand_update)",
     snapshot.members.length ? `- Members: ${snapshot.members.join(", ")}` : "",
