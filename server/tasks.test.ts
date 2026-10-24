@@ -144,7 +144,7 @@ describe("tasks", () => {
   });
 
   it("reads a usable title out of a model reply", async () => {
-    const { titleFromLlm } = await import("./store.ts");
+    const { titleFromLlm } = await import("./thread-title.ts");
     expect(titleFromLlm('"Fix login timeout."\n')).toBe("Fix login timeout");
     expect(titleFromLlm("Fix the login\nthat is the whole answer")).toBe("Fix the login");
     expect(titleFromLlm("Fix   the\tlogin")).toBe("Fix the login");

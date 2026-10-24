@@ -276,21 +276,6 @@ export function titleFromMessage(text: string): string {
   return line.length > 48 ? `${line.slice(0, 47)}…` : line || UNTITLED_TASK;
 }
 
-export function titleFromLlm(raw: string): string | null {
-  const line = raw
-    .trim()
-    .split("\n")[0]!
-    .replace(/^[#*\-\u2022]+/, "")
-    .replace(/^["'\u201C\u201D\u2018\u2019\u0060]+/, "")
-    .replace(/["'\u201C\u201D\u2018\u2019\u0060]+$/, "")
-    .replace(/^[#*\-\u2022]+/, "")
-    .replace(/[#*]+$/, "")
-    .replace(/[.\u3002]+$/, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return line.length >= 1 && line.length <= 48 ? line : null;
-}
-
 export interface BotRecord extends Omit<WireBot, "avatarUrl" | "tasks"> {
   tasks?: TaskRecord[];
   avatarUrl?: string;

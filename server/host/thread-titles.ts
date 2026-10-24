@@ -1,6 +1,6 @@
 import type { ApiRequestBudget, ProviderInstance } from "../contracts.ts";
-import { titleFromLlm, type BotRecord } from "../store.ts";
-import { threadTitlePrompt, type ThreadTitleSource } from "../thread-title.ts";
+import type { BotRecord } from "../store.ts";
+import { threadTitlePrompt, titleFromLlm, type ThreadTitleSource } from "../thread-title.ts";
 
 export function createThreadTitleHost(deps: {
   enabled(): boolean;

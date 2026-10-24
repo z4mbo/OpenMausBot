@@ -608,7 +608,8 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, initializeWorkspaceTeams, openWorkspaceHead } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, projectPeerTeams, readOriginCloud } from "./origin-cloud.ts";
+import { convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
+import { cloudProjectFor, projectPeerTeams } from "./origin-project-links.ts";
 import { setPeerProjectTeams } from "./peer-roster.ts";
 import { createProjectToolsHost } from "./host/project-tools.ts";
 import { createStaticResponder } from "./host/static-files.ts";
@@ -13208,16 +13209,6 @@ function mcpPolicyRefusal(name: string, server: object): string | undefined {
   return managedPolicy.mcpRefusal(name, "url" in server && typeof server.url === "string" ? server.url : undefined);
 }
 
-function mcpServerBody(body: unknown): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  if (!body || typeof body !== "object") return out;
-  const record = body as Record<string, unknown>;
-  for (const key of ["command", "args", "env", "type", "url", "headers", "oauth", "enabled", "resultBudget"]) {
-    if (record[key] !== undefined) out[key] = record[key];
-  }
-  return out;
-}
-
 function engineMcpServers(bot: BotRecord) {
   return withoutPendingSignIn(managedPolicy.filterMcp(customMcpServers(cfg, bot.mcpServers)), mcpOAuth);
 }
@@ -13872,7 +13863,7 @@ ROUTES.push(createMcpServerRoutes({
   cloudHome: CLOUD_HOME,
   fallbackPublicUrl: FALLBACK_PUBLIC_URL,
   mcpConfigBusy: { get: () => mcpConfigBusy, set: (busy) => { mcpConfigBusy = busy; } },
-  mcpServerResponse, mcpServerBody, mcpPolicyRefusal, persistMcpServers, savedCustomDomain,
+  mcpServerResponse, mcpPolicyRefusal, persistMcpServers, savedCustomDomain,
 }));
 ROUTES.push(createComputerRoutes({
   store, cfg, sessions, teamComputers, computerControl,

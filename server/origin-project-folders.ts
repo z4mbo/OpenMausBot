@@ -2,7 +2,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync,
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { DATA_DIR } from "./config.ts";
-import { cloudProjectFor, type OriginCloudClient, type OriginCloudState, type OriginProjectBot, type OriginProjectFolder } from "./origin-cloud.ts";
+import type { OriginCloudClient, OriginCloudState, OriginProjectFolder } from "./origin-cloud.ts";
+import { cloudProjectFor, type OriginProjectBot } from "./origin-project-links.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
 
 /** GET returns the projects root; PUT `{ root: string | null }` (admin scope) sets it, null going back to the default. */

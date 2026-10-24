@@ -1,9 +1,7 @@
 import { originIssueKey } from "../shared/origin-issues.ts";
 import { brandContextLine, type BrandKit } from "../shared/brand-kit.ts";
-import {
-  cloudProjectFor, folderLine, reachableCloudProjects, repoCoordinates,
-  type OriginCloudClient, type OriginCloudState, type OriginGitHub, type OriginProjectBot, type OriginProjectFolder, type ReachableProject,
-} from "./origin-cloud.ts";
+import { folderLine, repoCoordinates, type OriginCloudClient, type OriginCloudState, type OriginGitHub, type OriginProjectFolder } from "./origin-cloud.ts";
+import { cloudProjectFor, reachableCloudProjects, type OriginProjectBot, type ReachableProject } from "./origin-project-links.ts";
 import type { OriginTeamChat } from "./origin-team-chat.ts";
 import { sectionKey } from "./store.ts";
 import type { PromptPart } from "./system-prompt.ts";

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { ORIGIN_SERVER_TOOL_NAMES, cloudProjectFor, projectPeerTeams, reachableCloudProjects, runOriginTool, type OriginCloudClient, type OriginToolDeps } from "./origin-cloud.ts";
+import { ORIGIN_SERVER_TOOL_NAMES, runOriginTool, type OriginCloudClient, type OriginToolDeps } from "./origin-cloud.ts";
+import { cloudProjectFor, projectPeerTeams, reachableCloudProjects } from "./origin-project-links.ts";
 import { canReachPeer, coordinatorSupervises, setPeerProjectTeams } from "./peer-roster.ts";
 
 const bots = [

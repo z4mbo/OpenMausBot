@@ -7,9 +7,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { json, readBody } from "./harness/http.ts";
 import {
-  cloudProjectFor, createOriginCloudRoutes, reachableCloudProjects, readOriginCloud, runOriginTool, writeOriginCloud, type OriginAgentTurn, type OriginCloudClient,
+  createOriginCloudRoutes, readOriginCloud, runOriginTool, writeOriginCloud, type OriginAgentTurn, type OriginCloudClient,
   type OriginGitHub, type OriginToolDeps,
 } from "./origin-cloud.ts";
+import { cloudProjectFor, reachableCloudProjects } from "./origin-project-links.ts";
 import type { RequestAuth } from "./request-auth.ts";
 import { dispatchRoutes } from "./routes/table.ts";
 import type { BotRecord, Message } from "./store.ts";

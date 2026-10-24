@@ -12,7 +12,6 @@ import {
   currentTaskBot,
   desktopApprovalBridge,
   initialState,
-  liveCallFromFrame,
   loadSnapshotBoundary,
   openBot,
   openNotificationTarget,
@@ -35,6 +34,7 @@ import {
   type Message,
   type Action,
 } from "./store";
+import { liveCallFromFrame } from "@/lib/live-call-frame";
 import { LAST_CONVERSATION_KEY } from "@/lib/last-conversation";
 import { cacheDesktopCapabilities, desktopCapabilitiesNow } from "@/lib/desktop";
 import { LAST_BOT_SECTION_KEY } from "@/lib/last-bot-section";

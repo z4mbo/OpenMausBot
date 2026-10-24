@@ -15,7 +15,7 @@ import {
   teamResultCounts,
 } from "./team-bulk-settings";
 import { TeamSettingsRows } from "@/components/TeamSettingsDialog";
-import { TeamMenuItems } from "@/components/Sidebar";
+import { TeamMenuItems } from "@/components/SidebarSectionHeader";
 
 vi.mock("@/components/DesktopCapabilities", () => ({ useDesktopCapabilities: () => ({}) }));
 
