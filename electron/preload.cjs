@@ -150,6 +150,18 @@ const bridge = {
     ipcRenderer.on("speech:end", handler);
     return () => ipcRenderer.removeListener("speech:end", handler);
   },
+  /** whisper.cpp on this computer: 16 kHz mono PCM16 in, text out. Audio never leaves the computer. */
+  localVoice: {
+    status: () => ipcRenderer.invoke("voice:local-status"),
+    install: () => ipcRenderer.invoke("voice:local-install"),
+    remove: () => ipcRenderer.invoke("voice:local-remove"),
+    transcribe: (pcm16, options) => ipcRenderer.invoke("voice:local-transcribe", pcm16, options),
+    onProgress: (cb) => {
+      const handler = (_event, progress) => cb(progress);
+      ipcRenderer.on("voice:local-progress", handler);
+      return () => ipcRenderer.removeListener("voice:local-progress", handler);
+    },
+  },
   onOpenAppSettings: (cb) => {
     appSettingsListeners.add(cb);
     queueMicrotask(() => {

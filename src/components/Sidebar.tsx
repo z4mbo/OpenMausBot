@@ -159,6 +159,7 @@ import { SidebarAttentionPanel } from "./SidebarAttentionPanel";
 import { SidebarPinnedThreadsPanel } from "./SidebarPinnedThreadsPanel";
 import { useLiveMedia } from "@/lib/live-call-media";
 import { LiveCallPill, liveBadgeFor } from "./LiveCallPill";
+import { VoiceWakePill } from "./voice/VoiceWakePill";
 import { ShortcutHint } from "./ShortcutHint";
 import { roomThreadSpeakerId, roomThreadWorking } from "@/lib/room-threads";
 import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
@@ -2298,6 +2299,11 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
 
       <GlassBar edge="bottom">
       <LiveCallPill
+        currentBotId={state.activeView === "chat" ? state.selectedId : null}
+        onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)}
+        iconOnly={density === "icons"}
+      />
+      <VoiceWakePill
         currentBotId={state.activeView === "chat" ? state.selectedId : null}
         onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)}
         iconOnly={density === "icons"}

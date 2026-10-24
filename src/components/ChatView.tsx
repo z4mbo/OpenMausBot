@@ -121,6 +121,8 @@ import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
 import { SpeakButton } from "./SpeakButton";
 import { CallOverlay } from "./CallView";
 import { LiveCallBar } from "./LiveCallBar";
+import { VoiceSessionStrip } from "./voice/VoiceSessionStrip";
+import { VoiceWakeButton } from "./voice/VoiceWakeButton";
 import { LiveCallChip } from "./LiveCallPill";
 import { effectivePlace, toolPlace, type EffectivePlace } from "@/lib/place";
 import { cn } from "@/lib/cn";
@@ -1377,6 +1379,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
           {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
           <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
           <SharedAgentRunsOn bot={bot} />
+          {projectPage && window.ogb && <VoiceWakeButton bot={bot} />}
           <button
             data-tour="computer"
             onClick={() => dispatch({ type: "toggleComputer" })}
@@ -1527,6 +1530,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
         </div>
       )}
       <LiveCallBar bot={bot} />
+      <VoiceSessionStrip bot={bot} />
       <SharedThreadBar bot={bot} empty={!messages.some((m) => m.role === "user")} />
       {canWrite === false ? (
         <NewConversationInstead onNew={() => dispatch({ type: "newTask", botId: bot.id })} />

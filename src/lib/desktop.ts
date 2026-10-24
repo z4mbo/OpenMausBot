@@ -17,6 +17,10 @@ const browserCapabilities: DesktopCapabilities = {
     onDevice: false,
     reasonCode: "desktop-app-required",
   },
+  localVoice: {
+    engine: "none",
+    reasonCode: "desktop-app-required",
+  },
   localComputer: {
     available: false,
     support: "unsupported",
@@ -39,6 +43,10 @@ export function initialDesktopCapabilities(): DesktopCapabilities {
     onDevice: isMac,
   };
   if (!isMac) dictation.reasonCode = "unsupported-platform";
+  const localVoice: NonNullable<DesktopCapabilities["localVoice"]> = {
+    engine: isMac ? "apple-speech" : platform === "win32" ? "whisper" : "none",
+  };
+  if (localVoice.engine === "none") localVoice.reasonCode = "unsupported-platform";
   return {
     ...browserCapabilities,
     host: {
@@ -48,6 +56,7 @@ export function initialDesktopCapabilities(): DesktopCapabilities {
     },
     windowChrome: isMac ? "mac-inset" : platform === "win32" ? "win-caption" : "native",
     dictation,
+    localVoice,
   };
 }
 

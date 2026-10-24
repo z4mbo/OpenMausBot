@@ -50,6 +50,7 @@ import { ChatNotice } from "@/components/ChatErrorBanner";
 import { INSET_PAGE } from "@/lib/origin-teams";
 import { openOriginPage, useOriginPage } from "@/lib/origin-pages";
 import { OriginPageView } from "./components/OriginPages";
+import { VoiceWakeHost } from "./components/voice/VoiceWakeHost";
 
 function Shell({ viewer }: { viewer: WelcomeViewer | null }) {
   const { state, dispatch } = useStore();
@@ -413,6 +414,7 @@ function Application() {
         <WorkspaceGitHubSetup />
         <GuidedTour />
         <LiveCallHost />
+        <VoiceWakeHost />
         <MemberCallHost />
         <FirstConversationTour quiet={spotlightsQuiet(viewer)} />
       </StoreProvider>

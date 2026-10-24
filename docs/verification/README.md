@@ -310,6 +310,12 @@ record row, against the fake GPT-Live in a disposable workspace. `control-omb`
 cannot start a call, so the recipe also calls the harness's own routes. It
 proves no real audio, OpenAI key or phone.
 
+The [wake-phrase voice fixture](voice-wake.md) checks Local and GPT-voice
+sessions for a project agent with a scripted transcript source, the fake
+engine and the fake GPT-Live in a disposable workspace, plus a Windows smoke
+of the real pinned whisper.cpp download. `control-omb` cannot drive it: wake
+listening is desktop-only.
+
 The [right-to-left fixture](bidi.md) checks per-block direction in bot replies
 and per-line direction in sent turns, with code pinned left-to-right.
 

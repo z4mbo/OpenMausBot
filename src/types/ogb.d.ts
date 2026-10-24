@@ -26,6 +26,18 @@ const __APP_VERSION__: string;
   type DesktopComputerSharing = import("../../electron/computer-sharing.mjs").SharingState;
   type DesktopLendingActivity = import("../../electron/computer-sharing.mjs").LendingActivityEntry;
 
+  type LocalVoiceErrorCode =
+    | "unsupported-platform" | "download-failed" | "download-corrupt" | "extract-failed" | "not-installed"
+    | "vc-runtime-missing" | "transcribe-failed" | "invalid-audio" | "busy";
+  interface LocalVoiceStatus {
+    engine: "whisper" | "none";
+    installed: boolean;
+    installing: boolean;
+    receivedBytes: number;
+    totalBytes: number;
+    error?: LocalVoiceErrorCode;
+  }
+
   type DesktopCapabilities = {
     host: {
       platform: "darwin" | "linux" | "win32" | "other";
@@ -45,6 +57,13 @@ const __APP_VERSION__: string;
       available: boolean;
       engine: "apple-speech" | "none";
       onDevice: boolean;
+      reasonCode?: string;
+    };
+    /** What hears the wake phrase on this computer: whisper.cpp (downloaded on first use) on Windows,
+     * Apple's on-device recogniser on macOS. Audio given to either never leaves the computer. Absent from an older
+     * desktop shell. */
+    localVoice?: {
+      engine: "whisper" | "apple-speech" | "none";
       reasonCode?: string;
     };
     localComputer: {
@@ -233,7 +252,7 @@ const __APP_VERSION__: string;
       };
       /** Start native dictation. Call mode supplies endpointMs so silence
        * finalizes a turn; composer dictation omits it and remains manual. */
-      speechStart(options?: { endpointMs?: number }): Promise<void>;
+      speechStart(options?: { endpointMs?: number; onDeviceOnly?: boolean }): Promise<void>;
       speechStop(): Promise<void>;
       /** Finish capture and emit the recognizer's final transcript. */
       speechFinish?(): Promise<void>;
@@ -241,6 +260,14 @@ const __APP_VERSION__: string;
         cb: (line: { partial?: boolean; text?: string; error?: string }) => void,
       ): () => void;
       onSpeechEnd(cb: (info: { code: number | null; reason?: string }) => void): () => void;
+      /** whisper.cpp on this computer (Windows): 16 kHz mono PCM16 in, text out. Audio never leaves the computer. */
+      localVoice?: {
+        status(): Promise<LocalVoiceStatus>;
+        install(): Promise<{ ok: true } | { error: LocalVoiceErrorCode }>;
+        remove(): Promise<{ ok: true } | { error: LocalVoiceErrorCode }>;
+        transcribe(pcm16: ArrayBuffer, options?: { prompt?: string; language?: string }): Promise<{ text: string } | { error: LocalVoiceErrorCode }>;
+        onProgress(cb: (progress: { receivedBytes: number; totalBytes: number }) => void): () => void;
+      };
       /** Absolute path of a dropped File ("" when the drag carried no
        * file on disk). Absent in older builds of the shell. */
       getPathForFile?(file: File): string;

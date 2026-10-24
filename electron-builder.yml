@@ -88,6 +88,13 @@ extraResources:
   # carries its license text, so the upstream file travels here.
   - from: third_party/onepassword-sdk/LICENSE
     to: licenses/1password-sdk-LICENSE.txt
+  # Local voice on Windows downloads whisper.cpp and its model on first use (MIT); none of it is bundled.
+  - from: third_party/whisper.cpp/LICENSE
+    to: licenses/whisper.cpp-LICENSE.txt
+  - from: third_party/whisper.cpp/LICENSE-openai-whisper-model
+    to: licenses/openai-whisper-LICENSE.txt
+  - from: third_party/whisper.cpp/README.md
+    to: licenses/whisper.cpp-README.md
   - from: dist
     to: ui
   - from: dist-server
