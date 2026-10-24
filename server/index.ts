@@ -618,6 +618,8 @@ import { createOriginAgentSupport } from "./origin-agent-support.ts";
 import { createOriginInviteRoutes, createOriginPublicRoutes } from "./origin-public-pages.ts";
 import { createAvatarLookRoutes } from "./origin-avatar-looks.ts";
 import { createSharedAgents } from "./origin-shared-agents.ts";
+import { createSubscriptions } from "./agent-subscriptions.ts";
+import { loadPlanUsage } from "./plan-usage.ts";
 import { connectedConvex, createOriginMemberRoutes } from "./origin-members.ts";
 import { convexCallRooms } from "./origin-realtime-backend.ts";
 import { createOriginMcpRoutes } from "./origin-mcp.ts";
@@ -13572,6 +13574,7 @@ const originModelHost = createOriginModelHost({ ready: () => modelHostReady(DATA
 ROUTES.push(originModelHost.routes); originModelHost.start();
 const sharedAgents = createSharedAgents({
   store, hostKind: CLOUD_HOME || process.env.ORIGIN_HOST_KIND === "server" ? "server" : "local",
+  subscriptions: createSubscriptions({ instances: providerConfigs, usage: (accounts) => loadPlanUsage({ accounts }) }).all,
   locallyRunning: threadId => directTurnDispatchClaims.has(threadId) || directTurnBots.has(threadId) || runningTurnEngines.has(threadId),
   validateHostedSelection: (botId, selection, paid) => originModelHost.validateSelection(botId, selection, paid),
   ...createSharedModelBackups({ store, instance: id => registry.get(id), checkedLocal: checkedLocalModelSelection, providerRefusal: policyModelRefusal,

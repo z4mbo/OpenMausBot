@@ -1,4 +1,5 @@
 import { v, type Infer } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { runUsage, threadAttachment, threadMessageKind, threadMessageTool } from "./agentsTables";
 import { requireUser } from "./lib/auth";
@@ -55,7 +56,7 @@ export const begin = mutation({
     const busy = fresh.activeRunId !== undefined;
     const status = busy ? "queued" as const : "running" as const;
     const { runner: chosen, unavailable } = await chosenRunner(ctx, agent, now);
-    const runner = chosen && chosen.userId !== user._id ? chosen : null;
+    const runner = chosen && (chosen.userId !== user._id || chosen.hostKind !== "local") ? chosen : null;
     const engineLabel = runner ? undefined : args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
     const runId = await ctx.db.insert("workspaceAgentRuns", {
       teamId: thread.teamId, ...(thread.projectId ? { projectId: thread.projectId } : {}), threadId: thread._id, requestClientId: clientId,
@@ -226,7 +227,8 @@ export const cancel = mutation({
 /** The live and queued runs this member's app runs in a workspace: its own, and teammates' runs of agents set to run on it.
  * A desktop starts each one that holds its thread. */
 export const pendingForMe = query({
-  args: { sessionToken: v.string(), teamId: v.id("teams") },
+  /** `hostId`: the asking app's own host, so a person signed in on a laptop and a server runs each hosted message once, on the host it went to. */
+  args: { sessionToken: v.string(), teamId: v.id("teams"), hostId: v.optional(v.id("agentHosts")) },
   returns: v.array(v.object({
     runId: v.id("workspaceAgentRuns"), threadId: v.id("agentThreads"), agentId: v.id("workspaceAgents"), status: v.string(),
     requestClientId: v.optional(v.string()), text: v.string(), createdAt: v.number(),
@@ -237,15 +239,19 @@ export const pendingForMe = query({
   handler: async (ctx, args) => {
     const { member, user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     const out = [];
+    const seen = new Set<string>();
+    const hostsHere = (run: Doc<"workspaceAgentRuns">) => args.hostId ? run.hostId === args.hostId : run.requesterUserId !== user._id;
     for (const status of ["running", "queued"] as const) {
       const own = await ctx.db.query("workspaceAgentRuns")
         .withIndex("by_requesterMembershipId_and_status", (q) => q.eq("requesterMembershipId", member._id).eq("status", status)).take(50);
       const hosted = await ctx.db.query("workspaceAgentRuns")
         .withIndex("by_runnerMembershipId_and_status", (q) => q.eq("runnerMembershipId", member._id).eq("status", status)).take(50);
-      for (const run of [...own, ...hosted.filter((run) => run.requesterUserId !== user._id)]) {
+      for (const run of [...hosted.filter(hostsHere), ...own]) {
+        if (seen.has(run._id)) continue;
+        seen.add(run._id);
         if (!run.threadId || !await canResumeThreadRun(ctx, run, user)) continue;
         const request = run.requestClientId ? await messageByClientId(ctx, run.threadId, run.requestClientId) : null;
-        const requester = run.requesterUserId !== user._id ? await ctx.db.get(run.requesterUserId) : null;
+        const requester = run.runnerUserId && hostsHere(run) ? await ctx.db.get(run.requesterUserId) : null;
         const thread = await ctx.db.get(run.threadId);
         out.push({
           runId: run._id, threadId: run.threadId, agentId: run.actorAgentId, status: run.status,

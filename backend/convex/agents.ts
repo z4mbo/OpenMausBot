@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { agentKind, avatarLook, modelIntent } from "./agentsTables";
+import { agentKind, avatarLook, hostPlan, modelIntent } from "./agentsTables";
 import { requireUser } from "./lib/auth";
 import { agentAccess, requireAgent, requireSharedAgents } from "./lib/agentAccess";
 import { projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
@@ -259,6 +259,8 @@ export const publishHost = mutation({
     engines: v.array(v.string()), models: v.array(v.string()), computers: v.array(v.string()),
     /** "server": an always-on Origin server (a cloud machine or SSH box) rather than someone's desktop. */
     kind: v.optional(v.union(v.literal("local"), v.literal("server"))),
+    /** For each shared agent this host runs, the account it runs it on. */
+    plans: v.optional(v.array(hostPlan)),
   },
   returns: v.id("agentHosts"),
   handler: async (ctx, args) => {
@@ -267,17 +269,21 @@ export const publishHost = mutation({
     const name = clipped(args.name, 80, "Name") || "Desktop";
     const list = (values: string[]) => [...new Set(values.map((value) => value.trim().slice(0, 120)).filter(Boolean))].slice(0, 100);
     const capabilities = { engines: list(args.engines), models: list(args.models), computers: list(args.computers), capacity: 1 };
+    const plans = args.plans?.slice(0, 100).map((entry) => {
+      const plan = entry.plan?.replace(/\s+/g, " ").trim().slice(0, 40);
+      return { agentId: entry.agentId, provider: entry.provider, ...(plan ? { plan } : {}) };
+    });
     const now = Date.now();
     const hosts = await ctx.db.query("agentHosts").withIndex("by_teamId", (q) => q.eq("teamId", args.teamId)).take(500);
     const kind = args.kind ?? "local";
     const mine = hosts.find((host) => !host.deviceId && host.ownerUserId === user._id && host.name === name && host.kind === kind);
     if (mine) {
-      await ctx.db.patch(mine._id, { capabilities, online: true, heartbeatAt: now });
+      await ctx.db.patch(mine._id, { capabilities, ...(plans ? { plans } : {}), online: true, heartbeatAt: now });
       return mine._id;
     }
     return ctx.db.insert("agentHosts", {
       teamId: args.teamId, ownerUserId: user._id, ownerMembershipId: member._id, name, kind, shared: false, online: true, revoked: false,
-      heartbeatAt: now, capabilities, activeRuns: 0, createdAt: now,
+      heartbeatAt: now, capabilities, ...(plans ? { plans } : {}), activeRuns: 0, createdAt: now,
     });
   },
 });

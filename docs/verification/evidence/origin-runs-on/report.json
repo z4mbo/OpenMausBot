@@ -1,0 +1,67 @@
+{
+  "screenshots": [
+    "docs/verification/evidence/origin-runs-on/picker-whoever-writes.png",
+    "docs/verification/evidence/origin-runs-on/picker-chosen-member.png",
+    "docs/verification/evidence/origin-runs-on/badge-chosen-member.png",
+    "docs/verification/evidence/origin-runs-on/picker-member-view.png",
+    "docs/verification/evidence/origin-runs-on/badge-chosen-member-offline.png",
+    "docs/verification/evidence/origin-runs-on/picker-offline-note.png",
+    "docs/verification/evidence/origin-runs-on/picker-cloud.png",
+    "docs/verification/evidence/origin-runs-on/badge-cloud.png",
+    "docs/verification/evidence/origin-runs-on/badge-whoever-writes.png",
+    "docs/verification/evidence/origin-runs-on/badge-compact.png"
+  ],
+  "checks": {
+    "senderModeShowsYou": true,
+    "memberListShowsPlan": true,
+    "ownerChoiceSaved": true,
+    "memberBadgeNamesRunnerAndPlan": true,
+    "memberCannotEdit": true,
+    "memberCanOfferOwnComputer": true,
+    "offlineIsShown": true,
+    "cloudBadge": true,
+    "senderBadgeForMember": true,
+    "compactAtNarrowWidths": true,
+    "backendBackToSender": true,
+    "noPageErrors": true
+  },
+  "observed": {
+    "adaSender": {
+      "kind": "member",
+      "text": "AD\nYou · Claude",
+      "label": "Your messages run on your computer, with Claude.",
+      "offline": false
+    },
+    "graceMember": {
+      "kind": "member",
+      "text": "AD\nAda · Claude Max",
+      "label": "Runs on Ada's computer, with Claude Max.",
+      "offline": false
+    },
+    "graceOffline": {
+      "kind": "member",
+      "text": "AD\nAda · Claude Max",
+      "label": "Runs on Ada's computer, with Claude Max. It is offline, so messages run on each sender's own computer for now.",
+      "offline": true
+    },
+    "graceCloud": {
+      "kind": "cloud",
+      "text": "Cloud",
+      "label": "Runs in the cloud on origin-vps. Uses Anthropic key.",
+      "offline": false
+    },
+    "graceSender": {
+      "kind": "member",
+      "text": "GR\nYou · Claude",
+      "label": "Your messages run on your computer, with Claude.",
+      "offline": false
+    },
+    "narrowTextHidden": true,
+    "finalRunsOn": {
+      "canEdit": false,
+      "host": null,
+      "mode": "sender"
+    }
+  },
+  "pageErrors": []
+}

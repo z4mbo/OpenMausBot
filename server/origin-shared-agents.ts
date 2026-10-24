@@ -4,6 +4,7 @@ import { hostname } from "node:os";
 import { dirname, join } from "node:path";
 import { ConvexClient, ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
+import type { AgentSubscription, AgentSubscriptionsResponse } from "../shared/agent-subscription.ts";
 import { definitionHash, definitionOf } from "../shared/origin-shared-agents.ts";
 import type { SharedBotLink } from "../shared/wire.ts";
 import type { RuntimeEvent } from "../shared/runtime-events.ts";
@@ -91,6 +92,8 @@ export interface SharedAgentsDeps {
   connect?: (url: string, sessionToken: string) => CloudConnection;
   /** "server" for an always-on Origin server, so teammates can pick it to run agents around the clock. */
   hostKind?: "local" | "server";
+  /** This computer's accounts by instance id, published so teammates see whose subscription runs an agent. */
+  subscriptions?(): Promise<Record<string, AgentSubscription>>;
   files?: { cloud?: string; links?: string; state?: string; outbox?: string; bots?: string };
   validateHostedSelection?(botId: string, selection: ModelSelection, allowMetered: boolean): Promise<unknown>;
   nextHostedBackup?(request: HostedRequest, current: () => boolean): Promise<RequestBackup | null>;
@@ -281,7 +284,9 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
           syncWatches();
         }
       }));
-      wanted.set(`team:${shared.teamId}`, () => cloud.subscribe("agentRuns:pendingForMe", { teamId: shared.teamId }, (value) => {
+      if (!hostIds.has(shared.teamId)) continue;
+      const hostId = hostIds.get(shared.teamId);
+      wanted.set(`team:${shared.teamId}:${hostId ?? ""}`, () => cloud.subscribe("agentRuns:pendingForMe", { teamId: shared.teamId, ...(hostId ? { hostId } : {}) }, (value) => {
         hostedRows.set(shared.teamId, value as HostedRow[]);
         processPending(shared.teamId);
       }));
@@ -296,6 +301,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   };
 
   const hostedRows = new Map<string, HostedRow[]>();
+  const hostIds = new Map<string, string | null>();
   /** Teammates' runs that this app hosts become local queued runs answering their mirrored message, once it has arrived. */
   const adoptHosted = (teamId: string) => {
     if (!lease) return;
@@ -340,6 +346,8 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     hostedRows.clear();
     outbox?.close();
     outbox = null;
+    hostIds.clear();
+    hostPublishedAt = 0;
   };
 
   /** Follows the Origin session the bots use; a new account or sign-out starts over. */
@@ -397,6 +405,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       },
     });
     syncWatches();
+    void publishHost().catch(() => undefined);
     schedule();
   };
   const ensureConnection = () => connecting ??= connectCurrent().finally(() => { connecting = null; });
@@ -404,13 +413,25 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   const publishHost = async () => {
     if (!connection || Date.now() - hostPublishedAt < HOST_EVERY_MS) return;
     hostPublishedAt = Date.now();
+    const cloud = connection.cloud;
     const kind = deps.hostKind ?? "local";
+    const subscriptions: Record<string, AgentSubscription> = await deps.subscriptions?.().catch(() => ({})) ?? {};
     const ready = (await deps.instances().catch(() => [] as SelectableInstance[]))
       .filter((instance) => instance.enabled !== false && instance.snapshot.state === "available" && instance.snapshot.authenticated !== false);
     const engines = [...new Set(ready.map((instance) => instance.driverKind))];
     const models = [...new Set(ready.flatMap((instance) => [instance.models.default, ...instance.models.options.map((option) => option.id)]).filter(Boolean))].slice(0, 100);
     for (const teamId of new Set(sharedBots().map((bot) => bot.shared!.teamId))) {
-      await connection.cloud.mutation("agents:publishHost", { teamId, name: hostname().slice(0, 80) || "Desktop", engines, models, computers: [], kind }).catch(() => undefined);
+      const plans = sharedBots().flatMap((bot) => {
+        const subscription = bot.shared!.teamId === teamId && !bot.modelSelection.source ? subscriptions[bot.modelSelection.instanceId] : undefined;
+        return subscription ? [{ agentId: bot.shared!.agentId, ...subscription }] : [];
+      });
+      const hostId = await cloud.mutation("agents:publishHost", { teamId, name: hostname().slice(0, 80) || "Desktop", engines, models, computers: [], kind, plans })
+        .then((id) => typeof id === "string" ? id : null, () => null);
+      if (connection?.cloud !== cloud) return;
+      if (hostIds.get(teamId) !== hostId || !hostIds.has(teamId)) {
+        hostIds.set(teamId, hostId);
+        syncWatches();
+      }
     }
   };
 
@@ -620,6 +641,9 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       return json(res, 200, { bots: Object.fromEntries(Object.entries(state.bots).filter(([id]) => store.bot(id))) });
     }
     if (method === "GET" && path === "/api/origin/shared-agents/plan") return json(res, 200, await plan());
+    if (method === "GET" && path === "/api/origin/shared-agents/subscriptions") {
+      return json(res, 200, { instances: await deps.subscriptions?.().catch(() => ({})) ?? {} } satisfies AgentSubscriptionsResponse);
+    }
     if (!auth.scopes.includes("admin")) return json(res, 403, { error: "Changing shared agents needs the admin scope" });
     const body = (await readBody(req).catch(() => null)) as Record<string, unknown> | null;
     if (method === "PUT" && path === "/api/origin/shared-agents/defaults") {

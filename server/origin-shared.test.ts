@@ -634,6 +634,35 @@ describe("shared runner lifecycle", () => {
   });
 });
 
+describe("where this computer runs shared agents", () => {
+  it("tells Origin whose plan answers each agent, then follows only the runs sent to this host", async () => {
+    const folder = mkdtempSync(join(tmpdir(), "omb-shared-host-"));
+    folders.push(folder);
+    const cloudFile = join(folder, "cloud.json");
+    writeFileSync(cloudFile, JSON.stringify({ url: "https://fixture.invalid", sessionToken: "ada", projects: {} }));
+    const links = join(folder, "links.json");
+    writeFileSync(links, JSON.stringify({ threads: {} }));
+    const bot = { id: "b", name: "Bot", shared: { agentId: "agent", teamId: "team" }, modelSelection: { instanceId: "claude", model: "opus" } };
+    const mutation = vi.fn(async (name: string) => name === "agents:publishHost" ? "host1" : null);
+    const subscribe = vi.fn((_name: string, _args: Record<string, unknown>, _onUpdate: (value: unknown) => void) => () => undefined);
+    const shared = createSharedAgents({
+      store: { bots: [bot], projectBotForTask: () => undefined, bot: () => bot, taskByThread: () => undefined, messagesFor: () => [], onChange: () => () => undefined } as never,
+      files: { cloud: cloudFile, links, state: join(folder, "state.json"), outbox: join(folder, "outbox.sqlite"), bots: join(folder, "bots.json") },
+      connect: () => ({ query: async () => ({ _id: "ada", name: "Ada" }), mutation, subscribe, close: vi.fn() }),
+      subscriptions: async () => ({ claude: { provider: "claude", plan: "max" } }),
+      instances: async () => [], isBusy: () => false, startQueued: vi.fn(), interrupt: vi.fn(), redact: text => text,
+    });
+    try {
+      shared.start();
+      await expect.poll(() => subscribe.mock.calls.find(([name]) => name === "agentRuns:pendingForMe")?.[1]).toEqual({ teamId: "team", hostId: "host1" });
+      expect(mutation).toHaveBeenCalledWith("agents:publishHost", expect.objectContaining({ teamId: "team", plans: [{ agentId: "agent", provider: "claude", plan: "max" }] }));
+      expect(subscribe.mock.calls.filter(([name]) => name === "agentRuns:pendingForMe")).toHaveLength(1);
+    } finally {
+      shared.stop();
+    }
+  });
+});
+
 describe("shared model resolution", () => {
   const ready = { state: "available", authenticated: true } satisfies ProviderSnapshot;
   const claude = { instanceId: "claude", driverKind: "claudeAgent", snapshot: ready, models: { default: "claude-sonnet", options: [{ id: "claude-sonnet", label: "Sonnet" }, { id: "claude-haiku-5-5", label: "Haiku" }] } };
