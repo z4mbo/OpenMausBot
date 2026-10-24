@@ -42,9 +42,9 @@ describe("sidebar bot threads", () => {
     expect(markup).not.toContain("test");
   });
 
-  it("keeps All threads accessible even with one thread so its history actions remain reachable", () => {
+  it("keeps the thread picker reachable even with one thread so its history actions remain reachable", () => {
     const render = (candidate: Bot) => renderToStaticMarkup(createElement(StoreProvider, null, createElement(TaskPicker, { bot: candidate })));
-    expect(render(bot)).toContain('aria-label="All threads"');
+    expect(render(bot)).toMatch(/aria-label="Current thread: [^"]+" aria-haspopup="dialog" aria-expanded="false"/);
     const single = render({ ...bot, tasks: [bot.tasks![1]!] });
     expect(single).toContain("All threads");
     expect(single).not.toContain('disabled=""');

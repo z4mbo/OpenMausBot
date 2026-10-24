@@ -890,9 +890,9 @@ export function Composer({
             data-composer-backdrop
             className="pointer-events-none absolute -left-5 -right-5 -bottom-3 top-1/2 bg-app"
           />
-        <div data-tour="composer" className="@container/composer relative z-[1] rounded-3xl bg-composer px-2 py-1.5 ring-1 ring-composer-ring">
+        <div data-tour="composer" className="@container/composer relative z-[1] rounded-3xl bg-composer px-2.5 pb-2 pt-2.5 ring-1 ring-composer-ring transition-[border-color,box-shadow] border border-hairline/40 focus-within:border-focus/50">
         {replyTo && <ComposerReplyStrip message={replyTo} fallbackName={bot?.name} onClear={onClearReply} />}
-        <div data-composer-row className="flex items-end gap-1 @max-[30rem]/composer:flex-wrap">
+        <div data-composer-row className="flex flex-wrap items-center gap-1">
           <input
             ref={fileInput}
             type="file"
@@ -971,7 +971,7 @@ export function Composer({
             </div>
           )}
           <MentionTextarea
-          wrapperClassName="@max-[30rem]/composer:order-first @max-[30rem]/composer:basis-full"
+          wrapperClassName="order-first basis-full pb-1"
           inputRef={inputRef}
           peers={mentionPeers}
           everyone={Boolean(group && !group.dm)}
@@ -1085,9 +1085,9 @@ export function Composer({
                   : t("composer.placeholder.bot", { name: bot?.name ?? "" })
           }
           aria-label={t("composer.placeholder.bot", { name: group ? group.name : (bot?.name ?? "") })}
-            className="block max-h-[9rem] min-h-6 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-[15px] leading-6 placeholder:text-ink-secondary focus:outline-none"
+            className="block max-h-[12rem] min-h-10 w-full resize-none overflow-y-auto bg-transparent px-1.5 py-0.5 text-[15px] leading-6 placeholder:text-ink-tertiary focus:outline-none"
           />
-          <div data-composer-actions className="flex items-center gap-1 @max-[30rem]/composer:ml-auto">
+          <div data-composer-actions className="ml-auto flex items-center gap-1">
           {busy && !locked && (
           <button
             onClick={interruptTurn}

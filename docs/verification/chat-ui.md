@@ -188,6 +188,28 @@ checks that the finished reply still moves a following transcript to its end.
 pnpm exec vitest run src/state/store.test.ts src/components/ChatView.follow.test.ts
 ```
 
+## Header thread picker
+
+With threads shown, the header carries two pills: the bot's name and, to its
+right, a `button "Current thread: <title>"` that opens a `dialog "Threads"`.
+The menu lists this bot's threads with pinned ones first and then the most
+recent, offers **New thread**, and adds a **Search threads** field once there
+are eight or more threads (or attention rows). Without a search field the
+current thread's row takes focus; arrow keys, Home and End move between rows,
+and Escape closes the menu and returns focus to the pill. Switching and
+creating use the same `switchTask` and `newTask` actions as the sidebar.
+
+```sh
+pnpm control:omb ui click --ui $H --name "Current thread: hello"
+pnpm control:omb ui click --ui $H --name "New thread"
+pnpm control:omb ui eval --ui $H --js "document.querySelector('[data-chathead-thread]').getAttribute('aria-label')"
+```
+
+Expected: after **New thread** and a sent message, the pill's name follows
+the new thread's title and the menu lists both threads, newest first.
+`src/components/TaskPicker.thread-pill.test.ts` holds the ordering, focus,
+search threshold, actions and 375 px placement.
+
 ## Bot setup and MCP access recipe
 
 `scripts/testing/bot-tools-ui.e2e.test.ts` uses the same full-app launcher and

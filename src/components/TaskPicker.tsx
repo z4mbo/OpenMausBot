@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, Check, ChevronDown, FolderInput, Pencil, Pin, PinOff, Plus, Search, Trash2 } from "lucide-react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { Activity, Check, ChevronDown, FolderInput, MessagesSquare, Pencil, Pin, PinOff, Plus, Search, Trash2 } from "lucide-react";
 import { useStore, type Bot, type BotProject, type Group, type Task } from "@/state/store";
 import { cn } from "@/lib/cn";
 import { roomThreadsWorkingElsewhere } from "@/lib/room-threads";
@@ -15,6 +15,28 @@ import { formatUpdatedAt, orderedThreadList, threadByline, threadRecency, thread
 import { Select } from "./Select";
 
 export const TASK_PICKER_DISMISS_MS = 500;
+export const THREAD_SEARCH_MIN = 8;
+const THREAD_MENU_WIDTH = 352;
+
+export function threadMenuPosition(trigger: { left: number; bottom: number }, viewport: { width: number; height: number }) {
+  const width = Math.max(0, Math.min(THREAD_MENU_WIDTH, viewport.width - 16));
+  const left = Math.max(8, Math.min(trigger.left, viewport.width - width - 8));
+  const top = Math.max(8, Math.min(trigger.bottom + 8, viewport.height - 160));
+  return { left, top, width, maxHeight: Math.max(160, viewport.height - top - 16) };
+}
+
+function moveOptionFocus(event: ReactKeyboardEvent<HTMLElement>) {
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Home" && event.key !== "End") return;
+  const options = [...event.currentTarget.querySelectorAll<HTMLElement>("[data-thread-option]")];
+  if (!options.length) return;
+  event.preventDefault();
+  const index = options.findIndex((option) => option === document.activeElement);
+  const next = event.key === "Home" ? 0
+    : event.key === "End" ? options.length - 1
+    : event.key === "ArrowDown" ? (index + 1) % options.length
+    : (index <= 0 ? options.length : index) - 1;
+  options[next]?.focus();
+}
 
 
 /** The click that accompanies a dblclick has detail >= 2 and must not switch or close. */
@@ -85,7 +107,9 @@ function ConversationTaskPicker({
   attention,
   onAttentionJump,
   workingElsewhere = 0,
+  variant = "count",
 }: {
+  variant?: "count" | "title";
   threadId: string;
   tasks: PickerTask[];
   busy: boolean;
@@ -106,6 +130,10 @@ function ConversationTaskPicker({
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<ReturnType<typeof threadMenuPosition> | null>(null);
+  const titled = variant === "title";
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finishingRename = useRef(false);
   const now = useRelativeNow();
@@ -124,6 +152,7 @@ function ConversationTaskPicker({
     setRenaming(null);
     setQuery("");
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const queueDismiss = () => {
@@ -178,6 +207,7 @@ function ConversationTaskPicker({
       }
       setRenaming(null);
       setOpen(false);
+      triggerRef.current?.focus();
     };
     window.addEventListener("mousedown", onDown);
     window.addEventListener("keydown", onKey);
@@ -186,6 +216,22 @@ function ConversationTaskPicker({
       window.removeEventListener("keydown", onKey);
     };
   }, [open, renaming]);
+
+  useLayoutEffect(() => {
+    if (!open || !titled || !triggerRef.current) return;
+    const button = triggerRef.current;
+    const update = () => {
+      const next = threadMenuPosition(button.getBoundingClientRect(), { width: window.innerWidth, height: window.innerHeight });
+      setPosition((current) => current && current.left === next.left && current.top === next.top && current.width === next.width && current.maxHeight === next.maxHeight ? current : next);
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open, titled]);
 
   const commitRename = (threadId: string, save: boolean) => {
     // Escape unmounts the input, which fires blur; without this guard blur would save the cancelled draft.
@@ -214,38 +260,93 @@ function ConversationTaskPicker({
   const looking = query.trim();
   const results = [...attentionRows.map((entry) => ({ kind: "attention" as const, entry })), ...visible.map((task) => ({ kind: "task" as const, task }))];
 
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => {
-          if (open) closeMenu();
-          else setOpen(true);
-        }}
-        title={switchTitle}
-        aria-label={t("task.switch")}
-        className={cn(
-          "flex max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/40 px-2.5 py-1 text-[12.5px] text-ink-secondary hover:bg-raised hover:text-ink",
-          COMPACT_BUBBLE,
-        )}
-      >
-        <span className="truncate @max-4xl/chathead:hidden">{t("task.switch")}</span>
-        <span className="shrink-0 tabular-nums opacity-60 @max-4xl/chathead:opacity-100">{tasks.length}</span>
-        {workingElsewhere > 0 && (
-          <span
-            role="img"
-            data-working-elsewhere={workingElsewhere}
-            aria-label={t("task.workingElsewhere", { count: workingElsewhere })}
-            title={t("task.workingElsewhere", { count: workingElsewhere })}
-            className="size-1.5 shrink-0 animate-pulse rounded-full bg-accent"
-          />
-        )}
-        <ChevronDown size={12} className="shrink-0 @max-4xl/chathead:hidden" />
-      </button>
+  const searchable = !titled || tasks.length + (attention?.length ?? 0) >= THREAD_SEARCH_MIN;
+  const currentTitle = current?.title.trim() || t("task.list");
+  const workingDot = workingElsewhere > 0 && (
+    <span
+      role="img"
+      data-working-elsewhere={workingElsewhere}
+      aria-label={t("task.workingElsewhere", { count: workingElsewhere })}
+      title={t("task.workingElsewhere", { count: workingElsewhere })}
+      className="size-1.5 shrink-0 animate-pulse rounded-full bg-accent"
+    />
+  );
+  const toggle = () => {
+    if (open) closeMenu();
+    else setOpen(true);
+  };
+  const menuReady = open && (!titled || position !== null);
+  useEffect(() => {
+    if (!menuReady || searchable) return;
+    const list = listRef.current;
+    const target = list?.querySelector<HTMLElement>("[data-thread-option][aria-current=true]") ?? list?.querySelector<HTMLElement>("[data-thread-option]");
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }, [menuReady, searchable]);
 
-      {motion.shown && (
-        <div className={cn("absolute right-0 top-full z-40 mt-1 w-[300px] overflow-hidden rounded-xl border border-hairline/50 bg-card py-1 shadow-2xl shadow-black/50", motion.className)} {...motion.exitProps}>
-          <div className="px-2 pb-1 pt-1.5">
+  return (
+    <div className={cn("relative", titled && "min-w-0")} ref={ref}>
+      {titled ? (
+        <button
+          ref={triggerRef}
+          type="button"
+          data-chathead-thread
+          onClick={toggle}
+          title={switchTitle}
+          aria-label={t("task.currentThread", { title: currentTitle })}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          className={cn(
+            "flex h-9 min-w-0 max-w-[15rem] items-center gap-2 rounded-full border border-hairline/50 bg-control/50 pl-3.5 pr-3 text-[13px] font-medium text-ink-secondary transition-colors hover:bg-raised-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus @max-[30rem]/chathead:max-w-[11rem]",
+            open && "bg-raised-hover text-ink",
+          )}
+        >
+          <MessagesSquare size={14} aria-hidden="true" className="shrink-0 opacity-80" />
+          <span dir="auto" className="min-w-0 truncate">{currentTitle}</span>
+          {workingDot}
+          <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 opacity-70 transition-transform", open && "rotate-180")} />
+        </button>
+      ) : (
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={toggle}
+          title={switchTitle}
+          aria-label={t("task.switch")}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          className={cn(
+            "flex max-w-[220px] items-center gap-1.5 rounded-full border border-hairline/40 px-2.5 py-1 text-[12.5px] text-ink-secondary hover:bg-raised hover:text-ink",
+            COMPACT_BUBBLE,
+          )}
+        >
+          <span className="truncate @max-4xl/chathead:hidden">{t("task.switch")}</span>
+          <span className="shrink-0 tabular-nums opacity-60 @max-4xl/chathead:opacity-100">{tasks.length}</span>
+          {workingDot}
+          <ChevronDown size={12} className="shrink-0 @max-4xl/chathead:hidden" />
+        </button>
+      )}
+
+      {motion.shown && (!titled || position) && (
+        <div
+          role="dialog"
+          aria-label={t("task.list")}
+          data-thread-menu
+          style={titled && position ? { left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight } : undefined}
+          className={cn(
+            "z-40 flex flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-menu p-1.5",
+            titled ? "fixed" : "absolute right-0 top-full mt-1 w-[300px]",
+            motion.className,
+          )}
+          {...motion.exitProps}
+        >
+          {titled && (
+            <div className="flex items-baseline justify-between gap-2 px-2.5 pb-1.5 pt-1">
+              <span className="text-[12px] font-medium text-ink">{t("task.list")}</span>
+              <span className="text-[11px] tabular-nums text-ink-tertiary">{tasks.length}</span>
+            </div>
+          )}
+          {searchable && <div className="pb-1.5">
             <div className="flex items-center gap-2 rounded-lg border border-hairline/40 bg-inset px-2.5 py-1.5 focus-within:border-focus">
               <Search size={13} className="shrink-0 text-ink-secondary" />
               <input
@@ -262,6 +363,11 @@ function ConversationTaskPicker({
                     else closeMenu();
                     return;
                   }
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    listRef.current?.querySelector<HTMLElement>("[data-thread-option]")?.focus();
+                    return;
+                  }
                   if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                     e.preventDefault();
                     const first = results[0];
@@ -276,10 +382,10 @@ function ConversationTaskPicker({
                 className="w-full bg-transparent text-[12.5px] text-ink placeholder:text-ink-secondary focus:outline-none"
               />
             </div>
-          </div>
-          <div className="max-h-[320px] overflow-y-auto" role="group" aria-label={looking ? t("task.matching", { count: results.length }) : t("task.list")}>
+          </div>}
+          <div ref={listRef} onKeyDown={moveOptionFocus} className={cn("min-h-0 overflow-y-auto", !titled && "max-h-[320px]")} role="group" aria-label={looking ? t("task.matching", { count: results.length }) : t("task.list")}>
             {attentionRows.length > 0 && <div className="pb-1">
-              <div className="flex items-center gap-1.5 px-3 pb-1 pt-1.5 text-[11px] font-medium text-ink-secondary"><Activity size={12} />{t("attention.title")}</div>
+              <div className="flex items-center gap-1.5 px-2.5 pb-1 pt-1.5 text-[11px] font-medium text-ink-secondary"><Activity size={12} />{t("attention.title")}</div>
               <AttentionThreadRows entries={attentionRows} onJump={(entry) => { onAttentionJump?.(entry); closeMenu(); }} />
             </div>}
             {results.length === 0 ? (
@@ -292,9 +398,9 @@ function ConversationTaskPicker({
               const heading = grouped?.find((group) => group.tasks[0]?.threadId === task.threadId)?.project;
               return (
                 <Fragment key={task.threadId}>
-                {bot?.projects?.length && heading ? <div className={cn("flex items-center gap-1.5 px-3 pb-1 pt-2 text-[11px] font-medium text-ink-secondary", index > 0 && "border-t border-hairline/30")}>{heading.id && <FolderIcon emoji={heading.emoji} size={12} />}{heading.name}</div> : null}
+                {bot?.projects?.length && heading ? <div className={cn("flex items-center gap-1.5 px-2.5 pb-1 pt-2 text-[11px] font-medium text-ink-secondary", index > 0 && "mt-1 border-t border-hairline/30")}>{heading.id && <FolderIcon emoji={heading.emoji} size={12} />}{heading.name}</div> : null}
                 <div
-                  className={cn("group flex items-center gap-2 px-2.5 py-2", active ? "bg-raised/60" : "hover:bg-raised/40")}
+                  className={cn("group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors", active ? "bg-control/70" : "hover:bg-control/40")}
                 >
                   <Check size={13} className={cn("shrink-0", active ? "text-accent" : "opacity-0")} />
                   {renaming === task.threadId ? (
@@ -340,11 +446,13 @@ function ConversationTaskPicker({
                         e.stopPropagation();
                         startRename(task);
                       }}
-                      className="min-w-0 flex-1 text-left"
+                      data-thread-option
+                      aria-current={active || undefined}
+                      className="min-w-0 flex-1 rounded-md py-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                       title={t("task.renameHint")}
                     >
-                      <div dir="auto" className="truncate text-[13px] text-ink">{task.title}</div>
-                      <div className="text-[11px] text-ink-secondary">
+                      <div dir="auto" className={cn("truncate text-[13px] text-ink", active && "font-medium")}>{task.title}</div>
+                      <div className="truncate text-[11px] text-ink-secondary">
                         {task.activity === "waiting-on-you" ? `${t("task.waiting")} · ` : task.waitingForTeammates ? `${t("task.waitingOnTeammate")} · ` : task.busy ? `${t("chat.activity.working")} · ` : task.unread ? `${t("task.unread")} · ` : ""}
                         <TaskUpdatedTime task={task} now={now} />
                         <TaskUsage usage={task.usage} />
@@ -358,7 +466,7 @@ function ConversationTaskPicker({
                       onClick={() => onPin(task.threadId, task.pinned !== true)}
                       aria-label={task.pinned === true ? t("sidebar.bot.unpin") : t("sidebar.bot.pin")}
                       title={task.pinned === true ? t("sidebar.bot.unpin") : t("sidebar.bot.pin")}
-                      className="rounded p-1 text-ink-secondary opacity-0 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-70"
+                      className="rounded-md p-1 text-ink-secondary opacity-0 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-70"
                     >
                       {task.pinned === true ? <PinOff size={13} /> : <Pin size={13} />}
                     </button>
@@ -369,7 +477,7 @@ function ConversationTaskPicker({
                       onClick={() => startRename(task)}
                       aria-label={t("task.renameNamed", { title: task.title })}
                       title={t("task.renameTitle")}
-                      className="rounded p-1 text-ink-secondary opacity-0 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-70"
+                      className="rounded-md p-1 text-ink-secondary opacity-0 hover:bg-raised hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 touch:opacity-70"
                     >
                       <Pencil size={13} />
                     </button>
@@ -389,7 +497,7 @@ function ConversationTaskPicker({
                     disabled={Boolean(task.busy) || busy && active}
                     aria-label={t("task.deleteAria")}
                     title={t("task.deleteTitle")}
-                    className="rounded p-1 text-ink-secondary opacity-0 hover:bg-raised hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-20 touch:opacity-70 touch:disabled:opacity-20"
+                    className="rounded-md p-1 text-ink-secondary opacity-0 hover:bg-raised hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-20 touch:opacity-70 touch:disabled:opacity-20"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -398,17 +506,19 @@ function ConversationTaskPicker({
               );
             })}
           </div>
-          {bot ? <NewThreadButton bot={bot} onCreated={closeMenu} className="mt-1 w-full rounded-none border-t border-hairline/40" /> : <button
+          <div className="mt-1 shrink-0 border-t border-hairline/40 pt-1">
+          {bot ? <NewThreadButton bot={bot} onCreated={closeMenu} className="w-full text-[13px] hover:bg-control/50" /> : <button
             type="button"
             onClick={() => {
               onNew();
               closeMenu();
             }}
             disabled={busy}
-            className="mt-1 flex w-full items-center gap-2 border-t border-hairline/40 px-3 py-2 text-left text-[13px] text-ink hover:bg-raised/50 disabled:opacity-40"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink hover:bg-control/50 disabled:opacity-40"
           >
             <Plus size={13} className="text-ink-secondary" /> {t("task.newShort")}
           </button>}
+          </div>
         </div>
       )}
     </div>
@@ -444,6 +554,7 @@ export function TaskPicker({ bot }: { bot: Bot }) {
   if (!showThreads) return null;
   return (
     <ConversationTaskPicker
+      variant="title"
       threadId={bot.threadId}
       tasks={orderedThreadList((bot.tasks ?? []).filter((task) => !task.routineRunId))}
       busy={false}
