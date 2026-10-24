@@ -141,6 +141,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const [view, setView] = useState<"active" | "completed">("active");
   const [layout, setLayout] = useState<"board" | "list">("board");
   const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
   const [composer, setComposer] = useState<string | null>(null);
   const [columnEditor, setColumnEditor] = useState<CloudColumn | "new" | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -188,7 +189,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
       const target = event.target as HTMLElement | null;
       if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || target?.closest("input, textarea, select, [contenteditable=true], [role=dialog]")) return;
       if (event.key === "c" && canEdit) { event.preventDefault(); setComposer(""); }
-      if (event.key === "/") { event.preventDefault(); search.current?.focus(); }
+      if (event.key === "/") { event.preventDefault(); setSearching(true); requestAnimationFrame(() => search.current?.focus()); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -261,23 +262,30 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
     } else return;
     requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-task-id="${task._id}"]`)?.focus());
   };
-  const done = board.tasks.filter((task) => task.done).length;
+  const searchShown = searching || Boolean(query);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden motion-safe:animate-[rise_var(--motion-slow)_var(--ease-out)_backwards]" aria-label="Issues">
-      <PageHeader title="Issues" count={board.tasks.length ? <ProgressRing done={done} total={board.tasks.length} /> : undefined}>
+      <PageHeader>
         <Segmented label="Issue state" value={view} onChange={setView}
           options={[{ value: "active", label: <><Circle size={13} />Active <span className="tabular-nums text-ink-tertiary">{active.length}</span></> }, { value: "completed", label: <><CheckCircle2 size={13} />Done <span className="tabular-nums text-ink-tertiary">{completed.length}</span></> }]} />
         {view === "active" && (
           <Segmented label="Layout" value={layout} onChange={setLayout}
             options={[{ value: "board", label: <Columns3 size={14} aria-label="Board view" />, title: "Board" }, { value: "list", label: <List size={14} aria-label="List view" />, title: "List" }]} />
         )}
-        <label className="relative flex min-w-32 flex-1 items-center sm:flex-none">
-          <Search size={14} className="pointer-events-none absolute left-2.5 text-ink-tertiary" aria-hidden="true" />
-          <input ref={search} className={cn(inputClass, "h-8 min-w-0 pl-8 sm:w-48")} placeholder="Search issues" aria-label="Search issues" value={query} onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); event.currentTarget.blur(); } }} />
-        </label>
-        {canEdit && <button type="button" className={primaryButton} onClick={() => setComposer("")} title="New issue (C)"><Plus size={14} />New issue</button>}
+        <div className="ml-auto flex items-center gap-2">
+          {searchShown ? (
+            <label className="relative flex min-w-32 items-center motion-safe:animate-pop-in">
+              <Search size={14} className="pointer-events-none absolute left-2.5 text-ink-tertiary" aria-hidden="true" />
+              <input ref={search} autoFocus className={cn(inputClass, "h-8 w-48 min-w-0 pl-8")} placeholder="Search issues" aria-label="Search issues" value={query} onChange={(e) => setQuery(e.target.value)}
+                onBlur={() => { if (!query) setSearching(false); }}
+                onKeyDown={(event) => { if (event.key === "Escape") { setQuery(""); setSearching(false); } }} />
+            </label>
+          ) : (
+            <button type="button" className={iconButton} aria-label="Search issues" title="Search issues (/)" onClick={() => setSearching(true)}><Search size={15} /></button>
+          )}
+          {canEdit && <button type="button" className={primaryButton} onClick={() => setComposer("")} title="New issue (C)"><Plus size={14} />New issue</button>}
+        </div>
       </PageHeader>
       {(!canEdit || notice || info) && (
         <GlassHeader>
@@ -446,18 +454,6 @@ function DragGhost({ drag, ghost, task, columns, assignee }: {
   );
 }
 
-function ProgressRing({ done, total }: { done: number; total: number }) {
-  const percent = total ? Math.round((done / total) * 100) : 0;
-  return (
-    <span className="flex items-center gap-1.5" title={`${done} of ${total} issues done`}>
-      <svg viewBox="0 0 36 36" className="size-4 -rotate-90" aria-hidden="true">
-        <circle cx="18" cy="18" r="15" fill="none" strokeWidth="5" className="stroke-raised" />
-        <circle cx="18" cy="18" r="15" fill="none" strokeWidth="5" pathLength={100} strokeLinecap="round" className="stroke-success transition-[stroke-dasharray] duration-500" style={{ strokeDasharray: `${percent} 100` }} />
-      </svg>
-      {done} of {total} done
-    </span>
-  );
-}
 
 export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = false, draft = false, onOpen, onPointerDown, onKeyDown, onMove, onDone, onDelete, onAssign }: {
   task: CloudTask; columns: CloudColumn[]; canEdit: boolean; assignee?: Assignee; agents: readonly IssueAgent[];

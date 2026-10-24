@@ -44,6 +44,8 @@ async function issues(page, shoot) {
   assert.ok(await menu.evaluate((element) => { const box = element.getBoundingClientRect(); const hit = document.elementFromPoint(box.left + box.width / 2, box.bottom - 6); return element.contains(hit); }), "board actions menu is fully visible");
   await page.keyboard.press("Escape");
   assert.equal(await actions.evaluate((element) => element === document.activeElement), true, "Escape returns focus to the actions button");
+  assert.equal(await board.getByRole("textbox", { name: "Search issues" }).count(), 0, "search starts as an icon");
+  await board.getByRole("button", { name: "Search issues" }).click();
   await board.getByRole("textbox", { name: "Search issues" }).fill("map");
   assert.equal(await board.locator("[data-task-id]").count(), 1, "search narrows the board");
   await board.getByRole("textbox", { name: "Search issues" }).fill("");

@@ -343,14 +343,14 @@ export function ReadOnlyEditorNotice({ canEdit }: { canEdit: boolean }) {
 /** A page's header row once it sits in the glass above the page, lined up with the page's own gutters. */
 export const glassHeaderRow = "px-4 pb-3 md:px-6";
 
-export function PageHeader({ title, count, children }: { title: string; count?: ReactNode; children?: ReactNode }) {
+export function PageHeader({ title, count, children }: { title?: string; count?: ReactNode; children?: ReactNode }) {
   const pinned = useInGlassHeader();
   return (
     <GlassHeader>
       <div className={cn("flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2", pinned ? glassHeaderRow : "mb-4")}>
-        <h2 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">{title}</h2>
+        {title && <h2 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">{title}</h2>}
         {count !== undefined && <span className="text-[13px] tabular-nums text-ink-tertiary">{count}</span>}
-        <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">{children}</div>
+        <div className={cn("flex w-full flex-wrap items-center gap-2", title && "sm:ml-auto sm:w-auto")}>{children}</div>
       </div>
     </GlassHeader>
   );
