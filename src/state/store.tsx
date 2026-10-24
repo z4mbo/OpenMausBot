@@ -407,7 +407,7 @@ function openedUnreadDivider(state: AppState, threadId: string, unread: boolean,
 }
 
 export function visibleMessages(bot: Pick<Bot, "messages" | "activeLeafId">): Message[] {
-  if (bot.messages.some(message => message.sharedMessage)) return orderedSharedMessages(bot.messages);
+  if (bot.messages?.some(message => message.sharedMessage)) return orderedSharedMessages(bot.messages);
   const leafId = bot.activeLeafId;
   if (!leafId) return bot.messages;
   const byId = new Map(bot.messages.map((m) => [m.id, m]));
