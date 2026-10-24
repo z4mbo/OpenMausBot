@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanReleaseNotes, fallbackReleaseNotes, isReleaseTag, nextReleaseTag, releaseAnnouncement } from "./origin-ship.ts";
+import { cleanReleaseNotes, fallbackReleaseNotes, isReleaseTag, nextReleaseTag } from "./origin-ship.ts";
 
 const pull = (title: string, labels: string[] = []) => ({ title, labels });
 
@@ -25,11 +25,5 @@ describe("release text", () => {
     expect(fallbackReleaseNotes([{ number: 3, title: "fix(api): timeouts", url: "u", mergedAt: 1, labels: [], author: "kai" }])).toBe("## What's changed\n\n- Timeouts (#3) by @kai");
     expect(fallbackReleaseNotes([])).toBe("No pull requests were merged since the last release.");
     expect(cleanReleaseNotes("```md\n## New\n- A\n```")).toBe("## New\n- A");
-  });
-
-  it("announces with up to three bullets and the release address", () => {
-    const notes = "Intro.\n\n## New\n- Dark mode (#4)\n- Search (#5) by @ada\n* Export (#6)\n- Fourth (#7)";
-    expect(releaseAnnouncement("Acme", { tag: "v1.1.0", title: "Night shift", notes }, "https://r.test")).toBe("Acme v1.1.0 is out: Night shift.\n• Dark mode\n• Search\n• Export\nhttps://r.test");
-    expect(releaseAnnouncement("Acme", { tag: "v1.1.0", title: "v1.1.0", notes: "" }, undefined)).toBe("Acme v1.1.0 is out.");
   });
 });

@@ -1,6 +1,6 @@
 import { BRAND_FONT_IDS, brandFont, isBrandFont, type BrandFontId } from "./brand-fonts.ts";
 
-/** A project's one source of brand truth: what Canvas, Pages, Studio and Publish draw on. */
+/** A project's one source of brand truth, which agents read before they write or design. */
 export interface BrandKit {
   name: string;
   tagline: string;
@@ -20,7 +20,7 @@ export interface BrandKit {
   /** designAssets ids of the project, in order of preference. */
   logoAssetIds: string[];
   iconAssetId?: string;
-  /** Style words Studio prepends to image and video prompts. */
+  /** Style words for the project's images and video. */
   imagery: string[];
 }
 

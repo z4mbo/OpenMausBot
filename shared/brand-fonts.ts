@@ -1,9 +1,9 @@
-/** A typeface a brand kit may choose: Google Fonts that published pages load, or a web-safe stack that needs no download. */
+/** A typeface a brand kit may choose: a Google Font, or a web-safe stack that needs no download. */
 export interface BrandFont {
   id: string;
   family: string;
   category: "sans" | "serif" | "display" | "mono";
-  /** The Canvas font whose stack follows the family, so text keeps its shape while the face loads. */
+  /** The generic stack that follows the family, so text keeps its shape while the face loads. */
   fallback: "sans" | "serif" | "mono";
   /** The `family=` value of a Google Fonts css2 request; null for a web-safe face. */
   google: string | null;

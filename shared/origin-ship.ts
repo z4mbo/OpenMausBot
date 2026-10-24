@@ -100,12 +100,10 @@ export interface ShipRelease {
   baseTag?: string;
   pulls: MergedPull[];
   targetId?: string;
-  announce: boolean;
   agentName?: string;
   approvedByName?: string;
   releaseUrl?: string;
   deployNote?: string;
-  broadcastPostId?: string;
   error?: string;
   createdAt: number;
   updatedAt: number;
@@ -190,12 +188,4 @@ export function releaseNotesPrompt(projectName: string, tag: string, pulls: read
 /** Model output trimmed to notes: no surrounding code fence, within the stored limit. */
 export function cleanReleaseNotes(text: string): string {
   return text.trim().replace(/^```(?:markdown|md)?\s*\n([\s\S]*?)\n```$/i, "$1").trim().slice(0, SHIP_LIMITS.notes);
-}
-
-/** The Broadcast post announcing a published release. */
-export function releaseAnnouncement(projectName: string, release: Pick<ShipRelease, "tag" | "title" | "notes">, url: string | undefined): string {
-  const bullets = release.notes.split("\n").map((line) => line.trim()).filter((line) => /^[-*] /.test(line))
-    .map((line) => line.replace(/^[-*]\s+/, "").replace(/\s*\(#\d+\)(\s*by @\S+)?$/, "")).slice(0, 3);
-  const head = `${projectName} ${release.tag} is out${release.title && release.title !== release.tag ? `: ${release.title}` : ""}.`;
-  return [head, ...bullets.map((bullet) => `• ${bullet}`), url ? url : ""].filter(Boolean).join("\n");
 }
