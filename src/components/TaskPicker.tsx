@@ -285,7 +285,7 @@ function ConversationTaskPicker({
   }, [menuReady, searchable]);
 
   return (
-    <div className={cn("relative", titled && "min-w-0")} ref={ref}>
+    <div className={cn("relative", titled && "flex min-w-0")} ref={ref}>
       {titled ? (
         <button
           ref={triggerRef}
@@ -297,11 +297,11 @@ function ConversationTaskPicker({
           aria-haspopup="dialog"
           aria-expanded={open}
           className={cn(
-            "flex h-9 min-w-0 max-w-[15rem] items-center gap-2 rounded-full border border-hairline/50 bg-control/50 pl-3.5 pr-3 text-[13px] font-medium text-ink-secondary transition-colors hover:bg-raised-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus @max-[30rem]/chathead:max-w-[11rem]",
+            "flex h-9 min-w-0 max-w-[15rem] items-center gap-2 rounded-full border border-hairline/50 bg-control/50 pl-3.5 pr-3 text-[13px] font-medium text-ink-secondary transition-colors hover:bg-raised-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus @max-[30rem]/chathead:max-w-[11rem] @max-[30rem]/chathead:gap-1.5 @max-[30rem]/chathead:pl-3 @max-[30rem]/chathead:pr-2.5",
             open && "bg-raised-hover text-ink",
           )}
         >
-          <MessagesSquare size={14} aria-hidden="true" className="shrink-0 opacity-80" />
+          <MessagesSquare size={14} aria-hidden="true" className="shrink-0 opacity-80 @max-[30rem]/chathead:hidden" />
           <span dir="auto" className="min-w-0 truncate">{currentTitle}</span>
           {workingDot}
           <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 opacity-70 transition-transform", open && "rotate-180")} />
