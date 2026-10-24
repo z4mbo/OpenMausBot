@@ -288,7 +288,6 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   };
 
   const hostedRows = new Map<string, HostedRow[]>();
-  /** This app's host in each team; null when Origin refused to list it, so hosted runs are matched by person only. */
   const hostIds = new Map<string, string | null>();
   /** Teammates' runs that this app hosts become local queued runs answering their mirrored message, once it has arrived. */
   const adoptHosted = (teamId: string) => {
