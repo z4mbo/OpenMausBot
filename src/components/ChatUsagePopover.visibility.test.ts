@@ -3,7 +3,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Bot } from "@/state/store";
-import { setChatContextDetails, setChatUsageOpen } from "@/lib/chat-usage-preferences";
+import { setChatContextDetails } from "@/lib/chat-usage-preferences";
 
 vi.mock("@/state/store", () => ({ useStore: () => ({ state: { instances: [] } }) }));
 vi.mock("./PlanUsage", () => ({ PlanUsage: ({ providerId }: { providerId: string }) => createElement("span", { "data-quota-provider": providerId }, providerId) }));
@@ -29,7 +29,7 @@ const trigger = (id: string) => host.querySelector<HTMLButtonElement>(`[data-cha
 const collapsed = (node: HTMLElement | null): boolean => Boolean(node && (node.hidden || node.style.display === "none" || collapsed(node.parentElement)));
 
 beforeEach(() => {
-  setChatUsageOpen(false); setChatContextDetails(false);
+  setChatContextDetails(false);
   vi.stubGlobal("ResizeObserver", class {
     callback: ResizeObserverCallback;
     targets = new Set<Element>();
@@ -49,7 +49,7 @@ beforeEach(() => {
   host = document.createElement("div"); document.body.append(host); root = createRoot(host);
 });
 afterEach(() => {
-  act(() => root.unmount()); host.remove(); setChatUsageOpen(false); setChatContextDetails(false);
+  act(() => root.unmount()); host.remove(); setChatContextDetails(false);
   expect(observers.size).toBe(0); vi.restoreAllMocks(); vi.unstubAllGlobals();
 });
 
@@ -64,26 +64,24 @@ describe("retained chat usage visibility", () => {
     expect(panels()[0].textContent).not.toContain("12k");
   });
 
-  it("moves the persistent open panel across visibility changes using ResizeObserver", () => {
-    act(() => setChatUsageOpen(true));
+  it("closes the open panel when its chat is hidden, and opens nothing in the next chat", () => {
     show("chief");
+    act(() => trigger("chief").click());
     expect(panels()).toHaveLength(1);
     expect(panels()[0].textContent).toContain("12k");
     expect([...observers].some(observer => observer.targets.has(trigger("chief")))).toBe(true);
     show(null); act(resize);
     expect(panels()).toHaveLength(0);
-    expect(localStorage.getItem("origin-chat-usage-open")).toBe("1");
     show("echo"); act(resize);
-    expect(panels()).toHaveLength(1);
-    expect(panels()[0].textContent).toContain("echo-model");
-    expect(panels()[0].textContent).not.toContain("12k");
-    expect(localStorage.getItem("origin-chat-usage-open")).toBe("1");
+    expect(panels()).toHaveLength(0);
+    show("chief"); act(resize);
+    expect(panels()).toHaveLength(0);
   });
 
   it("rejects a visibility-hidden trigger when resize rechecks noncollapsed layout", () => {
-    act(() => setChatUsageOpen(true)); show("echo");
+    show("echo");
     trigger("echo").style.visibility = "hidden";
-    act(() => window.dispatchEvent(new Event("resize")));
+    act(() => trigger("echo").click());
     expect(panels()).toHaveLength(0);
     trigger("echo").style.visibility = "visible";
     act(() => window.dispatchEvent(new Event("resize")));
@@ -92,12 +90,12 @@ describe("retained chat usage visibility", () => {
   });
 
   it("closes with Escape and returns focus to the visible chat trigger", () => {
-    act(() => setChatUsageOpen(true)); show("echo");
+    show("echo");
+    act(() => trigger("echo").click());
     const panel = panels().find(item => item.textContent?.includes("echo-model"))!;
     act(() => panel.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })));
     expect(panels()).toHaveLength(0);
     expect(document.activeElement).toBe(trigger("echo"));
-    expect(localStorage.getItem("origin-chat-usage-open")).toBe("0");
     act(() => trigger("echo").click());
     expect(panels()).toHaveLength(1);
     act(() => trigger("echo").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })));

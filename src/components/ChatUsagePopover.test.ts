@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Bot, InstanceInfo, Message } from "@/state/store";
-import { setChatContextDetails, setChatUsageOpen } from "@/lib/chat-usage-preferences";
+import { setChatContextDetails } from "@/lib/chat-usage-preferences";
 import { spaceAbove } from "@/hooks/use-space-above";
 
 const fixture = vi.hoisted(() => ({ instances: [] as InstanceInfo[], dispatch: vi.fn(), api: vi.fn(async () => ({})) }));
@@ -31,7 +31,6 @@ const pointer = (type: "pointerover" | "pointerout" | "pointerenter" | "pointerl
   act(() => { trigger().dispatchEvent(new PointerEvent(type, { bubbles: type.startsWith("pointerover") || type.startsWith("pointerout"), pointerType })); });
 
 beforeEach(() => {
-  setChatUsageOpen(false);
   setChatContextDetails(false);
   fixture.instances = [];
   fixture.api.mockClear();
@@ -43,7 +42,6 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   host.remove();
-  setChatUsageOpen(false);
   vi.restoreAllMocks();
   vi.useRealTimers();
 });
@@ -57,11 +55,35 @@ describe("the composer's usage ring", () => {
     expect(panel()!.className.split(" ")).toEqual(expect.arrayContaining(["absolute", "bottom-full", "right-0"]));
     expect(panel()!.querySelector('[data-quota-provider="provider-one"]')).not.toBeNull();
     expect(panel()!.textContent).toContain("model-one");
-    expect(localStorage.getItem("origin-chat-usage-open")).toBe("1");
     act(() => panel()!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })));
     expect(panel()).toBeNull();
     expect(document.activeElement).toBe(trigger());
-    expect(localStorage.getItem("origin-chat-usage-open")).toBe("0");
+    expect(localStorage.getItem("origin-chat-usage-open")).toBeNull();
+  });
+
+  it("closes like the other popovers: on a click outside, on Escape from elsewhere, and on a switch of thread or chat", () => {
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    show(bot());
+    act(() => trigger().click());
+    act(() => { panel()!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); });
+    expect(panel()).not.toBeNull();
+    act(() => { outside.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); });
+    expect(panel()).toBeNull();
+    act(() => trigger().click());
+    outside.focus();
+    act(() => { outside.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); });
+    expect(panel()).toBeNull();
+    expect(document.activeElement).toBe(outside);
+    act(() => trigger().click());
+    show({ ...bot(), threadId: "other-thread" });
+    expect(panel()).toBeNull();
+    show(bot());
+    expect(panel()).toBeNull();
+    act(() => trigger().click());
+    show({ ...bot(), id: "echo" });
+    expect(panel()).toBeNull();
+    outside.remove();
   });
 
   it("peeks on a mouse hover without pinning, but never on touch", () => {
@@ -75,7 +97,6 @@ describe("the composer's usage ring", () => {
     expect(panel()).toBeNull();
     act(() => { vi.advanceTimersByTime(300); });
     expect(panel()).not.toBeNull();
-    expect(localStorage.getItem("origin-chat-usage-open")).toBe("0");
     pointer("pointerout", "mouse");
     act(() => { vi.advanceTimersByTime(300); });
     expect(panel()).toBeNull();
@@ -93,28 +114,40 @@ describe("the composer's usage ring", () => {
     expect(trigger().querySelector("svg")!.getAttribute("class")).toContain("text-danger");
   });
 
-  it("keeps a hidden chat's panel unrendered until its ring is on screen", () => {
+  it("keeps a hidden chat's panel unrendered, and closes a pinned panel once its ring leaves the screen", () => {
     vi.mocked(HTMLElement.prototype.getClientRects).mockImplementation(() => [] as unknown as DOMRectList);
-    setChatUsageOpen(true);
     show(bot());
+    act(() => trigger().click());
     expect(panel()).toBeNull();
     vi.mocked(HTMLElement.prototype.getClientRects).mockImplementation(() => [new DOMRect(0, 0, 32, 32)] as unknown as DOMRectList);
     act(() => window.dispatchEvent(new Event("resize")));
     expect(panel()).not.toBeNull();
+    vi.mocked(HTMLElement.prototype.getClientRects).mockImplementation(() => [] as unknown as DOMRectList);
+    act(() => window.dispatchEvent(new Event("resize")));
+    expect(panel()).toBeNull();
+    vi.mocked(HTMLElement.prototype.getClientRects).mockImplementation(() => [new DOMRect(0, 0, 32, 32)] as unknown as DOMRectList);
+    act(() => window.dispatchEvent(new Event("resize")));
+    expect(panel()).toBeNull();
   });
 
-  it("offers Compact now in the panel once the context is nearly full, locked while the bot works", () => {
-    show(bot({ tokens: 91_000, window: 100_000 }));
-    act(() => trigger().click());
-    const compact = [...panel()!.querySelectorAll("button")].find((button) => button.textContent === "Compact now")!;
-    expect(panel()!.textContent).toContain("Atlas's context is 91% full.");
-    expect(compact.disabled).toBe(false);
-    act(() => compact.click());
-    expect(fixture.api).toHaveBeenCalledWith("/api/bots/atlas/compact", { method: "POST", body: JSON.stringify({ threadId: "thread" }) });
+  it("offers Compact now in the panel once the context is nearly full, locked while the bot works", async () => {
     show(bot({ tokens: 91_000, window: 100_000 }, true));
-    const locked = [...panel()!.querySelectorAll("button")].find((button) => button.textContent === "Compact now" || button.textContent === "Compacting…")!;
-    expect(locked.disabled).toBe(true);
-    expect(locked.getAttribute("title")).toBe("Stop this bot's turn first");
+    act(() => trigger().click());
+    const button = () => [...panel()!.querySelectorAll("button")].find((item) => item.textContent === "Compact now" || item.textContent === "Compacting…")!;
+    expect(panel()!.textContent).toContain("Atlas's context is 91% full.");
+    expect(button().disabled).toBe(true);
+    expect(button().getAttribute("title")).toBe("Stop this bot's turn first");
+    show(bot({ tokens: 91_000, window: 100_000 }));
+    expect(button().disabled).toBe(false);
+    await act(async () => button().click());
+    expect(fixture.api).toHaveBeenCalledWith("/api/bots/atlas/compact", { method: "POST", body: JSON.stringify({ threadId: "thread" }) });
+    expect(button().textContent).toBe("Compacting…");
+    show(bot({ tokens: 91_000, window: 100_000 }, true));
+    expect(button().textContent).toBe("Compacting…");
+    expect(button().disabled).toBe(true);
+    expect(button().getAttribute("title")).toBeNull();
+    show(bot({ tokens: 91_000, window: 100_000 }));
+    expect(button().textContent).toBe("Compact now");
   });
 });
 

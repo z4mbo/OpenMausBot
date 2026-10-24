@@ -31,7 +31,7 @@ import {
 } from "@/lib/drafts";
 import { ComposerCommandList, ComposerMentionList, type MentionChoice, type MentionTeammate } from "./ComposerSuggestions";
 import { ModelPicker } from "./ModelPicker";
-import { ChatUsagePopover } from "./ChatUsagePopover";
+import { ComposerContextTools } from "./ComposerContextTools";
 import { AgentBudgetPill } from "./AgentBudgetPill";
 import { MentionTextarea } from "./MentionTextarea";
 import { ComposerAttachments, pathForFile } from "./ComposerAttachments";
@@ -1013,7 +1013,7 @@ export function Composer({
           </div>
           <div data-composer-actions className="flex shrink-0 items-center gap-0.5">
             {bot && !group && <AgentBudgetPill shared={bot.shared} placement="composer" />}
-            {bot && !group && <ChatUsagePopover bot={bot} messages={transcript} />}
+            {bot && !group && <ComposerContextTools bot={bot} messages={transcript} />}
             {!locked && !busy && !hasContent && capabilities.dictation.available && (
               <button
                 type="button"
