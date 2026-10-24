@@ -114,7 +114,8 @@ import { AttachmentGallery, collectMessageFiles, replyAttachmentGroup, splitMess
 import { ScreenFrame } from "./ScreenFrame";
 import { CompactionChip, DigestChip } from "./DigestChip";
 import { RenameTitle } from "./RenameTitle";
-import { BotActivityPicker } from "./TaskPicker";
+import { BotActivityPicker, TaskPicker } from "./TaskPicker";
+import { ChatRunsOnBadge, type ChatRunsOn } from "./ChatRunsOnBadge";
 import { ModelPicker } from "./ModelPicker";
 import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
 import { SpeakButton } from "./SpeakButton";
@@ -541,7 +542,7 @@ const Bubble = memo(function Bubble({
                 ? "text-ink"
                 : user
                   ? cn("bg-bubble-user px-4 py-2.5 whitespace-pre-wrap text-ink", bubbleStyle && "user-bubble-colored")
-                  : "bg-card px-4 py-2.5 text-ink",
+                  : "px-0.5 py-1 text-ink",
           )}
           style={user && !webhookView && !attachmentsOnly ? bubbleStyle : undefined}
           title={new Date(message.at).toLocaleString()}
@@ -1024,7 +1025,7 @@ function PinnedBanner({
   );
 }
 
-const CHATHEAD_PILL = "flex min-w-0 items-center gap-2 rounded-full border border-hairline/40 bg-control/60 py-0.5 pl-1.5 text-ink";
+const CHATHEAD_PILL = "flex h-9 min-w-0 items-center gap-2.5 rounded-full border border-hairline/50 bg-control/50 pl-1.5 text-ink transition-colors @min-[30rem]/chathead:min-w-[8rem]";
 
 function chiefOfStaffBadge(bot: Bot) {
   if (!bot.chiefOfStaff || isWorkspaceSection(bot.section)) return null;
@@ -1067,7 +1068,7 @@ function placedHeader(embedded: boolean, slot: HTMLElement | null | undefined, h
   return slot ? createPortal(header, slot) : null;
 }
 
-export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: Bot; embedded?: boolean; headerSlot?: HTMLElement | null }) {
+export function ChatView({ bot: profile, embedded = false, headerSlot, runsOn }: { bot: Bot; embedded?: boolean; headerSlot?: HTMLElement | null; runsOn?: ChatRunsOn | null }) {
   const bot = useMemo(() => currentTaskBot(profile), [profile]);
   const { state, dispatch } = useStore();
   const showThreads = useShowThreads();
@@ -1282,7 +1283,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
         <div data-chathead-row className="flex items-center justify-between @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:gap-y-1 @min-[30rem]/chathead:grid @min-[30rem]/chathead:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(max-content,1fr)]">
         <div data-chathead-identity className="flex min-w-0 items-center gap-2 @max-[30rem]/chathead:basis-full @min-[30rem]/chathead:col-start-2 @min-[30rem]/chathead:justify-self-center" style={headerNoDragStyle}>
           {advanced ? (
-            <div data-chathead-pill className={cn(CHATHEAD_PILL, "pr-1")}>
+            <div data-chathead-pill className={cn(CHATHEAD_PILL, "pr-2")}>
               <button
                 type="button"
                 onClick={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
@@ -1293,7 +1294,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
                 <BotAvatar
                   bot={bot}
                   state={stateForBot({ ...bot, messages })}
-                  size={24}
+                  size={26}
                   motion={mascotMotion?.kind ?? "none"}
                   motionKey={mascotMotion?.nonce ?? 0}
                   animated={headerAnimated}
@@ -1325,12 +1326,12 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
               onClick={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
               title={t("chat.openProfile")}
               aria-label={t("chat.openProfileAria", { name: bot.name })}
-              className={cn(CHATHEAD_PILL, "pr-3.5 hover:bg-raised-hover")}
+              className={cn(CHATHEAD_PILL, "pr-5 hover:bg-raised-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus")}
             >
               <BotAvatar
                 bot={bot}
                 state={stateForBot({ ...bot, messages })}
-                size={24}
+                size={26}
                 motion={mascotMotion?.kind ?? "none"}
                 motionKey={mascotMotion?.nonce ?? 0}
                 animated={headerAnimated}
@@ -1339,6 +1340,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
               {chiefOfStaffBadge(bot)}
             </button>
           )}
+          <TaskPicker bot={bot} />
           <span role="status" className="sr-only" data-chathead-status>{bot.busy ? t("sidebar.preview.working") : ""}</span>
           {!bot.busy && bot.waitingForTeammates && <span className="truncate text-[12px] text-ink-secondary" role="status">Teammates working</span>}
           {awayFromMainThread(profile, showThreads) && (
@@ -1354,14 +1356,14 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
         </div>
         <div
           data-chathead-controls
-          className="flex shrink-0 items-center gap-2 @max-[30rem]/chathead:ml-auto @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:justify-end @min-[30rem]/chathead:col-start-3 @min-[30rem]/chathead:justify-self-end"
+          className="flex shrink-0 items-center gap-1.5 @max-[30rem]/chathead:ml-auto @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:justify-end @min-[30rem]/chathead:col-start-3 @min-[30rem]/chathead:justify-self-end"
           style={controlsShiftStyle}
         >
           {(bot.busy || bot.waitingForTeammates) && (
             <button
               onClick={() => dispatch({ type: "interrupt", botId: bot.id, threadId: bot.threadId })}
               className={cn(
-                "flex items-center gap-1.5 rounded-full border border-hairline/40 bg-raised/60 px-2.5 py-1 text-[13px] text-ink-secondary hover:bg-raised hover:text-ink",
+                "flex h-8 items-center gap-1.5 rounded-full border border-hairline/50 bg-control/40 px-3 text-[13px] font-medium text-ink-secondary transition-colors hover:bg-raised hover:text-ink",
                 COMPACT_BUBBLE,
               )}
               title={t("chat.stopTurn")}
@@ -1375,16 +1377,17 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
           <ChatUsagePopover bot={bot} messages={messages} />
           {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
           <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
+          <ChatRunsOnBadge runsOn={runsOn} />
           <button
             data-tour="computer"
             onClick={() => dispatch({ type: "toggleComputer" })}
             className={cn(
-              "relative rounded-md p-1.5 hover:bg-raised",
-              state.computerOpen ? "text-accent" : "text-ink-secondary hover:text-ink",
+              "relative flex size-8 items-center justify-center rounded-full transition-colors hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+              state.computerOpen ? "bg-raised text-accent" : "text-ink-secondary hover:text-ink",
             )}
             title={t("chat.computer")} aria-label={busy && place === "browser" ? `${t("chat.computer")}, ${t("place.live")}` : t("chat.computer")}
           >
-            <Monitor size={18} />{busy && place === "browser" && <span aria-hidden="true" className="absolute right-1 top-1 size-1.5 animate-pulse rounded-full bg-success" data-testid="computer-button-live" />}
+            <Monitor size={17} />{busy && place === "browser" && <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-1.5 animate-pulse rounded-full bg-success" data-testid="computer-button-live" />}
           </button>
           <ChatHeaderMenu key={`menu:${bot.threadId}`} bot={bot} messages={messages} findOpen={findOpen} onFind={() => setFindOpen((open) => !open)} />
         </div>
@@ -1423,7 +1426,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
       >
         <div
           ref={transcriptRef}
-          className="glass-scroller-content chat-column flex w-full flex-col gap-3"
+          className="glass-scroller-content chat-column flex w-full flex-col gap-4"
           style={{ paddingBottom: composerDock.pad }}
           role="log"
           // off: a polite log re-reads every tick and chip while the bot works; TranscriptAnnouncer speaks once when

@@ -28,10 +28,10 @@ export function ComposerSendButton({ busy, canSteer, attachmentPending, sendLabe
             : `${t("chat.send")} (${sendLabel})`
       }
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-full text-white",
+        "flex size-8 shrink-0 items-center justify-center rounded-full transition-[filter,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-composer",
         busy && !canSteer
           ? "bg-raised text-ink-secondary hover:bg-raised-hover"
-          : "bg-accent hover:brightness-110",
+          : "bg-accent text-accent-ink hover:brightness-110",
       )}
     >
       {busy && !canSteer ? <Clock size={15} /> : <ArrowUp size={17} />}

@@ -17,20 +17,20 @@ export function ToolActivity({ tool, place = null }: { tool: NonNullable<Message
   const label = advanced ? tool.name : toolStepLabel(tool);
   const status = tool.ok === undefined ? t("toolDetail.running") : failed ? t("toolDetail.failed") : t("toolDetail.completed");
   return (
-    <details onToggle={(event) => setExpanded(event.currentTarget.open)} className="group/tool w-fit max-w-full rounded-xl border border-hairline/40 bg-panel text-[13px] open:w-[min(38rem,100%)]" data-testid="tool-activity">
+    <details onToggle={(event) => setExpanded(event.currentTarget.open)} className="group/tool w-fit max-w-full overflow-hidden rounded-lg border border-hairline/40 bg-panel/70 text-[12.5px] transition-colors open:w-[min(38rem,100%)] open:bg-panel" data-testid="tool-activity">
       <summary
         role="button"
         aria-expanded={expanded}
         aria-label={t("toolDetail.label", { name: label, status })}
-        className={cn("flex min-h-8 cursor-pointer list-none items-center gap-2 rounded-xl px-3 py-1.5 hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden", failed ? "text-danger" : "text-ink-secondary")}
+        className={cn("flex min-h-8 cursor-pointer list-none items-center gap-2 px-2.5 py-1 transition-colors hover:bg-control/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden", failed ? "text-danger" : "text-ink-secondary hover:text-ink")}
       >
-        <span className="shrink-0" aria-hidden="true">{tool.ok === undefined ? <WorkingDots size={3.5} /> : failed ? <X size={13} /> : <Check size={13} className="text-success" />}</span>
+        <span className={cn("flex size-4 shrink-0 items-center justify-center rounded-full", tool.ok === undefined ? "" : failed ? "bg-danger/15" : "bg-success/15")} aria-hidden="true">{tool.ok === undefined ? <WorkingDots size={3.5} /> : failed ? <X size={11} strokeWidth={2.5} /> : <Check size={11} strokeWidth={2.5} className="text-success" />}</span>
         {place && <PlaceIcon place={place} size={13} className="shrink-0 opacity-70" role="img" aria-label={t(placeLabelKey(place))} data-testid="tool-place" />}
         <span className={cn("min-w-0 max-w-[30rem] truncate leading-5", advanced ? "font-mono" : "font-medium")}>{label}</span>
         {advanced && tool.summary && tool.summary !== tool.name && !nameIsCommand(tool.name) && <span className="min-w-0 flex-1 truncate font-mono" title={tool.summary}>{tool.summary}</span>}
-        <ChevronRight size={13} className="ml-auto shrink-0 group-open/tool:rotate-90" aria-hidden="true" />
+        <ChevronRight size={13} className="ml-auto shrink-0 opacity-70 transition-transform group-open/tool:rotate-90" aria-hidden="true" />
       </summary>
-      <div className="space-y-3 border-t border-hairline/40 p-3 text-ink-secondary">
+      <div className="space-y-3 border-t border-hairline/40 px-3 pb-3 pt-2.5 text-ink-secondary">
         <div className={cn("text-[11px] font-medium", failed && "text-danger")}>{status}</div>
         {label !== tool.name && <div>
           <div className="mb-1 text-[11px] font-medium">{t("toolDetail.tool")}</div>
@@ -38,11 +38,11 @@ export function ToolActivity({ tool, place = null }: { tool: NonNullable<Message
         </div>}
         <div>
           <div className="mb-1 text-[11px] font-medium">{t("toolDetail.input")}</div>
-          <pre dir="ltr" className="max-h-52 overflow-auto rounded-lg bg-inset p-2.5 font-mono text-xs whitespace-pre-wrap break-words text-ink">{tool.input ?? tool.summary ?? tool.name}</pre>
+          <pre dir="ltr" className="max-h-52 overflow-auto rounded-md border border-hairline/30 bg-inset p-2.5 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words text-ink">{tool.input ?? tool.summary ?? tool.name}</pre>
         </div>
         <div>
           <div className="mb-1 text-[11px] font-medium">{t("toolDetail.output")}</div>
-          {tool.output ? <pre dir="ltr" className="max-h-64 overflow-auto rounded-lg bg-inset p-2.5 font-mono text-xs whitespace-pre-wrap break-words text-ink">{tool.output}</pre> : <p className="text-xs">{tool.ok === undefined ? t("toolDetail.waiting") : t("toolDetail.noOutput")}</p>}
+          {tool.output ? <pre dir="ltr" className="max-h-64 overflow-auto rounded-md border border-hairline/30 bg-inset p-2.5 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words text-ink">{tool.output}</pre> : <p className="text-xs">{tool.ok === undefined ? t("toolDetail.waiting") : t("toolDetail.noOutput")}</p>}
         </div>
         <p className="text-[11px] text-ink-secondary">{t("toolDetail.previewHint")}</p>
       </div>

@@ -173,12 +173,30 @@ describe("glass header", () => {
 });
 
 describe("thread control placement", () => {
-  it.each([true, false])("leaves All threads to the sidebar in both modes (advanced: %s)", (advanced) => {
+  it.each([true, false])("puts the current thread's picker beside the bot's pill in both modes (advanced: %s)", (advanced) => {
     fixture.advanced = advanced;
     const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
+    const identity = markup.slice(markup.indexOf("data-chathead-identity"), markup.indexOf("data-chathead-controls"));
+    expect(identity.indexOf("data-chathead-pill")).toBeLessThan(identity.indexOf("data-chathead-thread"));
+    expect(identity).toMatch(/aria-label="Current thread: [^"]+" aria-haspopup="dialog"/);
     expect(markup).not.toContain('aria-label="All threads"');
     expect(markup).toContain('data-testid="chat-more"');
     fixture.advanced = true;
+  });
+
+  it("leaves the thread picker out when threads are hidden", () => {
+    fixture.showThreads = false;
+    expect(renderToStaticMarkup(createElement(ChatView, { bot }))).not.toContain("data-chathead-thread");
+    fixture.showThreads = true;
+  });
+
+  it("draws a runs-on badge beside the computer only when one is given", () => {
+    expect(renderToStaticMarkup(createElement(ChatView, { bot }))).not.toContain("data-chathead-runs-on");
+    const markup = renderToStaticMarkup(createElement(ChatView, { bot, runsOn: { name: "Ada Lovelace", via: "subscription", plan: "Claude Max" } }));
+    const controls = markup.slice(markup.indexOf("data-chathead-controls"));
+    expect(controls.indexOf("data-chathead-runs-on")).toBeGreaterThan(-1);
+    expect(controls.indexOf("data-chathead-runs-on")).toBeLessThan(controls.indexOf('data-tour="computer"'));
+    expect(controls).toContain("Runs on Ada Lovelace · Claude Max");
   });
 
   it.each([true, false])("calls from the composer beside dictation, not the header (advanced %s)", (advanced) => {
@@ -193,13 +211,13 @@ describe("thread control placement", () => {
     fixture.advanced = true;
   });
 
-  it("gives the editor its own row in a narrow chat", () => {
+  it("gives the editor its own row above the composer's controls", () => {
     const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
     expect(markup).toContain("@container/composer");
     const row = /data-composer-row="[^"]*" class="([^"]*)"/.exec(markup)!;
-    expect(row[1]).toContain("@max-[30rem]/composer:flex-wrap");
+    expect(row[1].split(" ")).toContain("flex-wrap");
     const editor = /class="mention-editor ([^"]*)"/.exec(markup)!;
-    expect(editor[1].split(" ")).toEqual(expect.arrayContaining(["min-w-0", "flex-1", "@max-[30rem]/composer:order-first", "@max-[30rem]/composer:basis-full"]));
+    expect(editor[1].split(" ")).toEqual(expect.arrayContaining(["min-w-0", "flex-1", "order-first", "basis-full"]));
   });
 
   it("keeps the composer inert until the deleted thread's replacement transcript arrives", () => {

@@ -27,8 +27,8 @@ const bot: Bot = {
 beforeEach(() => { fixture.showThreads = true; fixture.queued = {}; fixture.bots = []; fixture.dispatch.mockClear(); });
 
 describe("optional bot thread picker", () => {
-  it("keeps the usual picker when threads are shown", () => {
-    expect(renderToStaticMarkup(createElement(TaskPicker, { bot }))).toContain('aria-label="All threads"');
+  it("shows the current thread's picker when threads are shown", () => {
+    expect(renderToStaticMarkup(createElement(TaskPicker, { bot }))).toContain('aria-label="Current thread: Current chat"');
   });
 
   it("hides quiet histories and creation but keeps sibling activity reachable", () => {

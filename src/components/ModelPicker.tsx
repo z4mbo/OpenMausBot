@@ -241,8 +241,8 @@ function ModelRow({
       type="button"
       onClick={onPick}
       className={cn(
-        "flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink hover:bg-control/60",
-        current && "bg-control",
+        "flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink transition-colors hover:bg-control/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+        current && "bg-control font-medium",
       )}
     >
       <span className="flex min-w-0 items-center gap-2">
@@ -779,7 +779,8 @@ export function ModelPicker({
       aria-expanded={open && !bot.busy}
       aria-haspopup="dialog"
       className={cn(
-        "flex items-center gap-1.5 rounded-full border border-hairline/40 bg-control/60 py-1 pl-2 pr-2.5 text-[13px] text-ink hover:bg-raised-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-control/60",
+        "flex h-8 items-center gap-2 rounded-full border border-hairline/50 bg-control/50 pl-2.5 pr-3 text-[13px] font-medium text-ink transition-colors hover:bg-raised-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-control/50",
+        open && "bg-raised-hover",
         !contained && active && !showActiveAccount && COMPACT_SQUARE,
       )}
       title={bot.busy ? `${summary}${followLine}\n${t(threadId ? "model.threadBusy" : "model.busy")}` : `${summary}${followLine}`}
@@ -800,9 +801,9 @@ export function ModelPicker({
           )}
         </span>
         {selectedVariantLabel !== undefined ? (
-          <span data-model-variant className="max-w-[120px] truncate text-ink-secondary">· {selectedVariantLabel}</span>
+          <span data-model-variant className="max-w-[120px] truncate font-normal text-ink-secondary">· {selectedVariantLabel}</span>
         ) : selection.effort && (
-          <span data-model-effort className="shrink-0 text-ink-secondary">
+          <span data-model-effort className="shrink-0 font-normal text-ink-secondary">
             · {advanced ? effortLabel(selection.effort) : friendlyEffort(selection.effort)}
           </span>
         )}
@@ -837,7 +838,7 @@ export function ModelPicker({
           {...motion.exitProps}
           style={contained ? undefined : { ...placement, width: popoverWidth }}
           className={cn(
-            "flex flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-card",
+            "flex flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-menu",
             contained
               ? "relative mt-3 w-full max-h-[min(420px,50dvh)]"
               : "absolute right-0 top-full z-30 mt-2 max-w-[calc(100vw-2rem)] max-h-[min(600px,calc(100dvh-7rem))] shadow-2xl shadow-black/50",
