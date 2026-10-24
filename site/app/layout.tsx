@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Origin | A workspace for your team",
   description: "A shared space for your projects, conversations, and ideas. Plan the work, sketch together, and keep your team connected with Origin.",
-  openGraph: { title: "Origin", description: "One workspace for issues, chat, calls, and a shared canvas.", images: [{ url: "/og.png", width: 1200, height: 630, alt: "The Origin workspace" }] },
+  openGraph: { title: "Origin", description: "One workspace for issues, chat, calls, and your team's agents.", images: [{ url: "/og.png", width: 1200, height: 630, alt: "The Origin workspace" }] },
   icons: [{ rel: "icon", url: "/origin.svg" }],
 };
 
