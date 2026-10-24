@@ -213,10 +213,9 @@ export function SidebarProjects({ projects, row, onNewProject, archived, selecte
         <div data-sidebar-project-row={id} data-flip-id={id} onPointerDown={(event) => { if (!locked) drag.press(event, id); }}
           className="group/project relative min-w-0 rounded-xl">
           {row(bot)}
-          <button type="button" disabled={locked} aria-label={`Reorder ${bot.name}`} title="Drag to reorder, or use the Up and Down arrow keys"
+          <button type="button" disabled={locked} aria-label={`Reorder ${bot.name}`} title="Use the Up and Down arrow keys to reorder"
             onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); event.stopPropagation(); order.moveBy(id, event.key === "ArrowUp" ? -1 : 1); } }}
-            className={cn("absolute left-0.5 top-1/2 z-10 flex h-6 w-3.5 -translate-y-1/2 touch-none select-none items-center justify-center rounded text-ink-tertiary opacity-0 transition-opacity duration-(--motion-fast) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-              locked ? "pointer-events-none" : "cursor-grab hover:text-ink-secondary active:cursor-grabbing group-hover/project:opacity-100 focus-visible:opacity-100 touch:opacity-100")}>
+            className="pointer-events-none absolute left-0.5 top-1/2 z-10 flex h-6 w-3.5 -translate-y-1/2 select-none items-center justify-center rounded text-ink-tertiary opacity-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
             <GripVertical size={12} aria-hidden="true" />
           </button>
         </div>
