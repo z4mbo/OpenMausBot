@@ -31,22 +31,22 @@ async function fixture() {
   return { t, teamId, owner, member, viewer, outsider };
 }
 
-const fal = { integration: "fal", values: { key: "fal-key-id:fal-secret" }, visible: {} };
+const openai = { integration: "openai", values: { apiKey: "sk-openai-secret" }, visible: {} };
 
 describe("integration keys shared with a workspace", () => {
   test("an admin shares a key once and every editor's server can use it, sealed at rest", async () => {
     const f = await fixture();
-    await expect(f.t.action(api.sharedKeys.share, { sessionToken: f.member.token, teamId: f.teamId, ...fal })).rejects.toThrow("owner or admin");
-    await f.t.action(api.sharedKeys.share, { sessionToken: f.owner.token, teamId: f.teamId, ...fal });
+    await expect(f.t.action(api.sharedKeys.share, { sessionToken: f.member.token, teamId: f.teamId, ...openai })).rejects.toThrow("owner or admin");
+    await f.t.action(api.sharedKeys.share, { sessionToken: f.owner.token, teamId: f.teamId, ...openai });
     const stored = await f.t.run((ctx) => ctx.db.query("sharedKeys").first());
-    expect(stored?.sealed).not.toContain("fal-secret");
+    expect(stored?.sealed).not.toContain("openai-secret");
     const resolved = await f.t.action(api.sharedKeys.resolve, { sessionToken: f.member.token });
-    expect(resolved).toEqual([expect.objectContaining({ integration: "fal", values: { key: "fal-key-id:fal-secret" }, sharedByName: "owner", projectId: null })]);
+    expect(resolved).toEqual([expect.objectContaining({ integration: "openai", values: { apiKey: "sk-openai-secret" }, sharedByName: "owner", projectId: null })]);
     expect(await f.t.action(api.sharedKeys.resolve, { sessionToken: f.viewer.token })).toEqual([]);
     expect(await f.t.action(api.sharedKeys.resolve, { sessionToken: f.outsider.token })).toEqual([]);
     const listed = await f.t.query(api.sharedKeys.list, { sessionToken: f.viewer.token, teamId: f.teamId });
-    expect(listed).toEqual([expect.objectContaining({ integration: "fal", sharedByName: "owner", visible: {} })]);
-    expect(JSON.stringify(listed)).not.toContain("fal-secret");
+    expect(listed).toEqual([expect.objectContaining({ integration: "openai", sharedByName: "owner", visible: {} })]);
+    expect(JSON.stringify(listed)).not.toContain("openai-secret");
   });
 
   test("a project key reaches only that project's editors, and unsharing removes it", async () => {
@@ -65,7 +65,7 @@ describe("integration keys shared with a workspace", () => {
   test("without a sealing key nothing is stored", async () => {
     const f = await fixture();
     vi.stubEnv("ORIGIN_SEALING_KEY", "");
-    await expect(f.t.action(api.sharedKeys.share, { sessionToken: f.owner.token, teamId: f.teamId, ...fal })).rejects.toThrow("ORIGIN_SEALING_KEY");
+    await expect(f.t.action(api.sharedKeys.share, { sessionToken: f.owner.token, teamId: f.teamId, ...openai })).rejects.toThrow("ORIGIN_SEALING_KEY");
     expect(await f.t.run((ctx) => ctx.db.query("sharedKeys").first())).toBeNull();
   });
 });
