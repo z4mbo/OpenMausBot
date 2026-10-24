@@ -87,13 +87,40 @@ try {
           assert.equal(Object.hasOwn(update.args, "description"), false);
           evidence.cases.push({ screen: "issue-collaboration-save", size, theme, mutation: update });
           await page.getByRole("button", { name: "Discard", exact: true }).click();
+          const mirrorsBefore = requests.filter((request) => request.path === "/api/github/mirror").length;
           await page.getByRole("button", { name: "Mark complete", exact: true }).click();
-          await page.getByText(/asks you before merging/).waitFor();
+          await page.waitForFunction(() => window.originPagesFixture.calls.some((call) => call.name === "tasks:updateTask" && call.args.done === true));
+          assert.equal(await page.getByRole("dialog", { name: /^Complete ORI-/ }).count(), 0, "Completing must not route through a pull request dialog");
+          assert.equal(await page.getByRole("button", { name: "Create GitHub issue" }).count(), 0, "GitHub issues are created automatically");
+          await page.waitForTimeout(100);
+          assert.ok(requests.filter((request) => request.path === "/api/github/mirror").length > mirrorsBefore, "Completing syncs the linked GitHub issue");
           await record("complete-issue", size, theme, "populated");
-          await page.keyboard.press("Escape");
-          await page.getByRole("dialog", { name: /^Complete ORI-/ }).waitFor({ state: "detached" });
         }
         await page.keyboard.press("Escape");
+        await page.getByRole("dialog").waitFor({ state: "detached" });
+        if (phase === "after") {
+          const row = page.getByRole("listitem").filter({ hasText: "Inspect the synthetic release workflow" }).first();
+          const box = await row.boundingBox();
+          await row.click({ button: "right", position: { x: box.width - 12, y: box.height / 2 } });
+          const menu = page.getByRole("menu", { name: "Actions for Inspect the synthetic release workflow" });
+          await menu.waitFor();
+          assert.deepEqual(await menu.getByRole("menuitem").allTextContents(), ["Complete", "Move to Draft", "Delete"]);
+          const sheet = await menu.boundingBox();
+          const viewportSize = page.viewportSize();
+          assert.ok(sheet.x >= 0 && sheet.y >= 0 && sheet.x + sheet.width <= viewportSize.width && sheet.y + sheet.height <= viewportSize.height, JSON.stringify({ sheet, viewportSize }));
+          await record("issue-context-menu", size, theme, "populated", "owner", { sheet });
+          await page.keyboard.press("Escape");
+          await menu.waitFor({ state: "detached" });
+          const draft = page.getByRole("listitem").filter({ hasText: "A private draft that must remain off GitHub" }).first();
+          await draft.click({ button: "right" });
+          const draftMenu = page.getByRole("menu", { name: "Actions for A private draft that must remain off GitHub" });
+          assert.deepEqual(await draftMenu.getByRole("menuitem").allTextContents(), ["Complete", "Delete"]);
+          await page.mouse.click(2, 2);
+          await draftMenu.waitFor({ state: "detached" });
+          await row.click({ button: "right" });
+          await menu.getByRole("menuitem", { name: "Move to Draft" }).click();
+          await page.waitForFunction(() => window.originPagesFixture.calls.some((call) => call.name === "tasks:moveTask" && call.args.columnId === "fixture-draft"));
+        }
       }
       if (screen === "vault") {
         await page.getByLabel("Vault passphrase", { exact: true }).fill("fixture-passphrase");

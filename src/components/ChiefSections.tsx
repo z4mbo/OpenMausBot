@@ -58,7 +58,7 @@ export function ChiefSectionPanel({ bot, section }: { bot: Bot; section: Exclude
           const agent = agentId ? team.find((candidate) => candidate.id === agentId) : undefined;
           if (agent) handOff(issue, agent);
           else setAssigning(issue);
-        }} chief={{ name: bot.name, implement: (issue) => dispatch({ type: "send", botId: bot.id, text: implementBrief(issue) }), openCanvas: () => setChiefSectionOf(bot.id, "draw") }} />
+        }} chief={{ name: bot.name, openCanvas: () => setChiefSectionOf(bot.id, "draw") }} />
         {assigning && <AssignIssueDialog issue={assigning} agents={team} onPick={(agent) => handOff(assigning, agent)} onClose={() => setAssigning(null)} />}
       </>
     );

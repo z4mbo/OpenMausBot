@@ -457,11 +457,12 @@ describe("issue mirroring and two-way state", () => {
     return harness;
   };
 
-  it("deletes the GitHub issue and forgets it when Origin completed the issue since the last sync", async () => {
+  it("closes the GitHub issue as completed and keeps the link when Origin completed the issue since the last sync", async () => {
     const { network } = await tickWith({ done: true, githubIssueState: "open" }, "open");
-    expect(JSON.parse(network.requests.find((r) => r.key.endsWith("/graphql"))!.body).query).toContain("deleteIssue");
-    expect(network.bridgeCalls.find((c) => c.name === "unlinkIssue")?.args).toEqual({ projectId: "p1", taskId: "t1", number: 5 });
-    expect(network.bridgeCalls.some((c) => c.name === "linkIssue")).toBe(false);
+    expect(JSON.parse(network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "closed", state_reason: "completed" });
+    expect(network.requests.some((r) => r.key.endsWith("/graphql"))).toBe(false);
+    expect(network.bridgeCalls.some((c) => c.name === "unlinkIssue")).toBe(false);
+    expect(network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ taskId: "t1", number: 5 });
   });
 
   it("reopens on GitHub after Origin reopened, and lets a change on GitHub win", async () => {
@@ -472,12 +473,13 @@ describe("issue mirroring and two-way state", () => {
     expect(closedOnGitHub.network.bridgeCalls.find((c) => c.name === "linkIssue")?.args).toMatchObject({ state: "closed" });
   });
 
-  it("deletes the GitHub issue of an issue moved back to Draft, and leaves an already closed one alone", async () => {
+  it("deletes the GitHub issue of an issue moved back to Draft, even an already closed one", async () => {
     const parked = await tickWith({ done: false, draft: true, githubIssueState: "open" }, "open");
     expect(parked.network.requests.some((r) => r.key.endsWith("/graphql"))).toBe(true);
     expect(parked.network.bridgeCalls.find((c) => c.name === "unlinkIssue")?.args).toEqual({ projectId: "p1", taskId: "t1", number: 5 });
-    const stillParked = await tickWith({ done: false, draft: true, githubIssueState: "closed" }, "closed");
-    expect(stillParked.network.requests.some((r) => r.key.startsWith("PATCH") || r.key.endsWith("/comments"))).toBe(false);
+    const closedParked = await tickWith({ done: false, draft: true, githubIssueState: "closed" }, "closed");
+    expect(closedParked.network.requests.some((r) => r.key.endsWith("/graphql"))).toBe(true);
+    expect(closedParked.network.bridgeCalls.find((c) => c.name === "unlinkIssue")?.args).toEqual({ projectId: "p1", taskId: "t1", number: 5 });
     const left = await tickWith({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed");
     expect(JSON.parse(left.network.requests.find((r) => r.key.startsWith("PATCH"))!.body)).toEqual({ state: "open" });
   });

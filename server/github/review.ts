@@ -2,7 +2,7 @@ import { appConfig, GitHubHttpError, githubRequest, type GitHubService } from ".
 import { repositoryPath, withInstallation } from "./app.ts";
 import { checksSummary, syncPREvent } from "./prs.ts";
 import type { OriginGitHub } from "../origin-cloud.ts";
-import { mirrorTasks, projectConnection, syncGitHubEvent } from "./sync.ts";
+import { mirrorTasks, projectConnection, pushIssueState, syncGitHubEvent } from "./sync.ts";
 import { readClosingIssueNumbers, readClosingIssuesForPulls } from "./closing-issues.ts";
 
 export type PullState = "draft" | "open" | "closed" | "merged";
@@ -214,6 +214,7 @@ export function originGitHub(service: GitHubService): OriginGitHub {
       const [result] = await mirrorTasks(service, projectId, [taskId]);
       return result;
     },
+    syncIssue: (projectId, taskId) => pushIssueState(service, projectId, taskId),
     linkPullRequest: (projectId, number, issueNumber) => withProjectGitHub(service, projectId, (token, repoUrl) => linkClosingReference(service, repoUrl, number, issueNumber, token)),
     pullRequests: (projectId) => withProjectGitHub(service, projectId, (token, repoUrl) => listPullRequests(service, repoUrl, token)),
     pullRequest: (projectId, number) => withProjectGitHub(service, projectId, (token, repoUrl) => readPullRequest(service, repoUrl, number, token)),

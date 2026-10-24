@@ -115,20 +115,26 @@ export const linkIssue = internalMutation({
     if (a.issueUrl !== `${a.repoUrl}/issues/${a.number}`) throw new Error("Invalid issue URL");
     if ((task.githubIssueUpdatedAt || 0) > a.updatedAt) return null;
     const prDriven = task.githubTaskMode === "pull_request" || Boolean(await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", task._id)).first());
-    const changed = !prDriven && a.state === "open" && task.githubIssueState === "closed" && task.done;
+    const reopenedOnGitHub = !prDriven && a.state === "open" && task.githubIssueState === "closed" && task.done;
+    const closedOnGitHub = !prDriven && a.state === "closed" && task.githubIssueState === "open" && !task.done && !task.githubIssueReopenRequested && !await inDraft(ctx, task);
+    const changed = reopenedOnGitHub || closedOnGitHub;
     if (!changed && task.githubIssueNumber === a.number && task.githubIssueState === a.state && task.githubIssueUpdatedAt === a.updatedAt && task.githubIssueUrl === a.issueUrl && task.teamId === project.teamId && !(a.state === "open" && task.githubIssueReopenRequested)) {
       await completeWithMergeReceipt(ctx, project, task);
       return null;
     }
-    if (changed) await changeOpenIssueCount(ctx, project._id, 1);
+    if (reopenedOnGitHub) await changeOpenIssueCount(ctx, project._id, 1);
+    if (closedOnGitHub) {
+      await recordCompletion(ctx, task, true, a.updatedAt);
+      await changeOpenIssueCount(ctx, project._id, -1);
+    }
     const reopened = a.state === "open" && task.githubIssueState === "closed";
-    await ctx.db.patch(task._id, { teamId: project.teamId, githubIssueNumber: a.number, githubIssueUrl: a.issueUrl, githubIssueState: a.state, githubIssueUpdatedAt: a.updatedAt, githubIssueSyncedAt: Date.now(), ...(a.state === "open" ? { githubIssueReopenRequested: undefined } : {}), ...(reopened ? { completionPullRequest: undefined } : {}), ...(changed ? { done: false, updatedAt: Date.now() } : {}) });
+    await ctx.db.patch(task._id, { teamId: project.teamId, githubIssueNumber: a.number, githubIssueUrl: a.issueUrl, githubIssueState: a.state, githubIssueUpdatedAt: a.updatedAt, githubIssueSyncedAt: Date.now(), ...(a.state === "open" ? { githubIssueReopenRequested: undefined } : {}), ...(reopened ? { completionPullRequest: undefined } : {}), ...(changed ? { done: closedOnGitHub, updatedAt: Date.now() } : {}) });
     await completeWithMergeReceipt(ctx, project, (await ctx.db.get(task._id))!);
     if (changed || !task.githubIssueNumber) await touchProject(ctx, project._id); return null;
   },
 });
 
-/** Forgets the GitHub issue removed for an issue that was completed or moved back to Draft; leaving Draft or reopening creates a new one. */
+/** Forgets the GitHub issue removed for an issue moved back to Draft; leaving Draft creates a new one. */
 export const unlinkIssue = internalMutation({
   args: { projectId: v.id("projects"), taskId: v.id("tasks"), number: v.number() }, returns: v.null(),
   handler: async (ctx, a) => {
@@ -143,7 +149,7 @@ export const unlinkIssue = internalMutation({
   },
 });
 
-/** Security: only the signed server bridge records head-pinned merge receipts; an issue closure cannot create one. */
+/** Security: only the signed server bridge records head-pinned merge receipts; an issue closure completes the issue without one. */
 export const completeMergedIssue = internalMutation({
   args: {
     projectId: v.id("projects"), taskId: v.id("tasks"), repoUrl: v.string(), issueNumber: v.number(),

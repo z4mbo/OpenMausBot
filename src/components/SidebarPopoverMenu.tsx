@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { createPortal } from "react-dom";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { useMenuMotion } from "./MenuMotion";
+import { useHeldMenuMotion, useMenuMotion } from "./MenuMotion";
 import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 
 export interface SidebarMenuItem {
@@ -28,6 +28,7 @@ export interface SidebarMenuItem {
 const OPEN_DELAY_MS = 80;
 const CLOSE_DELAY_MS = 250;
 export const ANCHORED_MENU_WIDTH = 280;
+const POINTER_MENU_WIDTH = 220;
 const EDGE_MARGIN = 8;
 const ANCHOR_GAP = 6;
 
@@ -41,6 +42,14 @@ export function anchoredMenuPosition(anchor: Box, menu: Size, viewport: Size, rt
   const top = above >= EDGE_MARGIN ? above : anchor.bottom + ANCHOR_GAP;
   const maxTop = Math.max(EDGE_MARGIN, viewport.height - menu.height - EDGE_MARGIN);
   return { left, top: Math.min(Math.max(top, EDGE_MARGIN), maxTop) };
+}
+
+export function pointerMenuPosition(point: { x: number; y: number }, menu: Size, viewport: Size, rtl = false): { left: number; top: number } {
+  const maxLeft = Math.max(EDGE_MARGIN, viewport.width - menu.width - EDGE_MARGIN);
+  const left = Math.min(Math.max(rtl ? point.x - menu.width : point.x, EDGE_MARGIN), maxLeft);
+  const fitsBelow = point.y + menu.height + EDGE_MARGIN <= viewport.height;
+  const maxTop = Math.max(EDGE_MARGIN, viewport.height - menu.height - EDGE_MARGIN);
+  return { left, top: Math.min(Math.max(fitsBelow ? point.y : point.y - menu.height, EDGE_MARGIN), maxTop) };
 }
 
 export function submenuPosition(menu: Box, row: Box, submenu: Size, viewport: Size, rtl = false): { left: number; top: number } {
@@ -420,5 +429,63 @@ export function SidebarPopoverMenu({
         ? typeof document !== "undefined" && sheet ? createPortal(<>{sheet}{subSheet}</>, document.body) : null
         : <>{sheet}{typeof document !== "undefined" && subSheet ? createPortal(subSheet, document.body) : null}</>}
     </div>
+  );
+}
+
+export type PointerMenuState = { x: number; y: number; ariaLabel: string; items: SidebarMenuItem[] };
+
+export function PointerMenu({ menu, onClose }: { menu: PointerMenuState | null; onClose(): void }) {
+  const motion = useHeldMenuMotion(menu);
+  const shown = motion.value;
+  const menuRef = useRef<HTMLDivElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+  const close = useCallback(() => {
+    const hadFocus = menuRef.current?.contains(document.activeElement) ?? false;
+    onClose();
+    if (hadFocus) opener.current?.focus();
+  }, [onClose]);
+  const insideRef = useRef({ contains: (target: unknown) => menuRef.current?.contains(target as Node) ?? false });
+  usePopoverDismiss(menu !== null, insideRef, close);
+
+  useLayoutEffect(() => {
+    if (!menu) return;
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const sheet = menuRef.current;
+    if (!sheet) return;
+    setPosition(pointerMenuPosition(menu, { width: sheet.offsetWidth, height: sheet.offsetHeight }, { width: window.innerWidth, height: window.innerHeight }, isRtl(sheet)));
+  }, [menu]);
+
+  useEffect(() => {
+    if (menu && position) menuItems(menuRef.current)[0]?.focus();
+  }, [menu, position]);
+
+  if (!motion.shown || !shown || typeof document === "undefined") return null;
+  return createPortal(
+    <div
+      ref={menuRef}
+      role="menu"
+      aria-label={shown.ariaLabel}
+      data-pointer-menu
+      {...motion.exitProps}
+      onContextMenu={(event) => event.preventDefault()}
+      onKeyDown={(event) => {
+        const list = menuItems(event.currentTarget);
+        const next = nextMenuIndex(event.key, list.indexOf(document.activeElement as HTMLElement), list.length);
+        if (next != null) {
+          event.preventDefault();
+          list[next]?.focus();
+        } else if (event.key === "Escape" || event.key === "Tab") {
+          event.preventDefault();
+          event.stopPropagation();
+          close();
+        }
+      }}
+      style={{ position: "fixed", left: position?.left ?? shown.x, top: position?.top ?? shown.y, width: POINTER_MENU_WIDTH, maxWidth: `calc(100vw - ${EDGE_MARGIN * 2}px)`, visibility: position ? undefined : "hidden" }}
+      className={cn("ui-panel z-[60] overflow-hidden bg-menu p-1.5", motion.className)}
+    >
+      <MenuRows items={shown.items} roomy onItem={(item) => { close(); item.onSelect(); }} />
+    </div>,
+    document.body,
   );
 }

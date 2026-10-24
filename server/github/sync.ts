@@ -176,14 +176,19 @@ export async function createGitHubTask(service: GitHubService, projectId: string
 
 export const DRAFT_STAYS_LOCAL = "This issue is in Draft, which stays in Origin. Move it to another column to create its GitHub issue.";
 
-/** `remove` deletes the GitHub issue of an Origin issue that was completed or moved back to Draft; it gets a new one when it leaves Draft or reopens. */
-export type IssueStateMove = "pull" | "remove" | "reopen";
+/**
+ * What a sync pushes to GitHub. `close` closes the GitHub issue of a completed Origin issue as completed and keeps the link;
+ * `reopen` reopens it after the Origin issue reopens; `remove` deletes the GitHub issue of one in Draft, which gets a new
+ * one when it leaves Draft. A completion or reopening made on GitHub since the last sync wins and is pulled instead.
+ */
+export type IssueStateMove = "pull" | "close" | "remove" | "reopen";
 
 export function issueStateMove(task: { done: boolean; draft?: boolean; githubIssueState?: "open" | "closed"; githubIssueReopenRequested?: boolean }, remote: "open" | "closed"): IssueStateMove {
-  const local = task.done || task.draft === true ? "closed" : "open";
+  if (task.draft === true) return "remove";
+  const local = task.done ? "closed" : "open";
   if (!task.githubIssueState || remote !== task.githubIssueState || local === remote) return "pull";
   if (local === "open") return task.githubIssueReopenRequested ? "reopen" : "pull";
-  return "remove";
+  return "close";
 }
 
 async function syncTarget(service: GitHubService, target: Target, pushChanges = true) {
@@ -196,17 +201,34 @@ async function syncTarget(service: GitHubService, target: Target, pushChanges = 
   if (issue.pull_request) return;
   const move = pushChanges ? issueStateMove(task, issue.state) : "pull";
   if (move === "remove") {
-    await removeGitHubIssue(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}/issues/${target.number}`, task.done ? "Completed in Origin" : "Moved back to Draft in Origin");
+    await removeGitHubIssue(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}/issues/${target.number}`, "Moved back to Draft in Origin");
     await service.bridge("unlinkIssue", { projectId: target.projectId, taskId: target.taskId, number: target.number });
     return;
   }
+  if (move === "close") issue = await githubRequest<GitHubIssue>(service, path, token, { method: "PATCH", body: JSON.stringify({ state: "closed", state_reason: "completed" }) });
   if (move === "reopen") issue = await githubRequest<GitHubIssue>(service, path, token, { method: "PATCH", body: JSON.stringify({ state: "open" }) });
   await link(service, target.projectId, target.taskId, `https://github.com/${repo.owner}/${repo.repo}`, issue);
 }
 
-/** Pushes one linked issue's Origin state to GitHub now instead of on the next sync: completed or back in Draft removes its GitHub issue. */
+/** Pushes one linked issue's Origin state to GitHub now instead of on the next sync: see `IssueStateMove`. */
 export async function syncLinkedTask(service: GitHubService, projectId: string, taskId: string, number: number, repoUrl: string) {
   await syncTarget(service, { projectId, taskId, number, repoUrl });
+}
+
+export async function pushIssueState(service: GitHubService, projectId: string, taskId: string): Promise<MirrorResult> {
+  try {
+    const { task, repo } = await contextWithToken(service, projectId, taskId);
+    if (!task || !repo) return { taskId };
+    if (task.githubIssueNumber) {
+      await syncLinkedTask(service, projectId, taskId, task.githubIssueNumber, `https://github.com/${repo.owner}/${repo.repo}`);
+      return task.draft ? { taskId } : { taskId, issueNumber: task.githubIssueNumber };
+    }
+    if (task.done || task.draft) return { taskId };
+    const created = await createGitHubTask(service, projectId, taskId);
+    return { taskId, ...(created.issueNumber ? { issueNumber: created.issueNumber } : {}) };
+  } catch (error) {
+    return { taskId, error: error instanceof Error ? error.message : "GitHub issue sync failed" };
+  }
 }
 
 export type GitHubIssueRemoval = {

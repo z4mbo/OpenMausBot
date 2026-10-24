@@ -78,6 +78,7 @@ export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
 /** GitHub work of the Origin tools, each call through the named project's own GitHub connection. */
 export interface OriginGitHub {
   mirrorIssue(projectId: string, taskId: string): Promise<MirrorResult>;
+  syncIssue(projectId: string, taskId: string): Promise<MirrorResult>;
   linkPullRequest(projectId: string, number: number, issueNumber: number): Promise<{ added: boolean; pull: PullSummary }>;
   pullRequests(projectId: string): Promise<PullSummary[]>;
   pullRequest(projectId: string, number: number): Promise<PullDetail>;
@@ -630,23 +631,14 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     const { taskId } = target;
     const changed: string[] = [];
     let done = typeof args.done === "boolean" ? args.done : undefined;
-    const viaPullRequest = Boolean(text((await projectDoc(ctx, scope.projectId)).repoUrl));
-    const completesHere = "Issues of a project with a GitHub repository complete when their pull request merges: finish your work with origin_complete_issue and the pull request link.";
-    if (done === true && viaPullRequest) return { text: completesHere, isError: true };
+    let column: Args | undefined;
     if (trimmed(args.column)) {
       const { columns, tasks } = await board(scope);
-      const column = findColumn(columns, text(args.column));
+      column = findColumn(columns, text(args.column));
       if (!column) return { text: `No such column. Columns: ${columnNames(columns)}.`, isError: true };
       if (!tasks.some((task) => task._id === taskId)) return { text: `No issue ${taskId} in this Origin project.`, isError: true };
-      if (viaPullRequest && isDoneColumn(column) && done !== false) return { text: completesHere, isError: true };
-      await scope.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, columnId: column._id });
       done ??= isDoneColumn(column);
       changed.push(`column "${text(column.title)}"`);
-      const task = tasks.find((item) => item._id === taskId);
-      if (viaPullRequest && ctx.github && !isDraftColumn(column) && !isDoneColumn(column) && !task?.githubIssueNumber) {
-        const result = await ctx.github.mirrorIssue(scope.projectId, taskId).catch((error: unknown): MirrorResult => ({ taskId, error: error instanceof Error ? error.message : String(error) }));
-        if (result.issueNumber) changed.push(`mirrored as GitHub issue #${result.issueNumber}`);
-      }
     }
     const fields: Args = {
       ...(typeof args.title === "string" ? { title: args.title } : {}),
@@ -656,16 +648,26 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
       ...(trimmed(args.due_date) ? { dueDate: trimmed(args.due_date) } : {}),
       ...(done !== undefined ? { done } : {}),
     };
-    if (Object.keys(fields).length) {
-      await scope.client.mutation("tasks:updateTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, ...fields });
-      changed.push(...Object.keys(fields).map((key) => key === "assignedToEmail" ? "assignee" : key === "dueDate" ? "due date" : key === "done" ? `done ${String(done)}` : key));
-    }
+    const move = async () => {
+      if (column) await scope.client.mutation("tasks:moveTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, columnId: column._id });
+    };
+    const update = async () => {
+      if (Object.keys(fields).length) await scope.client.mutation("tasks:updateTask", { projectId: scope.projectId, sessionToken: scope.sessionToken, taskId, ...fields });
+    };
+    if (column && isDoneColumn(column)) { await update(); await move(); }
+    else { await move(); await update(); }
+    changed.push(...Object.keys(fields).map((key) => key === "assignedToEmail" ? "assignee" : key === "dueDate" ? "due date" : key === "done" ? `done ${String(done)}` : key));
     if (Array.isArray(args.labels)) {
       await setLabels(scope, taskId, args.labels);
       changed.push("labels");
     }
     if (!changed.length) return { text: "origin_update_issue changed nothing: pass at least one of title, description, priority, done, column, assignee, due_date or labels.", isError: true };
-    return { text: `Updated issue ${taskId}: ${changed.join(", ")}.`, cards: await issueCardsFor(ctx, target, "Issue updated") };
+    let github = "";
+    if ((column || done !== undefined) && ctx.github && text((await projectDoc(ctx, scope.projectId)).repoUrl)) {
+      const result = await ctx.github.syncIssue(scope.projectId, taskId).catch((error: unknown): MirrorResult => ({ taskId, error: error instanceof Error ? error.message : String(error) }));
+      github = result.error ? ` Its GitHub issue is not in sync yet (${clip(result.error, 200)}); the next sync retries.` : result.issueNumber ? ` GitHub issue #${result.issueNumber} is in sync.` : "";
+    }
+    return { text: `Updated issue ${taskId}: ${changed.join(", ")}.${github}`, cards: await issueCardsFor(ctx, target, "Issue updated") };
   },
 
   async origin_comment_issue(args, ctx) {
