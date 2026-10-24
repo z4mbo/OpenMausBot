@@ -355,8 +355,8 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
             const draft = draftIds.has(column._id);
             return (
               <div key={column._id} data-column-id={column._id} data-draft={draft || undefined}
-                className={cn("flex w-[min(19rem,85vw)] shrink-0 snap-start flex-col rounded-2xl p-2 transition-[background-color,box-shadow] duration-(--motion-slow)",
-                  draft ? "border border-dashed border-hairline/70 bg-inset/20" : "bg-inset/50", lifted && (draft ? "bg-inset/40" : "bg-inset/70"), here && "bg-inset/90")}>
+                className={cn("flex w-[min(19rem,85vw)] shrink-0 snap-start flex-col rounded-2xl p-2",
+                  draft ? "border border-dashed border-hairline/70 bg-inset/20" : "bg-inset/50")}>
                 <div className="flex items-center gap-2 px-2 pb-2 pt-1">
                   <ColumnIcon column={column} size={12} strokeWidth={2.5} />
                   <strong className={cn("truncate text-[13px] font-semibold", draft ? "text-ink-secondary" : "text-ink")}>{column.title}</strong>
