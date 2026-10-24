@@ -423,6 +423,7 @@ export async function submitDesign(args: Args, project: CanvasToolProject) {
   if (!project.canEdit) project.refuse(`The Origin sign-in only views ${project.name}.`);
   const canvas = await chosenCanvas(args, project);
   const taskId = text(args.issue_id).trim() || project.refuse("origin_design_submit needs issue_id.");
+  await project.client.query("tasks:details", { projectId: project.projectId, sessionToken: project.sessionToken, taskId });
   const frames = (Array.isArray(args.frames) ? args.frames : [args.frames]).map(text).map((id) => id.trim()).filter(Boolean).slice(0, 12);
   if (!frames.length) project.refuse("origin_design_submit needs the frames that design the issue.");
   const rationale = text(args.rationale).trim().slice(0, 3_000);

@@ -1,0 +1,68 @@
+{
+    "date":  "2026-10-24",
+    "branch":  "agent/project-agent-scope",
+    "baseCommit":  "6c82f7b217356ce471195b29fc2cb02d08ba95a5",
+    "originToolsAudited":  46,
+    "checks":  {
+                   "typecheck":  "passed",
+                   "lint":  "passed",
+                   "fullSuite":  {
+                                     "command":  "pnpm exec vitest run server/drivers/ server/origin server/agent-tool-policy server/peer-roster.test.ts server/auto-approve.test.ts server/safety-floor.test.ts server/routes/sign-in.test.ts --maxWorkers=2",
+                                     "files":  134,
+                                     "tests":  3557,
+                                     "passed":  3533,
+                                     "skipped":  23,
+                                     "initialFailures":  1
+                                 },
+                   "resolvedFailure":  {
+                                           "file":  "server/origin-design-agent.e2e.test.ts",
+                                           "reason":  "The success card was observable before the provider tool record settled",
+                                           "fix":  "Wait for the completed provider tool item",
+                                           "rerunPassed":  1
+                                       },
+                   "finalScopeFollowup":  {
+                                              "files":  5,
+                                              "passed":  142,
+                                              "failed":  0
+                                          },
+                   "catalogAndBridgeGoldens":  {
+                                                   "passed":  127,
+                                                   "failed":  0,
+                                                   "updateEnv":  "UPDATE_AGENTS_CATALOG_GOLDENS=1",
+                                                   "sizeBudgetsChanged":  false
+                                               },
+                   "remainingFailures":  0
+               },
+    "fixture":  {
+                    "sourceEvidence":  "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792860735644-14616.log.scope.json",
+                    "serverLog":  "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792860735644-14616.log",
+                    "projectWait":  "settled",
+                    "headWait":  "settled",
+                    "dataDirectoryRemoved":  true,
+                    "result":  "passed",
+                    "backend":  {
+                                    "vault":  [
+                                                  {
+                                                      "title":  "Fixture API",
+                                                      "agentUse":  false,
+                                                      "encrypted":  true
+                                                  }
+                                              ],
+                                    "betaIssueCount":  0,
+                                    "outsideIssue":  "Elsewhere private issue"
+                                }
+                },
+    "boundaries":  {
+                       "frontendOrBackendFilesChanged":  false,
+                       "productionDeployment":  false,
+                       "pushed":  false,
+                       "completionImplementationChanged":  false
+                   },
+    "limits":  [
+                   "Vault storage consumes a member-prepared encrypted payload; member permission and unlock remain required",
+                   "Transcript reads are bounded and enforce source conversation and room access",
+                   "Live social publishing, real provider generation and GitHub mutations were not exercised",
+                   "23 provider or platform gated tests were skipped"
+               ],
+    "reportsArchive":  "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\project-agent-scope-21596ec76399423d90576c4b8f92b5c6"
+}

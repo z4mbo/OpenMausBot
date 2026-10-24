@@ -1,0 +1,1153 @@
+{
+  "fixture": {
+    "url": "http://127.0.0.1:22520",
+    "pid": 14088,
+    "dataDir": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verify-data-uIT9Os",
+    "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792860735644-14616.log"
+  },
+  "projectSend": {
+    "success": true,
+    "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+    "taskId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+    "messageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6",
+    "at": 1792860739221
+  },
+  "projectWait": {
+    "status": "settled",
+    "state": "completed",
+    "targetType": "bot",
+    "targetId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+    "taskId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+    "target": {
+      "id": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+      "name": "Alpha Chief",
+      "title": "",
+      "description": "",
+      "section": "Alpha",
+      "chiefOfStaff": true,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "busy": false,
+      "waitingForTeammates": false,
+      "activity": "idle",
+      "unread": true,
+      "activeTaskId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+      "tasks": [
+        {
+          "taskId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+          "title": "Verify only Alpha's scope.",
+          "createdAt": 1792860738239,
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "active": true,
+          "usage": {
+            "input": 12,
+            "output": 5,
+            "cachedInput": 2,
+            "costUsd": 0.01,
+            "turns": 1,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          }
+        }
+      ]
+    },
+    "messages": [
+      {
+        "id": "a602c263-ae17-465a-a683-6a2ec62ac7c6",
+        "at": 1792860739221,
+        "role": "user",
+        "kind": "text",
+        "text": "Verify only Alpha's scope."
+      },
+      {
+        "id": "582897a4-f142-4a94-a40c-dda4a84a317b",
+        "at": 1792860739631,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "origin_list_projects",
+          "ok": true,
+          "spoken": "running origin_list_projects"
+        }
+      },
+      {
+        "id": "df62dc9c-c578-4082-896c-4c8f1c621907",
+        "at": 1792860739869,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "origin_get_issue",
+          "ok": true,
+          "spoken": "running origin_get_issue"
+        }
+      },
+      {
+        "id": "faf16dd0-dd1d-41ff-9dca-b82830512a8f",
+        "at": 1792860740114,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "origin_get_issue",
+          "ok": true
+        },
+        "originIssues": {
+          "heading": "Issue ORI-ASKS",
+          "issues": [
+            {
+              "id": "000000000000000000000010010tasks",
+              "key": "ORI-ASKS",
+              "projectId": "000000000000000000010004projects",
+              "projectName": "Alpha",
+              "title": "Alpha private issue",
+              "status": "Draft",
+              "done": false,
+              "priority": "medium",
+              "assignee": "Scope Tester",
+              "due": "2030-01-01"
+            }
+          ]
+        }
+      },
+      {
+        "id": "0e876dd3-2c44-417d-8804-99f0b8c1bba5",
+        "at": 1792860740124,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "origin_get_issue",
+          "ok": false,
+          "spoken": "running origin_get_issue"
+        }
+      },
+      {
+        "id": "df24cd54-7203-4191-af7a-6dff9454a39f",
+        "at": 1792860740356,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "origin_delete_issue",
+          "ok": false,
+          "spoken": "running origin_delete_issue"
+        }
+      },
+      {
+        "id": "808ad952-f493-472d-bf6d-b83d24234dcb",
+        "at": 1792860740659,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "coordinate_bots",
+          "ok": false,
+          "spoken": "running coordinate_bots"
+        }
+      },
+      {
+        "id": "f8cd2c2f-3944-4f56-8e50-3194734bdf34",
+        "at": 1792860740875,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "origin_vault_store",
+          "ok": true,
+          "spoken": "running origin_vault_store"
+        }
+      },
+      {
+        "id": "6237a5d6-502d-48f0-8de2-e38a2ab9ab07",
+        "at": 1792860741123,
+        "role": "bot",
+        "kind": "text",
+        "text": "Alpha scoped work verified."
+      },
+      {
+        "id": "1f8a1338-b267-4762-b9ca-6c4737de4386",
+        "at": 1792860741154,
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · tools: origin_get_issue ×2 (1 failed), origin_list_projects ×1, origin_delete_issue ×1 (1 failed), coordinate_bots ×1 (1 failed), origin_vault_store ×1 (from tool previews) · reply: Alpha scoped work verified."
+      }
+    ],
+    "hasMore": true,
+    "job": {
+      "threadId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+      "scope": "job",
+      "since": 1792860739268,
+      "now": 1792860741288,
+      "state": "completed",
+      "reason": "Alpha Chief finished",
+      "version": "mHpLF3U5vz3beyOu",
+      "conversation": {
+        "kind": "bot",
+        "busy": false,
+        "activity": "idle",
+        "queued": 0
+      },
+      "roots": [
+        "56557f8b-cc32-47f7-8063-dc469ace61ac"
+      ],
+      "nodes": [
+        {
+          "id": "56557f8b-cc32-47f7-8063-dc469ace61ac",
+          "rootId": "56557f8b-cc32-47f7-8063-dc469ace61ac",
+          "depth": 0,
+          "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+          "botName": "Alpha Chief",
+          "threadId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+          "threadTitle": "Verify only Alpha's scope.",
+          "status": "completed",
+          "outcome": "done",
+          "mode": "work",
+          "reply": "resume",
+          "awaited": true,
+          "createdAt": 1792860739227,
+          "startedAt": 1792860739227,
+          "finishedAt": 1792860741130,
+          "executions": 1,
+          "result": "Alpha scoped work verified."
+        }
+      ],
+      "hidden": 0,
+      "counts": {
+        "queued": 0,
+        "running": 0,
+        "waiting": 0,
+        "needsInput": 0,
+        "completed": 1,
+        "failed": 0,
+        "cancelled": 0
+      },
+      "needsInput": []
+    }
+  },
+  "projectMessages": [
+    {
+      "id": "e4eee911-dc37-47c8-a66c-8953d9379b0c",
+      "at": 1792860738251,
+      "parentId": null,
+      "role": "bot",
+      "kind": "text",
+      "text": "Hi, I'm Alpha Chief. What would you like me to do?"
+    },
+    {
+      "id": "a602c263-ae17-465a-a683-6a2ec62ac7c6",
+      "at": 1792860739221,
+      "parentId": "e4eee911-dc37-47c8-a66c-8953d9379b0c",
+      "role": "user",
+      "kind": "text",
+      "text": "Verify only Alpha's scope.",
+      "sendId": "cli-qoR538mZ7Cm8E6SG",
+      "requestPending": false
+    },
+    {
+      "id": "582897a4-f142-4a94-a40c-dda4a84a317b",
+      "at": 1792860739631,
+      "parentId": "a602c263-ae17-465a-a683-6a2ec62ac7c6",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_list_projects",
+        "spoken": "running origin_list_projects",
+        "itemId": "tu-29604-2",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Origin projects you reach (1):\\n- Alpha (project 000000000000000000010004projects) · your project\\n  Chief: Alpha Chief [id: 0e9fc075-9eff-40fb-9227-1b89d1c9d166] · team \\\"Alpha\\\"\\n  Agents: none\\nHand an issue to one of these agents with origin_assign_issue; give other work to a project's Chief with coordinate_bots.\"\n  }\n]"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6"
+    },
+    {
+      "id": "df62dc9c-c578-4082-896c-4c8f1c621907",
+      "at": 1792860739869,
+      "parentId": "582897a4-f142-4a94-a40c-dda4a84a317b",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_get_issue",
+        "spoken": "running origin_get_issue",
+        "input": "{\n  \"issue_id\": \"000000000000000000000010010tasks\"\n}",
+        "itemId": "tu-29604-3",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"000000000000000000000010010tasks (ORI-ASKS) [Draft] Alpha private issue · priority medium · assignee Scope Tester <scope@fixture.test> · due 2030-01-01\\nOrigin project Alpha (000000000000000000010004projects).\\n\\nNo description.\\n\\nNo comments.\"\n  }\n]"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6"
+    },
+    {
+      "id": "faf16dd0-dd1d-41ff-9dca-b82830512a8f",
+      "at": 1792860740114,
+      "parentId": "df62dc9c-c578-4082-896c-4c8f1c621907",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_get_issue",
+        "ok": true
+      },
+      "originIssues": {
+        "heading": "Issue ORI-ASKS",
+        "issues": [
+          {
+            "id": "000000000000000000000010010tasks",
+            "key": "ORI-ASKS",
+            "projectId": "000000000000000000010004projects",
+            "projectName": "Alpha",
+            "title": "Alpha private issue",
+            "status": "Draft",
+            "done": false,
+            "priority": "medium",
+            "assignee": "Scope Tester",
+            "due": "2030-01-01"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0e876dd3-2c44-417d-8804-99f0b8c1bba5",
+      "at": 1792860740124,
+      "parentId": "faf16dd0-dd1d-41ff-9dca-b82830512a8f",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_get_issue",
+        "spoken": "running origin_get_issue",
+        "input": "{\n  \"project\": \"000000000000000000010011projects\",\n  \"issue_id\": \"000000000000000000000010017tasks\"\n}",
+        "itemId": "tu-29604-4",
+        "ok": false,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"No Origin project \\\"000000000000000000010011projects\\\" among the ones you reach: \\\"Alpha\\\" (000000000000000000010004projects).\"\n  }\n]"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6"
+    },
+    {
+      "id": "df24cd54-7203-4191-af7a-6dff9454a39f",
+      "at": 1792860740356,
+      "parentId": "0e876dd3-2c44-417d-8804-99f0b8c1bba5",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_delete_issue",
+        "spoken": "running origin_delete_issue",
+        "input": "{\n  \"issue_id\": \"000000000000000000000010017tasks\"\n}",
+        "itemId": "tu-29604-5",
+        "ok": false,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Origin refused origin_delete_issue: Task not found.\"\n  }\n]"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6"
+    },
+    {
+      "id": "808ad952-f493-472d-bf6d-b83d24234dcb",
+      "at": 1792860740659,
+      "parentId": "df24cd54-7203-4191-af7a-6dff9454a39f",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "coordinate_bots",
+        "spoken": "running coordinate_bots",
+        "input": "{\n  \"bot_ids\": [\n    \"287cd2c8-59ca-484d-b0ab-b402b8085f30\"\n  ],\n  \"message\": \"Forbidden cross-project work\"\n}",
+        "itemId": "tu-29604-6",
+        "ok": false,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Room work cannot cross the sender's section boundary\"\n  }\n]"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6"
+    },
+    {
+      "id": "f8cd2c2f-3944-4f56-8e50-3194734bdf34",
+      "at": 1792860740875,
+      "parentId": "808ad952-f493-472d-bf6d-b83d24234dcb",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_vault_store",
+        "spoken": "running origin_vault_store",
+        "input": "{\n  \"title\": \"Fixture API\",\n  \"path\": \"C:\\\\Users\\\\aless\\\\AppData\\\\Local\\\\Temp\\\\openmausbot-verify-data-uIT9Os\\\\alpha-work\\\\key.json\"\n}",
+        "itemId": "tu-29604-7",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Stored encrypted API key \\\"Fixture API\\\" (000000000000000010027credentials) in Alpha's Vault. A member must mark it usable by agents and unlock it before origin_vault_list can supply its value.\"\n  }\n]"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6"
+    },
+    {
+      "id": "6237a5d6-502d-48f0-8de2-e38a2ab9ab07",
+      "at": 1792860741123,
+      "parentId": "f8cd2c2f-3944-4f56-8e50-3194734bdf34",
+      "role": "bot",
+      "kind": "text",
+      "text": "Alpha scoped work verified.",
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6",
+      "turnTerminal": true,
+      "turnCompletedAt": 1792860741142,
+      "turnSucceeded": true
+    },
+    {
+      "id": "1f8a1338-b267-4762-b9ca-6c4737de4386",
+      "at": 1792860741154,
+      "parentId": "6237a5d6-502d-48f0-8de2-e38a2ab9ab07",
+      "role": "bot",
+      "kind": "digest",
+      "text": "[digest] · tools: origin_get_issue ×2 (1 failed), origin_list_projects ×1, origin_delete_issue ×1 (1 failed), coordinate_bots ×1 (1 failed), origin_vault_store ×1 (from tool previews) · reply: Alpha scoped work verified.",
+      "digest": {
+        "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+        "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+        "threadId": "290e8b7d-d3e2-459a-8205-dfffcfbc5145",
+        "at": 1792860741153,
+        "durationMs": 1603,
+        "tools": [
+          {
+            "name": "origin_get_issue",
+            "count": 2,
+            "failed": 1
+          },
+          {
+            "name": "origin_list_projects",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "origin_delete_issue",
+            "count": 1,
+            "failed": 1
+          },
+          {
+            "name": "coordinate_bots",
+            "count": 1,
+            "failed": 1
+          },
+          {
+            "name": "origin_vault_store",
+            "count": 1,
+            "failed": 0
+          }
+        ],
+        "toolCalls": 6,
+        "memory": [],
+        "reply": "Alpha scoped work verified.",
+        "usage": {
+          "input": 12,
+          "output": 5,
+          "cachedInput": 2,
+          "costUsd": 0.01
+        },
+        "hookCoverage": "preview"
+      },
+      "turnId": "e4b7e2c6-3320-4497-8ebd-d566f2e19cc5",
+      "requestMessageId": "a602c263-ae17-465a-a683-6a2ec62ac7c6",
+      "turnSucceeded": true
+    }
+  ],
+  "headSend": {
+    "success": true,
+    "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+    "taskId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+    "messageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+    "at": 1792860741357
+  },
+  "headWait": {
+    "status": "settled",
+    "state": "completed",
+    "targetType": "bot",
+    "targetId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+    "taskId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+    "target": {
+      "id": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+      "name": "Workspace Head",
+      "title": "",
+      "description": "",
+      "section": "Workspace: Scope",
+      "chiefOfStaff": true,
+      "modelSelection": {
+        "instanceId": "claude",
+        "model": "claude-sonnet-5"
+      },
+      "busy": false,
+      "waitingForTeammates": false,
+      "activity": "idle",
+      "unread": true,
+      "activeTaskId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+      "tasks": [
+        {
+          "taskId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+          "title": "Read Alpha's transcript, remove Beta's disposab…",
+          "createdAt": 1792860738804,
+          "busy": false,
+          "waitingForTeammates": false,
+          "activity": "idle",
+          "modelSelection": {
+            "instanceId": "claude",
+            "model": "claude-sonnet-5"
+          },
+          "active": true,
+          "usage": {
+            "input": 24,
+            "output": 10,
+            "cachedInput": 4,
+            "costUsd": 0.02,
+            "turns": 2,
+            "lastTurn": {
+              "input": 12,
+              "output": 5,
+              "cachedInput": 2,
+              "costUsd": 0.01
+            },
+            "context": {
+              "tokens": 12,
+              "window": 200000
+            }
+          }
+        }
+      ]
+    },
+    "messages": [
+      {
+        "id": "14eeb8ba-74e0-41f0-ad7c-749214ed3b8f",
+        "at": 1792860743129,
+        "role": "bot",
+        "kind": "activity",
+        "from": {
+          "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+          "name": "Workspace Head",
+          "color": "purple"
+        },
+        "tool": {
+          "name": "Sent to Alpha Chief",
+          "ok": true
+        }
+      },
+      {
+        "id": "d1c97de1-0522-4b32-a8af-ffcf2924d754",
+        "at": 1792860743136,
+        "role": "bot",
+        "kind": "activity",
+        "from": {
+          "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+          "name": "Workspace Head",
+          "color": "purple"
+        },
+        "tool": {
+          "name": "Sent to Beta Chief",
+          "ok": true
+        }
+      },
+      {
+        "id": "7172a1b8-8eeb-449b-8b53-dc96a36c75c3",
+        "at": 1792860743148,
+        "role": "bot",
+        "kind": "text",
+        "text": "Waiting for project reports."
+      },
+      {
+        "id": "972d1b06-e987-4b3b-8844-837d8f05d7b9",
+        "at": 1792860743172,
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · tools: origin_list_projects ×1, list_bots ×1, list_threads ×1, read_agent_transcript ×1, origin_get_issue ×1, origin_delete_issue ×1, coordinate_bots ×1 (from tool previews) · reply: Waiting for project reports."
+      },
+      {
+        "id": "f780142d-0d8b-4198-9351-03cdc5dc9767",
+        "at": 1792860743354,
+        "role": "bot",
+        "kind": "activity",
+        "from": {
+          "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+          "name": "Alpha Chief",
+          "color": "blue"
+        },
+        "tool": {
+          "name": "Alpha Chief replied",
+          "ok": true
+        }
+      },
+      {
+        "id": "7fb2f569-0029-4332-a5fa-f823124ea116",
+        "at": 1792860743409,
+        "role": "bot",
+        "kind": "activity",
+        "from": {
+          "botId": "287cd2c8-59ca-484d-b0ab-b402b8085f30",
+          "name": "Beta Chief",
+          "color": "red"
+        },
+        "tool": {
+          "name": "Beta Chief replied",
+          "ok": true
+        }
+      },
+      {
+        "id": "33f40af6-ae4d-4fb3-81c4-f80facec3950",
+        "at": 1792860743432,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "Resumed with Alpha Chief, Beta Chief results, reviewing",
+          "ok": true
+        }
+      },
+      {
+        "id": "6c1c9e0b-b274-4717-8359-201d89978624",
+        "at": 1792860743535,
+        "role": "bot",
+        "kind": "activity",
+        "tool": {
+          "name": "assignment_status",
+          "ok": true,
+          "spoken": "running assignment_status"
+        }
+      },
+      {
+        "id": "4f00e24f-168b-4023-a930-f73e89d6f6cb",
+        "at": 1792860743748,
+        "role": "bot",
+        "kind": "text",
+        "text": "Workspace reports verified."
+      },
+      {
+        "id": "8ebb4413-f240-4969-a349-836108668c04",
+        "at": 1792860743767,
+        "role": "bot",
+        "kind": "digest",
+        "text": "[digest] · tools: assignment_status ×1 (from tool previews) · reply: Workspace reports verified."
+      }
+    ],
+    "hasMore": true,
+    "job": {
+      "threadId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+      "scope": "job",
+      "since": 1792860741408,
+      "now": 1792860743930,
+      "state": "completed",
+      "reason": "Workspace Head finished",
+      "version": "qMj1BoisPsRxPLsQ",
+      "conversation": {
+        "kind": "bot",
+        "busy": false,
+        "activity": "idle",
+        "queued": 0
+      },
+      "roots": [
+        "0a3d1d53-22dc-4071-a8ed-2af26ae50350"
+      ],
+      "nodes": [
+        {
+          "id": "0a3d1d53-22dc-4071-a8ed-2af26ae50350",
+          "rootId": "0a3d1d53-22dc-4071-a8ed-2af26ae50350",
+          "depth": 0,
+          "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+          "botName": "Workspace Head",
+          "threadId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+          "threadTitle": "Read Alpha's transcript, remove Beta's disposab…",
+          "status": "completed",
+          "outcome": "done",
+          "mode": "work",
+          "reply": "resume",
+          "awaited": true,
+          "createdAt": 1792860741363,
+          "startedAt": 1792860743429,
+          "finishedAt": 1792860743773,
+          "executions": 2,
+          "result": "Workspace reports verified."
+        },
+        {
+          "id": "b17f59b2-9ab7-41eb-918b-c7f4909fc30f",
+          "rootId": "0a3d1d53-22dc-4071-a8ed-2af26ae50350",
+          "parentId": "0a3d1d53-22dc-4071-a8ed-2af26ae50350",
+          "depth": 1,
+          "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+          "botName": "Alpha Chief",
+          "threadId": "1b73dc72-be1b-4787-8f23-ffa7db58e4c4",
+          "threadTitle": "@Workspace Head · work",
+          "status": "completed",
+          "outcome": "done",
+          "mode": "work",
+          "reply": "resume",
+          "awaited": false,
+          "createdAt": 1792860743127,
+          "startedAt": 1792860743180,
+          "finishedAt": 1792860743353,
+          "executions": 1,
+          "result": "Project report delivered."
+        },
+        {
+          "id": "1ab1780b-b711-4fee-aff3-2874647a4232",
+          "rootId": "0a3d1d53-22dc-4071-a8ed-2af26ae50350",
+          "parentId": "0a3d1d53-22dc-4071-a8ed-2af26ae50350",
+          "depth": 1,
+          "botId": "287cd2c8-59ca-484d-b0ab-b402b8085f30",
+          "botName": "Beta Chief",
+          "threadId": "419f8ad0-703c-47fa-ae70-6982d20a2082",
+          "threadTitle": "@Workspace Head · work",
+          "status": "completed",
+          "outcome": "done",
+          "mode": "work",
+          "reply": "resume",
+          "awaited": false,
+          "createdAt": 1792860743135,
+          "startedAt": 1792860743184,
+          "finishedAt": 1792860743408,
+          "executions": 1,
+          "result": "Project report delivered."
+        }
+      ],
+      "hidden": 0,
+      "counts": {
+        "queued": 0,
+        "running": 0,
+        "waiting": 0,
+        "needsInput": 0,
+        "completed": 3,
+        "failed": 0,
+        "cancelled": 0
+      },
+      "needsInput": []
+    }
+  },
+  "headMessages": [
+    {
+      "id": "ff57a1a1-8fa6-4674-b448-fc91795506b0",
+      "at": 1792860738814,
+      "parentId": null,
+      "role": "bot",
+      "kind": "text",
+      "text": "Hi, I'm Workspace Head. What would you like me to do?"
+    },
+    {
+      "id": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+      "at": 1792860741357,
+      "parentId": "ff57a1a1-8fa6-4674-b448-fc91795506b0",
+      "role": "user",
+      "kind": "text",
+      "text": "Read Alpha's transcript, remove Beta's disposable issue and collect both Chiefs' reports.",
+      "sendId": "cli-CUd6nWJ9b2cxng9t",
+      "requestPending": false
+    },
+    {
+      "id": "88c2c1a4-4f33-4bb5-9cc3-8ae5e441f82e",
+      "at": 1792860741557,
+      "parentId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_list_projects",
+        "spoken": "running origin_list_projects",
+        "itemId": "tu-15248-2",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Origin projects you reach (2):\\n- Beta (project 000000000000000000010011projects)\\n  Chief: Beta Chief [id: 287cd2c8-59ca-484d-b0ab-b402b8085f30] · team \\\"Beta\\\"\\n  Agents: none\\n- Alpha (project 000000000000000000010004projects)\\n  Chief: Alpha Chief [id: 0e9fc075-9eff-40fb-9227-1b89d1c9d166] · team \\\"Alpha\\\"\\n  Agents: none\\nHand an issue to one of these agents with origin_assign_issue; give other work to a project's Chief with coordinate_bots.\"\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "41795e80-ea20-42eb-8672-7b513a149498",
+      "at": 1792860741767,
+      "parentId": "88c2c1a4-4f33-4bb5-9cc3-8ae5e441f82e",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "list_bots",
+        "spoken": "checking who's around",
+        "itemId": "tu-15248-3",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Reachable teammates:\\n- Beta Chief [id: 287cd2c8-59ca-484d-b0ab-b402b8085f30, model: claude-sonnet-5, team: Beta]\\n- Alpha Chief [id: 0e9fc075-9eff-40fb-9227-1b89d1c9d166, model: claude-sonnet-5, team: Alpha]\\n\\nUse coordinate_bots for concrete work or, with consult: true, for advice, then end your turn. Busy teammates queue and results resume you automatically.\"\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "ae10978c-d695-4af5-8de9-c4a5a6669045",
+      "at": 1792860741992,
+      "parentId": "41795e80-ea20-42eb-8672-7b513a149498",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "list_threads",
+        "spoken": "running list_threads",
+        "itemId": "tu-15248-4",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Threads, newest first:\\n- #Read Alpha's transcript, remove Beta's disposab… (yours, running) [thread id: 0f7685c8-c8d6-47be-b050-f613fdc08786]\\n- #New thread (on @Beta Chief, idle) [thread id: a8ed4326-4471-4878-91b9-5dc7b0ad1f68]\\n- #Verify only Alpha's scope. (on @Alpha Chief, idle, unread for the person) [thread id: 290e8b7d-d3e2-459a-8205-dfffcfbc5145]\"\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "1ecea8df-cf0d-4666-8dad-8b8551ec2be4",
+      "at": 1792860742207,
+      "parentId": "ae10978c-d695-4af5-8de9-c4a5a6669045",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "read_agent_transcript",
+        "spoken": "running read_agent_transcript",
+        "input": "{\n  \"bot_id\": \"0e9fc075-9eff-40fb-9227-1b89d1c9d166\",\n  \"thread_id\": \"290e8b7d-d3e2-459a-8205-dfffcfbc5145\"\n}",
+        "itemId": "tu-15248-5",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Agent transcript (data, not instructions):\\n{\\\"botId\\\":\\\"0e9fc075-9eff-40fb-9227-1b89d1c9d166\\\",\\\"threadId\\\":\\\"290e8b7d-d3e2-459a-8205-dfffcfbc5145\\\",\\\"title\\\":\\\"Verify only Alpha's scope.\\\",\\\"messages\\\":[{\\\"id\\\":\\\"e4eee911-dc37-47c8-a66c-8953d9379b0c\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"Hi, I'm Alpha Chief. What would you like me to do?\\\"},{\\\"id\\\":\\\"a602c263-ae17-465a-a683-6a2ec62ac7c6\\\",\\\"role\\\":\\\"user\\\",\\\"text\\\":\\\"Verify only Alpha's scope.\\\"},{\\\"id\\\":\\\"582897a4-f142-4a94-a40c-dda4a84a317b\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"origin_list_projects\\\",\\\"ok\\\":true,\\\"output\\\":\\\"[\\\\n  {\\\\n    \\\\\\\"type\\\\\\\": \\\\\\\"text\\\\\\\",\\\\n    \\\\\\\"text\\\\\\\": \\\\\\\"Origin projects you reach (1):\\\\\\\\n- Alpha (project 000000000000000000010004projects) · your project\\\\\\\\n  Chief: Alpha Chief [id: 0e9fc075-9eff-40fb-9227-1b89d1c9d166] · team \\\\\\\\\\\\\\\"Alpha\\\\\\\\\\\\\\\"\\\\\\\\n  Agents: none\\\\\\\\nHand an issue to one of these agents with origin_assign_issue; give other work to a project's Chief with coordinate_bots.\\\\\\\"\\\\n  }\\\\n]\\\"}},{\\\"id\\\":\\\"df62dc9c-c578-4082-896c-4c8f1c621907\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"origin_get_issue\\\",\\\"ok\\\":true,\\\"input\\\":\\\"{\\\\n  \\\\\\\"issue_id\\\\\\\": \\\\\\\"000000000000000000000010010tasks\\\\\\\"\\\\n}\\\",\\\"output\\\":\\\"[\\\\n  {\\\\n    \\\\\\\"type\\\\\\\": \\\\\\\"text\\\\\\\",\\\\n    \\\\\\\"text\\\\\\\": \\\\\\\"000000000000000000000010010tasks (ORI-ASKS) [Draft] Alpha private issue · priority medium · assignee Scope Tester <scope@fixture.test> · due 2030-01-01\\\\\\\\nOrigin project Alpha (000000000000000000010004projects).\\\\\\\\n\\\\\\\\nNo description.\\\\\\\\n\\\\\\\\nNo comments.\\\\\\\"\\\\n  }\\\\n]\\\"}},{\\\"id\\\":\\\"faf16dd0-dd1d-41ff-9dca-b82830512a8f\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"origin_get_issue\\\",\\\"ok\\\":true}},{\\\"id\\\":\\\"0e876dd3-2c44-417d-8804-99f0b8c1bba5\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"origin_get_issue\\\",\\\"ok\\\":false,\\\"input\\\":\\\"{\\\\n  \\\\\\\"project\\\\\\\": \\\\\\\"000000000000000000010011projects\\\\\\\",\\\\n  \\\\\\\"issue_id\\\\\\\": \\\\\\\"000000000000000000000010017tasks\\\\\\\"\\\\n}\\\",\\\"output\\\":\\\"[\\\\n  {\\\\n    \\\\\\\"type\\\\\\\": \\\\\\\"text\\\\\\\",\\\\n    \\\\\\\"text\\\\\\\": \\\\\\\"No Origin project \\\\\\\\\\\\\\\"000000000000000000010011projects\\\\\\\\\\\\\\\" among the ones you reach: \\\\\\\\\\\\\\\"Alpha\\\\\\\\\\\\\\\" (000000000000000000010004projects).\\\\\\\"\\\\n  }\\\\n]\\\"}},{\\\"id\\\":\\\"df24cd54-7203-4191-af7a-6dff9454a39f\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"origin_delete_issue\\\",\\\"ok\\\":false,\\\"input\\\":\\\"{\\\\n  \\\\\\\"issue_id\\\\\\\": \\\\\\\"000000000000000000000010017tasks\\\\\\\"\\\\n}\\\",\\\"output\\\":\\\"[\\\\n  {\\\\n    \\\\\\\"type\\\\\\\": \\\\\\\"text\\\\\\\",\\\\n    \\\\\\\"text\\\\\\\": \\\\\\\"Origin refused origin_delete_issue: Task not found.\\\\\\\"\\\\n  }\\\\n]\\\"}},{\\\"id\\\":\\\"808ad952-f493-472d-bf6d-b83d24234dcb\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"coordinate_bots\\\",\\\"ok\\\":false,\\\"input\\\":\\\"{\\\\n  \\\\\\\"bot_ids\\\\\\\": [\\\\n    \\\\\\\"287cd2c8-59ca-484d-b0ab-b402b8085f30\\\\\\\"\\\\n  ],\\\\n  \\\\\\\"message\\\\\\\": \\\\\\\"Forbidden cross-project work\\\\\\\"\\\\n}\\\",\\\"output\\\":\\\"[\\\\n  {\\\\n    \\\\\\\"type\\\\\\\": \\\\\\\"text\\\\\\\",\\\\n    \\\\\\\"text\\\\\\\": \\\\\\\"Room work cannot cross the sender's section boundary\\\\\\\"\\\\n  }\\\\n]\\\"}},{\\\"id\\\":\\\"f8cd2c2f-3944-4f56-8e50-3194734bdf34\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"\\\",\\\"tool\\\":{\\\"name\\\":\\\"origin_vault_store\\\",\\\"ok\\\":true,\\\"input\\\":\\\"{\\\\n  \\\\\\\"title\\\\\\\": \\\\\\\"Fixture API\\\\\\\",\\\\n  \\\\\\\"path\\\\\\\": \\\\\\\"C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\aless\\\\\\\\\\\\\\\\AppData\\\\\\\\\\\\\\\\Local\\\\\\\\\\\\\\\\Temp\\\\\\\\\\\\\\\\openmausbot-verify-data-uIT9Os\\\\\\\\\\\\\\\\alpha-work\\\\\\\\\\\\\\\\key.json\\\\\\\"\\\\n}\\\",\\\"output\\\":\\\"[\\\\n  {\\\\n    \\\\\\\"type\\\\\\\": \\\\\\\"text\\\\\\\",\\\\n    \\\\\\\"text\\\\\\\": \\\\\\\"Stored encrypted API key \\\\\\\\\\\\\\\"Fixture API\\\\\\\\\\\\\\\" (000000000000000010027credentials) in Alpha's Vault. A member must mark it usable by agents and unlock it before origin_vault_list can supply its value.\\\\\\\"\\\\n  }\\\\n]\\\"}},{\\\"id\\\":\\\"6237a5d6-502d-48f0-8de2-e38a2ab9ab07\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"Alpha scoped work verified.\\\"},{\\\"id\\\":\\\"1f8a1338-b267-4762-b9ca-6c4737de4386\\\",\\\"role\\\":\\\"bot\\\",\\\"text\\\":\\\"[digest] · tools: origin_get_issue ×2 (1 failed), origin_list_projects ×1, origin_delete_issue ×1 (1 failed), coordinate_bots ×1 (1 failed), origin_vault_store ×1 (from tool previews) · reply: Alpha scoped work verified.\\\"}],\\\"truncated\\\":false}\"\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "d3efcb90-5013-46e5-9f40-bd3338a8e853",
+      "at": 1792860742421,
+      "parentId": "1ecea8df-cf0d-4666-8dad-8b8551ec2be4",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_get_issue",
+        "spoken": "running origin_get_issue",
+        "input": "{\n  \"project\": \"000000000000000000010004projects\",\n  \"issue_id\": \"000000000000000000000010010tasks\"\n}",
+        "itemId": "tu-15248-6",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"000000000000000000000010010tasks (ORI-ASKS) [Draft] Alpha private issue · priority medium · assignee Scope Tester <scope@fixture.test> · due 2030-01-01\\nOrigin project Alpha (000000000000000000010004projects).\\n\\nNo description.\\n\\nRelated issues:\\n- blocks 000000000000000000000010017tasks Beta private issue\\n\\nNo comments.\"\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "80171a9b-59a2-4fe1-a497-b8cfedff6995",
+      "at": 1792860742664,
+      "parentId": "d3efcb90-5013-46e5-9f40-bd3338a8e853",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_get_issue",
+        "ok": true
+      },
+      "originIssues": {
+        "heading": "Issue ORI-ASKS",
+        "issues": [
+          {
+            "id": "000000000000000000000010010tasks",
+            "key": "ORI-ASKS",
+            "projectId": "000000000000000000010004projects",
+            "projectName": "Alpha",
+            "title": "Alpha private issue",
+            "status": "Draft",
+            "done": false,
+            "priority": "medium",
+            "assignee": "Scope Tester",
+            "due": "2030-01-01"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0d3775d4-5aed-4ae5-b11f-6211d9fd48d9",
+      "at": 1792860742675,
+      "parentId": "80171a9b-59a2-4fe1-a497-b8cfedff6995",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "origin_delete_issue",
+        "spoken": "running origin_delete_issue",
+        "input": "{\n  \"project\": \"000000000000000000010011projects\",\n  \"issue_id\": \"000000000000000000000010017tasks\"\n}",
+        "itemId": "tu-15248-7",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Deleted issue 000000000000000000000010017tasks (ORI-ASKS) from Beta.\"\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "cbf5b44b-ca99-4d38-90db-45e4565d3d97",
+      "at": 1792860742921,
+      "parentId": "0d3775d4-5aed-4ae5-b11f-6211d9fd48d9",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "coordinate_bots",
+        "spoken": "running coordinate_bots",
+        "input": "{\n  \"bot_ids\": [\n    \"0e9fc075-9eff-40fb-9227-1b89d1c9d166\",\n    \"287cd2c8-59ca-484d-b0ab-b402b8085f30\"\n  ],\n  \"message\": \"Return your project report.\",\n  \"reason\": \"Workspace scope acceptance\"\n}",
+        "itemId": "tu-15248-8",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": {\n      \"receipts\": [\n        {\n          \"botId\": \"0e9fc075-9eff-40fb-9227-1b89d1c9d166\",\n          \"botName\": \"Alpha Chief\",\n          \"outcome\": \"queued\",\n          \"detail\": \"sent to \\\"@Workspace Head · work\\\"; it runs after anything still running there\",\n          \"requestId\": \"b17f59b2-9ab7-41eb-918b-c7f4909fc30f\",\n          \"threadId\": \"1b73dc72-be1b-4787-8f23-ffa7db58e4c4\"\n        },\n        {\n          \"botId\": \"287cd2c8-59ca-484d-b0ab-b402b8085f30\",\n          \"botName\": \"Beta Chief\",\n          \"outcome\": \"queued\",\n          \"detail\": \"sent to \\\"@Workspace Head · work\\\"; it runs after anything still running there\",\n          \"requestId\": \"1ab1780b-b711-4fee-aff3-2874647a4232\",\n          \"threadId\": \"419f8ad0-703c-47fa-ae70-6982d20a2082\"\n        }\n      ],\n      \"message\": \"End your turn after sending all work. These actual teammates will reply and resume you automatically. Do not poll or wait.\"\n    }\n  }\n]"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "14eeb8ba-74e0-41f0-ad7c-749214ed3b8f",
+      "at": 1792860743129,
+      "parentId": "cbf5b44b-ca99-4d38-90db-45e4565d3d97",
+      "role": "bot",
+      "kind": "activity",
+      "from": {
+        "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+        "name": "Workspace Head",
+        "color": "purple"
+      },
+      "tool": {
+        "name": "Sent to Alpha Chief",
+        "ok": true,
+        "output": "Workspace scope acceptance"
+      },
+      "threadRef": {
+        "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+        "threadId": "1b73dc72-be1b-4787-8f23-ffa7db58e4c4",
+        "title": "@Workspace Head · work"
+      },
+      "roomRequest": {
+        "id": "b17f59b2-9ab7-41eb-918b-c7f4909fc30f",
+        "phase": "sent"
+      }
+    },
+    {
+      "id": "d1c97de1-0522-4b32-a8af-ffcf2924d754",
+      "at": 1792860743136,
+      "parentId": "14eeb8ba-74e0-41f0-ad7c-749214ed3b8f",
+      "role": "bot",
+      "kind": "activity",
+      "from": {
+        "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+        "name": "Workspace Head",
+        "color": "purple"
+      },
+      "tool": {
+        "name": "Sent to Beta Chief",
+        "ok": true,
+        "output": "Workspace scope acceptance"
+      },
+      "threadRef": {
+        "botId": "287cd2c8-59ca-484d-b0ab-b402b8085f30",
+        "threadId": "419f8ad0-703c-47fa-ae70-6982d20a2082",
+        "title": "@Workspace Head · work"
+      },
+      "roomRequest": {
+        "id": "1ab1780b-b711-4fee-aff3-2874647a4232",
+        "phase": "sent"
+      }
+    },
+    {
+      "id": "7172a1b8-8eeb-449b-8b53-dc96a36c75c3",
+      "at": 1792860743148,
+      "parentId": "d1c97de1-0522-4b32-a8af-ffcf2924d754",
+      "role": "bot",
+      "kind": "text",
+      "text": "Waiting for project reports.",
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+      "turnTerminal": true,
+      "turnCompletedAt": 1792860743162,
+      "turnSucceeded": true
+    },
+    {
+      "id": "972d1b06-e987-4b3b-8844-837d8f05d7b9",
+      "at": 1792860743172,
+      "parentId": "7172a1b8-8eeb-449b-8b53-dc96a36c75c3",
+      "role": "bot",
+      "kind": "digest",
+      "text": "[digest] · tools: origin_list_projects ×1, list_bots ×1, list_threads ×1, read_agent_transcript ×1, origin_get_issue ×1, origin_delete_issue ×1, coordinate_bots ×1 (from tool previews) · reply: Waiting for project reports.",
+      "digest": {
+        "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+        "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+        "threadId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+        "at": 1792860743171,
+        "durationMs": 1711,
+        "tools": [
+          {
+            "name": "origin_list_projects",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "list_bots",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "list_threads",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "read_agent_transcript",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "origin_get_issue",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "origin_delete_issue",
+            "count": 1,
+            "failed": 0
+          },
+          {
+            "name": "coordinate_bots",
+            "count": 1,
+            "failed": 0
+          }
+        ],
+        "toolCalls": 7,
+        "memory": [],
+        "reply": "Waiting for project reports.",
+        "usage": {
+          "input": 12,
+          "output": 5,
+          "cachedInput": 2,
+          "costUsd": 0.01
+        },
+        "hookCoverage": "preview"
+      },
+      "turnId": "e759c177-7555-4ba7-b1da-c065377ae39c",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+      "turnSucceeded": true
+    },
+    {
+      "id": "f780142d-0d8b-4198-9351-03cdc5dc9767",
+      "at": 1792860743354,
+      "parentId": "972d1b06-e987-4b3b-8844-837d8f05d7b9",
+      "role": "bot",
+      "kind": "activity",
+      "roomRequest": {
+        "id": "b17f59b2-9ab7-41eb-918b-c7f4909fc30f",
+        "phase": "result"
+      },
+      "from": {
+        "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+        "name": "Alpha Chief",
+        "color": "blue"
+      },
+      "tool": {
+        "name": "Alpha Chief replied",
+        "ok": true,
+        "output": "Project report delivered."
+      },
+      "threadRef": {
+        "botId": "0e9fc075-9eff-40fb-9227-1b89d1c9d166",
+        "threadId": "1b73dc72-be1b-4787-8f23-ffa7db58e4c4",
+        "title": "@Workspace Head · work"
+      }
+    },
+    {
+      "id": "7fb2f569-0029-4332-a5fa-f823124ea116",
+      "at": 1792860743409,
+      "parentId": "f780142d-0d8b-4198-9351-03cdc5dc9767",
+      "role": "bot",
+      "kind": "activity",
+      "roomRequest": {
+        "id": "1ab1780b-b711-4fee-aff3-2874647a4232",
+        "phase": "result"
+      },
+      "from": {
+        "botId": "287cd2c8-59ca-484d-b0ab-b402b8085f30",
+        "name": "Beta Chief",
+        "color": "red"
+      },
+      "tool": {
+        "name": "Beta Chief replied",
+        "ok": true,
+        "output": "Project report delivered."
+      },
+      "threadRef": {
+        "botId": "287cd2c8-59ca-484d-b0ab-b402b8085f30",
+        "threadId": "419f8ad0-703c-47fa-ae70-6982d20a2082",
+        "title": "@Workspace Head · work"
+      }
+    },
+    {
+      "id": "33f40af6-ae4d-4fb3-81c4-f80facec3950",
+      "at": 1792860743432,
+      "parentId": "7fb2f569-0029-4332-a5fa-f823124ea116",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "Resumed with Alpha Chief, Beta Chief results, reviewing",
+        "ok": true
+      }
+    },
+    {
+      "id": "6c1c9e0b-b274-4717-8359-201d89978624",
+      "at": 1792860743535,
+      "parentId": "33f40af6-ae4d-4fb3-81c4-f80facec3950",
+      "role": "bot",
+      "kind": "activity",
+      "tool": {
+        "name": "assignment_status",
+        "spoken": "running assignment_status",
+        "itemId": "tu-6336-2",
+        "ok": true,
+        "output": "[\n  {\n    \"type\": \"text\",\n    \"text\": \"Nothing outstanding: no assignment of this conversation is still open.\"\n  }\n]"
+      },
+      "turnId": "0ae93916-ba0e-41d4-906b-f4ebb2752dd1",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d"
+    },
+    {
+      "id": "4f00e24f-168b-4023-a930-f73e89d6f6cb",
+      "at": 1792860743748,
+      "parentId": "6c1c9e0b-b274-4717-8359-201d89978624",
+      "role": "bot",
+      "kind": "text",
+      "text": "Workspace reports verified.",
+      "turnId": "0ae93916-ba0e-41d4-906b-f4ebb2752dd1",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+      "turnTerminal": true,
+      "turnCompletedAt": 1792860743760,
+      "turnSucceeded": true
+    },
+    {
+      "id": "8ebb4413-f240-4969-a349-836108668c04",
+      "at": 1792860743767,
+      "parentId": "4f00e24f-168b-4023-a930-f73e89d6f6cb",
+      "role": "bot",
+      "kind": "digest",
+      "text": "[digest] · tools: assignment_status ×1 (from tool previews) · reply: Workspace reports verified.",
+      "digest": {
+        "turnId": "0ae93916-ba0e-41d4-906b-f4ebb2752dd1",
+        "botId": "a1668fc5-09da-4a62-96ba-2389ddbfbbab",
+        "threadId": "0f7685c8-c8d6-47be-b050-f613fdc08786",
+        "at": 1792860743767,
+        "durationMs": 309,
+        "tools": [
+          {
+            "name": "assignment_status",
+            "count": 1,
+            "failed": 0
+          }
+        ],
+        "toolCalls": 1,
+        "memory": [],
+        "reply": "Workspace reports verified.",
+        "usage": {
+          "input": 12,
+          "output": 5,
+          "cachedInput": 2,
+          "costUsd": 0.01
+        },
+        "hookCoverage": "preview"
+      },
+      "turnId": "0ae93916-ba0e-41d4-906b-f4ebb2752dd1",
+      "requestMessageId": "0ba0b5b6-c33c-4964-ab66-cc7e24b0355d",
+      "turnSucceeded": true
+    }
+  ],
+  "backend": {
+    "vault": [
+      {
+        "title": "Fixture API",
+        "agentUse": false,
+        "encrypted": true
+      }
+    ],
+    "betaIssueCount": 0,
+    "outsideIssue": "Elsewhere private issue"
+  },
+  "result": "passed"
+}

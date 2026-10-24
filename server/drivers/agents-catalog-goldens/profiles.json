@@ -1,9 +1,10 @@
 {
   "default": {
-    "bytes": 80009,
-    "sha256": "356ac63b1d774af73aec24adc1ccbe78ad5a181256b02e29bc60961355f6f9a2",
+    "bytes": 81891,
+    "sha256": "f9e655e901c4ddfcbad98cee5b76d342542561b51adc695d41870542dc4b9ec9",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_room_targets",
       "coordinate_bots",
       "assignment_status",
@@ -44,6 +45,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -51,6 +53,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -87,10 +90,11 @@
     ]
   },
   "voice": {
-    "bytes": 80750,
-    "sha256": "f2ce3fa642cf7f69c3333d1042f7e31e06ab845fd54d89f7a6e4cf0a2e96ba1a",
+    "bytes": 82632,
+    "sha256": "feb8d7c7978ba7be33933a7aff8701e5db22ede5053e48a3c7a941832f736e26",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_room_targets",
       "coordinate_bots",
       "assignment_status",
@@ -132,6 +136,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -139,6 +144,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -175,10 +181,11 @@
     ]
   },
   "shared": {
-    "bytes": 81754,
-    "sha256": "67664a97d6ec096fed4ee51f0ca12b0bf4bc7aff2726095718cb8c175692331c",
+    "bytes": 83636,
+    "sha256": "55c379659c32c6b958f0dd44cab2bfabc9f97b4d4eaa52716c631a9f7ef19cbd",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -221,6 +228,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -228,6 +236,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -264,10 +273,11 @@
     ]
   },
   "shared+voice": {
-    "bytes": 82495,
-    "sha256": "461d451720523a78d6536ecdf7be9aafd6c5ceec95adc9073a37d3274df209af",
+    "bytes": 84377,
+    "sha256": "f4afadfd7282062abdedda57810bd8047f1bd708910d848332cb49c0968a77b7",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -311,6 +321,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -318,6 +329,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -354,10 +366,11 @@
     ]
   },
   "skills": {
-    "bytes": 82908,
-    "sha256": "82ee1813edfc6dc78e0534e6e4c650855de6d549ab43d83b250925f415ab2c3a",
+    "bytes": 84790,
+    "sha256": "45fec97afa3e9dd2aea12e6a1c0464a6cd9a4436c380e6c5bffe6a83b37e49e5",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_room_targets",
       "coordinate_bots",
       "assignment_status",
@@ -400,6 +413,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -407,6 +421,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -443,10 +458,11 @@
     ]
   },
   "skills+voice": {
-    "bytes": 83649,
-    "sha256": "d9be26485fe93af94b80d10bef16fc8b127b3e6f037688f99d6f65f9f9ae9e7e",
+    "bytes": 85531,
+    "sha256": "42686acd2ebc354072033fdd6d151dccbd8f9ce49de2d6ac02b6df90e7dd663c",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_room_targets",
       "coordinate_bots",
       "assignment_status",
@@ -490,6 +506,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -497,6 +514,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -533,10 +551,11 @@
     ]
   },
   "skills+shared": {
-    "bytes": 84653,
-    "sha256": "0fec306b904e450b85a57823fcd62731c2e36f8a1fc189316b4f7561a1a27296",
+    "bytes": 86535,
+    "sha256": "9f90a8700cd3af46475710a25a8c6397fbcb0569974e27c17523bc5b1ea33ae6",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -581,6 +600,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -588,6 +608,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -624,10 +645,11 @@
     ]
   },
   "skills+shared+voice": {
-    "bytes": 85394,
-    "sha256": "0a690469bd81012159e7da320e93c1196446a72b4c7ffa96192e444bd7b65dc8",
+    "bytes": 87276,
+    "sha256": "42566bd94287c483c4672fa999ca6430c296ed20837e897ade9e98de709ce34b",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -673,6 +695,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -680,6 +703,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -716,8 +740,8 @@
     ]
   },
   "non-chief": {
-    "bytes": 67284,
-    "sha256": "2219a04fbc7a97c761aeaa7eba0f5e41971aba4be7ab332b9eefa758fafe74ec",
+    "bytes": 68583,
+    "sha256": "de2360d38a9e7a38283cee80883d5d1b65df188b8ea1ce1bbcf5672ab9f830e1",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -753,10 +777,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -792,8 +818,8 @@
     ]
   },
   "voice+non-chief": {
-    "bytes": 68025,
-    "sha256": "e2897eef699b3d92332c2b0122f380d096fcd88a316ca432ca2d2fb11643844c",
+    "bytes": 69324,
+    "sha256": "0512bee7ddf17d4aeddbc0d618df035392121d5a0d01920e9e073166ad784c9f",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -830,10 +856,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -869,8 +897,8 @@
     ]
   },
   "shared+non-chief": {
-    "bytes": 69029,
-    "sha256": "f472ffc25ccedf962fa160159912b29e5f288011fe8011ca45ef0e4a06d28041",
+    "bytes": 70328,
+    "sha256": "f1fd5c8ca4046c8e65f5915b6185339b1192b97b2e2e33df5842ec601cc29cc5",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -908,10 +936,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -947,8 +977,8 @@
     ]
   },
   "shared+voice+non-chief": {
-    "bytes": 69770,
-    "sha256": "2a2ba7083d6e6a8471323d92fdc43fcdae1ee379080de12f1819d11f25cc6189",
+    "bytes": 71069,
+    "sha256": "ef6b1295897c333be2fceb92443506953449d005f34b4f3ccf8f2ba1b599d797",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -987,10 +1017,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1026,8 +1058,8 @@
     ]
   },
   "skills+non-chief": {
-    "bytes": 70183,
-    "sha256": "9976a20ecf896d70851e7aa7c1642344407d15f6e224a2c0a398045b09504bf5",
+    "bytes": 71482,
+    "sha256": "badabca04a4ea4efe0e39deaa96dac8058ac976e001f6a1c83de5204b68a3bfd",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1065,10 +1097,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1104,8 +1138,8 @@
     ]
   },
   "skills+voice+non-chief": {
-    "bytes": 70924,
-    "sha256": "3c0751295d3bae5b37f9cc720c849086e90f907b1510091c9f32dbe67fa4a70d",
+    "bytes": 72223,
+    "sha256": "b1d873a0407272d93f29baebe79ef8e95ee7f81bb895f9df88ae752324101f9a",
     "tools": [
       "tool_result_read",
       "list_room_targets",
@@ -1144,10 +1178,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1183,8 +1219,8 @@
     ]
   },
   "skills+shared+non-chief": {
-    "bytes": 71928,
-    "sha256": "ae36a607625faf515b5f432d903773466e7b2f3ddc39ce791206fb5234fb7d1b",
+    "bytes": 73227,
+    "sha256": "4cc57454db04e49fef27fa0094321a2df8a63b4d234b949d3d6c994c0679d856",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1224,10 +1260,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1263,8 +1301,8 @@
     ]
   },
   "skills+shared+voice+non-chief": {
-    "bytes": 72669,
-    "sha256": "0db07f9ed8ca2b1d41355b08ccb4ae0002a4d4a72aec2dc185b022313f3ac37d",
+    "bytes": 73968,
+    "sha256": "738cedb494b4afc26ded1a7e72cc2f6170f8e158b5b883e2218d8f721ca841e9",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1305,10 +1343,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1344,10 +1384,11 @@
     ]
   },
   "skills+shared+voice+cloud-home": {
-    "bytes": 84449,
-    "sha256": "3c56b5d8d38dd752ca6a6e677e30518099079357207b7d5be60ec0b5fe4b9fb4",
+    "bytes": 86331,
+    "sha256": "a49b94c6a64cfaa25f6d1c120d8d7eabed903eb95d350020ba7d50e9e2f97855",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -1392,6 +1433,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -1399,6 +1441,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1435,8 +1478,8 @@
     ]
   },
   "skills+shared+voice+non-chief+cloud-home": {
-    "bytes": 71724,
-    "sha256": "64a9134d719a54856f697cfc0996d9b5b75aa0ef549abec84d21013325968c05",
+    "bytes": 73023,
+    "sha256": "8895596cca886fdd8ee1b4eb640758484f0791ed423e3660a9decf4ac28c95dd",
     "tools": [
       "tool_result_read",
       "list_shared_computers",
@@ -1476,10 +1519,12 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_complete_issue",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1515,10 +1560,11 @@
     ]
   },
   "skills+shared+voice+escalations": {
-    "bytes": 86254,
-    "sha256": "d04c6798b43f00871466c175bfacb8448eef9c8dd3663bd76627d944702aaf76",
+    "bytes": 88136,
+    "sha256": "231b84f97345ac0222e412d9999e2f4982c4c9a04eaec9a9c67b796ae36d4818",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -1565,6 +1611,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -1572,6 +1619,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1608,10 +1656,11 @@
     ]
   },
   "default+legacy-switches": {
-    "bytes": 80009,
-    "sha256": "356ac63b1d774af73aec24adc1ccbe78ad5a181256b02e29bc60961355f6f9a2",
+    "bytes": 81891,
+    "sha256": "f9e655e901c4ddfcbad98cee5b76d342542561b51adc695d41870542dc4b9ec9",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_room_targets",
       "coordinate_bots",
       "assignment_status",
@@ -1652,6 +1701,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -1659,6 +1709,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -1695,10 +1746,11 @@
     ]
   },
   "skills+shared+voice+escalations+whole-schemas": {
-    "bytes": 107790,
-    "sha256": "9a1497e5d0cbec45dfb27591ca31376dde6a45ade2683bf183ef476189fa2bf1",
+    "bytes": 109792,
+    "sha256": "fc94a22619e19995251d3707a73e7c75347f4d57c24e7473a319501f2ee21e00",
     "tools": [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -1745,6 +1797,7 @@
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -1752,6 +1805,7 @@
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",

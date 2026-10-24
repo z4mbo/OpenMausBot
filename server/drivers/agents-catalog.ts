@@ -185,7 +185,7 @@ const ORIGIN_CARDS = " The person sees issue cards; do not repeat them.";
 const ORIGIN_TOOL_DEFINITIONS = [
   {
     name: "origin_list_projects",
-    description: "List the Origin projects you reach (a Chief also reaches the teams it manages) with each one's Chief and agents and their bot ids. If Origin is not connected or nothing is linked, tell the person.",
+    description: "List your own Origin project, or a workspace head's managed projects, with each one's Chief, agents and bot ids. If Origin is not connected or nothing is linked, tell the person.",
     inputSchema: { type: "object", additionalProperties: false, properties: {} },
   },
   {
@@ -244,6 +244,11 @@ const ORIGIN_TOOL_DEFINITIONS = [
       },
       required: ["issue_id"],
     },
+  },
+  {
+    name: "origin_delete_issue",
+    description: "Permanently delete an Origin issue and its comments and attachments. Use completion for finished work; deletion removes the record." + ORIGIN_SCOPE,
+    inputSchema: { type: "object", additionalProperties: false, properties: { issue_id: ORIGIN_ISSUE_ID, project: ORIGIN_PROJECT }, required: ["issue_id"] },
   },
   {
     name: "origin_comment_issue",
@@ -331,6 +336,11 @@ const ORIGIN_TOOL_DEFINITIONS = [
     },
   },
   {
+    name: "origin_vault_store",
+    description: "Store an API key from an encrypted Vault JSON file in your working folder. Payload: ciphertext, iv, salt, iterations, kdf (PBKDF2-SHA256/AES-256-GCM). Never pass plaintext or a passphrase. A member must permit agent use and unlock it before reading its value." + ORIGIN_SCOPE,
+    inputSchema: { type: "object", additionalProperties: false, properties: { title: { type: "string", minLength: 1, maxLength: 150 }, path: { type: "string", minLength: 1, maxLength: 1_000 }, project: ORIGIN_PROJECT }, required: ["title", "path"] },
+  },
+  {
     name: "origin_vault_list",
     description: "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential." + ORIGIN_SCOPE,
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
@@ -410,6 +420,11 @@ const TOOL_DEFINITIONS = [
       },
       required: ["id"],
     },
+  },
+  {
+    name: "read_agent_transcript",
+    description: "As a workspace head, read a supervised agent's direct conversation from list_threads. Bounded, redacted text; managed teams, allowed peers and audience restrictions apply. Call from direct chat.",
+    inputSchema: { type: "object", additionalProperties: false, properties: { bot_id: { type: "string" }, thread_id: { type: "string" }, limit: { type: "integer", minimum: 1, maximum: 100 } }, required: ["bot_id", "thread_id"] },
   },
   {
     name: "list_shared_computers",
@@ -1094,7 +1109,7 @@ export const SHARED_COMPUTER_TOOL_NAMES = new Set(["list_shared_computers", "sha
 const VOICE_TOOL_NAMES = new Set(["send_voice_note"]);
 const CHIEF_ONLY_TOOL_NAMES = new Set([
   "create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue",
-  "origin_review_pr", "origin_merge_pr", "origin_standup"]);
+  "origin_review_pr", "origin_merge_pr", "origin_standup", "read_agent_transcript"]);
 const CHIEF_TARGET_TOOL_NAMES = new Set(["propose_profile", "propose_model"]);
 const WATCHER_TOOL_NAMES = new Set(["create_options_card"]);
 

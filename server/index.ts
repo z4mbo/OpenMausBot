@@ -608,7 +608,8 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, initializeWorkspaceTeams, openWorkspaceHead } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
+import { cloudProjectFor, convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, projectPeerTeams, readOriginCloud } from "./origin-cloud.ts";
+import { setPeerProjectTeams } from "./peer-roster.ts";
 import { createProjectToolsHost } from "./host/project-tools.ts";
 import { createStaticResponder } from "./host/static-files.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
@@ -3080,6 +3081,7 @@ const store = new Store(
   (instanceId) => registry.cliTarget(instanceId)?.driverKind,
   (section) => Boolean(teamComputers.forSection(section)),
 );
+setPeerProjectTeams((botId) => projectPeerTeams(store.bots, readOriginCloud(defaultOriginCloudFile()).projects, botId));
 const skillsHost = createSkillsLibraryHost({ store, cfg, appendSkillRequestCard });
 const { listBotSkills, readBotSkillFile } = skillsHost;
 const highlevelHost = createHighLevelHost({ service: highlevel, dataDir: DATA_DIR, bot: (id) => store.bot(id),

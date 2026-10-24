@@ -125,7 +125,7 @@ it("a design issue assigned to an agent ends as frames in review with a Design c
     await expect.poll(async () => {
       const dana = (await bots()).find((bot) => bot.id === designer.id);
       for (const task of dana?.tasks ?? []) {
-        if ((await messages(task.threadId)).some((m) => m.kind === "activity" && /origin_design_submit/.test(m.tool?.name ?? "") && m.tool?.ok === true)) designThread = task.threadId;
+        if ((await messages(task.threadId)).some((m) => m.kind === "activity" && m.tool?.itemId && /origin_design_submit/.test(m.tool.name) && m.tool.ok === true)) designThread = task.threadId;
       }
       return designThread;
     }, { timeout: 90_000, interval: 1_000 }).not.toBe("");
@@ -135,7 +135,7 @@ it("a design issue assigned to an agent ends as frames in review with a Design c
     const chiefLog = await messages(chief.activeTaskId);
     expect(chiefLog.some((m) => m.kind === "activity" && /origin_assign_issue/.test(m.tool?.name ?? "") && m.tool?.ok === true), JSON.stringify(chiefLog.filter((m) => m.kind === "activity"))).toBe(true);
 
-    const activity = (await messages(designThread)).filter((m) => m.kind === "activity" && m.tool?.name);
+    const activity = (await messages(designThread)).filter((m) => m.kind === "activity" && m.tool?.itemId);
     const ran = (tool: string) => activity.find((m) => m.tool.name.endsWith(tool));
     for (const tool of ["origin_canvas", "origin_canvas_edit", "origin_canvas_screenshot", "origin_canvas_comment", "origin_design_submit"]) {
       expect(ran(tool)?.tool?.ok, `${tool}: ${JSON.stringify(activity.map((m) => m.tool))}`).toBe(true);

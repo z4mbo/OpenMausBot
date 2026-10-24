@@ -19,6 +19,15 @@ export interface RosterMember {
 
 const sectionKey = (section?: string): string => section?.trim() || "";
 
+type ProjectTeams = (botId: string) => { projectId: string; teams: readonly string[] } | null;
+let projectTeams: ProjectTeams = () => null;
+
+export function setPeerProjectTeams(resolve: ProjectTeams): () => void {
+  const previous = projectTeams;
+  projectTeams = resolve;
+  return () => { projectTeams = previous; };
+}
+
 export const PEER_ACCESS_HELP = "Call list_bots for reachable teammates. If the intended Chief is missing, ask the user to check team membership and this bot's allowed peers, or message the Chief directly. A Chief's access to another team does not grant that team's bots access back to the Chief. Do not use computer control to bypass this.";
 
 /** OMB_OPEN_TEAMS=1: any bot may reach any section; peer lists, hidden bots and visibility still apply, and it grants no Chief authority. */
@@ -26,23 +35,27 @@ const openTeams = (): boolean => process.env.OMB_OPEN_TEAMS === "1";
 
 /** A title, peer id, imported persona or room membership is not a grant; invalid saved grants fail closed. */
 export function canAccessTeam(
-  from: Pick<RosterMember, "section" | "chiefOfStaff" | "managedSections">,
+  from: Pick<RosterMember, "section" | "chiefOfStaff" | "managedSections"> & { id?: string },
   section?: string,
 ): boolean {
-  if (openTeams()) return true;
   const target = sectionKey(section);
+  const projects = from.id ? projectTeams(from.id) : null;
+  if (projects) return projects.teams.some((team) => sectionKey(team) === target);
+  if (openTeams()) return true;
   return target === sectionKey(from.section) || Boolean(from.chiefOfStaff &&
     Array.isArray(from.managedSections) && from.managedSections.some(value =>
       typeof value === "string" && sectionKey(value) === target));
 }
 
 export function coordinatorSupervises(
-  coordinator: Pick<RosterMember, "chiefOfStaff" | "managedSections"> | null | undefined,
+  coordinator: Pick<RosterMember, "chiefOfStaff" | "managedSections"> & { id?: string } | null | undefined,
   bot: Pick<RosterMember, "section"> | null | undefined,
 ): boolean {
   if (!coordinator?.chiefOfStaff || !bot) return false;
   const target = sectionKey(bot.section);
   if (!target) return false;
+  const projects = coordinator.id ? projectTeams(coordinator.id) : null;
+  if (projects && !projects.teams.includes(target)) return false;
   return Boolean(
     Array.isArray(coordinator.managedSections) &&
     coordinator.managedSections.some((value) =>
@@ -82,10 +95,13 @@ export function peerStatusWords(status: PeerStatus): string {
 
 /** Only the sender's list counts: reading the target's would let a bot refuse work from its own section's Chief. */
 export const peerAllowed = (
-  from: { peers?: string[]; visibility?: unknown },
+  from: { id?: string; peers?: string[]; visibility?: unknown },
   target: string | { id: string; visibility?: unknown },
 ): boolean => {
   const targetId = typeof target === "string" ? target : target.id;
+  const sourceProject = from.id ? projectTeams(from.id) : null;
+  const targetProject = sourceProject ? projectTeams(targetId) : null;
+  if (sourceProject && targetProject && sourceProject.projectId !== targetProject.projectId) return false;
   if (Array.isArray(from.peers) && !from.peers.includes(targetId)) return false;
   // Same audience too: a teammate others can see would carry this bot's words to people who cannot see it.
   return typeof target === "string" || sameAudience(from.visibility, target.visibility);

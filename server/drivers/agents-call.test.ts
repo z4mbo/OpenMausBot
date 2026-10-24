@@ -17,6 +17,21 @@ function context(overrides: Partial<ToolCallContext> = {}): ToolCallContext {
   };
 }
 
+describe("read_agent_transcript", () => {
+  it("uses target addressing separately from capability identity and surfaces refusals", async () => {
+    for (const ok of [true, false]) {
+      const paths: string[] = [];
+      const result = await callTool("read_agent_transcript", { bot_id: "chief", thread_id: "work", limit: 10 }, context({ client: {
+        api: async () => ({}),
+        apiResponse: async (path) => { paths.push(path); return { ok, status: ok ? 200 : 404, body: ok ? { messages: [{ text: "Done" }] } : { error: "No supervised agent conversation" } }; },
+      } }));
+      expect(paths).toEqual(["/api/internal/agent-transcript?targetBotId=chief&threadId=work&limit=10"]);
+      expect(result.isError === true).toBe(!ok);
+      expect(result.text).toContain(ok ? "Done" : "No supervised agent conversation");
+    }
+  });
+});
+
 describe("send_voice_note", () => {
   it("refuses a missing or blank note with the shape a retry needs", async () => {
     for (const args of [{}, { text: "" }, { text: "   " }]) {
