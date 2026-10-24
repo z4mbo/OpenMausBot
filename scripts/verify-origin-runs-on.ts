@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { launchVerificationServer, runControlOmb } from "./control-omb.ts";
 import { mountPreview, REPO_ROOT } from "./testing/preview-fixture.ts";
-import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "./testing/origin-convex-backend.ts";
 
 type Json = Record<string, unknown>;
 
@@ -49,7 +49,7 @@ try {
   const cloud = fileURLToPath(new URL("./testing/origin-runs-on-cloud.ts", import.meta.url));
   preview = await mountPreview(live, {
     entry: "/scripts/testing/origin-runs-on-preview.tsx", route: "/__origin-runs-on.html", title: "Isolated runs-on", logLevel: "warn",
-    extraRoutes: [{ path: "/__origin-campaigns.json", handler: (_req, res) => {
+    extraRoutes: [{ path: "/__origin-cloud.json", handler: (_req, res) => {
       res.setHeader("Content-Type", "application/json");
       res.end(JSON.stringify({ url: convex.url, token: seeded.ada.token, viewerToken: seeded.grace.token, agentId: seeded.agentId, teamId: seeded.teamId }));
     } }],

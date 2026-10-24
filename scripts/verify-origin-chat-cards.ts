@@ -3,41 +3,16 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { crc32, deflateSync } from "node:zlib";
 import { launchVerificationServer, runControlOmb } from "./control-omb.ts";
 import { fixtureApi, mountPreview, REPO_ROOT } from "./testing/preview-fixture.ts";
-import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "./testing/origin-convex-backend.ts";
 
 type Json = Record<string, unknown>;
 
 const EVIDENCE = join(REPO_ROOT, "docs", "verification", "evidence", "origin-chat-cards");
-const PROMPT = "Show me where the launch stands: the post you drafted, the campaign, our assets, the vault, the repo, user feedback and the last call.";
+const PROMPT = "Show me where the launch stands: our assets, the vault, the repo, user feedback and the last call.";
 const swatchSvg = (fill: string, label: string, width = 640, height = 360) => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="${fill}"/><circle cx="${width * 0.7}" cy="${height * 0.4}" r="${Math.min(width, height) / 4}" fill="white" fill-opacity="0.18"/><text x="24" y="${height - 30}" font-family="sans-serif" font-size="28" fill="white">${label}</text></svg>`;
 const swatch = (fill: string, label: string, width?: number, height?: number) => `data:image/svg+xml;utf8,${encodeURIComponent(swatchSvg(fill, label, width, height))}`;
-
-/** A flat colour with a lighter disc, as a PNG data URL: Broadcast publishes PNG but not SVG. */
-function pngSwatch(hex: string, width: number, height: number): string {
-  const [r, g, b] = [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16));
-  const raw = Buffer.alloc((width * 3 + 1) * height);
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const lit = (x - width * 0.7) ** 2 + (y - height * 0.4) ** 2 < (Math.min(width, height) / 4) ** 2 ? 40 : 0;
-      raw.set([Math.min(255, r! + lit), Math.min(255, g! + lit), Math.min(255, b! + lit)], y * (width * 3 + 1) + 1 + x * 3);
-    }
-  }
-  const chunk = (type: string, data: Buffer) => {
-    const head = Buffer.alloc(8);
-    head.writeUInt32BE(data.length, 0);
-    head.write(type, 4);
-    const tail = Buffer.alloc(4);
-    tail.writeUInt32BE(crc32(Buffer.concat([head.subarray(4), data])), 0);
-    return Buffer.concat([head, data, tail]);
-  };
-  const header = Buffer.alloc(13);
-  header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 2;
-  const png = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]);
-  return `data:image/png;base64,${png.toString("base64")}`;
-}
 
 async function seed(convex: FakeConvex) {
   const { t, ref } = convex;
@@ -51,16 +26,10 @@ async function seed(convex: FakeConvex) {
   const projectId = String(await as("projects:create", { teamId, name: "Origin Lite", repoUrl: "https://github.com/acme/origin-lite" }));
   const now = Date.now();
   const insert = (table: string, row: Json) => t.run((ctx) => ctx.db.insert(table as never, row as never));
-  const hero = await insert("designAssets", { projectId, type: "image", name: "Launch hero.png", url: pngSwatch("#3b5bdb", 1200, 675), contentType: "image/png", folder: "Brand", createdAt: now, updatedAt: now });
+  await insert("designAssets", { projectId, type: "image", name: "Launch hero.svg", url: swatch("#3b5bdb", "hero", 1200, 675), contentType: "image/svg+xml", folder: "Brand", createdAt: now, updatedAt: now });
   await insert("designAssets", { projectId, type: "image", name: "App icon", url: swatch("#2b8a3e", "icon", 512, 512), contentType: "image/svg+xml", folder: "Brand", createdAt: now - 1, updatedAt: now - 1 });
   await insert("designAssets", { projectId, type: "image", name: "Pricing table", url: swatch("#a61e4d", "pricing", 800, 800), contentType: "image/svg+xml", createdAt: now - 2, updatedAt: now - 2 });
   await insert("designAssets", { projectId, type: "document", name: "Press kit.pdf", url: "https://cdn.fixture.test/press-kit.pdf", createdAt: now - 3, updatedAt: now - 3 });
-  const published = String(await as("broadcast:save", { projectId, variants: [{ channel: "x", text: "Origin Lite beta opens Monday." }], assetIds: [hero] }));
-  const campaignId = String(await as("campaigns:create", {
-    projectId, name: "Origin Lite launch", goal: "500 beta sign-ups in the first two weeks from founders who run small teams.",
-    channels: ["x", "linkedin", "bluesky"], startDate: "2026-10-26", endDate: "2026-11-09", status: "running",
-  }));
-  await as("campaigns:link", { projectId, campaignId, kind: "post", itemId: published });
   const cipher = { ciphertext: "CIPHERTEXT", iv: "IV", salt: "SALT", iterations: 1, kdf: "pbkdf2", createdAt: now, updatedAt: now };
   await insert("credentials", { projectId, title: "Stripe live key", kind: "api_key", agentUse: true, username: "billing@acme.test", ...cipher });
   await insert("credentials", { projectId, title: "Vercel deploy token", kind: "secret", agentUse: true, ...cipher });
@@ -83,9 +52,6 @@ async function seed(convex: FakeConvex) {
 }
 
 const TOOL_CALLS = [
-  { name: "origin_broadcast_draft", input: { channels: ["x", "linkedin", "bluesky"], text: "Origin Lite is live. Plan the work, ship it with your agents, launch it the same week. Join the beta: https://origin.example/lite #buildinpublic", media: ["Launch hero.png"], campaign: "Origin Lite launch" } },
-  { name: "origin_campaign_get", input: { campaign: "Origin Lite launch" } },
-  { name: "origin_campaign_get", input: {} },
   { name: "origin_list_assets", input: {} },
   { name: "origin_vault_list", input: {} },
   { name: "origin_repo_status", input: {} },
@@ -98,7 +64,7 @@ const seeded = await seed(convex);
 const env = {
   ...process.env,
   FAKE_CLAUDE_TOOL_CALLS: JSON.stringify(TOOL_CALLS),
-  FAKE_CLAUDE_REPLIES: JSON.stringify(["Here is where the launch stands. The post waits for your approval."]),
+  FAKE_CLAUDE_REPLIES: JSON.stringify(["Here is where the launch stands."]),
 };
 const live = await launchVerificationServer(env);
 const report: Json = { prompt: PROMPT, tools: TOOL_CALLS.map((call) => call.name), screenshots: [] as string[], checks: {} as Record<string, boolean> };
@@ -114,10 +80,10 @@ try {
   writeFileSync(join(live.info.dataDir, "origin-cloud.json"), JSON.stringify({ url: convex.url, sessionToken: seeded.token, projects: { [String(chief.id)]: seeded.projectId } }), { mode: 0o600 });
   await api("PATCH", "/api/config", { language: "en" });
 
-  const cloud = fileURLToPath(new URL("./testing/origin-campaigns-cloud.ts", import.meta.url));
+  const cloud = fileURLToPath(new URL("./testing/origin-convex-cloud.ts", import.meta.url));
   preview = await mountPreview(live, {
     entry: "/scripts/testing/threads-preview.tsx", route: "/__origin-chat-cards.html", title: "Isolated Origin chat cards",
-    extraRoutes: [{ path: "/__origin-campaigns.json", handler: (_req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ url: convex.url, token: seeded.token, viewerToken: seeded.token, projectId: seeded.projectId })); } }],
+    extraRoutes: [{ path: "/__origin-cloud.json", handler: (_req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ url: convex.url, token: seeded.token, viewerToken: seeded.token, projectId: seeded.projectId })); } }],
     aliases: [
       { find: /^@\/lib\/origin-cloud(?:\/client)?$/, replacement: cloud },
       { find: "@", replacement: fileURLToPath(new URL("../src", import.meta.url)) },
@@ -135,7 +101,7 @@ try {
   const messages = ((await api("GET", `/api/threads/${chief.activeTaskId}/messages`)).messages ?? []) as Json[];
   const cards = messages.filter((message) => message.originCard).map((message) => (message.originCard as Json).kind);
   report.cardsInTranscript = cards;
-  checks.everyToolDrewItsCard = ["broadcast", "campaign", "campaigns", "assets", "vault", "repo", "feedback", "call"].every((kind) => cards.includes(kind));
+  checks.everyToolDrewItsCard = ["assets", "vault", "repo", "feedback", "call"].every((kind) => cards.includes(kind));
   checks.vaultCardHasNoSecrets = !JSON.stringify(messages.filter((message) => message.originCard).map((message) => message.originCard)).match(/CIPHERTEXT|billing@acme|appstoreconnect/);
   const toolAnswers = messages.filter((message) => message.kind === "activity" && (message.tool as Json | undefined)?.output).map((message) => String((message.tool as Json).output));
   checks.modelNeverSawCardPayload = toolAnswers.every((output) => !output.includes("\"originCard\""));
@@ -151,7 +117,7 @@ try {
   await page.goto(preview.previewUrl);
   await page.getByRole("button", { name: /Atlas/ }).first().click().catch(() => undefined);
   const card = (kind: string) => page.locator(`[data-origin-card="${kind}"]`).first();
-  await card("broadcast").waitFor({ timeout: 30_000 });
+  await card("assets").waitFor({ timeout: 30_000 });
   mkdirSync(EVIDENCE, { recursive: true });
   const shoot = async (kind: string, name: string) => {
     const target = card(kind);
@@ -161,28 +127,6 @@ try {
     await target.screenshot({ path: file });
     shots.push(`docs/verification/evidence/origin-chat-cards/${name}.png`);
   };
-  await shoot("broadcast", "broadcast-needs-approval");
-  checks.approveOffered = await card("broadcast").getByRole("button", { name: "Approve" }).isVisible();
-  checks.scheduleHiddenUntilApproved = !(await card("broadcast").getByRole("button", { name: "Schedule" }).isVisible());
-  await card("broadcast").getByRole("tab", { name: "Preview on LinkedIn" }).click();
-  await shoot("broadcast", "broadcast-linkedin-preview");
-  await card("broadcast").getByRole("button", { name: "Approve" }).click();
-  await card("broadcast").getByRole("button", { name: "Schedule" }).waitFor({ timeout: 10_000 });
-  await shoot("broadcast", "broadcast-approved");
-  await card("broadcast").getByRole("button", { name: "Schedule" }).click();
-  await card("broadcast").getByText(/Goes out/).or(card("broadcast").getByRole("alert")).waitFor({ timeout: 10_000 });
-  report.scheduleAlert = await card("broadcast").getByRole("alert").textContent().catch(() => null);
-  await shoot("broadcast", "broadcast-scheduled");
-  const posts = (await convex.t.query(convex.ref("broadcast:list"), { sessionToken: seeded.token, projectId: seeded.projectId }) as { posts: Json[] }).posts;
-  checks.scheduledThroughApproval = posts.some((post) => post.agentName === "Atlas" && post.status === "scheduled" && typeof post.approvedAt === "number");
-  await shoot("campaign", "campaign");
-  await shoot("campaigns", "campaigns-list");
-  await card("campaign").getByRole("button", { name: "Mark done" }).click();
-  await card("campaign").getByText("Done", { exact: true }).waitFor({ timeout: 10_000 });
-  const campaigns = (await convex.t.query(convex.ref("campaigns:list"), { sessionToken: seeded.token, projectId: seeded.projectId }) as { campaigns: Json[] }).campaigns;
-  checks.campaignMarkedDoneFromCard = campaigns.some((campaign) => campaign.name === "Origin Lite launch" && campaign.status === "done");
-  checks.draftLinkedToCampaign = campaigns.some((campaign) => campaign.name === "Origin Lite launch" && (campaign.counts as Json).posts === 2);
-  await shoot("campaign", "campaign-done");
   await shoot("assets", "assets");
   await shoot("vault", "vault");
   await shoot("repo", "repo");

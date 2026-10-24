@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchVerificationServer, runControlOmb, type VerificationServer } from "./control-omb.ts";
-import { startFakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex } from "./testing/origin-convex-backend.ts";
 import { fixtureApi } from "./testing/preview-fixture.ts";
 import type { WireBot, WireMessage } from "../shared/wire.ts";
 

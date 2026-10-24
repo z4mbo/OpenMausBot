@@ -1,6 +1,6 @@
 // Two people on two Origin servers with their own data folders, one in-memory
 // Origin backend and a loopback GitHub: the workspace owner connected GitHub
-// and a fal.ai key on their computer once; an invited member, whose computer
+// and an OpenAI key on their computer once; an invited member, whose computer
 // holds neither, creates a project's repository, mirrors an issue, reads the
 // repository, gets git access for their agents, uses the shared key and links
 // their own GitHub. Nothing reaches GitHub or a real Origin deployment.
@@ -10,7 +10,7 @@ import { writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { launchVerificationServer, type VerificationServer } from "./control-omb.ts";
-import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "./testing/origin-convex-backend.ts";
 import { createFakeGitHub, type FakeGitHub } from "./testing/fake-github.ts";
 import { createGitHubStore } from "../server/github/store.ts";
 
@@ -95,7 +95,7 @@ try {
     writeFileSync(join(server.info.dataDir, "origin-cloud.json"), JSON.stringify({ url: convex.url, sessionToken: token, projects }), { mode: 0o600 });
   cloudFile(ownerServer, people.owner.token);
   cloudFile(memberServer, people.member.token);
-  writeFileSync(join(ownerServer.info.dataDir, "integration-keys.json"), JSON.stringify({ fal: { key: "fixture-fal-id:fixture-fal-secret" } }), { mode: 0o600 });
+  writeFileSync(join(ownerServer.info.dataDir, "integration-keys.json"), JSON.stringify({ openai: { apiKey: "fixture-openai-secret" } }), { mode: 0o600 });
   const store = createGitHubStore(join(ownerServer.info.dataDir, "origin-github"));
   store.saveApp({ clientId: "Iv1.fixture", clientSecret: "fixture-client-secret", slug: fake.slug, webhookSecret: "fixture-hook", appId: fake.appId, privateKey: fake.privateKeyPem });
   store.saveWorkspace(people.teamId, "octo", 7, people.owner.userId, { access_token: ownerGitHub });
@@ -144,12 +144,12 @@ try {
   const other = await credentialFill(memberServer.info.dataDir, "octo/secret-plans.git");
   expect("git gets nothing for a repository no linked project uses", !other.includes("password="), other);
 
-  const sharedKey = await owner(`/api/integrations/fal/share?${teamQuery}`, { method: "POST" });
-  expect("the owner shares their fal.ai key with the workspace", sharedKey.status === 200, sharedKey.body);
+  const sharedKey = await owner(`/api/integrations/openai/share?${teamQuery}`, { method: "POST" });
+  expect("the owner shares their OpenAI key with the workspace", sharedKey.status === 200, sharedKey.body);
   const keys = await member<{ integrations: { id: string; source: string | null; shared: { by: string } | null }[] }>("/api/integrations");
-  const fal = keys.body.integrations.find((entry) => entry.id === "fal");
-  expect("the member's computer uses the shared key and says who shared it", fal?.source === "shared" && fal.shared?.by === "ada", fal);
-  expect("the shared key's value never reaches the member's client", !JSON.stringify(keys.body).includes("fixture-fal-secret"));
+  const openai = keys.body.integrations.find((entry) => entry.id === "openai");
+  expect("the member's computer uses the shared key and says who shared it", openai?.source === "shared" && openai.shared?.by === "ada", openai);
+  expect("the shared key's value never reaches the member's client", !JSON.stringify(keys.body).includes("fixture-openai-secret"));
 
   const vaultItem = (title: string) => convex.t.mutation(convex.ref("credentials:create"), { sessionToken: people.member.token, projectId, kind: "api_key", title, ciphertext: "c", iv: "i", salt: "s", iterations: 1, kdf: "PBKDF2" });
   const [agentItem, privateItem] = [String(await vaultItem("Stripe test")), String(await vaultItem("Bank login"))];

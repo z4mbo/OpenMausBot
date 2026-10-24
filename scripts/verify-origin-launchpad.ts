@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchVerificationServer } from "./control-omb.ts";
 import { mountPreview, parkUntilSignal } from "./testing/preview-fixture.ts";
-import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "./testing/origin-convex-backend.ts";
 
 type Json = Record<string, unknown>;
 
@@ -38,7 +38,7 @@ const convex = await startFakeConvex();
 const seeded = await seed(convex);
 const fixture = await launchVerificationServer();
 writeFileSync(join(fixture.info.dataDir, "origin-cloud.json"), JSON.stringify({ url: convex.url, sessionToken: seeded.ownerToken, projects: {} }), { mode: 0o600 });
-const cloud = fileURLToPath(new URL("./testing/origin-campaigns-cloud.ts", import.meta.url));
+const cloud = fileURLToPath(new URL("./testing/origin-convex-cloud.ts", import.meta.url));
 const workspace = fileURLToPath(new URL("./testing/origin-launchpad-workspace.ts", import.meta.url));
 const json = (body: unknown) => (_req: unknown, res: { setHeader(name: string, value: string): void; end(body: string): void }) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify(body)); };
 let preview: Awaited<ReturnType<typeof mountPreview>> | undefined;
@@ -47,7 +47,7 @@ try {
     entry: "/scripts/testing/origin-launchpad-preview.tsx", route: "/__origin-launchpad.html", title: "Isolated Origin Launchpad",
     extraRoutes: [
       { path: "/__origin-launchpad.json", handler: json({ url: convex.url, teamId: seeded.teamId, projects: seeded.projects }) },
-      { path: "/__origin-campaigns.json", handler: json({ url: convex.url, token: seeded.ownerToken }) },
+      { path: "/__origin-cloud.json", handler: json({ url: convex.url, token: seeded.ownerToken }) },
     ],
     aliases: [
       { find: /^@\/lib\/origin-cloud(?:\/client)?$/, replacement: cloud },

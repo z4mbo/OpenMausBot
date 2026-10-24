@@ -12,7 +12,7 @@ Origin combines project management with the local agent runtime from [OpenMausBo
 - **Local agents:** the Electron app runs a Node server and the coding engines on the machine doing the work. Model execution and provider credentials use that machine.
 - **Shared conversations:** the sender runs a turn on their own machine by default. Members can explicitly choose a supported teammate model source when its owner grants access. Leases and a queue coordinate shared agents across members and computers.
 - **Issues and pull requests:** Draft issues stay private to Origin. Other issues can mirror to GitHub; the project Chief reviews the pull request, and merging requires a person's approval.
-- **Team tools:** project chat, mentions, notifications, calls, client-encrypted vault entries, assets, feedback and search. Studio brings together media generation, workflows, presets and the Design canvas. Publish prepares and schedules approved posts and campaigns with explicitly chosen channel accounts.
+- **Team tools:** project chat, mentions, notifications, calls, client-encrypted vault entries, assets, feedback and search.
 
 ## Repository map
 
@@ -37,7 +37,7 @@ Model backups are opt-in and follow up to five exact account/model choices. Only
 
 Daily API limits apply to this computer's local spending ledger, with an optional limit for each agent and a configured daily reset time zone. Supported bounded API requests reserve funds before every provider request, including later tool rounds and helper calls. Unknown costs retain their reservation. When a cap applies, unpriced or unsupported API routes are refused; confirmed subscription turns are separate from API spending. This is not a provider invoice or an account-wide budget across several computers.
 
-These limits cover AI model API spending. Unpriced Studio generations, paid transcription and ElevenLabs AI calls stop while an applicable cap is active. Manual Studio work checks this computer's cap; agent work also checks that agent's cap. SMS, email and social service charges are outside this model budget.
+These limits cover AI model API spending. Paid transcription and ElevenLabs AI calls stop while an applicable cap is active; agent work also checks that agent's cap. SMS and email service charges are outside this model budget.
 
 Teammate model sources are available in this candidate through explicit owner grants, disabled by default. A selected online source executes on its owner's computer with that computer's provider credentials, project folder, approval policy and applicable API budget. Only eligible confined runtimes can be shared. Sender-runs remains the default, and an unavailable or uncertain accepted request is not silently rerouted into another account. The isolated native evidence covers direct execution, local/remote quota transfers, offline-source skipping, partial-output refusal, Stop, revocation and pre-dispatch budget refusal. Repository fake providers establish these paths; real CLI/OS isolation, a third physical host, positive hosted API invoice accounting and unknown owner-crash recovery remain separate limits. See the [hosting acceptance boundary](docs/verification/origin-candidate-045.md#opt-in-teammate-model-hosting).
 

@@ -11,7 +11,7 @@ const { chromium } = await import(process.env.OMB_VERIFY_PLAYWRIGHT || "playwrig
 const browser = await chromium.launch();
 const evidence = { checkedAt: new Date().toISOString(), previewUrl: url.href, cases: [], pageErrors: [] };
 const config = await (await fetch(new URL("/__origin-launchpad.json", url))).json();
-const cloud = await (await fetch(new URL("/__origin-campaigns.json", url))).json();
+const cloud = await (await fetch(new URL("/__origin-cloud.json", url))).json();
 
 async function convex(kind, path, args) {
   const response = await fetch(`${config.url}/api/${kind}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path, format: "convex_encoded_json", args: [{ sessionToken: cloud.token, ...args }] }) });

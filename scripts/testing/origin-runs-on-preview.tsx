@@ -9,7 +9,7 @@ import { applySkin } from "../../src/lib/skins";
 import { setLocale } from "../../src/lib/i18n";
 import "../../src/styles.css";
 
-const fixture = await (await fetch("/__origin-campaigns.json")).json() as { agentId: string; teamId: string };
+const fixture = await (await fetch("/__origin-cloud.json")).json() as { agentId: string; teamId: string };
 setLocale("en");
 applySkin(new URLSearchParams(location.search).get("theme") === "light" ? "atelier" : "midnight");
 

@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchVerificationServer, runControlOmb } from "./control-omb.ts";
 import { fixtureApi, mountPreview, parkUntilSignal, REPO_ROOT } from "./testing/preview-fixture.ts";
-import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "./testing/origin-convex-backend.ts";
 
 type Json = Record<string, unknown>;
 
@@ -80,7 +80,7 @@ try {
   const cloud = fileURLToPath(new URL("./testing/origin-workspace-cloud.ts", import.meta.url));
   preview = await mountPreview(live, {
     entry: "/scripts/testing/threads-preview.tsx", route: "/__origin-workspace.html", title: "Isolated Origin workspace",
-    extraRoutes: [{ path: "/__origin-campaigns.json", handler: (_req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ url: convex.url, token: seeded.token, viewerToken: seeded.benToken, projectId: seeded.walkies })); } }],
+    extraRoutes: [{ path: "/__origin-cloud.json", handler: (_req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ url: convex.url, token: seeded.token, viewerToken: seeded.benToken, projectId: seeded.walkies })); } }],
     aliases: [
       { find: /^@\/lib\/origin-cloud(?:\/client)?$|^\.\/origin-cloud\/client$/, replacement: cloud },
       { find: "@", replacement: fileURLToPath(new URL("../src", import.meta.url)) },

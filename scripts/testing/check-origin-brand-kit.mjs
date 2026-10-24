@@ -10,7 +10,7 @@ await mkdir(output, { recursive: true });
 const { chromium } = await import(process.env.OMB_VERIFY_PLAYWRIGHT || "playwright");
 const browser = await chromium.launch();
 const evidence = { checkedAt: new Date().toISOString(), previewUrl: url.href, cases: [], pageErrors: [] };
-const config = await (await fetch(new URL("/__origin-campaigns.json", url))).json();
+const config = await (await fetch(new URL("/__origin-cloud.json", url))).json();
 
 async function convex(kind, path, args) {
   const response = await fetch(`${config.url}/api/${kind}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path, format: "convex_encoded_json", args: [{ sessionToken: config.token, ...args }] }) });
@@ -19,14 +19,6 @@ async function convex(kind, path, args) {
   return body.value;
 }
 const agent = async (tool, args) => (await fetch(new URL("/__brand-agent", url), { method: "POST", body: JSON.stringify({ tool, args }) })).json();
-const falInputs = async () => (await fetch(new URL("/__brand-fal.json", url))).json();
-async function submitted(count) {
-  for (let tries = 0; tries < 100; tries++) {
-    if ((await falInputs()).length >= count) return;
-    await new Promise((done) => setTimeout(done, 100));
-  }
-  assert.fail(`fal did not receive ${count} submissions`);
-}
 
 async function open(width, theme, query = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
@@ -95,8 +87,8 @@ try {
   await capture(edit, "contrast-fail-1280-dark");
   await edit.getByLabel("Primary hex").fill("#6D28D9");
   assert.equal(await contrast.getByText("Fails").count(), 0);
-  await edit.getByLabel("Style words for Studio").fill("quiet interiors");
-  await edit.getByLabel("Style words for Studio").press("Enter");
+  await edit.getByLabel("Style words for images").fill("quiet interiors");
+  await edit.getByLabel("Style words for images").press("Enter");
   await edit.getByLabel("Headings").selectOption("playfair-display");
   await edit.getByRole("button", { name: "Save brand" }).click();
   await edit.getByText(/Saved by ada/).waitFor();
@@ -106,74 +98,6 @@ try {
   assert.deepEqual(stored.imagery, ["soft lamplight", "film grain", "deep violet shadows", "quiet interiors"]);
   evidence.cases.push({ step: "editing shows a failing contrast live, then saves colour, font and imagery through brand:update" });
   await edit.close();
-
-  for (const [width, theme] of [[1280, "dark"], [375, "dark"]]) {
-    const canvas = await open(width, theme, { page: "canvas" });
-    await canvas.locator("[data-drawing-canvas]").waitFor();
-    if (width < 860) await canvas.getByRole("button", { name: /Layers/ }).first().click();
-    await canvas.locator("[data-layer-row]", { hasText: "Hero" }).first().click();
-    if (width < 860) await canvas.getByRole("button", { name: /Inspector|Design|Properties/ }).first().click().catch(() => {});
-    const apply = canvas.getByRole("button", { name: "Apply brand" });
-    await apply.waitFor();
-    if (width === 1280) {
-      await capture(canvas, `canvas-before-${width}-${theme}`);
-      await apply.click();
-      await canvas.waitForTimeout(2500);
-      const rows = (await convex("query", "draw:scene", { teamId: config.teamId, canvasId: config.canvasId })).map((row) => JSON.parse(row.data ?? row));
-      const byId = Object.fromEntries(rows.map((row) => [row.id, row]));
-      assert.equal(byId.hero.fill, "#1C1917");
-      assert.equal(byId.button.fill, "#6D28D9");
-      assert.equal(byId.title.family, "playfair-display");
-      assert.equal(byId.copy.family, "dm-sans");
-      assert.equal(await apply.isDisabled(), true);
-      await canvas.locator("[data-layer-row]", { hasText: "Title" }).first().click();
-      await canvas.getByRole("button", { name: "Heading", pressed: true }).waitFor();
-      await canvas.getByRole("group", { name: "Brand colours" }).waitFor();
-      evidence.cases.push({ step: "Apply brand restyles the frame through the canvas writer: background neutral, accent to primary, heading and body faces; the text shows the Heading style and brand swatches" });
-    }
-    await capture(canvas, `canvas-${width}-${theme}`);
-    await canvas.close();
-  }
-
-  await convex("mutation", "pages:publish", { projectId: config.projectId, canvasId: config.canvasId, frameId: "hero", slug: "lumen", title: "Lumen" });
-  for (const width of [1280, 375]) {
-    const page = await browser.newPage({ viewport: { width, height: 800 } });
-    await page.route(/^(?!http:\/\/127\.0\.0\.1)/, (route) => route.abort());
-    await page.goto(new URL("/__brand-page.html", url).href);
-    const href = await page.locator("link[rel=stylesheet]").getAttribute("href");
-    assert.match(href, /family=Playfair\+Display/);
-    assert.match(href, /family=DM\+Sans/);
-    assert.match(await page.locator("h1").getAttribute("style"), /Playfair Display/);
-    await capture(page, `page-${width}`);
-    await page.close();
-  }
-  evidence.cases.push({ step: "the published page asks Google Fonts for the kit's faces and sets its heading in the heading face" });
-
-  for (const [width, theme] of [[1280, "dark"], [375, "dark"]]) {
-    const studio = await open(width, theme, { page: "studio" });
-    const toggle = studio.getByRole("switch", { name: "Use brand" });
-    await toggle.waitFor();
-    assert.equal(await toggle.getAttribute("aria-checked"), "true");
-    if (width === 1280) {
-      await studio.getByLabel("Prompt").fill("A desk lamp over an open notebook");
-      await studio.getByRole("button", { name: "Generate" }).click();
-      await submitted(1);
-      await toggle.click();
-      assert.equal(await toggle.getAttribute("aria-checked"), "false");
-      await studio.getByRole("button", { name: "Generate" }).click();
-      await submitted(2);
-      const [branded, plain] = await falInputs();
-      assert.match(branded.prompt, /^Visual style: soft lamplight, film grain, deep violet shadows, quiet interiors\. Brand colours: primary #6D28D9, secondary #FDE68A/);
-      assert.match(branded.prompt, /A desk lamp over an open notebook$/);
-      assert.equal(plain.prompt, "A desk lamp over an open notebook");
-      const generations = await convex("query", "studio:list", { projectId: config.projectId });
-      assert.deepEqual(generations.map((row) => [row.prompt, row.branded ?? false]).reverse(), [["A desk lamp over an open notebook", true], ["A desk lamp over an open notebook", false]]);
-      await toggle.click();
-      evidence.cases.push({ step: "Studio's Use brand is on once a kit exists: fal receives the imagery and colours ahead of the prompt; off sends the prompt as written; the generation records which" });
-    }
-    await capture(studio, `studio-${width}-${theme}`);
-    await studio.close();
-  }
 
   const viewer = await openBrand(1280, "dark", { viewer: "1" });
   await viewer.getByText("Only editors can change the brand kit.").waitFor();

@@ -12,7 +12,7 @@ import { initialState, StoreContext, type Bot, type Message } from "../../src/st
 import { ChiefSectionBar, ChiefSectionFrame } from "../../src/components/ChiefSections";
 import { OriginSearch } from "../../src/components/OriginSearch";
 import { DelegationBlock } from "../../src/components/DelegationBlock";
-import type { ChiefSection } from "../../src/lib/origin-chief-section";
+import type { ShownSection } from "../../src/lib/origin-chief-section";
 import { applySkin } from "../../src/lib/skins";
 import { setSessionToken } from "../../src/lib/origin-cloud/client";
 import "../../src/styles.css";
@@ -34,7 +34,7 @@ function Fixture() {
   const [busy, setBusy] = useState(false);
   const [nested, setNested] = useState(false);
   const [assigned, setAssigned] = useState("");
-  const [section, setSection] = useState<ChiefSection>((params.get("section") as ChiefSection | null) ?? "agents");
+  const [section, setSection] = useState<ShownSection>((params.get("section") as ShownSection | null) ?? "agents");
   if (screen === "project") return <main className="flex h-dvh min-w-0 flex-col bg-app text-ink">{section === "chat"
     ? <ChiefSectionBar bot={fixtureLead} section={section} onSection={setSection} />
     : <ChiefSectionFrame bot={fixtureLead} section={section} onSection={setSection} />}</main>;

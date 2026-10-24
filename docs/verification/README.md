@@ -75,20 +75,15 @@ Use only mapped, tested commands:
 - [Sidebar footer containment and keyboard access](sidebar-footer-fit.md)
 - [Sidebar footer icons in one row](sidebar-footer-single-row.md)
 - [Origin product identity, startup and compatibility](origin-branding.md)
-- [Publish: previews, reels, accounts and the month calendar](origin-broadcast.md)
-- [Campaigns in Publish](origin-campaigns.md)
 - [Workspace integrations every member can use](origin-shared-integrations.md)
 - [Who runs a shared agent, and whose subscription pays](origin-runs-on.md)
 - [Personal Vault, service sign-ins and project roles](origin-vault-roles.md)
 - [Connect your stack: the guided Integrations checklist](origin-integrations-stack.md)
-- [Studio: create, workflows and Assets](origin-studio.md)
 - [Origin cards in agent chat](origin-chat-cards.md)
 - [Project bar and core sections](origin-core-sections.md)
 - [Workspace pages and workspace context](origin-workspace.md)
-- [Brand kit across Canvas, Pages and Studio](origin-brand-kit.md)
-- [Canvas design tools, collaboration and agents](origin-canvas-pro.md)
+- [Brand kit](origin-brand-kit.md)
 - [Launchpad](origin-launchpad.md)
-- [A Chief runs a launch with a cheap real model](origin-agentic-launch.md)
 - [Draft-first boards and default issue creation](origin-draft-defaults.md)
 - [Issue cards remain visible during rapid dragging](origin-issue-drag.md)
 - [Issue dragging after permission or project changes](origin-issue-drag-permission.md)
@@ -291,11 +286,6 @@ The [Origin import integrity fixture](origin-import.md) checks complete local
 team creation, link-write recovery, lost responses and concurrent retries against
 synthetic cloud access responses in a disposable fake-engine server.
 
-The [Origin Canvas fixture](origin-draw.md) checks drawing, editing, layers, the
-inspector, export, agent-built sections, converted Excalidraw drawings, project
-canvas management, read-only controls and mobile layout against a synthetic cloud
-adapter.
-
 The [mobile generated-image checks](mobile-generated-images.md) cover native image
 attachments and message-scoped download authorization using isolated fixtures.
 
@@ -376,7 +366,6 @@ Origin's inspection and delivery records:
 - [Public invitations and central email](origin-invitations.md)
 - [Core Settings and onboarding](origin-core.md)
 - [Member call lifecycle and audio recovery](origin-calls.md)
-- [Canvas design editing and agent sections](origin-draw.md)
 - [Storage admission security investigation](origin-storage-admission.md)
 - [Upstream fit review and paired appearance](origin-upstream-review.md)
 - [Thirty additional upstream source-fit decisions](origin-upstream-fit-034.md)

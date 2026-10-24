@@ -14,7 +14,7 @@ OMB_VERIFY_PLAYWRIGHT=<path to playwright's index.mjs> \
 ```
 
 Nothing leaves this computer. The real Convex functions of `backend/convex`
-run in memory (`scripts/testing/origin-campaigns-backend.ts`, reached through
+run in memory (`scripts/testing/origin-convex-backend.ts`, reached through
 `scripts/testing/origin-workspace-cloud.ts`), seeded with the workspace
 "Fixture studio" and its projects Walkies and Bakery with open issues. The
 server is the disposable fake-engine fixture with the workspace head, the

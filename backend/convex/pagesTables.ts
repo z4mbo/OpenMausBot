@@ -14,7 +14,7 @@ export const pagesTables = {
     description: v.string(),
     body: v.string(),
     background: v.string(),
-    /** PageFont ids from shared/canvas-page; the public route drops any it does not know. */
+    /** Font ids of the page. */
     fonts: v.array(v.string()),
     leadForms: v.number(),
     ogStorageId: v.optional(v.id("_storage")),

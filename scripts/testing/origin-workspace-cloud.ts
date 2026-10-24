@@ -1,8 +1,8 @@
-// The Campaigns fixture's @/lib/origin-cloud with the account calls the workspace sync makes and paginated
+// The in-memory backend's @/lib/origin-cloud with the account calls the workspace sync makes and paginated
 // queries, so the signed-in account's workspace head, Inbox and notifications show real fixture data.
-import { cloudQueryOnce, useCloudQuery } from "./origin-campaigns-cloud.ts";
+import { cloudQueryOnce, useCloudQuery } from "./origin-convex-cloud.ts";
 
-export * from "./origin-campaigns-cloud.ts";
+export * from "./origin-convex-cloud.ts";
 
 export const cloud = {
   workspaces: { list: () => cloudQueryOnce("workspaces:list") },

@@ -13,8 +13,8 @@ const evidence = { checkedAt: new Date().toISOString(), previewUrl: url.href, ca
 
 /** Each provider's answer to a key check, standing in for the vendor so nothing leaves this computer. */
 const CHECKS = {
-  fal: { ok: false, detail: "fal.ai rejected the key: Unauthorized" },
-  x: { ok: true, account: "@origin", detail: "X accepted the keys" },
+  netlify: { ok: false, detail: "Netlify rejected the key: Unauthorized" },
+  vercel: { ok: true, account: "origin", detail: "Vercel accepted the key" },
 };
 
 async function open(width, theme) {
@@ -49,47 +49,39 @@ try {
     const step = (id) => stack.locator(`[data-stack-step="${id}"]`);
     const provider = (id) => stack.locator(`[data-stack-provider="${id}"]`);
 
-    await stack.getByText("2 of 3 ready").waitFor();
-    await step("studio").getByRole("button", { expanded: true }).waitFor();
-    await provider("fal").getByText("Not connected").waitFor();
-    assert.equal(await provider("fal").getByRole("link", { name: "Get fal.ai keys" }).getAttribute("href"), "https://fal.ai/dashboard/keys");
+    await stack.getByText("1 of 2 ready").waitFor();
+    await step("deploy").getByRole("button", { expanded: true }).waitFor();
+    await provider("vercel").getByText("Not connected").waitFor();
+    assert.equal(await provider("vercel").getByRole("link", { name: "Get Vercel keys" }).getAttribute("href"), "https://vercel.com/account/settings/tokens");
     await capture(page, `stack-${tag}`);
-    evidence.cases.push({ tag, step: "checklist: 2 of 3 ready (GitHub shared, X), the first unfinished step (Studio generation) open with its key pages" });
+    evidence.cases.push({ tag, step: "checklist: 1 of 2 ready (GitHub shared), the first unfinished step (Deploys) open with its key pages" });
 
-    await step("social").getByRole("button", { expanded: false }).click();
-    await provider("x").getByText("Yours").waitFor();
-    await provider("x").getByRole("button", { name: "Check" }).click();
-    await provider("x").getByText("Works as @origin").waitFor();
-    const socials = stack.getByRole("group", { name: "Accounts per service" });
-    await socials.getByText("Founder").waitFor();
-    await socials.getByText("Main account").waitFor();
-    await socials.getByRole("button", { name: "Add X account" }).click();
-    const form = stack.getByRole("form", { name: "Add X account" });
-    await form.getByLabel("Name in Publish").fill(`Support ${tag}`);
-    for (const label of ["API key", "API secret", "Access token", "Access token secret"]) await form.getByLabel(label, { exact: true }).fill("fixture");
-    await capture(page, `social-accounts-${tag}`);
-    await form.getByRole("button", { name: "Add account" }).click();
-    await socials.getByText(`Support ${tag}`).waitFor();
-    page.once("dialog", (dialog) => void dialog.accept());
-    await socials.getByRole("button", { name: `Remove Support ${tag}` }).click();
-    await socials.getByText(`Support ${tag}`).waitFor({ state: "detached" });
-    evidence.cases.push({ tag, step: "a check shows the X handle; a second X account is added and removed through the server" });
-
-    await step("studio").getByRole("button", { expanded: false }).click();
-    await provider("fal").getByRole("button", { name: "Add key" }).click();
-    const row = page.locator('[data-integration="fal"]');
-    await row.getByRole("button", { expanded: true }).waitFor();
-    await row.getByLabel("API key").fill("fixture-id:fixture-secret");
-    await row.getByRole("button", { name: "Save" }).click();
-    await row.getByText("fal.ai rejected the key: Unauthorized").waitFor();
-    await provider("fal").getByText("fal.ai rejected the key: Unauthorized").waitFor();
-    await stack.getByText("2 of 3 ready").waitFor();
-    await step("studio").locator("span.border-warning").waitFor();
+    await provider("netlify").getByRole("button", { name: "Add key" }).click();
+    const netlify = page.locator('[data-integration="netlify"]');
+    await netlify.getByRole("button", { expanded: true }).waitFor();
+    await netlify.getByLabel("Personal access token").fill("nfp_fixture");
+    await netlify.getByRole("button", { name: "Save" }).click();
+    await netlify.getByText("Netlify rejected the key: Unauthorized").waitFor();
+    await provider("netlify").getByText("Netlify rejected the key: Unauthorized").waitFor();
+    await stack.getByText("1 of 2 ready").waitFor();
+    await step("deploy").locator("span.border-warning").waitFor();
     await capture(page, `inline-check-${tag}`);
-    evidence.cases.push({ tag, step: "Add key opens fal.ai's form; saving checks the key at once and shows the rejection in the form and in the checklist" });
+    evidence.cases.push({ tag, step: "Add key opens Netlify's form; saving checks the key at once and shows the rejection in the form and in the checklist" });
     page.once("dialog", (dialog) => void dialog.accept());
-    await row.getByRole("button", { name: "Disconnect" }).click();
-    await stack.getByText("2 of 3 ready").waitFor();
+    await netlify.getByRole("button", { name: "Disconnect" }).click();
+    await stack.getByText("1 of 2 ready").waitFor();
+
+    await provider("vercel").getByRole("button", { name: "Add key" }).click();
+    const vercel = page.locator('[data-integration="vercel"]');
+    await vercel.getByRole("button", { expanded: true }).waitFor();
+    await vercel.getByLabel("Access token").fill("fixture");
+    await vercel.getByRole("button", { name: "Save" }).click();
+    await stack.getByText("2 of 2 ready").waitFor();
+    await vercel.getByText("Works as origin").waitFor();
+    evidence.cases.push({ tag, step: "a working Vercel key completes Deploys and the check names the account" });
+    page.once("dialog", (dialog) => void dialog.accept());
+    await vercel.getByRole("button", { name: "Disconnect" }).click();
+    await stack.getByText("1 of 2 ready").waitFor();
     await page.close();
   }
 } finally {
