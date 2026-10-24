@@ -33,7 +33,6 @@ async function fixture() {
     const taskId = await t.mutation(api.tasks.createTask, { ...scope, columnId, title: "Sensitive issue", priority: "medium", assignedToEmail: people.owner.email, dueDate: "2026-12-31" });
     const credentialId = await t.mutation(api.credentials.create, { ...scope, title: "Encrypted vault entry", ciphertext: "ciphertext", iv: "iv", salt: "salt", iterations: 600000, kdf: "PBKDF2" });
     const pageId = await t.mutation(api.wiki.create, { ...scope, title: "Sensitive document", content: "Confidential", type: "wiki", tags: [] });
-    const canvasId = await t.mutation(api.draw.createCanvas, { ...scope, name: "Private scene" });
     await t.mutation(api.design.createToken, { ...scope, type: "color", name: "Accent", value: "#123456" });
     await t.mutation(api.design.createAsset, { ...scope, type: "image", name: "Asset", url: "https://example.test/image.png" });
     const design = await t.query(api.design.list, scope);
@@ -41,7 +40,7 @@ async function fixture() {
     const portal = (await t.query(api.feedback.portals, { sessionToken, teamId })).find(item => item.projectId === projectId)!;
     await t.mutation(internal.feedback.submit, { slug: portal.slug, title: "Bug", body: "Private report", kind: "bug" });
     const entryId = (await t.query(api.feedback.list, { sessionToken, teamId, portalId: portal._id }))[0]!._id;
-    records.push({ projectId, columnId, taskId, credentialId, pageId, canvasId, tokenId: design.tokens[0]!._id, assetId: design.assets[0]!._id, portalId: portal._id, entryId });
+    records.push({ projectId, columnId, taskId, credentialId, pageId, tokenId: design.tokens[0]!._id, assetId: design.assets[0]!._id, portalId: portal._id, entryId });
   }
   await t.mutation(api.agents.setSharedAgents, { sessionToken, teamId, enabled: true });
   const agentId = (await t.mutation(api.agents.publishProjectTeam, { sessionToken, teamId, projectId: privateId, agents: [{ roleKey: "chief", kind: "chief", name: "Private chief" }] }))[0]!.agentId;
@@ -69,8 +68,6 @@ describe("backend resource access matrix", () => {
       ["wiki.list", () => f.t.query(api.wiki.list, scope)],
       ["documents.get", () => f.t.query(api.documents.get, { sessionToken, pageId: f.private.pageId })],
       ["documents.list", () => f.t.query(api.documents.list, { ...scope, teamId: f.teamId })],
-      ["draw.canvases", () => f.t.query(api.draw.canvases, scope)],
-      ["draw.scene", () => f.t.query(api.draw.scene, { sessionToken, teamId: f.teamId, canvasId: f.private.canvasId })],
       ["feedback.list", () => f.t.query(api.feedback.list, { sessionToken, teamId: f.teamId, portalId: f.private.portalId })],
       ["commits.list", () => f.t.query(api.commits.list, scope)],
       ["github.listPullRequests", () => f.t.query(api.github.listPullRequests, scope)],
@@ -126,7 +123,6 @@ describe("backend resource access matrix", () => {
       ["design.updateToken", () => f.t.mutation(api.design.updateToken, { ...scope, tokenId: f.shared.tokenId, value: "Hijacked" })],
       ["wiki.update", () => f.t.mutation(api.wiki.update, { ...scope, pageId: f.shared.pageId, content: "Hijacked" })],
       ["documents.rename", () => f.t.mutation(api.documents.rename, { sessionToken, pageId: f.shared.pageId, title: "Hijacked" })],
-      ["draw.renameCanvas", () => f.t.mutation(api.draw.renameCanvas, { sessionToken, teamId: f.teamId, canvasId: f.shared.canvasId, name: "Hijacked" })],
       ["feedback.dismiss", () => f.t.mutation(api.feedback.dismiss, { sessionToken, teamId: f.teamId, entryId: f.shared.entryId, dismissed: true })],
       ["planning.assignMilestone", () => f.t.mutation(api.planning.assignMilestone, { sessionToken, teamId: f.teamId, taskId: f.shared.taskId, milestoneId: null })],
       ["issueRelations.labels", () => f.t.mutation(api.issueRelations.labels, { sessionToken, taskId: f.shared.taskId, labels: ["Hijacked"] })],
@@ -154,7 +150,6 @@ describe("backend resource access matrix", () => {
       ["feedback.portals", () => f.t.query(api.feedback.portals, scope)],
       ["agents.listForTeam", () => f.t.query(api.agents.listForTeam, scope)],
       ["agentRuns.pendingForMe", () => f.t.query(api.agentRuns.pendingForMe, scope)],
-      ["draw.scene", () => f.t.query(api.draw.scene, scope)],
       ["connectors.listGrants", () => f.t.query(api.connectors.listGrants, scope)],
       ["connectors.revoke", () => f.t.mutation(api.connectors.revoke, { sessionToken: f.viewer.token, teamId: f.teamId, grantId: grant.grantId })],
     ];

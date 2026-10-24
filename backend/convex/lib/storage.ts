@@ -33,18 +33,11 @@ export async function writableUploadScope(ctx: Ctx, user: Doc<"users">, target: 
     if (!agent || agent.archivedAt !== undefined || !(await agentAccess(ctx, agent, user))?.canEdit) throw new Error("No upload access");
     return agent.projectId ? { kind: "project", projectId: agent.projectId } : { kind: "workspace", teamId: agent.teamId };
   }
-  if (target.kind === "drawing" && !target.canvasId) {
-    const member = await getActiveTeamMember(ctx, target.teamId, user.email);
-    if (!member || (member.userId && member.userId !== user._id) || !canEdit(member) || !await ctx.db.get(target.teamId)) throw new Error("No upload access");
-    return { kind: "workspace", teamId: target.teamId };
-  }
-  const canvas = target.kind === "drawing" && target.canvasId ? await ctx.db.get(target.canvasId) : null;
-  if (target.kind === "drawing" && (!canvas || canvas.archived || canvas.teamId !== target.teamId)) throw new Error("No upload access");
-  const projectId = target.kind === "drawing" ? canvas!.projectId : target.projectId;
-  const project = await ctx.db.get(projectId);
+  if (target.kind === "drawing") throw new Error("No upload access");
+  const project = await ctx.db.get(target.projectId);
   const member = project ? await projectMember(ctx, project, user) : null;
-  if (!member || !canEdit(member) || (target.kind === "icon" && member.role !== "owner" && member.role !== "admin") || (target.kind === "drawing" && project?.teamId !== target.teamId)) throw new Error("No upload access");
-  return { kind: "project", projectId };
+  if (!member || !canEdit(member) || (target.kind === "icon" && member.role !== "owner" && member.role !== "admin")) throw new Error("No upload access");
+  return { kind: "project", projectId: target.projectId };
 }
 
 export function uploadLimit(target: UploadTarget) {
@@ -55,7 +48,6 @@ export function validateUpload(target: UploadTarget, size: number, contentType: 
   if (size > uploadLimit(target)) throw new Error("Upload too large");
   if (target.kind === "profile" && !IMAGE_TYPES.has(contentType ?? "")) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
   if ((target.kind === "icon" || target.kind === "agent") && !contentType?.startsWith("image/")) throw new Error("Choose an image under 5 MB");
-  if (target.kind === "drawing" && !IMAGE_TYPES.has(contentType ?? "") && contentType !== "image/svg+xml") throw new Error("Choose an image under 15 MB");
 }
 
 export async function storageMetadata(ctx: Ctx, storageId: Id<"_storage">) {
@@ -73,20 +65,14 @@ export async function addStorageScope(ctx: MutationCtx, storageId: Id<"_storage"
 
 async function canReadLegacyReference(ctx: Ctx, storageId: Id<"_storage">, user: Doc<"users">) {
   if (user.avatarStorageId === storageId) return true;
-  const [projects, assets, agents, drawings] = await Promise.all([
+  const [projects, assets, agents] = await Promise.all([
     ctx.db.query("projects").withIndex("by_iconStorageId", q => q.eq("iconStorageId", storageId)).take(100),
     ctx.db.query("designAssets").withIndex("by_storageId", q => q.eq("storageId", storageId)).take(100),
     ctx.db.query("workspaceAgents").withIndex("by_avatarStorageId", q => q.eq("avatarStorageId", storageId)).take(100),
-    ctx.db.query("drawingFiles").withIndex("by_storageId", q => q.eq("storageId", storageId)).take(100),
   ]);
   for (const project of projects) if (await projectMember(ctx, project, user)) return true;
   for (const asset of assets) if (await canReadStorageScope(ctx, user, { kind: "project", projectId: asset.projectId })) return true;
   for (const agent of agents) if (await agentAccess(ctx, agent, user)) return true;
-  for (const file of drawings) {
-    const canvas = file.canvasId ? await ctx.db.get(file.canvasId) : null;
-    if (file.canvasId && (!canvas || canvas.archived || canvas.teamId !== file.teamId)) continue;
-    if (await canReadStorageScope(ctx, user, canvas ? { kind: "project", projectId: canvas.projectId } : { kind: "workspace", teamId: file.teamId })) return true;
-  }
   return false;
 }
 

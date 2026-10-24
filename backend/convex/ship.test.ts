@@ -49,7 +49,7 @@ describe("ship", () => {
     const targetId = await f.t.mutation(api.ship.saveTarget, { sessionToken: f.owner, projectId: f.projectId, ...target });
     const pulls = [{ number: 4, title: "feat: dark mode", url: "https://github.com/acme/launch/pull/4", mergedAt: 1, labels: [] }];
     const releaseId = await f.t.mutation(api.ship.saveRelease, {
-      sessionToken: writer, projectId: f.projectId, tag: "v1.1.0", notes: "Dark mode.", pulls, baseTag: "v1.0.0", targetId, announce: true, agent: { botId: "chief", name: "Atlas" },
+      sessionToken: writer, projectId: f.projectId, tag: "v1.1.0", notes: "Dark mode.", pulls, baseTag: "v1.0.0", targetId, agent: { botId: "chief", name: "Atlas" },
     });
     await expect(f.t.mutation(api.ship.saveRelease, { sessionToken: viewer, projectId: f.projectId, tag: "v9", notes: "" })).rejects.toThrow("Edit role required");
     await expect(f.t.mutation(api.ship.saveRelease, { sessionToken: writer, projectId: f.projectId, tag: "v1.1.0", notes: "" })).rejects.toThrow("already a release");
@@ -58,7 +58,7 @@ describe("ship", () => {
 
     await expect(f.t.mutation(api.ship.beginPublish, { sessionToken: writer, projectId: f.projectId, releaseId })).rejects.toThrow("Admin role required");
     const plan = await f.t.mutation(api.ship.beginPublish, { sessionToken: f.owner, projectId: f.projectId, releaseId });
-    expect(plan).toMatchObject({ tag: "v1.1.0", title: "Night shift", notes: "Dark mode everywhere.", announce: true, targetId, agentName: "Atlas", repoUrl: "https://github.com/acme/launch" });
+    expect(plan).toMatchObject({ tag: "v1.1.0", title: "Night shift", notes: "Dark mode everywhere.", targetId, agentName: "Atlas", repoUrl: "https://github.com/acme/launch" });
     await expect(f.t.mutation(api.ship.beginPublish, { sessionToken: f.owner, projectId: f.projectId, releaseId })).rejects.toThrow("already publishing");
     await expect(f.t.mutation(api.ship.saveRelease, { sessionToken: writer, projectId: f.projectId, releaseId, tag: "v1.1.0", notes: "x" })).rejects.toThrow("already publishing");
 

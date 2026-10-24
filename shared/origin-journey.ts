@@ -8,20 +8,15 @@ export interface JourneyFacts {
   name: string;
   brief: boolean;
   docs: number;
-  canvases: number;
   drafts: number;
   issuesOpen: number;
   issuesDone: number;
-  /** A release is published or a page is live. */
+  /** A release is published. */
   shipped: boolean;
-  /** Finished Studio generations. */
-  content: number;
-  postsLive: number;
-  postsScheduled: number;
 }
 
-export type JourneyStepId = "brief" | "sketch" | "issues" | "build" | "ship" | "content" | "post";
-export type JourneySection = "docs" | "draw" | "issues" | "ship" | "studio" | "broadcast";
+export type JourneyStepId = "brief" | "issues" | "build" | "ship" | "feedback";
+export type JourneySection = "docs" | "issues" | "ship" | "feedback";
 
 export interface JourneyStep {
   id: JourneyStepId;
@@ -37,12 +32,10 @@ export interface JourneyStep {
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 function stepId(facts: JourneyFacts): JourneyStepId {
-  if (facts.postsLive > 0) return "post";
-  if (facts.shipped) return facts.content > 0 ? "post" : "content";
+  if (facts.shipped) return "feedback";
   if (facts.issuesOpen === 0 && facts.issuesDone > 0) return "ship";
   if (facts.issuesOpen > 0) return "build";
-  if (facts.canvases > 0) return "issues";
-  return facts.brief ? "sketch" : "brief";
+  return facts.brief ? "issues" : "brief";
 }
 
 /** The one step that moves the project on: the furthest thing it has made decides it. */
@@ -54,16 +47,11 @@ export function nextJourneyStep(facts: JourneyFacts): JourneyStep {
       title: "Write the Brief", detail: "Problem, audience, core features and the success metric.",
       brief: `Draft the Brief for ${name} in Docs: problem, audience, core features and success metric. Ask me what you need to know first.`,
     };
-    case "sketch": return {
-      id: "sketch", phase: "plan", section: "draw", action: "Open Canvas",
-      title: "Brief ready → sketch in Canvas", detail: "Lay out the main flow and the first screens.",
-      brief: `The Brief for ${name} is ready. Sketch the main flow and the first screens on a Canvas, based on the Brief.`,
-    };
     case "issues": return {
       id: "issues", phase: "plan", section: "issues", action: "Open Issues",
-      title: "Sketch done → plan the MVP issues",
-      detail: facts.drafts ? `${plural(facts.drafts, "Draft issue waits", "Draft issues wait")} to be moved onto the board.` : "Break the Brief and the sketch into issues the team can take.",
-      brief: `Break the Brief and the Canvas sketch of ${name} into MVP issues, each with what done looks like, and tell me which agent should take each one.`,
+      title: "Brief ready → plan the MVP issues",
+      detail: facts.drafts ? `${plural(facts.drafts, "Draft issue waits", "Draft issues wait")} to be moved onto the board.` : "Break the Brief into issues the team can take.",
+      brief: `Break the Brief of ${name} into MVP issues, each with what done looks like, and tell me which agent should take each one.`,
     };
     case "build": return {
       id: "build", phase: "build", section: "issues", action: "Open Issues",
@@ -75,16 +63,10 @@ export function nextJourneyStep(facts: JourneyFacts): JourneyStep {
       title: "MVP issues done → Ship", detail: "Release what the team merged and deploy it.",
       brief: `The MVP issues of ${name} are done. Prepare a release in Ship with notes from the merged pull requests, ready for my approval.`,
     };
-    case "content": return {
-      id: "content", phase: "launch", section: "studio", action: "Open Studio",
-      title: "Shipped → create launch content", detail: "Images, a short video or a demo for the launch.",
-      brief: `${name} is shipped. Create launch content in Studio (images and a short video) that follows the brand kit.`,
-    };
-    case "post": return {
-      id: "post", phase: "launch", section: "broadcast", action: "Open Publish",
-      title: "Content ready → publish",
-      detail: facts.postsScheduled ? `${plural(facts.postsScheduled, "post", "posts")} scheduled; plan the rest of the launch.` : "Plan the launch posts across your channels.",
-      brief: `Draft a launch campaign for ${name} in Publish with the Studio content, for my approval.`,
+    case "feedback": return {
+      id: "feedback", phase: "launch", section: "feedback", action: "Open Feedback",
+      title: "Shipped → learn from feedback", detail: "Read what people say about the release and plan the next issues.",
+      brief: `${name} is shipped. Go through its Feedback, group what people ask for, and propose the next issues for my approval.`,
     };
   }
 }
@@ -100,11 +82,8 @@ export function journeyContextLine(facts: JourneyFacts): string {
   const step = nextJourneyStep(facts);
   const made = [
     facts.brief ? "Brief written" : "no Brief",
-    plural(facts.canvases, "canvas", "canvases"),
     `${facts.issuesOpen} open / ${facts.issuesDone} done issues${facts.drafts ? ` (${facts.drafts} in Draft)` : ""}`,
     facts.shipped ? "shipped" : "not shipped",
-    plural(facts.content, "Studio output", "Studio outputs"),
-    plural(facts.postsLive, "post live", "posts live"),
   ].join(", ");
   return `- Journey (Plan → Build → Launch → Sell): ${facts.name} is in ${JOURNEY_PHASE_LABEL[step.phase]}; ${made}. Next step: ${step.title}. ${step.detail} Steer plans and suggestions toward it unless the person asks for something else.`;
 }

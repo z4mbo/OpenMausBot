@@ -1,9 +1,9 @@
 export const PULSE_RANGES = [7, 30] as const;
 export type PulseRange = (typeof PULSE_RANGES)[number];
 
-export const PULSE_STAGES = ["idea", "build", "launch"] as const;
+export const PULSE_STAGES = ["idea", "build"] as const;
 export type PulseStage = (typeof PULSE_STAGES)[number];
-export const PULSE_STAGE_LABEL: Record<PulseStage, string> = { idea: "Plan", build: "Build", launch: "Launch" };
+export const PULSE_STAGE_LABEL: Record<PulseStage, string> = { idea: "Plan", build: "Build" };
 
 export type PulseBudgetLevel = "ok" | "warn" | "over";
 
@@ -34,17 +34,6 @@ export interface ProjectPulse {
     /** Median hours from an issue's creation to its completion, over the issues completed in range; null with none. */
     cycleHours: number | null;
   };
-  launch: {
-    pagesLive: number;
-    viewsTotal: number;
-    views: PulseCount;
-    viewsSeries: number[];
-    posts: PulseCount;
-    postsSeries: number[];
-    postsScheduled: number;
-    /** Last read numbers of campaign posts published in range. */
-    engagement: { likes: number; reposts: number; replies: number; impressions: number; posts: number };
-  };
   team: {
     runs: PulseCount;
     runsSeries: number[];
@@ -72,8 +61,6 @@ export interface PulseStageInput {
   issues: number;
   runs: number;
   prs: number;
-  pagesLive: number;
-  postsPublished: number;
 }
 
 /** Each stage counts as reached on real data; the project sits at the furthest one reached. */
@@ -81,7 +68,6 @@ export function inferStage(input: PulseStageInput): { stage: PulseStage; reached
   const reached: Record<PulseStage, boolean> = {
     idea: true,
     build: input.issues > 0 || input.runs > 0 || input.prs > 0,
-    launch: input.pagesLive > 0 || input.postsPublished > 0,
   };
   const stage = [...PULSE_STAGES].reverse().find((candidate) => reached[candidate]) ?? "idea";
   return { stage, reached };

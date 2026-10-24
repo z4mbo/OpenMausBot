@@ -52,11 +52,11 @@ function siteAddress(value: string | undefined) {
 
 function releaseView(release: Doc<"shipReleases">, approver: string | undefined) {
   return {
-    _id: release._id, tag: release.tag, title: release.title, notes: release.notes, status: release.status, pulls: release.pulls, announce: release.announce,
+    _id: release._id, tag: release.tag, title: release.title, notes: release.notes, status: release.status, pulls: release.pulls,
     ...(release.baseTag ? { baseTag: release.baseTag } : {}), ...(release.targetId ? { targetId: release.targetId } : {}),
     ...(release.agentName ? { agentName: release.agentName } : {}), ...(approver ? { approvedByName: approver } : {}),
     ...(release.releaseUrl ? { releaseUrl: release.releaseUrl } : {}), ...(release.deployNote ? { deployNote: release.deployNote } : {}),
-    ...(release.broadcastPostId ? { broadcastPostId: release.broadcastPostId } : {}), ...(release.error ? { error: release.error } : {}),
+    ...(release.error ? { error: release.error } : {}),
     ...(release.publishedAt ? { publishedAt: release.publishedAt } : {}), createdAt: release.createdAt, updatedAt: release.updatedAt,
   };
 }
@@ -130,7 +130,7 @@ export const saveRelease = mutation({
   args: {
     sessionToken: v.string(), projectId: v.id("projects"), releaseId: v.optional(v.id("shipReleases")),
     tag: v.string(), title: v.optional(v.string()), notes: v.string(), baseTag: v.optional(v.string()), pulls: v.optional(v.array(mergedPull)),
-    targetId: v.optional(v.union(v.id("shipTargets"), v.null())), announce: v.optional(v.boolean()), agent: v.optional(agentInput),
+    targetId: v.optional(v.union(v.id("shipTargets"), v.null())), agent: v.optional(agentInput),
   },
   returns: v.id("shipReleases"),
   handler: async (ctx, args) => {
@@ -148,7 +148,7 @@ export const saveRelease = mutation({
     const now = Date.now();
     if (!args.releaseId) {
       return ctx.db.insert("shipReleases", {
-        projectId: args.projectId, tag, title, notes, status: "draft", pulls: args.pulls ?? [], announce: args.announce ?? false,
+        projectId: args.projectId, tag, title, notes, status: "draft", pulls: args.pulls ?? [], announce: false,
         ...(args.baseTag?.trim() ? { baseTag: args.baseTag.trim().slice(0, SHIP_LIMITS.tag) } : {}), ...(args.targetId ? { targetId: args.targetId } : {}),
         ...agent, createdBy: user._id, createdAt: now, updatedAt: now,
       });
@@ -158,7 +158,7 @@ export const saveRelease = mutation({
     await ctx.db.patch(release._id, {
       tag, title, notes, status: "draft", error: undefined, updatedAt: now, ...agent,
       ...(args.pulls ? { pulls: args.pulls } : {}), ...(args.baseTag !== undefined ? { baseTag: args.baseTag.trim().slice(0, SHIP_LIMITS.tag) || undefined } : {}),
-      ...(args.targetId !== undefined ? { targetId: args.targetId ?? undefined } : {}), ...(args.announce !== undefined ? { announce: args.announce } : {}),
+      ...(args.targetId !== undefined ? { targetId: args.targetId ?? undefined } : {}),
     });
     return release._id;
   },
@@ -189,7 +189,7 @@ export const beginPublish = mutation({
     await ctx.db.patch(release._id, { status: "publishing", approvedBy: user._id, approvedAt: now, error: undefined, updatedAt: now });
     const target = release.targetId ? await ctx.db.get(release.targetId) : null;
     return {
-      tag: release.tag, title: release.title, notes: release.notes, announce: release.announce, repoUrl: project.repoUrl, projectName: project.name,
+      tag: release.tag, title: release.title, notes: release.notes, repoUrl: project.repoUrl, projectName: project.name,
       ...(target && target.projectId === args.projectId ? { targetId: target._id } : {}),
       ...(release.agentName ? { agentName: release.agentName } : {}), ...(release.agentBotId ? { agentBotId: release.agentBotId } : {}),
     };
@@ -199,17 +199,13 @@ export const beginPublish = mutation({
 export const finishPublish = mutation({
   args: {
     sessionToken: v.string(), projectId: v.id("projects"), releaseId: v.id("shipReleases"),
-    releaseUrl: v.optional(v.string()), error: v.optional(v.string()), deployNote: v.optional(v.string()), broadcastPostId: v.optional(v.id("broadcastPosts")),
+    releaseUrl: v.optional(v.string()), error: v.optional(v.string()), deployNote: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.projectId, args.sessionToken);
     const release = await releaseOf(ctx, args.projectId, args.releaseId);
     if (release.status !== "publishing") throw new Error(`${release.tag} is not being published`);
-    if (args.broadcastPostId) {
-      const post = await ctx.db.get(args.broadcastPostId);
-      if (!post || post.projectId !== args.projectId) throw new Error("Post not found");
-    }
     const now = Date.now();
     const published = Boolean(args.releaseUrl);
     await ctx.db.patch(release._id, {
@@ -217,7 +213,6 @@ export const finishPublish = mutation({
       ...(published ? { releaseUrl: args.releaseUrl!.slice(0, SHIP_LIMITS.url), publishedAt: now } : {}),
       ...(args.error ? { error: args.error.slice(0, 500) } : {}),
       ...(args.deployNote ? { deployNote: args.deployNote.slice(0, 500) } : {}),
-      ...(args.broadcastPostId ? { broadcastPostId: args.broadcastPostId } : {}),
     });
     return null;
   },

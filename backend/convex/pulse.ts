@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { query, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { projectMember, requireMember, requireTeamMember } from "./lib/permissions";
 import { budgetLevel, monthOf } from "./budgets";
@@ -12,9 +12,6 @@ const COMPLETIONS_MAX = 2_000;
 const CREATED_MAX = 1_500;
 const IDEAS_MAX = 500;
 const PRS_MAX = 300;
-const PAGES_MAX = 50;
-const POSTS_MAX = 600;
-const CAMPAIGNS_MAX = 100;
 const RUNS_MAX = 800;
 const LIVE_MAX = 50;
 const APPROVALS_MAX = 50;
@@ -23,14 +20,6 @@ const PROJECTS_MAX = 50;
 const LIVE_STATUSES = ["queued", "claimed", "running", "waiting_approval"] as const;
 
 export const pulseRange = v.union(v.literal(7), v.literal(30));
-
-/** Counts one public page view toward its project's day. */
-export async function countPageView(ctx: MutationCtx, projectId: Id<"projects">, now: number): Promise<void> {
-  const day = new Date(now).toISOString().slice(0, 10);
-  const row = await ctx.db.query("pulseDays").withIndex("by_projectId_and_day", (q) => q.eq("projectId", projectId).eq("day", day)).unique();
-  if (row) await ctx.db.patch(row._id, { pageViews: row.pageViews + 1 });
-  else await ctx.db.insert("pulseDays", { projectId, day, pageViews: 1 });
-}
 
 class Window {
   readonly days: string[];
@@ -98,54 +87,6 @@ async function buildSignals(ctx: QueryCtx, project: Doc<"projects">, w: Window) 
   };
 }
 
-async function launchSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window) {
-  let truncated = false;
-  const pages = await ctx.db.query("publishedPages").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).take(PAGES_MAX);
-  const views = zero();
-  const viewsSeries = w.series();
-  const firstDay = new Date(w.previousSince).toISOString().slice(0, 10);
-  for (const row of await ctx.db.query("pulseDays").withIndex("by_projectId_and_day", (q) => q.eq("projectId", projectId).gte("day", firstDay)).take(64)) {
-    w.add(views, Date.parse(`${row.day}T12:00:00Z`), viewsSeries, row.pageViews);
-  }
-
-  const posts = await ctx.db.query("broadcastPosts").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId).gte("updatedAt", w.previousSince)).take(POSTS_MAX);
-  truncated ||= posts.length === POSTS_MAX;
-  const published = zero();
-  const postsSeries = w.series();
-  const inRange = new Set<Id<"broadcastPosts">>();
-  for (const post of posts) {
-    const times = post.variants.flatMap((variant) => variant.result === "published" && variant.publishedAt ? [variant.publishedAt] : []);
-    if (!times.length) continue;
-    const first = Math.min(...times);
-    w.add(published, first, postsSeries);
-    if (first >= w.since) inRange.add(post._id);
-  }
-  const everPublished = published.value + published.previous > 0
-    || Boolean(await ctx.db.query("broadcastPosts").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(200).then((rows) => rows.find((post) => post.status === "published")));
-
-  const engagement = { likes: 0, reposts: 0, replies: 0, impressions: 0, posts: 0 };
-  const counted = new Set<string>();
-  for (const campaign of await ctx.db.query("campaigns").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(CAMPAIGNS_MAX)) {
-    for (const metric of campaign.metrics) {
-      const key = `${metric.postId}:${metric.channel}`;
-      if (!inRange.has(metric.postId) || counted.has(key)) continue;
-      counted.add(key);
-      engagement.likes += metric.likes;
-      engagement.reposts += metric.reposts;
-      engagement.replies += metric.replies;
-      engagement.impressions += metric.impressions ?? 0;
-    }
-  }
-  engagement.posts = new Set([...counted].map((key) => key.split(":")[0])).size;
-  return {
-    truncated, everPublished,
-    launch: {
-      pagesLive: pages.length, viewsTotal: pages.reduce((sum, page) => sum + page.views, 0), views, viewsSeries,
-      posts: published, postsSeries, postsScheduled: posts.filter((post) => post.status === "scheduled").length, engagement,
-    },
-  };
-}
-
 async function teamSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window, now: number) {
   const runs = await ctx.db.query("workspaceAgentRuns").withIndex("by_projectId", (q) => q.eq("projectId", projectId).gte("_creationTime", w.previousSince)).take(RUNS_MAX);
   const count = zero();
@@ -180,18 +121,15 @@ async function teamSignals(ctx: QueryCtx, projectId: Id<"projects">, w: Window, 
 
 export async function projectPulse(ctx: QueryCtx, project: Doc<"projects">, range: PulseRange, now: number): Promise<ProjectPulse> {
   const w = new Window(now, range);
-  const [build, launch, team] = await Promise.all([
-    buildSignals(ctx, project, w), launchSignals(ctx, project._id, w), teamSignals(ctx, project._id, w, now),
-  ]);
+  const [build, team] = await Promise.all([buildSignals(ctx, project, w), teamSignals(ctx, project._id, w, now)]);
   const { stage, reached } = inferStage({
     ideas: build.ideas, issues: build.hasIssues ? 1 : 0, runs: team.team.runs.value + team.team.runs.previous, prs: build.prsSeen,
-    pagesLive: launch.launch.pagesLive, postsPublished: launch.everPublished ? 1 : 0,
   });
   const signals = { build: build.build, team: team.team };
   return {
     projectId: project._id, name: project.name, accent: project.accent, range, days: w.days, generatedAt: now, stage, reached,
-    idea: { ideas: build.ideas }, ...signals, launch: launch.launch, attention: pulseAttention(signals),
-    truncated: build.truncated || launch.truncated || team.truncated,
+    idea: { ideas: build.ideas }, ...signals, attention: pulseAttention(signals),
+    truncated: build.truncated || team.truncated,
   };
 }
 
@@ -209,31 +147,23 @@ const JOURNEY_MAX = 200;
 export async function journeyFacts(ctx: QueryCtx, project: Doc<"projects">): Promise<JourneyFacts> {
   const projectId = project._id;
   const docs = (await ctx.db.query("wikiPages").withIndex("by_project", (q) => q.eq("projectId", projectId)).take(JOURNEY_MAX)).filter((page) => page.type !== "credential_note");
-  const canvases = await ctx.db.query("canvases").withIndex("by_project", (q) => q.eq("projectId", projectId).eq("archived", false)).take(50);
   const draft = await ctx.db.query("columns").withIndex("by_projectId_and_isDraft_and_order", (q) => q.eq("projectId", projectId).eq("isDraft", true)).first();
   const open = await ctx.db.query("tasks").withIndex("by_project_and_done", (q) => q.eq("projectId", projectId).eq("done", false)).take(JOURNEY_MAX * 5);
   const drafts = draft ? open.filter((task) => task.columnId === draft._id).length : 0;
   const done = await ctx.db.query("tasks").withIndex("by_project_and_done", (q) => q.eq("projectId", projectId).eq("done", true)).take(JOURNEY_MAX);
-  const page = await ctx.db.query("publishedPages").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).first();
   const releases = await ctx.db.query("shipReleases").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(50);
-  const generations = await ctx.db.query("studioGenerations").withIndex("by_projectId_and_createdAt", (q) => q.eq("projectId", projectId)).order("desc").take(JOURNEY_MAX);
-  const posts = await ctx.db.query("broadcastPosts").withIndex("by_projectId_and_updatedAt", (q) => q.eq("projectId", projectId)).order("desc").take(POSTS_MAX);
   return {
     name: project.name,
     brief: docs.some((doc) => doc.tags.includes(BRIEF_TAG)),
     docs: docs.length,
-    canvases: canvases.length,
     drafts,
     issuesOpen: open.length - drafts,
     issuesDone: done.filter((task) => !draft || task.columnId !== draft._id).length,
-    shipped: Boolean(page) || releases.some((release) => release.status === "published"),
-    content: generations.filter((generation) => generation.status === "done").length,
-    postsLive: posts.filter((post) => post.status === "published" || post.variants.some((variant) => variant.result === "published")).length,
-    postsScheduled: posts.filter((post) => post.status === "scheduled").length,
+    shipped: releases.some((release) => release.status === "published"),
   };
 }
 
-/** What a project has made so far, from Brief to published posts, for its next step. */
+/** What a project has made so far, from Brief to a published release, for its next step. */
 export const journey = query({
   args: { sessionToken: v.string(), projectId: v.id("projects") },
   handler: async (ctx, args): Promise<JourneyFacts> => {
