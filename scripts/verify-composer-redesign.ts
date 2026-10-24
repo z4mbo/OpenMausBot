@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import type { Browser, Page } from "playwright";
 import { launchVerificationServer, runControlOmb, type VerificationServer } from "./control-omb.ts";
@@ -99,7 +99,7 @@ try {
   const main = await fixture({ FAKE_CLAUDE_CACHE_READ_TOKENS: "64000", FAKE_CLAUDE_TOOL_CALLS: "[]", FAKE_CLAUDE_REPLIES: JSON.stringify(REPLIES) }, "26610-26700",
     ["Plan the launch week for the new release.", "Write the demo script."]);
   owned.push(main);
-  report.logPath = main.server.info.logPath;
+  report.log = basename(main.server.info.logPath);
   browser = await playwright.chromium.launch();
   for (const theme of THEMES) {
     for (const size of SIZES) {
@@ -209,7 +209,7 @@ try {
   }
   checks.noPageErrors = errors.length === 0;
   writeFileSync(join(EVIDENCE, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
-  console.log(JSON.stringify({ ok: checks.noPageErrors, evidence: EVIDENCE, logPath: report.logPath }));
+  console.log(JSON.stringify({ ok: checks.noPageErrors, evidence: EVIDENCE, logPath: main.server.info.logPath }));
 } finally {
   await browser?.close();
   for (const { server, preview } of owned.reverse()) {
