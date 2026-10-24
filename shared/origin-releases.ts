@@ -3,6 +3,19 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.9.0",
+  date: "2026-10-25",
+  title: "Shared agent chats, voice, and a focused Origin",
+  changes: [
+    { title: "Agent chats are shared", body: "Every member of a workspace sees the same agent threads and replies, live as they stream, and catches up after being offline. A message reaches the agent once, whoever's computer runs it." },
+    { title: "Choose whose subscription runs an agent", body: "Each shared agent runs for whoever writes, on a chosen member's computer and plan, or in the cloud. The chat header shows who it runs on and which plan pays." },
+    { title: "Talk to your project", body: "Turn on Listen and say \"ehi\" and the project name to ask its agent a question; it answers in chat and out loud. Transcription runs free on your computer, or GPT voice with an OpenAI API key." },
+    { title: "Project agents stay in their project", body: "A project's agent sees and works on only its own issues, chat, assets, vault, repository and feedback, and can now delete issues and save keys to the Vault. The workspace agent can direct every project agent and read their threads." },
+    { title: "Issues and GitHub, both ways", body: "Draft stays in Origin. Leaving Draft creates the GitHub issue, completing closes it, and moving back to Draft or deleting removes it. Closing or reopening on GitHub updates Origin, and completing no longer waits for a merged pull request. Right-click an issue to complete, move to Draft or delete it." },
+    { title: "A new composer", body: "The model picker and usage moved into a redesigned message box: search every model, set effort, see context and plan limits, and compact a long conversation in one click. The thread picker sits next to the agent in the header." },
+    { title: "Studio, Design and Publish are gone", body: "Origin focuses on projects, issues, agents and chat. Studio, Design, Board, Presentations, published pages and Publish were removed, along with milestones and the Start from an idea banner on empty projects." },
+  ],
+}, {
   version: "0.8.0",
   date: "2026-10-23",
   title: "Your project bot in chat and calls, Design, and a cleaner Studio",
