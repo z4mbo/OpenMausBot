@@ -8,6 +8,7 @@ import {
   SidebarPopoverMenu,
   anchoredMenuPosition,
   nextMenuIndex,
+  pointerMenuPosition,
   submenuPosition,
   type SidebarMenuItem,
 } from "./SidebarPopoverMenu";
@@ -36,6 +37,21 @@ describe("anchoredMenuPosition", () => {
   it("drops below the trigger when there is no room above, and clamps to a short window", () => {
     expect(anchoredMenuPosition({ left: 12, right: 60, top: 40, bottom: 80 }, menu, viewport).top).toBe(86);
     expect(anchoredMenuPosition({ left: 12, right: 60, top: 100, bottom: 140 }, menu, { width: 800, height: 320 }).top).toBe(12);
+  });
+});
+
+describe("pointerMenuPosition", () => {
+  const small = { width: 220, height: 140 };
+
+  it("opens below the pointer on its inline start side, or on its end side in RTL", () => {
+    expect(pointerMenuPosition({ x: 300, y: 200 }, small, viewport)).toEqual({ left: 300, top: 200 });
+    expect(pointerMenuPosition({ x: 300, y: 200 }, small, viewport, true)).toEqual({ left: 80, top: 200 });
+  });
+
+  it("flips above the pointer near the bottom and stays inside the window at its edges", () => {
+    expect(pointerMenuPosition({ x: 300, y: 760 }, small, viewport)).toEqual({ left: 300, top: 620 });
+    expect(pointerMenuPosition({ x: 1270, y: 5 }, small, viewport)).toEqual({ left: 1280 - 220 - 8, top: 8 });
+    expect(pointerMenuPosition({ x: 2, y: 100 }, small, { width: 200, height: 120 })).toEqual({ left: 8, top: 8 });
   });
 });
 

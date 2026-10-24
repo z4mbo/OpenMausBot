@@ -5,13 +5,12 @@ import { canEdit, changeOpenIssueCount, getActiveTeamMember, projectMember, proj
 import { priorityValidator, taskAssetTypeValidator } from "./lib/validators";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { hasCurrentMergeReceipt, recordCompletion } from "./lib/completions";
+import { recordCompletion } from "./lib/completions";
 import { notify } from "./notifications";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { updateChecklist } from "../lib/comment-checklist";
 import { compareStoredColumns, compareWorkflowColumns, DEFAULT_WORKFLOW_COLUMNS, ensureDraftColumn, isDoneColumn, isDraftColumn, normalizeColumnTitle } from "./lib/columns";
 import { DRAFT_COLUMN_TITLE, isLegacyIdeaColumn } from "../../shared/origin-columns";
-import { repositoryUrl } from "./lib/repository";
 import schema from "./schema";
 
 const columnDoc = v.object({ ...schema.tables.columns.validator.fields, _id: v.id("columns"), _creationTime: v.number() });
@@ -280,7 +279,6 @@ export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
     const order = last ? last.order + 1 : 0;
     const project = await ctx.db.get(args.projectId);
     const done = isDoneColumn(column);
-    if (done) await requireMergedCompletion(ctx, args.projectId);
     const taskId = await ctx.db.insert("tasks", {
       teamId: project?.teamId,
       projectId: args.projectId,
@@ -382,20 +380,6 @@ export const updateTask = mutation({
   },
 });
 
-async function requireMergedCompletion(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, task?: Doc<"tasks">) {
-  const project = await ctx.db.get(projectId);
-  if (!project) throw new Error("Project not found");
-  if (!project.repoUrl && !task?.githubIssueNumber) return;
-  const repo = repositoryUrl(project.repoUrl)?.toLowerCase();
-  if (task) {
-    if (task.githubIssueState === "closed" && hasCurrentMergeReceipt(task, project)) return;
-    const rows = await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", task._id)).take(20);
-    if (rows.some(row => row.state === "merged" && row.projectId === projectId && repo && row.url.toLowerCase().startsWith(`${repo}/pull/`))) return;
-  }
-  if (task?.githubIssueNumber) throw new Error(`GitHub issue #${task.githubIssueNumber} completes when its pull request merges. Open a pull request that says "Closes #${task.githubIssueNumber}".`);
-  throw new Error("This issue completes when its pull request merges. Ask the project Chief to implement it and open a pull request.");
-}
-
 export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; title?: string; description?: string; priority?: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; done?: boolean; }, actorId: Id<"users">) {
   const task = await ctx.db.get(args.taskId);
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
@@ -408,7 +392,7 @@ export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
       dueDate: string | undefined;
       done: boolean;
       completionPullRequest: Doc<"tasks">["completionPullRequest"];
-      githubIssueReopenRequested: boolean;
+      githubIssueReopenRequested: boolean | undefined;
       updatedAt: number;
     }> = { updatedAt: Date.now() };
     if (args.title !== undefined) {
@@ -432,7 +416,7 @@ export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
       patch.completionPullRequest = undefined;
       if (task.githubIssueNumber) patch.githubIssueReopenRequested = true;
     }
-    if (patch.done === true && !task.done) await requireMergedCompletion(ctx, args.projectId, task);
+    if (patch.done === true && !task.done) patch.githubIssueReopenRequested = undefined;
     if (patch.done !== undefined) await recordCompletion(ctx, task, patch.done);
     await ctx.db.patch(args.taskId, patch);
     if (patch.assignedToEmail && patch.assignedToEmail !== task.assignedToEmail) {
@@ -457,6 +441,7 @@ export const moveTask = mutation({
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
     if (!task.done && isDoneColumn(column)) throw new Error("Complete this issue before moving it to Done");
+    const reopenAsDraft = task.done && isDraftColumn(column);
     const previousColumn = task.githubIssueNumber && !task.done && !isDraftColumn(column) ? await ctx.db.get(task.columnId) : null;
     const reopen = Boolean(previousColumn && isDraftColumn(previousColumn));
     const tasks = (await ctx.db.query("tasks").withIndex("by_column", (q) => q.eq("columnId", args.columnId)).collect())
@@ -472,7 +457,9 @@ export const moveTask = mutation({
       : tasks.length
         ? Math.max(...tasks.map((item) => item.order)) + 1
         : 0;
-    await ctx.db.patch(args.taskId, { columnId: args.columnId, order, updatedAt: Date.now(), ...(reopen ? { githubIssueReopenRequested: true } : {}) });
+    await ctx.db.patch(args.taskId, { columnId: args.columnId, order, updatedAt: Date.now(), ...(reopen ? { githubIssueReopenRequested: true } : {}),
+      ...(reopenAsDraft ? { done: false, completionPullRequest: undefined } : {}) });
+    if (reopenAsDraft) await changeOpenIssueCount(ctx, args.projectId, 1);
     await touchProject(ctx, args.projectId);
   },
 });

@@ -3,6 +3,7 @@ import {
   AtSign, Bell, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock3, Inbox, List, Loader2, MessageSquare, Search, Sunrise, X,
 } from "lucide-react";
 import { cloudMutation, useCloudPages, useCloudQuery, type CloudProject } from "@/lib/origin-cloud";
+import { originGitHub } from "@/lib/origin-github";
 import { useWorkspaceMembers } from "@/lib/origin-members";
 import { useOpenOriginIssue } from "@/lib/origin-issue-focus";
 import { useOpenOriginNotification } from "@/lib/origin-notification-open";
@@ -197,13 +198,10 @@ function IssueList({ teamId, projects, filters, canEdit, onOpen, onError, hasFil
   const today = localDay(new Date());
   const rows = results.filter((task) => matches(task, filters.search));
   const toggle = async (task: InboxTask) => {
-    if (!task.done && (task.githubIssueNumber || projects.some((project) => project._id === task.projectId && project.repoUrl))) {
-      onOpen(task.projectId, task._id);
-      return;
-    }
     setPending(task._id);
     try {
       await cloudMutation("tasks:updateTask", { projectId: task.projectId, taskId: task._id, done: !task.done });
+      if (task.githubIssueNumber) void originGitHub.mirrorIssues(task.projectId, [task._id]).catch(() => undefined);
     } catch (error) {
       onError(errorText(error, "Could not update the issue"));
     } finally {

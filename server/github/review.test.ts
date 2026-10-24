@@ -33,20 +33,21 @@ describe("merge blockers", () => {
 
 describe("issue state sync", () => {
   it("pushes an Origin change, pulls a GitHub change, and lets GitHub win when both moved", () => {
-    expect(issueStateMove({ done: true, githubIssueState: "open" }, "open")).toBe("remove");
+    expect(issueStateMove({ done: true, githubIssueState: "open" }, "open")).toBe("close");
     expect(issueStateMove({ done: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
     expect(issueStateMove({ done: false, githubIssueState: "closed" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: false, githubIssueState: "open" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: true, githubIssueState: "closed" }, "open")).toBe("pull");
+    expect(issueStateMove({ done: true, githubIssueState: "closed" }, "closed")).toBe("pull");
     expect(issueStateMove({ done: true }, "open")).toBe("pull");
   });
 
-  it("removes the GitHub issue of an issue moved back to Draft", () => {
+  it("removes the GitHub issue of any issue in Draft, whatever its GitHub state", () => {
     expect(issueStateMove({ done: false, draft: true, githubIssueState: "open" }, "open")).toBe("remove");
-    expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "closed")).toBe("pull");
-    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
+    expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "closed")).toBe("remove");
+    expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "open")).toBe("remove");
     expect(issueStateMove({ done: true, draft: true, githubIssueState: "open" }, "open")).toBe("remove");
-    expect(issueStateMove({ done: false, draft: true, githubIssueState: "closed" }, "open")).toBe("pull");
+    expect(issueStateMove({ done: false, draft: false, githubIssueState: "closed", githubIssueReopenRequested: true }, "closed")).toBe("reopen");
   });
 });
 

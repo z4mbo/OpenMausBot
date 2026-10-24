@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, type RefObject } from "react";
 import {
   Bot as BotIcon, CalendarDays, CheckCircle2, ChevronRight, Circle, CircleDashed, Columns3, ExternalLink, GitBranch, GitPullRequest, GripVertical,
   List, Loader2, MessageCircle, MoreHorizontal, Plus, Search, SignalMedium, Trash2, UserRound,
@@ -24,7 +24,6 @@ import {
 } from "./issue-fields";
 import { orderForMove, settlePendingMove, stepTarget, useFlip, withPendingMoves, type PendingMove } from "./issue-order";
 import { NewIssueComposer } from "./NewIssueComposer";
-import { CompleteIssueDialog, completesThroughPullRequest, type IssueImplementer } from "./CompleteIssueDialog";
 import { DesignChips } from "./canvas/DesignChips";
 import { originGitHub } from "@/lib/origin-github";
 import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
@@ -32,7 +31,7 @@ import { PersonAvatar } from "./PersonAvatar";
 import { useCardDrag, type CardDrag, type DropTarget } from "./use-card-drag";
 import { DropGap } from "./DropGap";
 import { openIssueColumns } from "./issue-columns";
-import { SidebarPopoverMenu, type SidebarMenuItem } from "../SidebarPopoverMenu";
+import { PointerMenu, SidebarPopoverMenu, type PointerMenuState, type SidebarMenuItem } from "../SidebarPopoverMenu";
 
 /** What the Issues page hands to `onAssignToAgent`. */
 export type AssignableIssue = {
@@ -50,8 +49,8 @@ export type AssignableIssue = {
   githubIssueNumber?: number;
 };
 
-/** The project's Chief, handed an issue marked complete that still needs its pull request. */
-export type IssueChief = { name: string; implement(issue: AssignableIssue): void; openCanvas?(): void };
+/** The project's Chief, whose canvas holds an issue's designs. */
+export type IssueChief = { name: string; openCanvas?(): void };
 
 export type IssuesPageProps = OriginPageProps & {
   /** The project's agents, offered wherever an issue can be handed off. */
@@ -95,23 +94,8 @@ export function IssuesPage({ onAssignToAgent, agents, chief, ...props }: IssuesP
   );
 }
 
-const isInProgressColumn = (column: CloudColumn) => !isDoneColumn(column) && column.title.toLowerCase().replace(/[\s_-]+/g, "") === "inprogress";
-
-function handOver(chief: IssueChief | undefined, project: CloudProject, projectId: string, columns: readonly CloudColumn[], task: CloudTask): IssueImplementer | undefined {
-  if (!chief) return undefined;
-  const inProgress = columns.find(isInProgressColumn);
-  return {
-    name: chief.name,
-    column: inProgress?.title,
-    async start() {
-      if (inProgress && task.columnId !== inProgress._id) await cloudMutation("tasks:moveTask", { projectId, taskId: task._id, columnId: inProgress._id });
-      chief.implement(toAssignable(task, project, columns));
-    },
-  };
-}
-
-/** Completing an issue, or moving it back to Draft, removes its GitHub issue; the server pushes that through the mirror. */
-function removeLinkedIssue(projectId: string, project: CloudProject, task: CloudTask) {
+/** Pushes a completion, reopening or move across Draft to the issue's GitHub issue now rather than on the server's next sync. */
+function syncGitHubIssue(projectId: string, project: CloudProject, task: CloudTask) {
   if (task.githubIssueNumber && project.repoUrl) void originGitHub.mirrorIssues(projectId, [task._id]).catch(() => undefined);
 }
 
@@ -149,7 +133,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
   const [moves, setMoves] = useState(0);
   const [notice, setNotice] = useState("");
   const [info, setInfo] = useState("");
-  const [completing, setCompleting] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<PointerMenuState | null>(null);
   const ensured = useRef(false);
   const mirrored = useRef(new Set<string>());
   const lanesRef = useRef<HTMLDivElement>(null);
@@ -218,15 +202,14 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
     const task = tasks.find((item) => item._id === taskId);
     const crossesDraft = Boolean(task && draftIds.has(task.columnId) !== draftIds.has(columnId));
     void cloudMutation("tasks:moveTask", { projectId, taskId, columnId, ...(beforeTaskId ? { beforeTaskId } : {}) })
-      .then(() => { if (crossesDraft && task) removeLinkedIssue(projectId, project, task); })
+      .then(() => { if (crossesDraft && task) syncGitHubIssue(projectId, project, task); })
       .catch(report)
       .finally(() => setPending((current) => settlePendingMove(current, taskId, entry)));
   };
   const setDone = (task: CloudTask, done: boolean) => {
-    if (done && completesThroughPullRequest(project, task)) { setCompleting(task._id); return; }
     setMoves((count) => count + 1);
     void cloudMutation("tasks:updateTask", { projectId, taskId: task._id, done })
-      .then(() => { if (done) removeLinkedIssue(projectId, project, task); })
+      .then(() => syncGitHubIssue(projectId, project, task))
       .catch(report);
   };
   const remove = (task: CloudTask) => {
@@ -238,6 +221,17 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
     void deleteIssue(projectId, task).then(setInfo, report);
   };
   const assign = onAssignToAgent ? (task: CloudTask, agentId?: string) => onAssignToAgent(toAssignable(task, project, board.columns), agentId) : undefined;
+  const draftColumn = columns.find(isDraftColumn);
+  const openContextMenu = (event: MouseEvent<HTMLElement>, task: CloudTask) => {
+    if (!canEdit) return;
+    event.preventDefault();
+    const items: SidebarMenuItem[] = [task.done
+      ? { key: "reopen", label: "Reopen", icon: <Circle size={16} />, onSelect: () => setDone(task, false) }
+      : { key: "complete", label: "Complete", icon: <CheckCircle2 size={16} />, onSelect: () => setDone(task, true) }];
+    if (draftColumn && task.columnId !== draftColumn._id) items.push({ key: "draft", label: "Move to Draft", icon: <CircleDashed size={16} />, onSelect: () => move(task._id, draftColumn._id) });
+    items.push({ key: "delete", label: "Delete", icon: <Trash2 size={16} className="text-danger" />, separatorBefore: true, onSelect: () => remove(task) });
+    setContextMenu({ x: event.clientX, y: event.clientY, ariaLabel: `Actions for ${task.title}`, items });
+  };
   placed.current = (taskId, drop) => {
     const task = tasks.find((item) => item._id === taskId);
     if (!task) return;
@@ -302,7 +296,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
           {!completed.length ? <EmptyState icon={<CheckCircle2 size={22} />} title="Nothing done yet" body={needle ? "No issues match your search." : "Completed issues land here, newest first."} /> : (
             <ul className={cn(cardClass, "divide-y divide-hairline/30 overflow-hidden")}>
               {completed.map((task) => (
-                <li key={task._id} className="group flex items-center gap-3 px-4 py-2.5 text-[13px] transition-colors hover:bg-raised/30">
+                <li key={task._id} className="group flex items-center gap-3 px-4 py-2.5 text-[13px] transition-colors hover:bg-raised/30" onContextMenu={(event) => openContextMenu(event, task)}>
                   <CheckCircle2 size={16} className="shrink-0 text-success" aria-hidden="true" />
                   <button type="button" className="flex min-w-0 flex-1 items-center gap-3 rounded text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60" onClick={() => setSelected(task._id)}>
                     <span className="font-mono text-[11.5px] text-ink-tertiary">{taskKey(task._id)}</span>
@@ -333,7 +327,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
                         const person = task.assignedToEmail ? assignees.get(task.assignedToEmail) : undefined;
                         const due = dueInfo(task.dueDate);
                         return (
-                          <li key={task._id} className="group flex items-center gap-3 px-4 py-2 text-[13px] transition-colors hover:bg-raised/30">
+                          <li key={task._id} className="group flex items-center gap-3 px-4 py-2 text-[13px] transition-colors hover:bg-raised/30" onContextMenu={(event) => openContextMenu(event, task)}>
                             <PriorityIcon priority={task.priority} />
                             <button type="button" className="flex min-w-0 flex-1 items-center gap-3 rounded text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60" onClick={() => setSelected(task._id)}>
                               <span className="hidden font-mono text-[11.5px] text-ink-tertiary sm:inline">{taskKey(task._id)}</span>
@@ -383,6 +377,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
                           onOpen={() => { if (!cardDrag.justDropped()) setSelected(task._id); }}
                           onPointerDown={(event) => cardDrag.press(event, task._id)}
                           onKeyDown={(event) => keyMove(event, task)}
+                          onContextMenu={(event) => openContextMenu(event, task)}
                           onMove={(columnId) => move(task._id, columnId)}
                           onDone={() => setDone(task, true)} onDelete={() => remove(task)} onAssign={assign} />
                       )}
@@ -428,10 +423,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
           }} />
       )}
       {columnEditor && <ColumnEditor projectId={projectId} column={columnEditor === "new" ? null : columnEditor} columns={columns} onClose={() => setColumnEditor(null)} />}
-      {completing && (() => {
-        const task = board.tasks.find((item) => item._id === completing);
-        return task ? <CompleteIssueDialog project={project} projectId={projectId} task={task} implementer={handOver(chief, project, projectId, board.columns, task)} onClose={() => setCompleting(null)} /> : null;
-      })()}
+      <PointerMenu menu={contextMenu} onClose={() => setContextMenu(null)} />
       {selected && <IssueDetail key={selected} project={project} projectId={projectId} taskId={selected} canEdit={canEdit} agents={agents} chief={chief} onClose={() => setSelected(null)}
         onDelete={(task) => remove(task)} onAssign={assign} />}
     </section>
@@ -455,13 +447,13 @@ function DragGhost({ drag, ghost, task, columns, assignee }: {
 }
 
 
-export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = false, draft = false, onOpen, onPointerDown, onKeyDown, onMove, onDone, onDelete, onAssign }: {
+export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = false, draft = false, onOpen, onPointerDown, onKeyDown, onContextMenu, onMove, onDone, onDelete, onAssign }: {
   task: CloudTask; columns: CloudColumn[]; canEdit: boolean; assignee?: Assignee; agents: readonly IssueAgent[];
   /** The copy that follows the pointer while the card is dragged. */
   lifted?: boolean;
   /** In the draft column, whose issues have no GitHub issue. */
   draft?: boolean;
-  onOpen?(): void; onPointerDown?(event: PointerEvent<HTMLElement>): void; onKeyDown?(event: KeyboardEvent<HTMLElement>): void;
+  onOpen?(): void; onPointerDown?(event: PointerEvent<HTMLElement>): void; onKeyDown?(event: KeyboardEvent<HTMLElement>): void; onContextMenu?(event: MouseEvent<HTMLElement>): void;
   onMove?(columnId: string): void; onDone?(): void; onDelete?(): void; onAssign?(task: CloudTask, agentId?: string): void;
 }) {
   const due = dueInfo(task.dueDate);
@@ -470,6 +462,7 @@ export function TaskCard({ task, columns, canEdit, assignee, agents, lifted = fa
       aria-label={`${taskKey(task._id)} ${task.title}`}
       aria-keyshortcuts={canEdit ? "Alt+ArrowUp Alt+ArrowDown Alt+ArrowLeft Alt+ArrowRight" : undefined}
       onPointerDown={onPointerDown}
+      onContextMenu={onContextMenu}
       onClick={onOpen}
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return;
@@ -592,7 +585,6 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
   const details = useCloudQuery<CloudTaskDetails>("tasks:details", { projectId, taskId });
   const [edits, setEdits] = useState<{ title?: string; description?: string }>({});
   const action = useAction();
-  const [completing, setCompleting] = useState(false);
   const task = details?.task;
   const draft = task ? { title: edits.title ?? task.title, description: edits.description ?? task.description ?? "" } : null;
 
@@ -631,13 +623,10 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
       ...(descriptionChanged ? { description: draft.description } : {}),
     }), "Could not save issue");
   };
-  const toggleDone = () => {
-    if (!task.done && completesThroughPullRequest(project, task)) { setCompleting(true); return; }
-    void action.run(async () => {
-      await cloudMutation("tasks:updateTask", { projectId, taskId, done: !task.done });
-      if (!task.done) removeLinkedIssue(projectId, project, task);
-    }, "Could not update issue");
-  };
+  const toggleDone = () => void action.run(async () => {
+    await cloudMutation("tasks:updateTask", { projectId, taskId, done: !task.done });
+    syncGitHubIssue(projectId, project, task);
+  }, "Could not update issue");
 
   return (
     <IssueDialog label={`${taskKey(task._id)} ${task.title}`} heading={heading} onClose={onClose}
@@ -656,7 +645,7 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
             disabled={!canEdit || task.done} placeholder={task.done ? "Done" : undefined}
             onChange={(columnId) => void action.run(async () => {
               await cloudMutation("tasks:moveTask", { projectId, taskId, columnId });
-              if (inDraft(task.columnId) !== inDraft(columnId)) removeLinkedIssue(projectId, project, task);
+              if (inDraft(task.columnId) !== inDraft(columnId)) syncGitHubIssue(projectId, project, task);
             }, "Could not move issue")} />
           <ChipSelect label="Priority" value={task.priority} options={priorityOptions()} icon={<SignalMedium size={14} aria-hidden="true" />} disabled={!canEdit}
             onChange={(priority) => update({ priority }, "Could not change the priority")} />
@@ -664,11 +653,10 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
             onChange={(assignedToEmail) => update({ assignedToEmail }, "Could not change the assignee")} />
           <DateChip value={task.dueDate ?? ""} disabled={!canEdit} onChange={(dueDate) => { if (dueDate) update({ dueDate }, "Could not change the due date"); }} />
           {onAssign && !task.done && <AgentChip agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
-          <GitHubChips project={project} projectId={projectId} task={task} canEdit={canEdit} draft={inDraft(task.columnId)} />
+          <GitHubChips project={project} task={task} />
           <DesignChips projectId={projectId} taskId={task._id} onOpen={chief?.openCanvas} className={chipButton} />
         </IssueChips>
         {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
-        {completing && <CompleteIssueDialog project={project} projectId={projectId} task={task} implementer={handOver(chief, project, projectId, details.columns, task)} onClose={() => setCompleting(false)} />}
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-hairline/40 pt-4">
           <span className="text-[12px] text-ink-tertiary">
             {canEdit && dirty ? "Ctrl+Enter to save" : `Created ${fmtDate(task.createdAt)} · Updated ${fmtDate(task.updatedAt)}`}
@@ -695,37 +683,23 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
   );
 }
 
-function GitHubChips({ project, projectId, task, canEdit, draft }: { project: CloudProject; projectId: string; task: CloudTask; canEdit: boolean; draft: boolean }) {
+function GitHubChips({ project, task }: { project: CloudProject; task: CloudTask }) {
   const prs = useCloudQuery<CloudTaskPullRequest[]>("taskPRs:list", { taskId: task._id });
-  const [message, setMessage] = useState("");
-  const action = useAction();
-  const mode = task.githubTaskMode ?? project.githubTaskMode ?? "issue";
-  if (!project.repoUrl && !task.githubIssueUrl && !prs?.length) return null;
-  const create = () => action.run(async () => {
-    const [result] = (await originGitHub.mirrorIssues(projectId, [task._id])).results;
-    if (result?.error) throw new Error(result.error);
-    setMessage(result?.issueNumber ? `Created GitHub issue #${result.issueNumber}` : "");
-  }, "GitHub issue creation failed");
+  if (!task.githubIssueUrl && !prs?.length) return null;
   return <>
-    {task.githubIssueUrl ? (
+    {task.githubIssueUrl && (
       <a className={chipButton} href={task.githubIssueUrl} target="_blank" rel="noreferrer" title={`${githubRepoLabel(project.repoUrl)} issue #${task.githubIssueNumber}`}>
         <GitBranch size={14} aria-hidden="true" className="shrink-0" />#{task.githubIssueNumber}
         <span className={task.githubIssueState === "closed" ? "text-ink-tertiary" : "text-success"}>{task.githubIssueState ?? "open"}</span>
         <ExternalLink size={12} aria-hidden="true" className="shrink-0 opacity-60" />
       </a>
-    ) : project.repoUrl && mode === "issue" && canEdit && !draft ? (
-      <button type="button" className={chipButton} disabled={action.busy} onClick={() => void create()} title={githubRepoLabel(project.repoUrl)}>
-        {action.busy ? <Loader2 size={14} className="animate-spin" /> : <GitBranch size={14} aria-hidden="true" />}Create GitHub issue
-      </button>
-    ) : null}
+    )}
     {prs?.map((pr) => (
       <a key={pr._id} className={chipButton} href={pr.url} target="_blank" rel="noreferrer"
         title={`Checks: ${pr.checks} · Review: ${pr.review} · Mergeable: ${pr.mergeable == null ? "unknown" : pr.mergeable ? "yes" : "no"}`}>
         <GitPullRequest size={14} aria-hidden="true" className="shrink-0" />PR #{pr.number}<span className="capitalize text-ink-tertiary">{pr.state}</span>
       </a>
     ))}
-    {message && <span className="text-[12px] text-ink-secondary" role="status">{message}</span>}
-    {action.error && <span className="text-[12px] text-danger" role="alert">{action.error}</span>}
   </>;
 }
 

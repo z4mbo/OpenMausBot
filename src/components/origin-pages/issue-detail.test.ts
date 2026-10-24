@@ -100,16 +100,3 @@ describe("issue actions menu", () => {
     expect(document.activeElement).toBe(trigger);
   });
 });
-
-describe("completing through the Chief", () => {
-  it("only promises a move to In progress when the board has that column", async () => {
-    const { CompleteIssueDialog } = await import("./CompleteIssueDialog");
-    const task = { _id: "task", columnId: "todo", title: "Original title", priority: "medium", done: false, order: 0, createdAt: 1, updatedAt: 1, githubIssueNumber: 4 } as CloudTask;
-    const project = { _id: "project", name: "Fixture", memberRole: "owner", repoUrl: "https://github.com/fixture/app" } as never;
-    const dialog = (column?: string) => flushSync(() => root.render(createElement(CompleteIssueDialog, { project, projectId: "project", task, implementer: { name: "Atlas", column, start: async () => {} }, onClose() {} })));
-    dialog();
-    expect(document.body.textContent).not.toContain("In progress");
-    dialog("Doing");
-    expect(document.body.textContent).toContain("It moves to Doing now.");
-  });
-});

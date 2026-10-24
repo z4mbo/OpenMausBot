@@ -248,8 +248,8 @@ describe("runOriginTool", () => {
     const result = await runOriginTool("origin_update_issue", { issue_id: "t1", column: "done" }, "coder", { bots: BOTS, state, connect: () => client });
     expect(result.text).toBe('Updated issue t1: column "Done", done true.');
     expect(mutations(calls)).toEqual([
-      ["tasks:moveTask", { projectId: "proj", sessionToken: "tok", taskId: "t1", columnId: "col3" }],
       ["tasks:updateTask", { projectId: "proj", sessionToken: "tok", taskId: "t1", done: true }],
+      ["tasks:moveTask", { projectId: "proj", sessionToken: "tok", taskId: "t1", columnId: "col3" }],
     ]);
     expect(result.cards?.heading).toBe("Issue updated");
   });
@@ -417,6 +417,7 @@ function fakeGitHub(overrides: Partial<OriginGitHub> = {}) {
   const pull = { number: 7, title: "CI", url: "https://github.com/ggs/kai/pull/7", author: "dev", branch: "ci", state: "open" as const, closes: [12], updatedAt: 1, checks: "success", review: "review_required" as const };
   const api: OriginGitHub = {
     mirrorIssue: async (projectId, taskId) => { calls.push(["mirrorIssue", projectId, taskId]); return { taskId, issueNumber: 12 }; },
+    syncIssue: async (projectId, taskId) => { calls.push(["syncIssue", projectId, taskId]); return { taskId, issueNumber: 12 }; },
     linkPullRequest: async (projectId, number, issueNumber) => { calls.push(["linkPullRequest", projectId, number, issueNumber]); return { added: true, pull }; },
     pullRequests: async (projectId) => { calls.push(["pullRequests", projectId]); return [pull, { ...pull, number: 3, state: "merged" }]; },
     pullRequest: async (projectId, number) => {
@@ -433,17 +434,28 @@ function fakeGitHub(overrides: Partial<OriginGitHub> = {}) {
 describe("GitHub-first issues", () => {
   const repoProject = (memberRole = "admin") => ({ "projects:get": (args: Record<string, unknown>) => ({ _id: args.projectId, name: "Kai", repoUrl: "https://github.com/ggs/kai", memberRole }) });
 
-  it("mirrors an explicitly requested Todo issue to GitHub, and refuses to mark one done or drop it in the done column", async () => {
+  it("mirrors an explicitly requested Todo issue to GitHub, and closes its GitHub issue when an agent completes it", async () => {
     const { client, calls } = workspaceConvex({ ...repoProject(), "auth:me": { email: "me@x.dev" }, "tasks:createTask": "kainew" });
     const github = fakeGitHub();
     const created = await runOriginTool("origin_create_issue", { title: "New", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
     expect(created.text).toContain("Mirrored as GitHub issue #12.");
     for (const change of [{ done: true }, { column: "Done" }]) {
-      const refused = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", ...change }, "kai-dev", workspaceDeps(client, { github: github.api }));
-      expect(refused).toMatchObject({ isError: true });
-      expect(refused.text).toContain("origin_complete_issue");
+      const completed = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", ...change }, "kai-dev", workspaceDeps(client, { github: github.api }));
+      expect(completed.isError).toBeFalsy();
+      expect(completed.text).toContain("done true");
+      expect(completed.text).toContain("GitHub issue #12 is in sync.");
     }
-    expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:createTask"]);
+    expect(mutations(calls).map(([name]) => name)).toEqual(["tasks:createTask", "tasks:updateTask", "tasks:updateTask", "tasks:moveTask"]);
+    expect(github.calls).toEqual([["mirrorIssue", "kai", "kainew"], ["syncIssue", "kai", "kaitaskab12"], ["syncIssue", "kai", "kaitaskab12"]]);
+  });
+
+  it("leaves GitHub alone for edits that change neither column nor completion, and reports a sync failure", async () => {
+    const { client } = workspaceConvex(repoProject());
+    const github = fakeGitHub({ syncIssue: async () => { throw new Error("GitHub request failed (502)"); } });
+    const renamed = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", title: "Renamed" }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(renamed.text).toBe("Updated issue kaitaskab12: title.");
+    const reopened = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", done: false }, "kai-dev", workspaceDeps(client, { github: github.api }));
+    expect(reopened.text).toContain("not in sync yet (GitHub request failed (502)); the next sync retries.");
   });
 
   it("keeps a new issue in Draft off GitHub, and mirrors it once it moves to another column", async () => {
@@ -455,8 +467,8 @@ describe("GitHub-first issues", () => {
     expect(mutations(calls)[0]).toEqual(["tasks:createTask", expect.not.objectContaining({ columnId: expect.anything() })]);
     expect(github.calls).toEqual([]);
     const moved = await runOriginTool("origin_update_issue", { issue_id: "kaitaskab12", column: "Todo" }, "kai-dev", workspaceDeps(client, { github: github.api }));
-    expect(moved.text).toContain("mirrored as GitHub issue #12");
-    expect(github.calls).toEqual([["mirrorIssue", "kai", "kaitaskab12"]]);
+    expect(moved.text).toContain("GitHub issue #12 is in sync.");
+    expect(github.calls).toEqual([["syncIssue", "kai", "kaitaskab12"]]);
   });
 
   it("repairs a legacy board before default creation and keeps its new issue off GitHub", async () => {

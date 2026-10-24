@@ -173,10 +173,12 @@ describe("Delivery dedupe and finalize authority", () => {
 });
 
 describe("GitHub-first issue lifecycle", () => {
-  test("a GitHub-linked issue completes only through a merged pull request", async () => {
+  test("a GitHub-linked issue completes by hand or through a merged pull request", async () => {
     const f = await fixture();
     await f.t.run(ctx => ctx.db.patch(f.taskId, { githubIssueNumber: 7, githubIssueUrl: `${repoUrl}/issues/7`, githubIssueState: "open" }));
-    await expect(f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true })).rejects.toThrow("Closes #7");
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true });
+    expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: false });
     await f.link({ ...f.s, state: "merged", githubUpdatedAt: 3000 });
     expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
     await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: false });

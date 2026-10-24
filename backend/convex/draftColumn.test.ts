@@ -46,7 +46,7 @@ describe("Draft column", () => {
     expect(after.rows.map(row => row.taskId).sort()).toEqual([draft, todo].sort());
   });
 
-  test("a GitHub issue closed while its Origin issue is in Draft does not complete it", async () => {
+  test("a GitHub issue closed while its Origin issue is in Draft does not complete it, but one closed after it leaves Draft does", async () => {
     const f = await fixture();
     const taskId = await f.create(f.columns[0]._id, "Parked");
     const link = (state: "open" | "closed", updatedAt: number) => f.t.mutation(internal.integrations.linkIssue, { projectId: f.projectId, taskId, repoUrl, number: 7, issueUrl: `${repoUrl}/issues/7`, state, updatedAt });
@@ -57,8 +57,6 @@ describe("Draft column", () => {
     await link("open", 3000);
     expect((await context(f, taskId)).task.done).toBe(false);
     await link("closed", 4000);
-    expect((await context(f, taskId)).task.done).toBe(false);
-    await f.t.mutation(internal.integrations.completeMergedIssue, { projectId: f.projectId, taskId, repoUrl, issueNumber: 7, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: 5000 } });
     expect((await context(f, taskId)).task.done).toBe(true);
   });
 

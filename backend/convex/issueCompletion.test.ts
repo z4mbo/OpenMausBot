@@ -26,20 +26,40 @@ async function fixture(withRepository = true) {
 }
 
 describe("repository issue completion", () => {
-  test.each(["Todo", "Draft"] as const)("an unmirrored %s issue cannot skip its pull request", async column => {
+  const completions = (f: Awaited<ReturnType<typeof fixture>>) => f.t.run(ctx => ctx.db.query("taskCompletions").collect());
+  const openCount = async (f: Awaited<ReturnType<typeof fixture>>) => (await f.t.query(api.projects.get, f.scope)).openIssueCount ?? 0;
+
+  test.each(["Todo", "Draft"] as const)("an unmirrored %s issue completes without a pull request, by hand or through a connector", async column => {
     const f = await fixture();
     const taskId = column === "Draft" ? await f.create(f.columns[0]!._id) : f.taskId;
-    await expect(f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId, done: true })).rejects.toThrow("pull request");
-    await expect(f.t.mutation(api.connectors.write, { token: f.grant.token, requestId: "complete-without-pr", change: { kind: "update_issue", projectId: f.scope.projectId, taskId, done: true } })).rejects.toThrow("pull request");
+    const before = await openCount(f);
+    await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId, done: true });
+    expect((await f.t.query(api.tasks.details, { ...f.scope, taskId })).task).toMatchObject({ done: true });
+    expect(await openCount(f)).toBe(before - 1);
+    expect(await completions(f)).toHaveLength(1);
+    await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId, done: false });
+    await f.t.mutation(api.connectors.write, { token: f.grant.token, requestId: "complete-without-pr", change: { kind: "update_issue", projectId: f.scope.projectId, taskId, done: true } });
     const task = (await f.t.query(api.tasks.details, { ...f.scope, taskId })).task;
-    expect(task).toMatchObject({ done: false });
+    expect(task).toMatchObject({ done: true });
     expect(task.githubIssueNumber).toBeUndefined();
+    expect(await completions(f)).toHaveLength(1);
   });
 
-  test("creating an issue in an existing system Done column cannot bypass review", async () => {
+  test("completing a linked issue keeps its GitHub link and drops a pending reopen request", async () => {
     const f = await fixture();
-    await expect(f.create(f.doneColumnId)).rejects.toThrow("pull request");
-    expect((await f.t.query(api.tasks.board, f.scope)).tasks).toHaveLength(1);
+    await f.t.run(ctx => ctx.db.patch(f.taskId, { githubIssueNumber: 7, githubIssueUrl: "https://github.com/fixture/completion/issues/7", githubIssueState: "closed", githubIssueReopenRequested: true }));
+    await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: true });
+    const task = (await f.t.query(api.tasks.details, { ...f.scope, taskId: f.taskId })).task;
+    expect(task).toMatchObject({ done: true, githubIssueNumber: 7, githubIssueState: "closed" });
+    expect(task.githubIssueReopenRequested).toBeUndefined();
+  });
+
+  test("an issue created in an existing system Done column starts completed", async () => {
+    const f = await fixture();
+    const before = await openCount(f);
+    const taskId = await f.create(f.doneColumnId);
+    expect((await f.t.query(api.tasks.details, { ...f.scope, taskId })).task.done).toBe(true);
+    expect(await openCount(f)).toBe(before);
   });
 
   test("move and column deletion cannot hide an open issue in a system Done column", async () => {
@@ -48,6 +68,17 @@ describe("repository issue completion", () => {
     await expect(f.t.mutation(api.tasks.deleteColumn, { ...f.scope, columnId: f.columns[1]!._id, moveToColumnId: f.doneColumnId })).rejects.toThrow("Complete");
     const task = (await f.t.query(api.tasks.details, { ...f.scope, taskId: f.taskId })).task;
     expect(task).toMatchObject({ columnId: f.columns[1]!._id, done: false });
+  });
+
+  test("moving a completed issue to Draft reopens it as a draft", async () => {
+    const f = await fixture();
+    await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: true });
+    const before = await openCount(f);
+    await f.t.mutation(api.tasks.moveTask, { ...f.scope, taskId: f.taskId, columnId: f.columns[0]!._id });
+    expect((await f.t.query(api.tasks.details, { ...f.scope, taskId: f.taskId })).task).toMatchObject({ columnId: f.columns[0]!._id, done: false });
+    expect(await openCount(f)).toBe(before + 1);
+    await f.t.mutation(api.tasks.moveTask, { ...f.scope, taskId: f.taskId, columnId: f.columns[0]!._id });
+    expect(await openCount(f)).toBe(before + 1);
   });
 
   test("local-only projects can still complete and reopen issues", async () => {

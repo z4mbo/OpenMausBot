@@ -29,14 +29,45 @@ async function fixture() {
   return { t, scope, columns, taskId, link, completion, complete, task };
 }
 
-describe("trusted GitHub merge completion", () => {
-  test("a manual GitHub close mirrors remote state without completing the Origin issue", async () => {
+describe("GitHub issue state sync", () => {
+  test("closing the GitHub issue completes the Origin issue once, and reopening it on GitHub reopens it", async () => {
+    const f = await fixture();
+    await f.link("open", 1000);
+    await f.link("closed", 2000);
+    expect(await f.task()).toMatchObject({ githubIssueState: "closed", done: true, completedAt: 2000 });
+    await f.link("closed", 2000);
+    await f.link("closed", 2500);
+    expect(await f.t.run(ctx => ctx.db.query("taskCompletions").collect())).toHaveLength(1);
+    expect((await f.t.query(api.projects.get, f.scope)).openIssueCount).toBe(0);
+    await f.link("open", 3000);
+    expect(await f.task()).toMatchObject({ githubIssueState: "open", done: false });
+    expect((await f.t.query(api.projects.get, f.scope)).openIssueCount).toBe(1);
+  });
+
+  test("a GitHub close does not complete an issue first seen closed, one in Draft, or one reopened in Origin", async () => {
     const f = await fixture();
     await f.link("closed", 1000);
     expect(await f.task()).toMatchObject({ githubIssueState: "closed", done: false });
     expect((await f.task()).githubIssueReopenRequested).toBeUndefined();
-    expect(await f.t.run(ctx => ctx.db.query("taskCompletions").collect())).toEqual([]);
+    await f.link("open", 2000);
+    await f.t.mutation(api.tasks.moveTask, { ...f.scope, taskId: f.taskId, columnId: f.columns[0]!._id });
+    await f.link("closed", 3000);
+    expect((await f.task()).done).toBe(false);
+    await f.t.mutation(api.tasks.moveTask, { ...f.scope, taskId: f.taskId, columnId: f.columns[1]!._id });
+    await f.link("open", 4000);
+    await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: true });
+    await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: false });
+    await f.link("closed", 5000);
+    expect(await f.task()).toMatchObject({ done: false, githubIssueReopenRequested: true });
     expect((await f.t.query(api.projects.get, f.scope)).openIssueCount).toBe(1);
+  });
+
+  test("a pull-request-driven issue follows its pull request, not its GitHub issue", async () => {
+    const f = await fixture();
+    await f.t.run(ctx => ctx.db.patch(f.taskId, { githubTaskMode: "pull_request" }));
+    await f.link("open", 1000);
+    await f.link("closed", 2000);
+    expect((await f.task()).done).toBe(false);
   });
 
   test("legacy snapshots never complete an issue just because GitHub reports closed", async () => {
@@ -55,7 +86,6 @@ describe("trusted GitHub merge completion", () => {
     expect(await f.t.run(ctx => ctx.db.query("taskCompletions").collect())).toHaveLength(1);
     await f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: false });
     expect((await f.task()).completionPullRequest).toBeUndefined();
-    await expect(f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: true })).rejects.toThrow("pull request");
     expect(await f.complete()).toBe(true);
     expect((await f.task()).done).toBe(true);
     expect(await f.t.run(ctx => ctx.db.query("taskCompletions").collect())).toHaveLength(1);
@@ -76,12 +106,11 @@ describe("trusted GitHub merge completion", () => {
     expect((await f.task()).done).toBe(false);
   });
 
-  test("a merge receipt waits for eventual GitHub closure without permitting early direct completion", async () => {
+  test("a merge receipt recorded before GitHub closes the issue completes it once GitHub does", async () => {
     const f = await fixture();
     await f.link("open", 1000);
     expect(await f.complete()).toBe(false);
     expect(await f.task()).toMatchObject({ done: false, completionPullRequest: { number: pullRequest.number } });
-    await expect(f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: true })).rejects.toThrow("pull request");
     await f.link("closed", 2000);
     expect((await f.task()).done).toBe(true);
     await f.link("closed", 2000);
@@ -96,11 +125,10 @@ describe("trusted GitHub merge completion", () => {
     await f.t.mutation(api.projects.update, { ...f.scope, repoUrl: "https://github.com/fixture/replacement" });
     await expect(f.link("closed", 2000)).rejects.toThrow("Repository changed");
     await expect(f.complete()).rejects.toThrow("Repository changed");
-    await expect(f.t.mutation(api.tasks.updateTask, { ...f.scope, taskId: f.taskId, done: true })).rejects.toThrow("pull request");
     expect((await f.task()).done).toBe(false);
   });
 
-  test("an externally reopened issue drops its receipt and a later manual close stays incomplete", async () => {
+  test("an externally reopened issue drops its receipt and a later GitHub close completes it again", async () => {
     const f = await fixture();
     await f.link("closed", 1000);
     expect(await f.complete()).toBe(true);
@@ -108,8 +136,10 @@ describe("trusted GitHub merge completion", () => {
     expect(await f.task()).toMatchObject({ done: false, githubIssueState: "open" });
     expect((await f.task()).completionPullRequest).toBeUndefined();
     await f.link("closed", 3000);
-    expect((await f.task()).done).toBe(false);
-    expect((await f.t.query(api.projects.get, f.scope)).openIssueCount).toBe(1);
+    expect((await f.task()).done).toBe(true);
+    expect((await f.task()).completionPullRequest).toBeUndefined();
+    expect((await f.t.query(api.projects.get, f.scope)).openIssueCount).toBe(0);
+    expect(await f.t.run(ctx => ctx.db.query("taskCompletions").collect())).toHaveLength(1);
   });
 
   test("an explicit reopen sets an intent that clears once GitHub reports open", async () => {
@@ -138,7 +168,7 @@ describe("trusted GitHub merge completion", () => {
     expect((await f.task()).githubIssueReopenRequested).toBe(true);
   });
 
-  test("legacy snapshot reopening clears trusted completion evidence before a later manual close", async () => {
+  test("legacy snapshot reopening clears trusted completion evidence before a later GitHub close", async () => {
     const f = await fixture();
     await f.link("closed", 1000);
     await f.complete();
@@ -147,7 +177,8 @@ describe("trusted GitHub merge completion", () => {
     expect((await f.task()).completionPullRequest).toBeUndefined();
     expect((await f.task()).githubIssueReopenRequested).toBeUndefined();
     await f.link("closed", 3000);
-    expect((await f.task()).done).toBe(false);
+    expect(await f.task()).toMatchObject({ done: true });
+    expect((await f.task()).completionPullRequest).toBeUndefined();
   });
 
   test("the signed HTTP bridge rejects unsigned receipts and dispatches a valid receipt", async () => {
