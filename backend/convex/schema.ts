@@ -413,9 +413,9 @@ export default defineSchema({
     contentType: v.optional(v.string()),
     size: v.optional(v.number()),
     notes: v.optional(v.string()),
-    /** The Assets folder it is filed under, such as Studio for every Studio output. */
+    /** The Assets folder it is filed under. */
     folder: v.optional(v.string()),
-    /** The Studio generation that made it, with the model and prompt it ran. */
+    /** Nothing writes this; stored assets may still name the generation that made them. */
     studio: v.optional(v.object({ generationId: v.id("studioGenerations"), model: v.string(), modelLabel: v.string(), prompt: v.string() })),
     createdAt: v.number(),
     updatedAt: v.number(),

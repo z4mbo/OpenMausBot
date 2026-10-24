@@ -37,10 +37,8 @@ async function fixture() {
   const ownProjectId = await t.mutation(api.projects.create, { sessionToken: people.member.token, teamId: ownTeam.teamId, name: "Own project", githubRepo: "later" });
   await t.mutation(api.agents.setSharedAgents, { sessionToken: people.member.token, teamId: ownTeam.teamId, enabled: true });
   const agents = await t.mutation(api.agents.publishProjectTeam, { sessionToken: people.member.token, teamId: ownTeam.teamId, projectId: ownProjectId, agents: [{ kind: "chief", roleKey: "chief", name: "Chief" }] });
-  const canvasId = await t.mutation(api.draw.createCanvas, { sessionToken: people.member.token, projectId: ownProjectId, name: "Canvas" });
   const source = { projectId, sessionToken: people.owner.token };
   const own = { projectId: ownProjectId, sessionToken: people.member.token };
-  const drawing = { sessionToken: people.member.token, teamId: ownTeam.teamId, canvasId };
   const removeMember = async () => {
     const row = (await t.query(api.members.list, source)).find(member => member.email === people.member.email)!;
     await t.mutation(api.members.remove, { ...source, memberId: row._id });
@@ -50,7 +48,7 @@ async function fixture() {
     expect(response.status).toBe(200);
     return (await response.json() as { storageId: import("./_generated/dataModel").Id<"_storage"> }).storageId;
   };
-  return { t, people, source, own, drawing, agentId: agents[0]!.agentId, removeMember, upload };
+  return { t, people, source, own, agentId: agents[0]!.agentId, removeMember, upload };
 }
 
 test("a removed project member cannot rebind its remembered storage ID in their own workspace", async () => {
@@ -84,7 +82,7 @@ test("a removed project member cannot rebind its remembered storage ID in their 
   await expect(rebind()).rejects.toThrow("access");
 });
 
-test("unreferenced IDs cannot be claimed by any of the five storage reference writers", async () => {
+test("unreferenced IDs cannot be claimed by any of the four storage reference writers", async () => {
   const f = await fixture();
   const storageId = await f.t.run(async ctx => {
     const id = await ctx.storage.store(new Blob(["unknown private bytes"], { type: "image/png" }));
@@ -96,14 +94,12 @@ test("unreferenced IDs cannot be claimed by any of the five storage reference wr
     () => f.t.mutation(api.projects.update, { ...f.own, iconType: "image", iconStorageId: storageId }),
     () => f.t.mutation(api.agents.setAvatar, { sessionToken: f.own.sessionToken, agentId: f.agentId, storageId }),
     () => f.t.mutation(api.design.createAsset, { ...f.own, storageId, type: "image", name: "Foreign" }),
-    () => f.t.mutation(api.draw.saveFile, { ...f.drawing, storageId, mimeType: "image/png", fileId: "foreign" }),
   ];
   for (const attempt of attempts) await expect(attempt()).rejects.toThrow("access");
   expect((await f.t.query(api.design.list, f.own)).assets).toHaveLength(0);
-  expect(await f.t.query(api.draw.files, f.drawing)).toHaveLength(0);
 });
 
-test("all five upload issuers register scoped server-stored bytes and preserve the transport contract", async () => {
+test("all four upload issuers register scoped server-stored bytes and preserve the transport contract", async () => {
   const f = await fixture();
   const avatar = await f.upload(await f.t.mutation(api.auth.generateAvatarUploadUrl, { sessionToken: f.own.sessionToken }));
   await f.t.mutation(api.auth.updateProfile, { sessionToken: f.own.sessionToken, avatarStorageId: avatar });
@@ -117,9 +113,6 @@ test("all five upload issuers register scoped server-stored bytes and preserve t
   const asset = await f.upload(await f.t.mutation(api.design.generateUploadUrl, f.own), "application/pdf");
   await f.t.mutation(api.design.createAsset, { ...f.own, storageId: asset, type: "document", name: "Document" });
   expect((await f.t.query(api.design.list, f.own)).assets[0]?.fileUrl).toBeTruthy();
-  const drawing = await f.upload(await f.t.mutation(api.draw.uploadUrl, f.drawing));
-  await f.t.mutation(api.draw.saveFile, { ...f.drawing, storageId: drawing, mimeType: "image/png", fileId: "drawing" });
-  expect((await f.t.query(api.draw.files, f.drawing))[0]?.url).toBeTruthy();
 });
 
 test("a valid unrelated upload intent cannot authorize an arbitrary ID or someone else's private profile upload", async () => {
@@ -143,7 +136,7 @@ test("current source readers may reuse legacy files, and an authorized copy surv
   expect((await f.t.query(api.projects.get, f.own)).iconUrl).toBeTruthy();
 });
 
-test("a revoked source cannot be rebound through profiles, icons, agents, assets or drawing files", async () => {
+test("a revoked source cannot be rebound through profiles, icons, agents or assets", async () => {
   const f = await fixture();
   const storageId = await f.upload(await f.t.mutation(api.design.generateUploadUrl, f.source));
   await f.t.mutation(api.design.createAsset, { ...f.source, storageId, type: "image", name: "Private" });
@@ -153,7 +146,6 @@ test("a revoked source cannot be rebound through profiles, icons, agents, assets
     () => f.t.mutation(api.projects.update, { ...f.own, iconStorageId: storageId }),
     () => f.t.mutation(api.agents.setAvatar, { sessionToken: f.own.sessionToken, agentId: f.agentId, storageId }),
     () => f.t.mutation(api.design.createAsset, { ...f.own, storageId, type: "image", name: "Stolen" }),
-    () => f.t.mutation(api.draw.saveFile, { ...f.drawing, storageId, mimeType: "image/png", fileId: "stolen" }),
   ];
   for (const attempt of attempts) await expect(attempt()).rejects.toThrow("access");
 });
@@ -260,19 +252,16 @@ test("migration covers every live reference scope without exposing unrelated unr
     await ctx.db.patch(f.source.projectId, { iconType: "image", iconStorageId: id });
     await ctx.db.patch(f.agentId, { avatarStorageId: id });
     await ctx.db.insert("designAssets", { projectId: f.source.projectId, storageId: id, name: "Legacy", type: "image", createdAt: 1, updatedAt: 1 });
-    await ctx.db.insert("drawingFiles", { teamId: f.drawing.teamId, canvasId: f.drawing.canvasId, fileId: "canvas", storageId: id, mimeType: "image/png" });
-    await ctx.db.insert("drawingFiles", { teamId: f.drawing.teamId, fileId: "workspace", storageId: id, mimeType: "image/png" });
     return id;
   });
-  for (const table of ["users", "projects", "workspaceAgents", "designAssets", "drawingFiles"] as const) {
+  for (const table of ["users", "projects", "workspaceAgents", "designAssets"] as const) {
     expect((await f.t.mutation(internal.storage.migrateReferences, { table, cursor: null })).done).toBe(true);
   }
   const admissions = await f.t.run(ctx => ctx.db.query("storageAdmissions").collect());
-  expect(admissions).toHaveLength(4);
+  expect(admissions).toHaveLength(3);
   expect(admissions.every(row => row.storageId === storageId)).toBe(true);
   expect((await f.t.query(api.projects.get, f.source)).iconUrl).toBeTruthy();
   expect((await f.t.query(api.agents.get, { sessionToken: f.own.sessionToken, agentId: f.agentId })).avatarUrl).toBeTruthy();
-  expect(await f.t.query(api.draw.files, f.drawing)).toHaveLength(1);
 });
 
 test("upload preflight permits binary transport without ambient credentials", async () => {

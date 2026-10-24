@@ -2,15 +2,14 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useStore } from "@/state/store";
 import { openBot } from "@/state/thread-navigation";
 import { useCloudLinks } from "./origin-cloud-links";
-import { setChiefSectionOf, type ChiefSection } from "./origin-chief-section";
+import { setChiefSectionOf, type ShownSection } from "./origin-chief-section";
 import { projectBotFor } from "./origin-issue-focus";
 import { openOriginPage } from "./origin-pages";
 import { useShowThreads } from "./thread-preferences";
 
-export type OriginItemKind = "post" | "campaign" | "asset" | "vault" | "feedback" | "call" | "repo";
+export type OriginItemKind = "asset" | "vault" | "feedback" | "call" | "repo";
 
-export const ITEM_SECTION: Record<OriginItemKind, Exclude<ChiefSection, "chat">> = {
-  post: "broadcast", campaign: "broadcast",
+export const ITEM_SECTION: Record<OriginItemKind, Exclude<ShownSection, "chat">> = {
   asset: "assets", vault: "vault", feedback: "feedback", call: "call", repo: "repo",
 };
 

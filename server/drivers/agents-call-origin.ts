@@ -26,26 +26,20 @@ async function assignOriginIssue(args: Json, context: ToolCallContext): Promise<
 
 const record = (value: unknown): Json | null => (value !== null && typeof value === "object" && !Array.isArray(value) ? value as Json : null);
 
-/**
- * Runs an Origin tool on the server. A result naming a reviewer (the Chief, after an issue's pull request or design is
- * ready) starts the review in a new thread; a result carrying an image reaches the model as an image.
- */
+/** Runs an Origin tool on the server. A result naming a reviewer (the Chief, once an issue's pull request is ready) starts the review in a new thread. */
 export async function callOriginTool(name: string, args: Json, context: ToolCallContext): Promise<ToolCallResult> {
   if (name === "origin_assign_issue") return assignOriginIssue(args, context);
   const { apiResponse } = context.client;
   const { ok, body } = await apiResponse("/api/internal/origin/tool", { method: "POST", body: JSON.stringify({ name, arguments: args }) });
   const text = String(body.text ?? body.error ?? `${name} did not answer.`);
   if (!ok || body.isError === true) return { text, isError: true };
-  const image = record(body.image);
-  if (image && typeof image.data === "string" && typeof image.mimeType === "string") return { text: "", passthrough: { content: [{ type: "text", text }, { type: "image", mimeType: image.mimeType, data: image.data }] } };
   const reviewer = record(body.reviewer);
   if (!reviewer) return { text };
   const sent = await apiResponse("/api/internal/coordinate-bots", {
     method: "POST",
     body: JSON.stringify({ botIds: [reviewer.botId], message: reviewer.message, reason: reviewer.reason, thread: "new", reply: "none" }),
   });
-  const ready = name === "origin_complete_issue" ? "the pull request is ready" : "it is ready";
   return sent.ok && !sent.body.error
     ? { text }
-    : { text: `${text} Asking ${String(reviewer.botName)} to review did not go through (${String(sent.body.error ?? `HTTP ${sent.status}`)}); tell your Chief ${ready}.` };
+    : { text: `${text} Asking ${String(reviewer.botName)} to review did not go through (${String(sent.body.error ?? `HTTP ${sent.status}`)}); tell your Chief the pull request is ready.` };
 }

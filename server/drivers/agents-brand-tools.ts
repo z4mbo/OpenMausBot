@@ -17,12 +17,12 @@ interface ToolDefinition {
 export const BRAND_TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "origin_brand_get",
-    description: "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Read it before you design, generate media or write copy." + ORIGIN_SCOPE,
+    description: "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Read it before you design or write copy." + ORIGIN_SCOPE,
     inputSchema: { type: "object", additionalProperties: false, properties: { project: ORIGIN_PROJECT } },
   },
   {
     name: "origin_brand_update",
-    description: "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Publish all use it." + ORIGIN_SCOPE,
+    description: "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand." + ORIGIN_SCOPE,
     inputSchema: {
       type: "object", additionalProperties: false,
       properties: {
@@ -38,7 +38,7 @@ export const BRAND_TOOL_DEFINITIONS: ToolDefinition[] = [
         body_font: { type: "string", enum: BRAND_FONT_IDS },
         logos: words(BRAND_LIMITS.logos, 200, "Image asset names or ids from origin_list_assets; [] removes them."),
         icon: { type: "string", maxLength: 200, description: "An image asset name or id; empty removes it." },
-        imagery: words(BRAND_LIMITS.imagery, 40, "Style words for generated images and video, such as soft daylight, film grain."),
+        imagery: words(BRAND_LIMITS.imagery, 40, "Style words for images and video, such as soft daylight, film grain."),
         project: ORIGIN_PROJECT,
       },
     },

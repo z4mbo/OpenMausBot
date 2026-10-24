@@ -4,21 +4,21 @@
 
 **P1: revoked private-project access could be recovered through a remembered storage ID.** A member read a private asset and remembered its `_storage` ID. After removal, `design.list` correctly refused the source project. The former member created another workspace/project, submitted that ID to `design.createAsset`, and received a fresh private-file URL. The original regression in `backend/convex/storageAdmission.test.ts` was observed failing before this fix. Its source is an existing legacy reference, covering installations predating provenance.
 
-All five reference writers now use `admitStorageReference`: account avatars (`auth.updateProfile`), project icons (`projects.update`), shared-agent avatars (`agents.setAvatar`), assets (`design.createAsset`), and drawing files (`draw.saveFile`). Destination write permission and source read permission are separate checks. Knowing an unreferenced ID grants no authority. A current source reader may deliberately reuse a file in an authorized destination. Access removal prevents subsequent sharing from the removed scope; an already authorized copy retains the destination's access rules. Replacing a reference preserves other shared images.
+All four reference writers use `admitStorageReference`: account avatars (`auth.updateProfile`), project icons (`projects.update`), shared-agent avatars (`agents.setAvatar`) and assets (`design.createAsset`). Drawing files, a fifth writer, left with Design; drawing upload intents are refused. Destination write permission and source read permission are separate checks. Knowing an unreferenced ID grants no authority. A current source reader may deliberately reuse a file in an authorized destination. Access removal prevents subsequent sharing from the removed scope; an already authorized copy retains the destination's access rules. Replacing a reference preserves other shared images.
 
 ## Upload provenance
 
-`lib/storage.ts` issues ten-minute, one-use upload capabilities pinned to the authenticated session, actor and exact destination. Only token hashes are stored. All five issuers return URL strings; `POST /uploads` accepts raw bytes and returns `{ storageId }`, preserving the renderer/tool transport shape.
+`lib/storage.ts` issues ten-minute, one-use upload capabilities pinned to the authenticated session, actor and exact destination. Only token hashes are stored. All four issuers return URL strings; `POST /uploads` accepts raw bytes and returns `{ storageId }`, preserving the renderer/tool transport shape.
 
 The HTTP action consumes the capability before reading, bounds streamed bytes without trusting Content-Length, stores the blob itself, and registers its scope through an internal mutation. Both consumption and completion recheck session expiry/generation/account status and current destination authority. Callers cannot pair unrelated storage IDs with intents. Failed completion deletes only the new blob just stored by that HTTP operation, never a reused/shared blob.
 
-Profile, agent and icon uploads are bounded at 5 MiB; assets and Draw at 15 MiB. Profile MIME policy remains PNG/JPEG/WebP/GIF, agent/icon images accept `image/*`, and Draw retains PNG/JPEG/WebP/GIF/SVG. These checks validate declared stored Content-Type, not image-content sniffing. Expired intents are removed in batches of 100 with continuations; issuance allows at most 100 unexpired intents per account. Interrupted uploads require a new capability.
+Profile, agent and icon uploads are bounded at 5 MiB; assets at 15 MiB. Profile MIME policy remains PNG/JPEG/WebP/GIF, and agent/icon images accept `image/*`. These checks validate declared stored Content-Type, not image-content sniffing. Expired intents are removed in batches of 100 with continuations; issuance allows at most 100 unexpired intents per account. Interrupted uploads require a new capability.
 
 `server/origin-cloud.ts` also accepts the selected deployment's corresponding `.convex.site` origin, the next loopback port, or the explicitly configured action origin. Unrelated hosts remain refused. Custom deployments require `ORIGIN_CONVEX_SITE_URL` for a distinct action origin.
 
 ## Legacy migration and rollout
 
-Tables/indexes are additive; existing rows have no new required fields. `internal.storage.migrateReferences` accepts `{ table, cursor }` and returns `{ cursor, done, admitted }`. Allowed tables: `users`, `projects`, `workspaceAgents`, `designAssets`, `drawingFiles`. Each call visits at most 100 rows and admits only extant referenced blobs under their account/project/workspace scope. Continue the returned cursor until `done`; reruns are idempotent. No storage-wide first-caller assignment or blob deletion occurs.
+Tables/indexes are additive; existing rows have no new required fields. `internal.storage.migrateReferences` accepts `{ table, cursor }` and returns `{ cursor, done, admitted }`. Allowed tables: `users`, `projects`, `workspaceAgents`, `designAssets`. Each call visits at most 100 rows and admits only extant referenced blobs under their account/project/workspace scope. Continue the returned cursor until `done`; reruns are idempotent. No storage-wide first-caller assignment or blob deletion occurs.
 
 Before backfill completes, indexed legacy-reference lookup permits reuse only for an actor who currently reads a source reference. Old unreferenced blobs stay unclaimable, so no insecure grace period is needed.
 
@@ -27,7 +27,7 @@ Rollout must account for older packaged tool servers:
 1. Build, verify and publish compatible Windows/macOS desktop artifacts and update the hosted app server. Their upload allowlist supports the action origin.
 2. Confirm the intended deployment's action origin and `/uploads` reachability/CORS while preserving existing images.
 3. Deploy the additive schema/indexes and secured issuers/writers together to the explicitly selected deployment. Existing renderer uploads retain their API shape. Old packaged **tool** uploads reject the action origin until upgraded; there is deliberately no unprovenanceable direct-upload fallback.
-4. Run all five internal migration streams on a backed-up, reviewed deployment, recording cursor completion and counts. This slice ran them only in disposable fixtures.
+4. Run all four internal migration streams on a backed-up, reviewed deployment, recording cursor completion and counts. This slice ran them only in disposable fixtures.
 5. Verify scoped upload, authorized shared reuse and removed-member denial through the deployed application before claiming deployed acceptance.
 
 Historical references lack reliable original-uploader provenance. Migration preserves existing bindings; it cannot identify unauthorized rebinds made before this fix. Such rows require ownership/audit review rather than automatic deletion or reassignment.

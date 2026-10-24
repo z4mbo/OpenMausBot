@@ -54,7 +54,7 @@ export const upload = httpAction(async (ctx, request) => {
 });
 
 export const migrateReferences = internalMutation({
-  args: { table: v.union(v.literal("users"), v.literal("projects"), v.literal("workspaceAgents"), v.literal("designAssets"), v.literal("drawingFiles")), cursor: v.union(v.string(), v.null()) },
+  args: { table: v.union(v.literal("users"), v.literal("projects"), v.literal("workspaceAgents"), v.literal("designAssets")), cursor: v.union(v.string(), v.null()) },
   returns: v.object({ cursor: v.string(), done: v.boolean(), admitted: v.number() }),
   handler: async (ctx, args) => {
     const result = await ctx.db.query(args.table).paginate({ cursor: args.cursor, numItems: 100 });
@@ -70,12 +70,7 @@ export const migrateReferences = internalMutation({
         await addStorageScope(ctx, row.iconStorageId, { kind: "project", projectId: row._id as Doc<"projects">["_id"] });
         admitted += 1;
       } else if ("storageId" in row && row.storageId) {
-        if ("projectId" in row) await addStorageScope(ctx, row.storageId, { kind: "project", projectId: row.projectId });
-        else {
-          const canvas = row.canvasId ? await ctx.db.get(row.canvasId) : null;
-          if (row.canvasId && (!canvas || canvas.teamId !== row.teamId)) continue;
-          await addStorageScope(ctx, row.storageId, canvas ? { kind: "project", projectId: canvas.projectId } : { kind: "workspace", teamId: row.teamId });
-        }
+        await addStorageScope(ctx, row.storageId, { kind: "project", projectId: row.projectId });
         admitted += 1;
       }
     }

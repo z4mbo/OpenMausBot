@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, it } from "vitest";
 import { launchVerificationServer, runControlOmb } from "../scripts/control-omb.ts";
-import { startFakeConvex, type FakeConvex } from "../scripts/testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "../scripts/testing/origin-convex-backend.ts";
 import { encryptSecret } from "../src/components/origin-pages/vaultCrypto.ts";
 
 type Json = Record<string, any>;

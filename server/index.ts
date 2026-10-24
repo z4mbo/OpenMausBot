@@ -608,10 +608,9 @@ import { createBotMemoryRoutes } from "./routes/bot-memory.ts";
 import { createBotCreateRoutes } from "./routes/bots-create.ts";
 import { createDefaultTeamRoutes, initializeWorkspaceTeams, openWorkspaceHead } from "./origin-teams.ts";
 import { createProjectIconRoutes } from "./origin-project-icons.ts";
-import { convexOriginClient, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
+import { convexOriginClient, createOriginCloudRoutes, defaultOriginCloudFile, ORIGIN_ASSET_MAX_BYTES, readOriginCloud } from "./origin-cloud.ts";
 import { cloudProjectFor, projectPeerTeams } from "./origin-project-links.ts";
 import { setPeerProjectTeams } from "./peer-roster.ts";
-import { createProjectToolsHost } from "./host/project-tools.ts";
 import { createStaticResponder } from "./host/static-files.ts";
 import { createCloudLinkRoutes } from "./origin-cloud-sync.ts";
 import { createOriginImportRoutes } from "./routes/origin-import.ts";
@@ -13529,7 +13528,7 @@ const originAgents = createOriginAgentSupport({
   localFolders: !CLOUD_HOME, git: CLOUD_HOME ? undefined : createProjectGit({ service: () => githubService(), cloud: () => readOriginCloud(defaultOriginCloudFile()), connect: convexOriginClient, port: PORT, dataDir: DATA_DIR }),
 });
 ROUTES.push(originAgents.routes); PUBLIC_ROUTES.push(originAgents.publicRoutes);
-const projectTools = createProjectToolsHost({
+ROUTES.push(createOriginCloudRoutes({
   store,
   github: () => originGitHub(githubService()),
   teamChat: originAgents.teamChat,
@@ -13548,8 +13547,7 @@ const projectTools = createProjectToolsHost({
       await opened.handle.close().catch(() => undefined);
     }
   },
-}, { studioBudget: ({ botId }) => apiBudgetFor.assertUnpriced(botId, "Studio generation") });
-ROUTES.push(...projectTools.routes);
+}));
 ROUTES.push(createCloudLinkRoutes({ store, changed: originAgents.changed }));
 ROUTES.push(createOriginImportRoutes({
   store, maxWorkspaceBots: MAX_WORKSPACE_BOTS, defaultSelection, wireBot, changed: originAgents.changed, authorized: workspaceBackupAccess.authorized,
@@ -17370,7 +17368,6 @@ const server = createServer(handleRequest);
 desktopViewer.attach(server, handleRequest);
 
 calendarCalls.start();
-projectTools.start();
 
 // Resolve the edition before accepting requests so /api/edition is never a guess.
 console.log(describeEdition(await loadEnterpriseLayer()));

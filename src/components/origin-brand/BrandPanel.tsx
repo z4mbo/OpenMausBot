@@ -144,7 +144,7 @@ function BrandEditor({ stored, images, projectId, projectName, canEdit, botId }:
             </div>
           </Group>
           <Group title="Imagery">
-            <TagInput label="Style words for Studio" placeholder="soft daylight, film grain" values={kit.imagery} max={BRAND_LIMITS.imagery}
+            <TagInput label="Style words for images" placeholder="soft daylight, film grain" values={kit.imagery} max={BRAND_LIMITS.imagery}
               onChange={(imagery) => change({ ...kit, imagery })} />
           </Group>
         </fieldset>
@@ -313,7 +313,7 @@ function AddTile({ label, onClick }: { label: string; onClick(): void }) {
 function AssetPicker({ images, title, onPick, onClose }: { images: CloudDesignAsset[]; title: string; onPick(asset: CloudDesignAsset): void; onClose(): void }) {
   return (
     <Modal title={title} onClose={onClose} wide>
-      {!images.length ? <EmptyState compact icon={<ImagePlus size={22} />} title="No images in Assets yet" body="Upload the logo in Files, or generate one in Studio and save it to Assets." /> : (
+      {!images.length ? <EmptyState compact icon={<ImagePlus size={22} />} title="No images in Assets yet" body="Upload the logo in Files first." /> : (
         <div className="grid max-h-[60vh] grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2 overflow-y-auto">
           {images.map((asset) => (
             <button key={asset._id} type="button" onClick={() => onPick(asset)}

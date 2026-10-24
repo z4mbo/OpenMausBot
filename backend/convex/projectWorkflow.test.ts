@@ -165,38 +165,6 @@ test("comment mentions validate access, store inline tokens and notify once", as
   expect(containsMention("@member2", "@member")).toBe(false);
 });
 
-test("canvases isolate scenes, files and viewers from global Draw", async () => {
-  const f = await fixture();
-  const canvasId = await f.t.mutation(api.draw.createCanvas, { sessionToken: f.member.token, projectId: f.shared, name: "Architecture" });
-  const otherCanvas = await f.t.mutation(api.draw.createCanvas, { sessionToken: f.owner.token, projectId: f.privateProject, name: "Private design" });
-  const element = JSON.stringify({ id: "box", version: 1, versionNonce: 1, type: "rectangle", x: 0, y: 0, width: 100, height: 100 });
-  await f.t.mutation(api.draw.updateElements, { sessionToken: f.member.token, teamId: f.teamId, canvasId, elements: [element] });
-  expect(await f.t.query(api.draw.scene, { sessionToken: f.viewer.token, teamId: f.teamId, canvasId })).toEqual([element]);
-  expect(await f.t.query(api.draw.scene, { sessionToken: f.member.token, teamId: f.teamId })).toEqual([]);
-  expect(await f.t.query(api.draw.scene, { sessionToken: f.owner.token, teamId: f.teamId, canvasId: otherCanvas })).toEqual([]);
-  await expect(f.t.query(api.draw.scene, { sessionToken: f.member.token, teamId: f.teamId, canvasId: otherCanvas })).rejects.toThrow();
-  await expect(f.t.query(api.draw.files, { sessionToken: f.member.token, teamId: f.teamId, canvasId: otherCanvas })).rejects.toThrow();
-  await expect(f.t.mutation(api.draw.updateElements, { sessionToken: f.viewer.token, teamId: f.teamId, canvasId, elements: [element] })).rejects.toThrow();
-});
-
-test("canvas nodes are stored sanitized beside Excalidraw rows, and archived canvases close", async () => {
-  const f = await fixture();
-  const canvasId = await f.t.mutation(api.draw.createCanvas, { sessionToken: f.member.token, projectId: f.shared, name: "Landing" });
-  const scope = { sessionToken: f.member.token, teamId: f.teamId, canvasId };
-  const node = { format: "canvas", id: "hero", type: "frame", version: 1, versionNonce: 3, parentId: null, z: 1, name: "Hero", x: 0, y: 0, width: 1440, height: 800, rotation: 0, opacity: 1, fill: "#ffffff", stroke: null, strokeWidth: 0, radius: 0, script: "<x>" };
-  await f.t.mutation(api.draw.updateElements, { ...scope, elements: [JSON.stringify(node)] });
-  const [stored] = (await f.t.query(api.draw.scene, scope)).map((row) => JSON.parse(row));
-  expect(stored).toMatchObject({ format: "canvas", id: "hero", fill: "#FFFFFF", clip: true });
-  expect(stored.script).toBeUndefined();
-  await f.t.mutation(api.draw.updateElements, { ...scope, elements: [JSON.stringify({ ...node, version: 1, versionNonce: 9, name: "Older tie" })] });
-  expect(JSON.parse((await f.t.query(api.draw.scene, scope))[0]).name).toBe("Hero");
-  await expect(f.t.mutation(api.draw.updateElements, { ...scope, elements: [JSON.stringify({ ...node, id: "bad", type: "script" })] })).rejects.toThrow("Invalid canvas node");
-  await expect(f.t.mutation(api.draw.archiveCanvas, { ...scope, sessionToken: f.viewer.token })).rejects.toThrow();
-  await f.t.mutation(api.draw.archiveCanvas, scope);
-  expect(await f.t.query(api.draw.canvases, { sessionToken: f.member.token, projectId: f.shared })).toEqual([]);
-  await expect(f.t.query(api.draw.scene, scope)).rejects.toThrow();
-});
-
 test("MCP inbox, completion and deletion are scoped and idempotent", async () => {
   const f = await fixture();
   const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Codex", write: true });

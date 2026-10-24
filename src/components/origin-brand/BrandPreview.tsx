@@ -3,7 +3,7 @@ import { useCopyFeedback } from "@/lib/copy-text";
 import { useBrandFonts } from "@/lib/origin-brand";
 import { cn } from "@/lib/cn";
 import { brandFont, brandFontStack } from "../../../shared/brand-fonts";
-import { brandPalette, brandedPrompt, type BrandKit } from "../../../shared/brand-kit";
+import { brandPalette, type BrandKit } from "../../../shared/brand-kit";
 
 const SANS = "Inter, ui-sans-serif, system-ui, sans-serif";
 
@@ -26,7 +26,7 @@ function Swatch({ label, color }: { label: string; color: string }) {
   );
 }
 
-/** The kit drawn as a small page in its own colours and faces, beside the swatches and the line Studio adds to prompts. */
+/** The kit drawn as a small page in its own colours and faces, beside the swatches. */
 export function BrandPreview({ kit, logoUrl, iconUrl }: { kit: BrandKit; logoUrl?: string | null; iconUrl?: string | null }) {
   useBrandFonts([kit.fonts.heading, kit.fonts.body]);
   const palette = brandPalette(kit);
@@ -67,10 +67,6 @@ export function BrandPreview({ kit, logoUrl, iconUrl }: { kit: BrandKit; logoUrl
           <dd className="truncate text-[15px] text-ink" style={{ fontFamily: body }}>{brandFont(kit.fonts.body)?.family}</dd>
         </div>
       </dl>
-      <div className="rounded-lg bg-inset/60 px-3 py-2 max-sm:hidden">
-        <p className="text-[12px] text-ink-tertiary">Studio prompts start with</p>
-        <p className="mt-0.5 whitespace-pre-line break-words font-mono text-[11.5px] leading-relaxed text-ink-secondary">{brandedPrompt(kit, "").trim()}</p>
-      </div>
     </div>
   );
 }

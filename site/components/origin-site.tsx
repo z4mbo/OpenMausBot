@@ -5,7 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import {
   ArrowRight, Bot, Check, ChevronDown, Cloud, FileImage, FolderGit2, GitPullRequest, Inbox, KeyRound, Laptop, ListTodo, Menu, MessageSquareHeart,
-  MessagesSquare, PenTool, Phone, ShieldAlert, UsersRound, Vault, X,
+  MessagesSquare, Palette, Phone, ShieldAlert, UsersRound, Vault, X,
 } from "lucide-react";
 import { bodyFont } from "@/lib/fonts";
 import { AgentAvatar, AppleLogo, MAC_ARM_DOWNLOAD_URL, MAC_INTEL_DOWNLOAD_URL, TEAM, WINDOWS_DOWNLOAD_URL, WindowsLogo, usePlatform, useOriginSession, type Platform } from "./brand";
@@ -196,7 +196,7 @@ function Structure() {
         <li className={st.treeCard} data-reveal="" style={order(0)}>
           <span className={st.step} aria-hidden="true">1</span>
           <h3>Workspace</h3>
-          <p>Your company or team: members, chat, calls, a shared canvas and one inbox.</p>
+          <p>Your company or team: members, chat, calls and one inbox.</p>
           <div className={st.chips}><span className={clsx(st.chip, st.chipOn)}><span className={st.workspaceIcon} aria-hidden="true">N</span>Northwind</span></div>
         </li>
         <li className={st.treeCard} data-reveal="" style={order(1)}>
@@ -282,11 +282,11 @@ function Together() {
     { icon: <Inbox size={18} />, title: "Inbox", body: "Assignments, mentions and finished work in one list." },
     { icon: <MessagesSquare size={18} />, title: "Chat", body: "Talk with people and agents in the workspace or a project." },
     { icon: <Phone size={18} />, title: "Calls", body: "Get on a call with your team without leaving the app." },
-    { icon: <PenTool size={18} />, title: "Draw", body: "A shared canvas for sketches, flows and plans." },
     { icon: <FileImage size={18} />, title: "Assets", body: "Files and images the project and its agents work from." },
     { icon: <Vault size={18} />, title: "Vault", body: "Shared secrets, encrypted before they are saved." },
     { icon: <FolderGit2 size={18} />, title: "Repo", body: "Connect a GitHub repository so issues and PRs stay linked." },
     { icon: <MessageSquareHeart size={18} />, title: "Feedback", body: "A public form per project. Turn good ideas into issues." },
+    { icon: <Palette size={18} />, title: "Brand", body: "Colours, fonts and voice agents follow when they write." },
   ];
   return (
     <section id="together" className={st.section} aria-labelledby="together-title">

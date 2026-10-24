@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { useStore } from "@/state/store";
 import { openBot } from "@/state/thread-navigation";
 import { useCloudLinks } from "./origin-cloud-links";
-import { setChiefSectionOf, type ChiefSection } from "./origin-chief-section";
+import { setChiefSectionOf, type ShownSection } from "./origin-chief-section";
 import { openOriginPage } from "./origin-pages";
 import { useShowThreads } from "./thread-preferences";
 
@@ -39,7 +39,7 @@ export function projectBotFor(projects: Record<string, string>, bots: readonly {
 }
 
 /** Opens a section of a cloud project's bot after `focus` ran; false when no bot in this app shows that project. */
-export function useOpenOriginSection(): (projectId: string, section: ChiefSection, focus?: () => void) => boolean {
+export function useOpenOriginSection(): (projectId: string, section: ShownSection, focus?: () => void) => boolean {
   const { state, dispatch } = useStore();
   const { projects } = useCloudLinks();
   const showThreads = useShowThreads();

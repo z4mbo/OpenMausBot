@@ -1,5 +1,5 @@
 // The real Convex functions of backend/convex, run in memory by convex-test and
-// served over the HTTP wire ConvexHttpClient speaks, so the Campaigns fixture
+// served over the HTTP wire ConvexHttpClient speaks, so a fixture
 // exercises the deployed code without a deployment. Vite loads the backend's
 // extensionless TypeScript imports; nothing here reaches the network.
 import { createServer as createHttpServer, type IncomingMessage, type ServerResponse } from "node:http";

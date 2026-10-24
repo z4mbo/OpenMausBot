@@ -105,7 +105,7 @@ function Assets({ projectId, canEdit, projectName, botId }: { projectId: string;
                   )}
                   <div className="min-w-0 p-3">
                     <strong className="block truncate text-[13px] font-medium text-ink" title={asset.name}>{asset.name}</strong>
-                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}{asset.folder ? ` · ${asset.folder}` : ""}{asset.studio ? ` · ${asset.studio.modelLabel}` : ""}</small>
+                    <small className="text-[11.5px] text-ink-tertiary">{asset.type}{asset.size ? ` · ${Math.ceil(asset.size / 1024)} KB` : ""}{asset.folder ? ` · ${asset.folder}` : ""}</small>
                     {asset.notes && <p className="mt-1 line-clamp-3 text-[12px] text-ink-secondary">{asset.notes}</p>}
                   </div>
                 </article>

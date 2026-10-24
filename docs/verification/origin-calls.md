@@ -65,9 +65,9 @@ The checker requires the exact loopback preview path and fixture marker before i
 
 The earlier mocked fixture proves local session lifecycle and production route/store behavior with synthetic authorization. The native follow-up above extends this to real local peer media and negotiation. Cross-machine ICE/TURN, screen capture, real agent transcription/speech, Electron device permissions and authenticated production project navigation remain separate acceptance boundaries.
 
-Drawing sources inspected: `src/components/OriginDraw.tsx`, `src/components/origin-pages/DrawingCanvas.tsx`, `backend/convex/draw.ts`. The backend checks canvas/project/workspace membership and edit permissions for scene and image mutations. No Convex process was used or changed.
+Drawing sources inspected: `OriginDraw.tsx`, `DrawingCanvas.tsx`, `draw.ts`. The backend checks canvas/project/workspace membership and edit permissions for scene and image mutations. No Convex process was used or changed.
 
-The two drawing findings from the original call batch are fixed and verified in the separate [drawing inspection](origin-draw.md):
+The two drawing findings from the original call batch are fixed and verified in the separate drawing inspection (its recipe left with Design):
 
 - `DrawingCanvas` removes an in-flight save batch from `pending` before awaiting the mutation. On navigation, cleanup sends only the remaining pending elements. If the in-flight request then fails, its catch puts the batch back into an unmounted component's ref, where no interval retries it. Browser `beforeunload` protection does not cover in-app navigation. This needs a durable scene save queue or an application navigation guard, plus failure-after-navigation coverage.
 - Image downloads have no abort/liveness check. Switching canvases during a delayed image fetch can call `addFiles` on the old canvas object and update the old component's state. A production Excalidraw fixture with delayed synthetic storage responses should cover cancellation and failed-image recovery before accepting that workflow.

@@ -30,13 +30,6 @@ Each row applies to every tool named in it.
 | `origin_create_issue`, `origin_update_issue`, `origin_comment_issue`, `origin_delete_issue`, `origin_complete_issue` | Yes | Yes | Resolved project and issue; existing backend edit checks; deletion calls `tasks:deleteTask` |
 | `origin_assign_issue` | Yes | Yes | Recipient must belong to the issue's project; actual dispatch still uses `coordinate_bots` |
 | `origin_team_chat`, `origin_team_chat_post` | Yes | Yes | Selected project's team and project channel; no direct messages |
-| `origin_studio_generate`, `origin_studio_list`, `origin_studio_save_asset` | Yes | Yes | `studioScope` selects project; runner/backend bind generation and asset IDs to it |
-| `origin_studio_workflow_list`, `origin_studio_workflow_run`, `origin_studio_workflow_save` | Yes | Yes | Project workflows and project-validated generation/source IDs |
-| `origin_studio_template_save`, `origin_studio_presets`, `origin_studio_library` | Yes | Yes | Project templates/library; built-in presets are shared static definitions |
-| `origin_canvas`, `origin_canvas_edit`, `origin_canvas_screenshot`, `origin_canvas_comment` | Yes | Yes | `canvasProject`, project canvas enumeration before scene/board/file operations |
-| `origin_canvas_board`, `origin_canvas_deck`, `origin_design_submit` | Yes | Yes | Project canvas; design submissions prove issue ownership before writing links or frames |
-| `origin_broadcast_draft`, `origin_broadcast_list`, `origin_broadcast_schedule`, `origin_broadcast_unschedule` | Yes | Yes | `broadcastScope`; post/media IDs resolved in project; member post approval required before scheduling/publishing |
-| `origin_campaign_create`, `origin_campaign_get`, `origin_campaign_link` | Yes | Yes | Project campaigns; backend checks linked post/generation/issue belongs to selected project |
 | `origin_vault_list` | Yes | Yes | Selected project's Vault plus personal items explicitly shared for agent use; member unlock and edit-role checks remain |
 | `origin_vault_store` | Yes | Yes | Selected project's Vault; encrypted payload read through caller's allowed file roots; cannot grant itself agent use |
 | `origin_list_assets`, `origin_add_asset` | Yes | Yes | Selected project's library; local upload uses caller's allowed file roots and deployment upload origin |
@@ -90,9 +83,7 @@ prepares/encrypts it, enables agent use and unlocks it. Agents cannot acquire
 the Vault passphrase or enable their own secret access. Personal secrets
 explicitly shared for agent use retain their established workspace-wide scope.
 
-Publishing still needs member post approval and the person's app/channel
-credentials. No real provider generation, social publication, GitHub mutation
-or live-model judgment is established by this fixture. Issue completion keeps
+No GitHub mutation or live-model judgment is established by this fixture. Issue completion keeps
 its existing implementation so the separate completion change can replace it.
 These boundaries govern server tools and peer coordination; they do not
 constitute a filesystem or network sandbox for arbitrary engine commands.

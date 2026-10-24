@@ -266,9 +266,9 @@ describe("find_tool", () => {
     ["read the whole message from an old conversation", "session_read"],
     ["retry the failed thread", "retry_thread"],
     ["cron", "propose_routine"],
-    ["make an image", "origin_studio_generate"],
-    ["post this on X", "origin_broadcast_draft"],
-    ["design a pricing section", "origin_canvas_edit"],
+    ["what did we decide on the call", "origin_call_notes"],
+    ["daily standup", "origin_standup"],
+    ["change the brand colours", "origin_brand_update"],
   ])("ranks the hidden tool first from how a person would ask: %s", async (query, expected) => {
     const matches = (await found(bridgeFor(FULL_CHIEF), query)).matches;
     expect(matches[0]!.name).toBe(expected);
@@ -556,7 +556,7 @@ describe("a turn that lists its domain tools in short", () => {
   it("defers the domain sections only, never a Chief's or an issue's tool", () => {
     const tools = availableTools(profile(FULL_CHIEF)) as BridgeTool[];
     const deferred = names(createToolDeferral(tools).deferred);
-    for (const domain of ["origin_studio_", "origin_broadcast_", "origin_canvas"]) {
+    for (const domain of ["origin_brand_", "origin_standup", "origin_call_"]) {
       expect(deferred.some((tool) => tool.startsWith(domain)), domain).toBe(true);
     }
     expect(deferred.every((tool) => DEFERRED_TOOL_DOMAINS.some((domain) => tool.startsWith(domain.prefix)))).toBe(true);
@@ -571,7 +571,7 @@ describe("a turn that lists its domain tools in short", () => {
       expect(names(deferral.listed)).toContain(tool.name);
       expect(await deferral.route(tool.name, {}), tool.name).toBeUndefined();
     }
-    expect(await deferral.route(USE_TOOL, { name: "origin_studio_generate" })).toBeUndefined();
+    expect(await deferral.route(USE_TOOL, { name: "origin_brand_update" })).toBeUndefined();
   });
 
   it("returns a domain tool's whole definition, as a whole listing has it, for its exact name", async () => {
@@ -581,16 +581,13 @@ describe("a turn that lists its domain tools in short", () => {
       const [match] = await matchesFor(deferral, tool.name);
       expect(JSON.stringify(match), tool.name).toBe(JSON.stringify({ name: tool.name, description: tool.description, inputSchema: tool.inputSchema }));
     }
-    expect(JSON.parse((await answer(deferral, "make an image")).text).next).toContain("directly by its own name");
+    expect(JSON.parse((await answer(deferral, "change the brand colours")).text).next).toContain("directly by its own name");
   });
 
   it.each([
-    ["make an image", "origin_studio_generate"],
-    ["post this on X", "origin_broadcast_draft"],
-    ["design a pricing section", "origin_canvas_edit"],
-    ["read the canvas", "origin_canvas"],
-    ["what posts are scheduled", "origin_broadcast_list"],
-    ["save that picture to assets", "origin_studio_save_asset"],
+    ["what did we decide on the call", "origin_call_notes"],
+    ["daily standup", "origin_standup"],
+    ["change the brand colours", "origin_brand_update"],
   ])("ranks the domain tool first from how a person would ask: %s", async (query, expected) => {
     const matches = await matchesFor(deferralFor(FULL_CHIEF), query);
     expect(matches[0]!.name).toBe(expected);
@@ -600,13 +597,13 @@ describe("a turn that lists its domain tools in short", () => {
   it("searches only the tools listed in short, and points at the list for any other", async () => {
     const deferral = deferralFor(FULL_CHIEF);
     const short = new Set(names(deferral.deferred));
-    for (const query of ["create a new specialist bot", "schedule a routine", "open an issue", "merge the pull request", "make an image"]) {
+    for (const query of ["create a new specialist bot", "schedule a routine", "open an issue", "merge the pull request", "what did we decide on the call"]) {
       for (const match of await matchesFor(deferral, query)) expect(short.has(match.name), `${query}: ${match.name}`).toBe(true);
     }
     expect((await answer(deferral, "origin_create_issue")).text).toBe("origin_create_issue is in your tool list with its whole input schema: call it directly.");
     const nothing = JSON.parse((await answer(deferral, "nudge me tomorrow at 9")).text) as FindPayload;
     expect(nothing.matches).toEqual([]);
-    expect(nothing.next).toContain("origin_studio_generate");
+    expect(nothing.next).toContain("origin_brand_update");
     expect(await answer(deferral, "")).toMatchObject({ isError: true });
   });
 
@@ -621,26 +618,26 @@ describe("a turn that lists its domain tools in short", () => {
     const tools = (availableTools(profile()) as BridgeTool[]).filter((tool) => !isDeferredTool(tool.name));
     const deferral = createToolDeferral(tools);
     expect(deferral.listed).toBe(tools);
-    expect(await deferral.route(FIND_TOOL, { query: "make an image" })).toBeUndefined();
+    expect(await deferral.route(FIND_TOOL, { query: "change the brand colours" })).toBeUndefined();
   });
 });
 
 describe("typed arguments for tools listed without their schema", () => {
-  const draft = (availableTools(profile(FULL_CHIEF)) as BridgeTool[]).find((tool) => tool.name === "origin_broadcast_draft")!;
-  const save = (availableTools(profile(FULL_CHIEF)) as BridgeTool[]).find((tool) => tool.name === "origin_studio_save_asset")!;
+  const brand = (availableTools(profile(FULL_CHIEF)) as BridgeTool[]).find((tool) => tool.name === "origin_brand_update")!;
+  const flags = { type: "object", properties: { id: { type: "string" }, share: { type: "boolean" }, index: { type: "integer" } } };
 
   it("reads stringified arrays, lists and booleans back as the tool's schema types", () => {
-    expect(typedDeferredArguments({ channels: "[\"x\",\"bluesky\"]", text: "[launch] day", media: "launch.png" }, draft.inputSchema))
-      .toEqual({ channels: ["x", "bluesky"], text: "[launch] day", media: ["launch.png"] });
-    expect(typedDeferredArguments({ channels: "\"x,bluesky\"" }, draft.inputSchema)).toEqual({ channels: ["x", "bluesky"] });
-    expect(typedDeferredArguments({ generation_id: "g1", broadcast: "true", index: "0" }, save.inputSchema)).toEqual({ generation_id: "g1", broadcast: true, index: 0 });
-    expect(typedDeferredArguments({ broadcast: "maybe", index: "1.5" }, save.inputSchema)).toEqual({ broadcast: "maybe", index: "1.5" });
+    expect(typedDeferredArguments({ voice_adjectives: "[\"warm\",\"precise\"]", tagline: "[launch] day", logos: "logo.png" }, brand.inputSchema))
+      .toEqual({ voice_adjectives: ["warm", "precise"], tagline: "[launch] day", logos: ["logo.png"] });
+    expect(typedDeferredArguments({ voice_adjectives: "\"warm,precise\"" }, brand.inputSchema)).toEqual({ voice_adjectives: ["warm", "precise"] });
+    expect(typedDeferredArguments({ id: "g1", share: "true", index: "0" }, flags)).toEqual({ id: "g1", share: true, index: 0 });
+    expect(typedDeferredArguments({ share: "maybe", index: "1.5" }, flags)).toEqual({ share: "maybe", index: "1.5" });
   });
 
   it("types a deferred tool's call and leaves every other call as it came", async () => {
     const deferral = createToolDeferral(availableTools(profile(FULL_CHIEF)) as BridgeTool[]);
-    expect(await deferral.route("origin_broadcast_draft", { channels: "[\"x\"]", text: "hi" })).toEqual({ name: "origin_broadcast_draft", arguments: { channels: ["x"], text: "hi" } });
-    expect(await deferral.route("origin_broadcast_draft", { channels: ["x"], text: "hi" })).toBeUndefined();
+    expect(await deferral.route("origin_brand_update", { imagery: "[\"film grain\"]", tagline: "hi" })).toEqual({ name: "origin_brand_update", arguments: { imagery: ["film grain"], tagline: "hi" } });
+    expect(await deferral.route("origin_brand_update", { imagery: ["film grain"], tagline: "hi" })).toBeUndefined();
     expect(await deferral.route("origin_create_issue", { title: "[x]" })).toBeUndefined();
   });
 });

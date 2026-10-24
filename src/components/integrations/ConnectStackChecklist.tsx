@@ -6,7 +6,6 @@ import { originGitHub } from "@/lib/origin-github";
 import { STACK, providerSource, stepState as baseState, type GitHubState, type StackStep, type StepState } from "@/lib/integration-stack";
 import type { IntegrationStatus } from "../../../shared/integration-keys";
 import { CheckButton, CheckResult, checkFailed, useCheckRevision, type CheckScope } from "./integration-check";
-import { SocialAccounts } from "./SocialAccounts";
 
 /** A step whose every connected key was just rejected by its provider is not done yet. */
 function stepState(step: StackStep, integrations: readonly IntegrationStatus[], github: GitHubState, scope: CheckScope): StepState {
@@ -75,10 +74,7 @@ function StepBody({ step, integrations, github, canEdit, scope }: { step: StackS
   }
   const providers = step.providers.flatMap((id) => integrations.filter((integration) => integration.id === id));
   return (
-    <div className="flex flex-col">
-      <ul className="flex flex-col divide-y divide-hairline/25">{providers.map((integration) => <ProviderLine key={integration.id} integration={integration} canEdit={canEdit} scope={scope} />)}</ul>
-      {step.id === "social" && <SocialAccounts integrations={integrations} canEdit={canEdit} />}
-    </div>
+    <ul className="flex flex-col divide-y divide-hairline/25">{providers.map((integration) => <ProviderLine key={integration.id} integration={integration} canEdit={canEdit} scope={scope} />)}</ul>
   );
 }
 

@@ -24,7 +24,6 @@ import {
 } from "./issue-fields";
 import { orderForMove, settlePendingMove, stepTarget, useFlip, withPendingMoves, type PendingMove } from "./issue-order";
 import { NewIssueComposer } from "./NewIssueComposer";
-import { DesignChips } from "./canvas/DesignChips";
 import { originGitHub } from "@/lib/origin-github";
 import { isDraftColumn, isLegacyIdeaColumn } from "../../../shared/origin-columns";
 import { PersonAvatar } from "./PersonAvatar";
@@ -49,15 +48,11 @@ export type AssignableIssue = {
   githubIssueNumber?: number;
 };
 
-/** The project's Chief, whose canvas holds an issue's designs. */
-export type IssueChief = { name: string; openCanvas?(): void };
-
 export type IssuesPageProps = OriginPageProps & {
   /** The project's agents, offered wherever an issue can be handed off. */
   agents?: readonly IssueAgent[];
   /** Hands an issue to an agent; without `agentId` the host asks which one. */
   onAssignToAgent?(issue: AssignableIssue, agentId?: string): void;
-  chief?: IssueChief;
 };
 
 function dueInfo(value?: string): { label: string; tone: string } | null {
@@ -86,10 +81,10 @@ export function createdToAssignable(issue: CreatedIssue, projectName: string): A
   };
 }
 
-export function IssuesPage({ onAssignToAgent, agents, chief, ...props }: IssuesPageProps) {
+export function IssuesPage({ onAssignToAgent, agents, ...props }: IssuesPageProps) {
   return (
     <CloudGate {...props} label="Issues">
-      {({ project, projectId, canEdit }) => <IssuesBoard project={project} projectId={projectId} canEdit={canEdit} agents={agents ?? []} onAssignToAgent={onAssignToAgent} chief={chief} />}
+      {({ project, projectId, canEdit }) => <IssuesBoard project={project} projectId={projectId} canEdit={canEdit} agents={agents ?? []} onAssignToAgent={onAssignToAgent} />}
     </CloudGate>
   );
 }
@@ -117,8 +112,8 @@ async function deleteIssue(projectId: string, task: CloudTask): Promise<string> 
   }
 }
 
-function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chief }: {
-  project: CloudProject; projectId: string; canEdit: boolean; agents: readonly IssueAgent[]; onAssignToAgent?(issue: AssignableIssue, agentId?: string): void; chief?: IssueChief;
+function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent }: {
+  project: CloudProject; projectId: string; canEdit: boolean; agents: readonly IssueAgent[]; onAssignToAgent?(issue: AssignableIssue, agentId?: string): void;
 }) {
   const board = useCloudQuery<CloudBoard>("tasks:board", { projectId });
   const people = useCloudQuery<CloudPerson[]>("members:people", { projectId });
@@ -424,7 +419,7 @@ function IssuesBoard({ project, projectId, canEdit, agents, onAssignToAgent, chi
       )}
       {columnEditor && <ColumnEditor projectId={projectId} column={columnEditor === "new" ? null : columnEditor} columns={columns} onClose={() => setColumnEditor(null)} />}
       <PointerMenu menu={contextMenu} onClose={() => setContextMenu(null)} />
-      {selected && <IssueDetail key={selected} project={project} projectId={projectId} taskId={selected} canEdit={canEdit} agents={agents} chief={chief} onClose={() => setSelected(null)}
+      {selected && <IssueDetail key={selected} project={project} projectId={projectId} taskId={selected} canEdit={canEdit} agents={agents} onClose={() => setSelected(null)}
         onDelete={(task) => remove(task)} onAssign={assign} />}
     </section>
   );
@@ -579,8 +574,8 @@ function ColumnEditor({ projectId, column, columns, onClose }: { projectId: stri
 
 const savedAs = (draft: string, stored: string | undefined) => draft.trim() === (stored ?? "");
 
-function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClose, onDelete, onAssign }: {
-  project: CloudProject; projectId: string; taskId: string; canEdit: boolean; agents: readonly IssueAgent[]; chief?: IssueChief; onClose(): void; onDelete(task: CloudTask): void; onAssign?(task: CloudTask, agentId?: string): void;
+function IssueDetail({ project, projectId, taskId, canEdit, agents, onClose, onDelete, onAssign }: {
+  project: CloudProject; projectId: string; taskId: string; canEdit: boolean; agents: readonly IssueAgent[]; onClose(): void; onDelete(task: CloudTask): void; onAssign?(task: CloudTask, agentId?: string): void;
 }) {
   const details = useCloudQuery<CloudTaskDetails>("tasks:details", { projectId, taskId });
   const [edits, setEdits] = useState<{ title?: string; description?: string }>({});
@@ -654,7 +649,6 @@ function IssueDetail({ project, projectId, taskId, canEdit, agents, chief, onClo
           <DateChip value={task.dueDate ?? ""} disabled={!canEdit} onChange={(dueDate) => { if (dueDate) update({ dueDate }, "Could not change the due date"); }} />
           {onAssign && !task.done && <AgentChip agents={agents} onPick={(agentId) => onAssign(task, agentId)} />}
           <GitHubChips project={project} task={task} />
-          <DesignChips projectId={projectId} taskId={task._id} onOpen={chief?.openCanvas} className={chipButton} />
         </IssueChips>
         {action.error && <div className="mt-3"><Notice tone="danger">{action.error}</Notice></div>}
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-hairline/40 pt-4">

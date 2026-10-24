@@ -38,7 +38,7 @@ export const shipTables = {
     pulls: v.array(mergedPull),
     /** Deployed to production once the release is published. */
     targetId: v.optional(v.id("shipTargets")),
-    /** Drafts a Broadcast post announcing the release once it is published; the post still waits for a person's approval. */
+    /** Nothing reads this; new releases store false. */
     announce: v.boolean(),
     agentName: v.optional(v.string()),
     agentBotId: v.optional(v.string()),
@@ -47,6 +47,7 @@ export const shipTables = {
     approvedAt: v.optional(v.number()),
     releaseUrl: v.optional(v.string()),
     deployNote: v.optional(v.string()),
+    /** Nothing writes this; stored releases may still carry it. */
     broadcastPostId: v.optional(v.id("broadcastPosts")),
     error: v.optional(v.string()),
     createdAt: v.number(),

@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchVerificationServer, runControlOmb } from "./control-omb.ts";
 import { fixtureApi, mountPreview, parkUntilSignal, REPO_ROOT } from "./testing/preview-fixture.ts";
-import { startFakeConvex, type FakeConvex } from "./testing/origin-campaigns-backend.ts";
+import { startFakeConvex, type FakeConvex } from "./testing/origin-convex-backend.ts";
 import { encryptSecret } from "../src/components/origin-pages/vaultCrypto.ts";
 
 type Json = Record<string, unknown>;
@@ -100,10 +100,10 @@ try {
   await post(seeded.benToken, "Pilot walkers are booked for Saturday. Can someone check the map on Android?");
   await post(seeded.token, "On it. Nova is on the booking sheet, I'll take the map after lunch.");
 
-  const cloud = fileURLToPath(new URL("./testing/origin-campaigns-cloud.ts", import.meta.url));
+  const cloud = fileURLToPath(new URL("./testing/origin-convex-cloud.ts", import.meta.url));
   preview = await mountPreview(live, {
     entry: "/scripts/testing/threads-preview.tsx", route: "/__origin-core-sections.html", title: "Isolated Origin core sections",
-    extraRoutes: [{ path: "/__origin-campaigns.json", handler: (_req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ url: convex.url, token: seeded.token, viewerToken: seeded.benToken, projectId: seeded.projectId })); } }],
+    extraRoutes: [{ path: "/__origin-cloud.json", handler: (_req, res) => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ url: convex.url, token: seeded.token, viewerToken: seeded.benToken, projectId: seeded.projectId })); } }],
     aliases: [
       { find: /^@\/lib\/origin-cloud(?:\/client)?$|^\.\/origin-cloud\/client$/, replacement: cloud },
       { find: "@", replacement: fileURLToPath(new URL("../src", import.meta.url)) },

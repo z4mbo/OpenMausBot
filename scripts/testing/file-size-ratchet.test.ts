@@ -15,7 +15,7 @@ const HARD_CAP = 2000;
 const LISTED_FROM = 1000;
 
 const LINES: Record<string, number> = {
-  "server/index.ts": 17597,
+  "server/index.ts": 17594,
   "src/state/store.tsx": 3540,
   "electron/main.mjs": 3482,
   "server/store.ts": 2410,
@@ -48,7 +48,7 @@ const LINES: Record<string, number> = {
   "server/org-library.ts": 1003,
   "src/components/TeamLibraryPanel.tsx": 1120,
   "src/components/AttachmentPreview.tsx": 1044,
-  "server/origin-cloud.ts": 1112,
+  "server/origin-cloud.ts": 1067,
   "src/components/origin-pages/CallPage.tsx": 1239,
   "src/components/zap-dots/scene.ts": 1413,
 };

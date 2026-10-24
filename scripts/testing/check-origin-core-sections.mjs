@@ -114,7 +114,7 @@ async function barSweep(page) {
   const overlaps = [];
   for (let width = 1120; width >= 800; width -= 8) {
     await page.setViewportSize({ width, height: 860 });
-    for (const id of ["broadcast", "studio"]) {
+    for (const id of ["call", "team-chat"]) {
       await open(page, id);
       await page.waitForTimeout(120);
       const box = await page.evaluate(() => {
@@ -134,7 +134,7 @@ async function open(page, id) {
   const tab = page.locator(`[data-chief-section="${id}"]`).first();
   if (await tab.isVisible()) return tab.click();
   await page.getByRole("button", { name: /^More sections/ }).click();
-  const label = { "team-chat": "Chat", broadcast: "Publish" }[id] ?? id;
+  const label = { "team-chat": "Chat" }[id] ?? id;
   await page.getByRole("menuitem", { name: new RegExp(`^${label}`, "i") }).click();
 }
 

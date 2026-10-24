@@ -29,43 +29,41 @@ function tempFile() {
 describe("integration keys", () => {
   it("returns values only once every required field is set", () => {
     const file = tempFile();
-    expect(integrationKey("linkedin", file)).toBeNull();
-    expect(saveIntegrationKeys("linkedin", { accessToken: "tok" }, file)).toEqual({ ok: true });
-    expect(integrationConfigured("linkedin", file)).toBe(false);
-    saveIntegrationKeys("linkedin", { authorUrn: "urn:li:person:ada" }, file);
-    expect(integrationKey("linkedin", file)).toEqual({ accessToken: "tok", authorUrn: "urn:li:person:ada" });
-    saveIntegrationKeys("resend", { apiKey: "re_1", senderEmail: "a@b.co" }, file);
+    expect(integrationKey("resend", file)).toBeNull();
+    expect(saveIntegrationKeys("resend", { apiKey: "re_1" }, file)).toEqual({ ok: true });
+    expect(integrationConfigured("resend", file)).toBe(false);
+    saveIntegrationKeys("resend", { senderEmail: "a@b.co" }, file);
     expect(integrationKey("resend", file)).toEqual({ apiKey: "re_1", senderEmail: "a@b.co" });
   });
 
   it("never shows a secret in the client status, only that it is set", () => {
     const file = tempFile();
-    saveIntegrationKeys("bluesky", { handle: "me.bsky.social", appPassword: "aaaa-bbbb" }, file);
-    const bluesky = integrationStatuses(file).find((entry) => entry.id === "bluesky")!;
-    expect(bluesky.configured).toBe(true);
-    expect(JSON.stringify(integrationStatuses(file))).not.toContain("aaaa-bbbb");
-    expect(bluesky.fields).toEqual([
-      expect.objectContaining({ name: "handle", set: true, value: "me.bsky.social" }),
-      expect.objectContaining({ name: "appPassword", set: true, secret: true }),
+    saveIntegrationKeys("resend", { apiKey: "re_secret_value", senderEmail: "me@example.test" }, file);
+    const resend = integrationStatuses(file).find((entry) => entry.id === "resend")!;
+    expect(resend.configured).toBe(true);
+    expect(JSON.stringify(integrationStatuses(file))).not.toContain("re_secret_value");
+    expect(resend.fields).toEqual([
+      expect.objectContaining({ name: "apiKey", set: true, secret: true }),
+      expect.objectContaining({ name: "senderEmail", set: true, value: "me@example.test" }),
     ]);
-    expect(bluesky.fields[1]).not.toHaveProperty("value");
+    expect(resend.fields[0]).not.toHaveProperty("value");
   });
 
   it("clears one field with an empty string and the whole integration with null", () => {
     const file = tempFile();
-    saveIntegrationKeys("x", { apiKey: "k", apiSecret: "s", accessToken: "t", accessSecret: "u" }, file);
-    saveIntegrationKeys("x", { apiKey: "" }, file);
-    expect(integrationConfigured("x", file)).toBe(false);
-    saveIntegrationKeys("fal", { key: "fal-key" }, file);
-    saveIntegrationKeys("x", null, file);
-    expect(JSON.parse(readFileSync(file, "utf8"))).toEqual({ fal: { key: "fal-key" } });
+    saveIntegrationKeys("resend", { apiKey: "k", senderEmail: "s@example.test" }, file);
+    saveIntegrationKeys("resend", { apiKey: "" }, file);
+    expect(integrationConfigured("resend", file)).toBe(false);
+    saveIntegrationKeys("openai", { apiKey: "openai-key" }, file);
+    saveIntegrationKeys("resend", null, file);
+    expect(JSON.parse(readFileSync(file, "utf8"))).toEqual({ openai: { apiKey: "openai-key" } });
   });
 
   it("refuses unknown fields and pasted multi-line values", () => {
     const file = tempFile();
-    expect(saveIntegrationKeys("fal", { token: "x" }, file)).toMatchObject({ ok: false });
-    expect(saveIntegrationKeys("fal", { key: "a\nb" }, file)).toMatchObject({ ok: false });
-    expect(integrationConfigured("fal", file)).toBe(false);
+    expect(saveIntegrationKeys("openai", { token: "x" }, file)).toMatchObject({ ok: false });
+    expect(saveIntegrationKeys("openai", { apiKey: "a\nb" }, file)).toMatchObject({ ok: false });
+    expect(integrationConfigured("openai", file)).toBe(false);
   });
 });
 
@@ -85,21 +83,21 @@ describe("integration key routes", () => {
   it("saves write-only keys for an admin and reports configured flags", async () => {
     const file = tempFile();
     const base = await serve(file, ["admin"]);
-    const saved = await fetch(`${base}/api/integrations/fal`, { method: "PUT", body: JSON.stringify({ fields: { key: "fal-secret" } }) });
+    const saved = await fetch(`${base}/api/integrations/openai`, { method: "PUT", body: JSON.stringify({ fields: { apiKey: "openai-secret" } }) });
     expect(saved.status).toBe(200);
     const listed = await (await fetch(`${base}/api/integrations`)).text();
-    expect(listed).not.toContain("fal-secret");
-    expect(JSON.parse(listed).integrations[0]).toMatchObject({ id: "fal", configured: true });
-    expect((await fetch(`${base}/api/integrations/fal`, { method: "DELETE" })).status).toBe(200);
-    expect(integrationConfigured("fal", file)).toBe(false);
+    expect(listed).not.toContain("openai-secret");
+    expect(JSON.parse(listed).integrations.find((entry: { id: string }) => entry.id === "openai")).toMatchObject({ configured: true });
+    expect((await fetch(`${base}/api/integrations/openai`, { method: "DELETE" })).status).toBe(200);
+    expect(integrationConfigured("openai", file)).toBe(false);
   });
 
   it("refuses changes without the admin scope", async () => {
     const file = tempFile();
     const base = await serve(file, ["chat"]);
-    const response = await fetch(`${base}/api/integrations/fal`, { method: "PUT", body: JSON.stringify({ fields: { key: "x" } }) });
+    const response = await fetch(`${base}/api/integrations/openai`, { method: "PUT", body: JSON.stringify({ fields: { apiKey: "x" } }) });
     expect(response.status).toBe(403);
-    expect(integrationConfigured("fal", file)).toBe(false);
+    expect(integrationConfigured("openai", file)).toBe(false);
   });
 });
 
@@ -107,29 +105,29 @@ describe("integration check route", () => {
   it("refuses checks without the admin scope before calling the provider", async () => {
     const request = vi.fn<typeof fetch>();
     const base = await serve(tempFile(), ["chat"], { fetch: request });
-    const response = await fetch(`${base}/api/integrations/fal/check`, { method: "POST", body: JSON.stringify({ fields: { key: "draft-secret" } }) });
+    const response = await fetch(`${base}/api/integrations/openai/check`, { method: "POST", body: JSON.stringify({ fields: { apiKey: "draft-secret" } }) });
     expect(response.status).toBe(403);
     expect(request).not.toHaveBeenCalled();
   });
 
   it("merges trimmed draft fields over stored values without saving them", async () => {
     const file = tempFile();
-    saveIntegrationKeys("linkedin", { accessToken: "stored-secret", authorUrn: "urn:li:person:ada" }, file);
+    saveIntegrationKeys("resend", { apiKey: "stored-secret", senderEmail: "ada@example.test" }, file);
     const stored = readFileSync(file, "utf8");
-    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ name: "Ada Lovelace" }));
+    const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ data: [] }));
     const base = await serve(file, ["admin"], { fetch: request });
     const before = Date.now();
-    const response = await fetch(`${base}/api/integrations/linkedin/check`, {
-      method: "POST", body: JSON.stringify({ fields: { authorUrn: "   ", accessToken: "  draft-secret  " } }),
+    const response = await fetch(`${base}/api/integrations/resend/check`, {
+      method: "POST", body: JSON.stringify({ fields: { senderEmail: "   ", apiKey: "  draft-secret  " } }),
     });
     expect(response.status).toBe(200);
     const { check } = await response.json() as { check: IntegrationCheck };
-    expect(check).toEqual({ ok: true, account: "Ada Lovelace", detail: "LinkedIn accepted the key", checkedAt: expect.any(Number) });
+    expect(check).toEqual({ ok: true, detail: "Resend accepted the key", checkedAt: expect.any(Number) });
     expect(check.checkedAt).toBeGreaterThanOrEqual(before);
     expect(check.checkedAt).toBeLessThanOrEqual(Date.now());
     expect(request).toHaveBeenCalledTimes(1);
     const [url, init] = request.mock.calls[0]!;
-    expect(url).toBe("https://api.linkedin.com/v2/userinfo");
+    expect(url).toBe("https://api.resend.com/domains");
     expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer draft-secret");
     expect(readFileSync(file, "utf8")).toBe(stored);
   });
@@ -217,11 +215,11 @@ describe("integration check route", () => {
 
   it.each([
     null, [], { fields: null }, { fields: [] }, { fields: "secret" }, { fields: { unknown: "secret" } },
-    { fields: { key: 42 } }, { fields: { key: "line\nbreak" } }, { fields: { key: "a".repeat(4097) } },
+    { fields: { apiKey: 42 } }, { fields: { apiKey: "line\nbreak" } }, { fields: { apiKey: "a".repeat(4097) } },
   ])("rejects invalid draft fields: %j", async (body) => {
     const request = vi.fn<typeof fetch>();
     const base = await serve(tempFile(), ["admin"], { fetch: request });
-    const response = await fetch(`${base}/api/integrations/fal/check`, { method: "POST", body: JSON.stringify(body) });
+    const response = await fetch(`${base}/api/integrations/openai/check`, { method: "POST", body: JSON.stringify(body) });
     expect(response.status).toBe(400);
     expect(request).not.toHaveBeenCalled();
   });
@@ -229,7 +227,7 @@ describe("integration check route", () => {
   it("returns missing fields as a check without calling the provider", async () => {
     const request = vi.fn<typeof fetch>();
     const base = await serve(tempFile(), ["admin"], { fetch: request });
-    const response = await fetch(`${base}/api/integrations/fal/check`, { method: "POST", body: "{}" });
+    const response = await fetch(`${base}/api/integrations/openai/check`, { method: "POST", body: "{}" });
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ check: { ok: false, detail: "Fill in API key first", checkedAt: expect.any(Number) } });
     expect(request).not.toHaveBeenCalled();
@@ -245,33 +243,33 @@ describe("integration check route", () => {
 
 describe("keys shared with a workspace or one project", () => {
   const shared = (keys: SharedKey[]) => createSharedKeys({ cloud: () => ({ url: "http://convex.test", sessionToken: "s".repeat(64), projects: {} }), resolve: async () => keys });
-  const fal = (projectId: string | null, secret: string): SharedKey => ({
-    integration: "fal", teamId: "team1", projectId, projectName: projectId ? "Launch" : null, sharedByName: "Ada", values: { key: secret }, updatedAt: 1,
+  const openai = (projectId: string | null, secret: string): SharedKey => ({
+    integration: "openai", teamId: "team1", projectId, projectName: projectId ? "Launch" : null, sharedByName: "Ada", values: { apiKey: secret }, updatedAt: 1,
   });
 
   it("uses a project's key only for that project and names every share of the workspace", async () => {
-    const cache = shared([fal("p1", "project-fal-secret")]);
+    const cache = shared([openai("p1", "project-openai-secret")]);
     try {
       await cache.current();
       const file = tempFile();
-      const status = (scope: { teamId?: string; projectId?: string }) => integrationStatuses(file, scope, cache).find((entry) => entry.id === "fal")!;
+      const status = (scope: { teamId?: string; projectId?: string }) => integrationStatuses(file, scope, cache).find((entry) => entry.id === "openai")!;
       expect(status({ teamId: "team1", projectId: "p1" })).toMatchObject({ configured: true, source: "shared", shared: { by: "Ada", projectId: "p1", projectName: "Launch" } });
       expect(status({ teamId: "team1", projectId: "p2" })).toMatchObject({ configured: false, source: null, shared: null });
       expect(status({ teamId: "team1" })).toMatchObject({ configured: false, shared: null, shares: [{ by: "Ada", projectId: "p1", projectName: "Launch" }] });
       expect(status({ teamId: "team2" }).shares).toEqual([]);
-      expect(JSON.stringify(integrationStatuses(file, { teamId: "team1", projectId: "p1" }, cache))).not.toContain("project-fal-secret");
+      expect(JSON.stringify(integrationStatuses(file, { teamId: "team1", projectId: "p1" }, cache))).not.toContain("project-openai-secret");
     } finally { cache.close(); }
   });
 
   it("prefers the project's key over the workspace's, and a member's own over both", async () => {
-    const cache = shared([fal(null, "workspace-fal-secret"), fal("p1", "project-fal-secret")]);
+    const cache = shared([openai(null, "workspace-openai-secret"), openai("p1", "project-openai-secret")]);
     try {
       await cache.current();
       const file = tempFile();
-      expect(integrationStatuses(file, { teamId: "team1", projectId: "p1" }, cache).find((entry) => entry.id === "fal")!.shared).toMatchObject({ projectId: "p1" });
-      expect(integrationStatuses(file, { teamId: "team1", projectId: "p2" }, cache).find((entry) => entry.id === "fal")!.shared).toMatchObject({ projectId: null });
-      saveIntegrationKeys("fal", { key: "my-own-fal" }, file);
-      expect(integrationStatuses(file, { teamId: "team1", projectId: "p1" }, cache).find((entry) => entry.id === "fal")!.source).toBe("yours");
+      expect(integrationStatuses(file, { teamId: "team1", projectId: "p1" }, cache).find((entry) => entry.id === "openai")!.shared).toMatchObject({ projectId: "p1" });
+      expect(integrationStatuses(file, { teamId: "team1", projectId: "p2" }, cache).find((entry) => entry.id === "openai")!.shared).toMatchObject({ projectId: null });
+      saveIntegrationKeys("openai", { apiKey: "my-own-openai" }, file);
+      expect(integrationStatuses(file, { teamId: "team1", projectId: "p1" }, cache).find((entry) => entry.id === "openai")!.source).toBe("yours");
     } finally { cache.close(); }
   });
 });

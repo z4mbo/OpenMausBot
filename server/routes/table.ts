@@ -4,8 +4,6 @@ import type { json, readBody } from "../harness/http.ts";
 import type { RequestAuth } from "../request-auth.ts";
 import { cloudSyncRoutes } from "./cloud-sync.ts";
 import { createIntegrationKeyRoutes } from "../integration-keys.ts";
-import { createStudioRoutes } from "./studio.ts";
-import { createCampaignRoutes } from "../broadcast/metrics.ts";
 import { vaultAgentSecrets } from "../origin-vault-agent.ts";
 
 export const PASS: unique symbol = Symbol("route.pass");
@@ -25,7 +23,7 @@ export interface RouteContext {
 export type RouteHandler = (ctx: RouteContext) => Promise<typeof PASS | void>;
 
 /** Modules with no wiring from index.ts are listed here; index.ts pushes the rest. */
-export const ROUTES: RouteHandler[] = [cloudSyncRoutes, createIntegrationKeyRoutes(), createStudioRoutes(), createCampaignRoutes(), (ctx) => vaultAgentSecrets().routes(ctx)];
+export const ROUTES: RouteHandler[] = [cloudSyncRoutes, createIntegrationKeyRoutes(), (ctx) => vaultAgentSecrets().routes(ctx)];
 
 export type PublicRouteContext = Omit<RouteContext, "auth">;
 

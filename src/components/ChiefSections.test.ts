@@ -9,9 +9,6 @@ function Page({ projectName }: { projectName: string }) {
   return createElement("p", null, `${first} page shown for ${projectName}`);
 }
 vi.mock("./origin-pages", () => ({ IssuesPage: Page, AssetsPage: Page, VaultPage: Page, RepoPage: Page, FeedbackPage: Page, ProjectSettingsPage: Page, CallPage: Page, TeamChatPage: Page, AssignIssueDialog: () => null, implementBrief: () => "", issueBrief: () => "" }));
-vi.mock("./OriginDraw", () => ({ ProjectDrawPage: () => null }));
-vi.mock("./origin-studio/StudioPage", () => ({ StudioPage: () => null }));
-vi.mock("./origin-broadcast/BroadcastPage", () => ({ BroadcastPage: () => null }));
 vi.mock("./ProjectSectionBar", () => ({ ChiefSectionBar: () => null }));
 vi.mock("@/lib/origin-cloud-links", () => ({ useCloudProjectFor: () => undefined, useCloudWorkspaceFor: () => undefined }));
 vi.mock("@/state/store", () => ({ useStore: () => ({ state: { bots: [] }, dispatch: vi.fn() }) }));

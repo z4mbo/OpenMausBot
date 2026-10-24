@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  brandColor, brandContextLine, brandContrastChecks, brandPalette, brandVoiceGuide, brandedPrompt, contrastPasses, contrastRatio, defaultBrandKit, normalizeBrandKit,
+  brandColor, brandContextLine, brandContrastChecks, brandPalette, brandVoiceGuide, contrastPasses, contrastRatio, defaultBrandKit, normalizeBrandKit,
 } from "./brand-kit.ts";
 import { brandFontStack, googleFontsHref } from "./brand-fonts.ts";
 
@@ -43,13 +43,6 @@ describe("brand kit", () => {
     expect(problems).toEqual([expect.stringMatching(/secondary colour/), expect.stringMatching(/body font/)]);
     expect(normalizeBrandKit({ neutrals: [] }, kit).problems).toEqual([]);
     expect(normalizeBrandKit({ colors: { neutrals: [] } }, kit).problems).toEqual([expect.stringMatching(/Neutrals/)]);
-  });
-
-  it("puts the imagery and colours ahead of a Studio prompt", () => {
-    expect(brandedPrompt({ ...kit, imagery: ["soft daylight", "film grain"] }, "  a desk at dawn ")).toBe(
-      "Visual style: soft daylight, film grain. Brand colours: primary #7C3AED, secondary #FDE68A, neutrals #111827, #FFFFFF, #9CA3AF.\n\na desk at dawn",
-    );
-    expect(brandedPrompt(kit, "x").startsWith("Brand colours:")).toBe(true);
   });
 
   it("writes the voice for agents and stays quiet without one", () => {

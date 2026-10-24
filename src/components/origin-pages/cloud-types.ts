@@ -123,7 +123,6 @@ export interface CloudDesignAsset {
   size?: number;
   notes?: string;
   folder?: string;
-  studio?: { generationId: string; model: string; modelLabel: string; prompt: string };
   updatedAt: number;
 }
 

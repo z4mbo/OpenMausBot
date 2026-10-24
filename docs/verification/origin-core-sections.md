@@ -1,7 +1,7 @@
 # Project bar and core sections
 
 The project bar (`src/components/ProjectSectionBar.tsx`) leads with the Chief,
-then Agents, Issues, Chat, Call, Studio and Publish, with Assets, Vault, Repo,
+then Agents, Issues, Chat and Call, with Assets, Vault, Repo,
 Feedback and Settings as icons on its right. This recipe drives every core
 section of a seeded launch project in the full renderer, at 1280 and 375 px,
 dark and light.
@@ -14,7 +14,7 @@ OMB_VERIFY_PLAYWRIGHT=<path to playwright's index.mjs> \
 ```
 
 Nothing leaves this computer. The real Convex functions of `backend/convex`
-run in memory (`scripts/testing/origin-campaigns-backend.ts`), seeded with a
+run in memory (`scripts/testing/origin-convex-backend.ts`), seeded with a
 project "Walkies": two members, seven issues across Draft, Todo and In
 progress, assets, two vault items encrypted
 with the fixture passphrase, a feedback portal with two reports, a pull
@@ -49,8 +49,8 @@ In each theme and width it opens the Chief, then every section from the bar
 - Repo: Refresh answers; Feedback: every filter and Convert to issue.
 - Settings: the page renders.
 
-At 1280 dark it also narrows the window from 1120 to 800 px with Publish or
-Studio open behind More and fails if the tab strip runs past its row.
+At 1280 dark it also narrows the window from 1120 to 800 px with Call or Chat
+open and fails if the tab strip runs past its row.
 
 The report goes to `docs/verification/evidence/round6/core-sections-report.json`;
 `core-issues.png`, `core-issue-detail.png`, `core-agents.png` and

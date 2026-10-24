@@ -1,9 +1,9 @@
-// Stands in for @/lib/origin-cloud in the Campaigns fixture: every query and
-// mutation goes over HTTP to the in-memory backend of origin-campaigns-backend.ts,
+// Stands in for @/lib/origin-cloud in a fixture: every query and
+// mutation goes over HTTP to the in-memory backend of origin-convex-backend.ts,
 // which runs the real Convex functions.
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-const config = await (await fetch("/__origin-campaigns.json")).json() as { url: string; token: string; viewerToken: string };
+const config = await (await fetch("/__origin-cloud.json")).json() as { url: string; token: string; viewerToken: string };
 const viewer = () => new URLSearchParams(location.search).has("viewer");
 const token = () => viewer() ? config.viewerToken : config.token;
 
@@ -14,7 +14,7 @@ const changed = () => { revision++; for (const listener of listeners) listener()
 setInterval(changed, 1_500);
 
 const requests: { name: string; args: Record<string, unknown> }[] = [];
-Object.assign(window, { originCampaignsFixture: { requests, changed } });
+Object.assign(window, { originCloudFixture: { requests, changed } });
 
 async function call<T>(kind: "query" | "mutation" | "action", name: string, args: Record<string, unknown> = {}): Promise<T> {
   const response = await fetch(`${config.url}/api/${kind}`, {

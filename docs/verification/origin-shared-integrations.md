@@ -12,11 +12,11 @@ node --experimental-strip-types scripts/verify-origin-shared-integrations.ts
 ```
 
 It starts the real Convex functions of `backend/convex` in memory
-(`scripts/testing/origin-campaigns-backend.ts`), a loopback GitHub
+(`scripts/testing/origin-convex-backend.ts`), a loopback GitHub
 (`scripts/testing/fake-github.ts`, one App, user and installation tokens with
 GitHub's per-repository scoping) and two isolated Origin servers through the
 `control-omb` launcher, each with its own data folder: the owner, whose folder
-holds a GitHub connection and a fal.ai key as if they had connected them on
+holds a GitHub connection and an OpenAI key as if they had connected them on
 their desktop, and a member who joined through a workspace invitation and whose
 folder holds nothing. The launcher passes only a loopback `OMB_GITHUB_API_URL`
 into the servers, so no request reaches GitHub. It prints one JSON report and
@@ -35,7 +35,7 @@ exits non-zero on the first failed check:
 - `git credential fill` through the member's credential helper gets a token
   scoped to contents of that one repository, and nothing for a repository no
   linked project uses, and that token cannot write the default branch;
-- the owner shares their fal.ai key; the member's server uses it, says who
+- the owner shares their OpenAI key; the member's server uses it, says who
   shared it, and never hands its value to the client;
 - the member hands their agents only the vault item marked for them;
 - the member links their own GitHub through device sign-in and is invited to
