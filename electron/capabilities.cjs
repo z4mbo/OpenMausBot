@@ -88,6 +88,7 @@ function desktopCapabilities({
   packaged = false,
   localConnection = null,
   homeDir = require("node:os").homedir(),
+  arch = process.arch,
   // A remote server's page: this computer's screen, voice and local control are never on offer.
   remote = false,
 } = {}) {
@@ -117,6 +118,9 @@ function desktopCapabilities({
     onDevice: isMac,
   };
   if (!isMac) dictation.reasonCode = "unsupported-platform";
+  const whisper = hostPlatform === "win32" && (arch === "x64" || arch === "arm64");
+  const localVoice = { engine: isMac ? "apple-speech" : whisper ? "whisper" : "none" };
+  if (localVoice.engine === "none") localVoice.reasonCode = "unsupported-platform";
   const localComputer = {
     available: localAvailable,
     support:
@@ -163,6 +167,7 @@ function desktopCapabilities({
     const unavailable = { reasonCode: "remote-server" };
     Object.assign(screenPreview, { available: false, interaction: "none" }, unavailable);
     Object.assign(dictation, { available: false, engine: "none", onDevice: false }, unavailable);
+    Object.assign(localVoice, { engine: "none" }, unavailable);
     Object.assign(localComputer, {
       available: false,
       support: "unsupported",
@@ -198,6 +203,7 @@ function desktopCapabilities({
       isMac ? "mac-inset" : hostPlatform === "win32" ? "win-caption" : "native",
     screenPreview,
     dictation,
+    localVoice,
     localComputer,
   };
 }

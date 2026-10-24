@@ -55,7 +55,10 @@ export function startSpeech(win, options = {}) {
   const endpointMs = Number.isFinite(requested) && requested > 0
     ? Math.min(5_000, Math.max(250, Math.round(requested)))
     : 0;
-  const args = endpointMs ? ["--endpoint-ms", String(endpointMs)] : [];
+  const args = [
+    ...(endpointMs ? ["--endpoint-ms", String(endpointMs)] : []),
+    ...(options?.onDeviceOnly === true ? ["--on-device-only"] : []),
+  ];
 
   try {
     ensureBuilt();

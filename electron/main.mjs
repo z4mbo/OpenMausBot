@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { startCua, stopCua, registerCuaIpc, setCuaStateListener } from "./cua.mjs";
 import { createAndroidDeviceController } from "./android-device.mjs";
 import { finishSpeech, startSpeech, stopSpeech } from "./speech.mjs";
+import { createLocalVoice, LocalVoiceError } from "./local-voice.mjs";
 import { openBlankTerminal } from "./terminal-launch.mjs";
 import { pasteMenuItem } from "./paste-menu-item.mjs";
 import { attachUpdaterWindow, startUpdater, registerUpdaterIpc, sendUpdaterState } from "./updater.mjs";
@@ -2598,6 +2599,26 @@ ipcMain.handle("speech:stop", localOnly("speech:stop", () => {
 }));
 ipcMain.handle("speech:finish", localOnly("speech:finish", () => {
   if (nativeActions.appleSpeech) finishSpeech();
+}));
+
+const localVoice = createLocalVoice({ directory: path.join(app.getPath("userData"), "voice") });
+const localVoiceFailure = (error) => ({ error: error instanceof LocalVoiceError ? error.code : "transcribe-failed" });
+localVoice.onProgress((progress) => {
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (!window.isDestroyed() && senderIsLocal({ sender: window.webContents })) window.webContents.send("voice:local-progress", progress);
+  }
+});
+ipcMain.handle("voice:local-status", localOnly("voice:local-status", () => localVoice.status()));
+ipcMain.handle("voice:local-install", localOnly("voice:local-install", () =>
+  localVoice.install().then(() => ({ ok: true }), localVoiceFailure)));
+ipcMain.handle("voice:local-remove", localOnly("voice:local-remove", () =>
+  localVoice.remove().then(() => ({ ok: true }), localVoiceFailure)));
+ipcMain.handle("voice:local-transcribe", localOnly("voice:local-transcribe", (_event, audio, options) => {
+  if (!(audio instanceof ArrayBuffer) && !ArrayBuffer.isView(audio)) return { error: "invalid-audio" };
+  const bytes = audio instanceof ArrayBuffer ? new Uint8Array(audio) : new Uint8Array(audio.buffer, audio.byteOffset, audio.byteLength);
+  if (bytes.byteLength % 2 !== 0 || bytes.byteLength > 16_000 * 2 * 30) return { error: "invalid-audio" };
+  const samples = new Int16Array(bytes.slice().buffer);
+  return localVoice.transcribe(samples, options).then((text) => ({ text }), localVoiceFailure);
 }));
 
 ipcMain.handle("companion:state", localOnly("companion:state", () => desktopCompanionState()));

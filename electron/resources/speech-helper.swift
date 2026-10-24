@@ -39,6 +39,9 @@ let endpointMs: Int = {
   return min(5_000, max(250, value))
 }()
 
+// `--on-device-only` refuses Apple's server-based recognition, so no audio leaves the Mac.
+let onDeviceOnly = CommandLine.arguments.contains("--on-device-only")
+
 let stopFile: String? = {
   let args = CommandLine.arguments
   guard let index = args.firstIndex(of: "--stop-file"), index + 1 < args.count else { return nil }
@@ -144,6 +147,8 @@ SFSpeechRecognizer.requestAuthorization { status in
   request.shouldReportPartialResults = true
   if recognizer.supportsOnDeviceRecognition {
     request.requiresOnDeviceRecognition = true
+  } else if onDeviceOnly {
+    fail("on-device-unavailable")
   }
 
   let engine = AVAudioEngine()
