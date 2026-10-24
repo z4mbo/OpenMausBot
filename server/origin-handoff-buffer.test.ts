@@ -7,7 +7,7 @@ function mirrorFixture() {
   let changed!: (change: StoreChange) => void;
   const enqueue = vi.fn();
   const mirror = createThreadMirror({
-    store: { onChange: listener => { changed = listener; return () => undefined; }, messagesFor: () => [], applyRemoteMessage: vi.fn(), patchTask: vi.fn(), taskByThread: () => undefined, botByThread: () => null },
+    store: { onChange: listener => { changed = listener; return () => undefined; }, messagesFor: () => [], applyRemoteMessage: vi.fn(), patchMessage: vi.fn(), patchTask: vi.fn(), taskByThread: () => undefined, botByThread: () => null },
     outbox: { enqueue, cursor: () => 0, setCursor: vi.fn() }, cloud: { mutation: vi.fn(), subscribe: () => () => undefined },
     threads: () => ({ thread: "canonical-thread" }), runFor: () => "run1", me: () => "requester1", kick: vi.fn(), redact: value => value.replaceAll("private-value", "[redacted]"),
   });

@@ -45,6 +45,13 @@ const msg = (id: string, text: string, extra: Partial<Message> = {}): Message =>
 });
 
 describe("message-db", () => {
+  it("pages cloud rows by their canonical position after out-of-order catch-up and reopen", () => {
+    insertMessage("shared", msg("later", "second", { sharedMessage: { cloudId: "c2", seq: 2, updSeq: 2 } }));
+    insertMessage("shared", msg("earlier", "first", { sharedMessage: { cloudId: "c1", seq: 1, updSeq: 4 } }));
+    closeMessageDb();
+    expect(readThread("shared", legacy("shared")).messages.map(row => row.text)).toEqual(["first", "second"]);
+    expect(readThreadTail("shared", legacy("shared"), 1)).toMatchObject({ messages: [{ text: "second" }], hasMore: true });
+  });
   beforeEach(() => {
     closeMessageDb();
     rmSync(DATA_DIR, { recursive: true, force: true });

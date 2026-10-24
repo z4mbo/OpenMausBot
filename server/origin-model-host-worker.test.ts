@@ -36,6 +36,17 @@ function fixture(options: {
 afterEach(() => vi.useRealTimers());
 
 describe("native model host claim fencing", () => {
+  it("keeps a streaming reply's cloud identity through its final patch", async () => {
+    const f = fixture({ run: async input => {
+      await input.beforeDispatch();
+      input.emit({ clientId: "stream:one", role: "bot", kind: "text", text: "Partial ", status: "streaming" }, false);
+      input.emit({ clientId: "stream:one", role: "bot", kind: "text", text: "Partial answer", status: "final" }, true);
+      return { ok: true };
+    } });
+    f.worker.offer(work()); await f.worker.drain();
+    expect(f.calls("modelHosts:appendReply")[0]?.[1]).toMatchObject({ clientId: "host:execution1:stream:one", status: "streaming" });
+    expect(f.calls("modelHosts:patchReply")[0]?.[1]).toMatchObject({ clientId: "host:execution1:stream:one", status: "final", text: "Partial answer" });
+  });
   it("runs the owner's local binding once with canonical history and host-only secrets", async () => {
     const f = fixture({ run: async input => {
       expect(input.instanceId).toBe("owner-claude"); expect(input.botId).toBe("local-agent");

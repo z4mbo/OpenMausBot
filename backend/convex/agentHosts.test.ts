@@ -27,10 +27,21 @@ async function fixture() {
   const [{ agentId }] = await t.mutation(api.agents.publishProjectTeam, { sessionToken: people.owner.token, teamId, projectId, agents: [{ roleKey: "chief", kind: "chief", name: "App" }] });
   const threadId = await t.mutation(api.agentThreads.create, { sessionToken: people.owner.token, agentId, title: "Plan" });
   const host = (person: { token: string }, name: string) => t.mutation(api.agents.publishHost, { sessionToken: person.token, teamId, name, engines: ["claude"], models: ["claude-sonnet-5"], computers: [] });
-  return { t, ...people, teamId, agentId, threadId, host };
+  return { t, ...people, teamId, agentId, threadId, projectId, host };
 }
 
 describe("where an agent runs", () => {
+  test("a remote runner cannot start a queued request after its sender loses project access", async () => {
+    const f = await fixture();
+    const hostId = await f.host(f.owner, "Owner PC");
+    await f.t.mutation(api.agentHosts.setRunsOn, { sessionToken: f.owner.token, agentId: f.agentId, hostId });
+    const active = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId: f.threadId, clientId: "active", text: "First" });
+    const queued = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.member.token, threadId: f.threadId, clientId: "queued", text: "Second" });
+    const membership = await f.t.run(ctx => ctx.db.query("members").withIndex("by_project_email", q => q.eq("projectId", f.projectId).eq("email", f.member.email)).unique());
+    await f.t.mutation(api.members.remove, { sessionToken: f.owner.token, projectId: f.projectId, memberId: membership!._id });
+    await f.t.mutation(api.agentRuns.finish, { sessionToken: f.owner.token, runId: active.runId, status: "succeeded" });
+    expect((await f.t.run(ctx => ctx.db.get(queued.runId)))?.status).toBe("interrupted");
+  });
   test("a teammate's message runs on the computer the agent is set to, and only that app may carry it", async () => {
     const f = await fixture();
     const ownerPc = await f.host(f.owner, "Owner PC");

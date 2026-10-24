@@ -61,7 +61,8 @@ describe("owner-local hosted conversation isolation", () => {
     expect(JSON.stringify(f.messages)).toContain("Canonical project context");
     expect(JSON.stringify(f.messages)).not.toContain("PRIVATE_OWNER_SESSION");
     expect(f.input.beforeDispatch).toHaveBeenCalledTimes(1);
-    expect(f.input.emit).toHaveBeenCalledWith(expect.objectContaining({ text: "Public result", role: "bot" }), false);
+    expect(f.input.emit).toHaveBeenCalledWith(expect.objectContaining({ text: "Public ", role: "bot", status: "streaming" }), false);
+    expect(f.input.emit).toHaveBeenLastCalledWith(expect.objectContaining({ text: "Public result", role: "bot", status: "final" }), true);
     expect(f.sidecar.owns("host-sidecar")).toBe(false); expect(f.events.size).toBe(0); expect(f.rows.size).toBe(0);
   });
 

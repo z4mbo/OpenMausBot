@@ -65,7 +65,7 @@ export interface HostedTurnInput {
   signal: AbortSignal;
   beforeDispatch(): Promise<void>;
   activity(): void;
-  emit(row: OutboundRow, patch: boolean): void;
+  emit(row: OutboundRow & { status?: "streaming" | "final" }, patch: boolean): void;
 }
 
 export interface HostedTurnOutcome {

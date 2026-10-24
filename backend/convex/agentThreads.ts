@@ -1,11 +1,12 @@
-import { v } from "convex/values";
+import { v, type Infer } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { canSeeThread, requireAgent, requireSharedAgents, requireThread, runnerOf } from "./lib/agentAccess";
 import { messageView, runSummary, runView, userNames } from "./lib/agentThreadRows";
 
 const TITLE_MAX = 80;
-const PAGE_MAX = 200;
+const PAGE_MAX = 20;
 
 const threadView = v.object({
   _id: v.id("agentThreads"), agentId: v.id("workspaceAgents"), title: v.string(), createdBy: v.id("users"), creatorName: v.string(),
@@ -14,6 +15,19 @@ const threadView = v.object({
 });
 
 const cleanTitle = (title: string) => title.trim().slice(0, TITLE_MAX) || "New thread";
+
+export const listPage = query({
+  args: { sessionToken: v.string(), agentId: v.id("workspaceAgents"), paginationOpts: paginationOptsValidator },
+  returns: v.object({ page: v.array(v.object({ _id: v.id("agentThreads"), title: v.string(), clientId: v.optional(v.string()), createdBy: v.id("users") })), isDone: v.boolean(), continueCursor: v.string() }),
+  handler: async (ctx, args) => {
+    const { access } = await requireAgent(ctx, args.agentId, args.sessionToken);
+    const rows = await ctx.db.query("agentThreads").withIndex("by_agentId", q => q.eq("agentId", args.agentId))
+      .paginate({ ...args.paginationOpts, numItems: Math.max(1, Math.min(50, args.paginationOpts.numItems)) });
+    return { isDone: rows.isDone, continueCursor: rows.continueCursor, page: rows.page.filter(thread => thread.archivedAt === undefined && canSeeThread(thread, access.user)).map(thread => ({
+      _id: thread._id, title: thread.title, createdBy: thread.createdBy, ...(thread.clientId ? { clientId: thread.clientId } : {}),
+    })) };
+  },
+});
 
 export const list = query({
   args: { sessionToken: v.string(), agentId: v.id("workspaceAgents") },
@@ -96,7 +110,7 @@ export const messagesSince = query({
     const rows = await ctx.db.query("agentThreadMessages")
       .withIndex("by_threadId_and_updSeq", (q) => q.eq("threadId", thread._id).gt("updSeq", args.afterSeq)).take(limit + 1);
     const runs = new Map<string, { by?: string; byUserId?: Id<"users">; engineLabel?: string; executedByUserId?: Id<"users">; executedByName?: string; hostId?: Id<"agentHosts">; sourceId?: Id<"modelHostSources"> }>();
-    const messages = [];
+    const messages: Infer<typeof messageView>[] = [];
     for (const row of rows.slice(0, limit)) {
       let run = row.runId ? runs.get(row.runId) : undefined;
       if (row.runId && !run) {
@@ -111,7 +125,7 @@ export const messagesSince = query({
         _id: row._id, seq: row.seq, updSeq: row.updSeq, clientId: row.clientId, role: row.role, kind: row.kind,
         ...(row.text !== undefined ? { text: row.text } : {}), ...(row.tool ? { tool: row.tool } : {}),
         ...(row.authorUserId ? { authorUserId: row.authorUserId, authorName: await name(row.authorUserId) } : {}),
-        ...(row.runId ? { runId: row.runId } : {}), ...(run?.by ? { runBy: run.by } : {}),
+        ...(row.runId ? { runId: row.runId } : {}), ...(run?.by ? { runBy: run.by } : row.role === "bot" && row.authorUserId ? { runBy: await name(row.authorUserId), runByUserId: row.authorUserId } : {}),
         ...(run?.byUserId ? { runByUserId: run.byUserId } : {}), ...(run?.engineLabel ? { engineLabel: run.engineLabel } : {}),
         ...(run?.executedByUserId ? { executedByUserId: run.executedByUserId, executedByName: run.executedByName } : {}),
         ...(run?.hostId ? { hostId: run.hostId, sourceId: run.sourceId } : {}),

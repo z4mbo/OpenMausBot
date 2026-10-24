@@ -32,6 +32,7 @@ import type {
   WireMessage, WireTask, BotProject as BotProjectRecord,
 } from "../shared/wire.ts";
 import { movesThreadToTop } from "../shared/wire.ts";
+import { orderedSharedMessages } from "../shared/shared-chat-order.ts";
 import { parseConnectorTools } from "./connector-tools.ts";
 import { sameModelSelection } from "../shared/thread-model.ts";
 import { createBotCreation, type NewBotProfile, type OriginImportRecord } from "./store-bot-creation.ts";
@@ -1294,7 +1295,8 @@ export class Store {
   }
 
   messagesFor(threadId: string): Message[] {
-    return this.thread(threadId).messages;
+    const messages = this.thread(threadId).messages;
+    return messages.some(message => message.sharedMessage) ? orderedSharedMessages(messages) : messages;
   }
 
   /** Legacy rows without a parentId chain only on a full load, so a bounded page missing that context falls back to one. */
@@ -1313,7 +1315,8 @@ export class Store {
         };
       }
     }
-    const { messages, activeLeafId } = state;
+    const { activeLeafId } = state;
+    const messages = state.messages.some(message => message.sharedMessage) ? orderedSharedMessages(state.messages) : state.messages;
     const start = Math.max(0, messages.length - limit);
     return { messages: messages.slice(start), hasMore: start > 0, activeLeafId };
   }
@@ -1332,6 +1335,8 @@ export class Store {
   }
 
   activePath(threadId: string): Message[] {
+    const shared = this.messagesFor(threadId);
+    if (shared.some(message => message.sharedMessage)) return shared;
     const t = this.thread(threadId);
     const byId = new Map(t.messages.map((m) => [m.id, m]));
     const path: Message[] = [];

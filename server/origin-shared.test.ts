@@ -24,6 +24,19 @@ const redact = (text: string) => text.replace(/sk-[a-z0-9]+/gi, "[redacted]");
 const message = (fields: Partial<Message>): Message => ({ id: "m1", at: 1, role: "bot", kind: "text", ...fields });
 
 describe("outbox", () => {
+  it("retains a newer coalesced patch arriving while the earlier patch is in flight", async () => {
+    const box = outboxAt();
+    box.enqueue("patch", { text: "first" }, { key: "same-row" });
+    const sent: string[] = [];
+    try {
+      await box.flush(async (_name, args) => {
+        sent.push(String(args.text));
+        if (args.text === "first") box.enqueue("patch", { text: "final" }, { key: "same-row" });
+      });
+      expect(sent).toEqual(["first", "final"]);
+      expect(box.pending()).toEqual([]);
+    } finally { box.close(); }
+  });
   it("sends in order, coalesces keyed patches and waits out the coalescing window", async () => {
     let clock = 1_000;
     const box = outboxAt(() => clock);
@@ -97,6 +110,7 @@ describe("thread mirror", () => {
       messagesFor: () => local,
       applyRemoteMessage: (_thread: string, row: unknown) => { applied.push(row); return message({}); },
       patchTask: vi.fn(),
+      patchMessage: vi.fn(),
       taskByThread: () => ({ threadId: "t" }),
       botByThread: () => ({ id: "b" }),
     };
@@ -593,12 +607,12 @@ describe("shared runner lifecycle", () => {
     const bot = { id: "b", name: "Bot", shared: { agentId: "agent", teamId: "team" }, modelSelection: task.modelSelection };
     const interrupt = vi.fn();
     const shared = createSharedAgents({
-      store: { bots: [bot], projectBotForTask: () => undefined, bot: () => bot, taskByThread: () => task,
+      store: { bots: [bot], projectBotForTask: () => undefined, bot: () => bot, botByThread: () => bot, taskByThread: () => task,
         messagesFor: () => [], patchTask: (_bot: string, _thread: string, patch: object) => Object.assign(task, patch), onChange: () => () => undefined } as never,
       files: { cloud: cloudFile, links, state: join(folder, "state.json"), outbox: join(folder, "outbox.sqlite"), bots: join(folder, "bots.json") },
       connect: (_url, token) => ({ query: async () => ({ _id: token, name: token }),
         mutation: async name => name === "agentRuns:begin" ? { runId: token, status: "running", messageId: "m" } : { status: "running" },
-        subscribe: () => () => undefined, close: vi.fn() }),
+        subscribe: (name, _args, update) => { if (name === "agentThreads:messagesSince") void Promise.resolve().then(() => update({ seq: 0, title: "Thread", archived: false, more: false, messages: [], activeRun: null, queued: [] })); return () => undefined; }, close: vi.fn() }),
       instances: async () => [], isBusy: () => true, startQueued: vi.fn(), interrupt, redact: text => text,
     });
     try {

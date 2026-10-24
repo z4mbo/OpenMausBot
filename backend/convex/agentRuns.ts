@@ -37,6 +37,7 @@ export const begin = mutation({
     const existing = await messageByClientId(ctx, thread._id, clientId);
     if (existing) {
       if (existing.authorUserId !== user._id || !existing.runId) throw new Error("clientId already belongs to another message");
+      if (existing.text !== cleanText(args.text, "user")) throw new Error("clientId already belongs to another message");
       const run = await ctx.db.get(existing.runId);
       const runner = run && runnerOf(run) !== user._id ? await ctx.db.get(runnerOf(run)) : null;
       const host = run?.hostId ? await ctx.db.get(run.hostId) : null;
@@ -78,7 +79,7 @@ export const begin = mutation({
 });
 
 export const heartbeat = mutation({
-  args: { sessionToken: v.string(), runId: v.id("workspaceAgentRuns"), engineLabel: v.optional(v.string()) },
+  args: { sessionToken: v.string(), runId: v.id("workspaceAgentRuns"), engineLabel: v.optional(v.string()), executorId: v.optional(v.string()) },
   returns: v.object({ status: v.string() }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
@@ -87,13 +88,19 @@ export const heartbeat = mutation({
     if (run.modelExecutionId) throw new Error("Hosted runs require their executor lease");
     if (run.status !== "running" || !run.threadId) return { status: run.status };
     const now = Date.now();
+    const thread = await ctx.db.get(run.threadId);
+    if (thread?.activeRunId !== run._id || (thread.leaseUntil ?? 0) <= now) {
+      await settleRun(ctx, run, "interrupted", now);
+      return { status: "interrupted" };
+    }
+    if (args.executorId !== undefined && (!args.executorId || args.executorId.length > 128)) throw new Error("Invalid executor identity");
+    if (run.executorId && run.executorId !== args.executorId) return { status: "claimed_elsewhere" };
     if (!await canResumeThreadRun(ctx, run, user)) {
       await settleRun(ctx, run, "interrupted", now);
       return { status: "interrupted" };
     }
     const engineLabel = args.engineLabel?.trim().slice(0, ENGINE_LABEL_MAX);
-    await ctx.db.patch(run._id, { heartbeatAt: now, updatedAt: now, ...(engineLabel ? { engineLabel } : {}) });
-    const thread = await ctx.db.get(run.threadId);
+    await ctx.db.patch(run._id, { heartbeatAt: now, updatedAt: now, ...(engineLabel ? { engineLabel } : {}), ...(args.executorId ? { executorId: args.executorId } : {}) });
     if (thread?.activeRunId === run._id) await ctx.db.patch(thread._id, { leaseUntil: now + LEASE_MS });
     return { status: "running" };
   },
@@ -128,6 +135,32 @@ export const appendMessage = mutation({
       ...(args.payload !== undefined ? { payload: cleanPayload(args.payload) } : {}), createdAt: now, updatedAt: now,
     });
     return { messageId, seq };
+  },
+});
+
+export const importMessages = mutation({
+  args: { sessionToken: v.string(), threadId: v.id("agentThreads"), messages: v.array(v.object({
+    clientId: v.string(), role: v.union(v.literal("user"), v.literal("bot")), kind: threadMessageKind,
+    text: v.optional(v.string()), tool: v.optional(threadMessageTool), payload: v.optional(v.string()),
+  })) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { thread, user } = await requireWritableThread(ctx, args.threadId, args.sessionToken);
+    if (thread.createdBy !== user._id || !thread.clientId || thread.activeRunId) throw new Error("Only the creator can import a local conversation before it runs");
+    if (args.messages.length > 20 || JSON.stringify(args.messages).length > 128_000) throw new Error("Import batch is too large");
+    const now = Date.now();
+    for (const row of args.messages) {
+      const clientId = clientIdOf(row.clientId);
+      if (await messageByClientId(ctx, thread._id, clientId)) continue;
+      const seq = await nextSeq(ctx, thread, now, true);
+      await ctx.db.insert("agentThreadMessages", {
+        teamId: thread.teamId, threadId: thread._id, seq, updSeq: seq, clientId, role: row.role, kind: row.kind,
+        ...(row.text !== undefined ? { text: cleanText(row.text, row.role) } : {}), ...(row.tool ? { tool: cleanTool(row.tool) } : {}),
+        ...(row.payload !== undefined ? { payload: cleanPayload(row.payload) } : {}), authorUserId: user._id,
+        status: "final", createdAt: now, updatedAt: now,
+      });
+    }
+    return null;
   },
 });
 
@@ -197,6 +230,7 @@ export const pendingForMe = query({
   returns: v.array(v.object({
     runId: v.id("workspaceAgentRuns"), threadId: v.id("agentThreads"), agentId: v.id("workspaceAgents"), status: v.string(),
     requestClientId: v.optional(v.string()), text: v.string(), createdAt: v.number(),
+    threadSeq: v.number(),
     /** A teammate's run of an agent set to run here: the cloud row of their message, and who sent it. */
     hostedFor: v.optional(v.object({ userId: v.id("users"), name: v.string(), messageId: v.optional(v.id("agentThreadMessages")) })),
   })),
@@ -212,8 +246,10 @@ export const pendingForMe = query({
         if (!run.threadId || !await canResumeThreadRun(ctx, run, user)) continue;
         const request = run.requestClientId ? await messageByClientId(ctx, run.threadId, run.requestClientId) : null;
         const requester = run.requesterUserId !== user._id ? await ctx.db.get(run.requesterUserId) : null;
+        const thread = await ctx.db.get(run.threadId);
         out.push({
           runId: run._id, threadId: run.threadId, agentId: run.actorAgentId, status: run.status,
+          threadSeq: thread?.seq ?? 0,
           ...(run.requestClientId ? { requestClientId: run.requestClientId } : {}), text: request?.text ?? run.task, createdAt: run.createdAt,
           ...(requester ? { hostedFor: { userId: requester._id, name: requester.name || requester.email, ...(request ? { messageId: request._id } : {}) } } : {}),
         });

@@ -43,6 +43,7 @@ function open(): DatabaseSync {
       PRIMARY KEY (thread_id, id)
     );
     CREATE INDEX IF NOT EXISTS messages_thread ON messages(thread_id);
+    CREATE INDEX IF NOT EXISTS messages_shared_order ON messages(thread_id, COALESCE(json_extract(json, '$.sharedMessage.seq'), 9007199254740991));
     -- at is not part of the primary key, so newest-per-thread reads cannot
     -- walk these rows in time order on messages_thread. Created on every
     -- open, including a database that already has messages.
@@ -373,7 +374,7 @@ export interface ThreadRows {
 
 export function readThread(threadId: string, legacyFile: string): ThreadRows {
   const rows = db()
-    .prepare("SELECT json FROM messages WHERE thread_id = ? ORDER BY rowid")
+    .prepare("SELECT json FROM messages WHERE thread_id = ? ORDER BY COALESCE(json_extract(json, '$.sharedMessage.seq'), 9007199254740991), rowid")
     .all(threadId) as Array<{ json: string }>;
   if (rows.length) {
     const state = db()
@@ -390,7 +391,7 @@ export interface ThreadTailRows extends ThreadRows {
 
 export function readThreadTail(threadId: string, legacyFile: string, limit: number): ThreadTailRows {
   const rows = db()
-    .prepare("SELECT json FROM messages WHERE thread_id = ? ORDER BY rowid DESC LIMIT ?")
+    .prepare("SELECT json FROM messages WHERE thread_id = ? ORDER BY COALESCE(json_extract(json, '$.sharedMessage.seq'), 9007199254740991) DESC, rowid DESC LIMIT ?")
     .all(threadId, limit + 1) as Array<{ json: string }>;
   if (rows.length) {
     const hasMore = rows.length > limit;

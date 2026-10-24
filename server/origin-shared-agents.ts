@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { copyFileSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { hostname } from "node:os";
 import { dirname, join } from "node:path";
@@ -6,6 +6,7 @@ import { ConvexClient, ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
 import { definitionHash, definitionOf } from "../shared/origin-shared-agents.ts";
 import type { SharedBotLink } from "../shared/wire.ts";
+import type { RuntimeEvent } from "../shared/runtime-events.ts";
 import { DATA_DIR } from "./config.ts";
 import type { ModelSelection } from "./contracts.ts";
 import { resolveSharedModel, type DefaultSelectionContext, type ModelIntent, type SelectableInstance } from "./default-model-selection.ts";
@@ -16,7 +17,7 @@ import { runChiefHeartbeats } from "./origin-chief-heartbeat.ts";
 import { openOutbox, type Outbox, type QueuedRun } from "./origin-outbox.ts";
 import { createHostedRequests, type HostedRequest, type RequestBackup } from "./origin-hosted-requests.ts";
 import { createRunLease, type RunLease } from "./origin-run-lease.ts";
-import { clientIdFor, createThreadMirror, type CloudPort } from "./origin-thread-mirror.ts";
+import { clientIdFor, createThreadMirror, toCloudRow, type CloudPort } from "./origin-thread-mirror.ts";
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import type { Message, Store } from "./store.ts";
 
@@ -51,7 +52,6 @@ interface BotMeta {
   /** The cloud definition version this bot last matched, and the local definition's hash at that point. */
   version: number;
   hash: string;
-  /** Threads opened after this moment are shared by default; older ones stay private. */
   boundAt: number;
   intent?: ModelIntent;
 }
@@ -59,12 +59,13 @@ interface BotMeta {
 interface SharedState {
   bots: Record<string, BotMeta>;
   defaults: Record<string, ModelSelection>;
+  imported?: Record<string, string>;
 }
 
 function readState(file: string): SharedState {
   try {
     const raw = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) as Partial<SharedState> : {};
-    return { bots: raw.bots && typeof raw.bots === "object" ? raw.bots : {}, defaults: raw.defaults && typeof raw.defaults === "object" ? raw.defaults : {} };
+    return { bots: raw.bots && typeof raw.bots === "object" ? raw.bots : {}, defaults: raw.defaults && typeof raw.defaults === "object" ? raw.defaults : {}, imported: raw.imported ?? {} };
   } catch {
     return { bots: {}, defaults: {} };
   }
@@ -104,7 +105,7 @@ export type SendDecision =
   | { status: "remote"; sendId: string; runner: { name: string; host: string } };
 
 /** A teammate's run of an agent set to run on this app, as Origin lists it. */
-export type HostedRow = { runId: string; threadId: string; status: string; text: string; hostedFor?: { userId: string; name: string; messageId?: string } };
+export type HostedRow = { runId: string; threadId: string; status: string; text: string; threadSeq?: number; hostedFor?: { userId: string; name: string; messageId?: string } };
 
 const TICK_MS = 15_000;
 const MENTIONS_PER_MESSAGE = 10;
@@ -138,7 +139,6 @@ export function budgetRefusalLine(error: unknown): string | null {
   return BUDGET_REFUSAL.exec(error instanceof Error ? error.message : String(error))?.[0].trim() ?? null;
 }
 
-/** Origin no longer shares this agent or thread (sharing turned off, archived, access removed): the thread goes on locally. */
 export function sharingWithdrawn(error: unknown): boolean {
   return /Shared agents are off|Agent not found|Thread not found|is archived|View-only access/.test(error instanceof Error ? error.message : String(error));
 }
@@ -175,13 +175,17 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   const connect = deps.connect ?? convexConnection;
   let outbox: Outbox | null = null;
   let connection: { url: string; token: string; cloud: CloudConnection; me: { id: string; name: string } | null } | null = null;
+  let connecting: Promise<void> | null = null;
   let lease: RunLease | null = null;
   let mirror: ReturnType<typeof createThreadMirror> | null = null;
   const watches = new Map<string, () => void>();
+  const agentPages = new Map<string, Set<string | null>>();
+  const binding = new Map<string, Promise<string>>();
   let hostPublishedAt = 0;
   let heartbeatAt = 0;
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
   let tickTimer: ReturnType<typeof setInterval> | null = null;
+  let scanTimer: ReturnType<typeof setTimeout> | null = null;
   const stops: Array<() => void> = [];
   const cancelledAdmissions = new Map<string, number>();
   let sharedStopped = false;
@@ -211,16 +215,20 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     },
   });
 
-  const box = () => (outbox ??= openOutbox(files.outbox));
+  const box = () => {
+    const scope = connection ? createHash("sha256").update(`${connection.url}:${connection.me?.id}`).digest("hex").slice(0, 20) : "unbound";
+    return outbox ??= openOutbox(`${files.outbox}.${scope}.sqlite`);
+  };
   const threads = () => readSharedLinks(files.links).threads;
 
   const flush = () => {
     if (!connection) return;
     const cloud = connection.cloud;
-    void box().flush((name, args) => cloud.mutation(name, args), (op, error) => {
+    const queue = box();
+    void queue.flush((name, args) => cloud.mutation(name, args), (op, error) => {
       console.warn(`origin shared: dropped ${op.name}: ${error instanceof Error ? error.message : String(error)}`);
     }).then(() => {
-      if (box().pending().length) schedule(500);
+      if (connection?.cloud === cloud && outbox === queue && queue.pending().length) schedule(500);
     });
   };
   const schedule = (delay = 0) => {
@@ -239,22 +247,21 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     mirror?.sync();
   };
 
-  const unbindThread = (botId: string, threadId: string) => {
-    const { [threadId]: _gone, ...rest } = threads();
-    writeSharedLinks(files.links, { threads: rest });
-    store.patchTask(botId, threadId, { shared: undefined });
-    mirror?.sync();
-  };
-
-  const discover = (botId: string, rows: readonly { _id: string; title: string; clientId?: string }[]) => {
+  const discover = (botId: string, rows: readonly { _id: string; title: string; clientId?: string; createdBy?: string }[]) => {
     const bot = store.bot(botId);
     if (!bot?.shared) return;
     const bound = new Set(Object.values(threads()));
     for (const row of rows) {
       if (bound.has(row._id)) continue;
-      const own = row.clientId ? store.taskByThread(botId, row.clientId) : undefined;
+      const own = row.clientId && row.createdBy === connection?.me?.id ? store.taskByThread(botId, row.clientId) : undefined;
       const task = own ?? store.createTask(botId, row.title, false, undefined, undefined, "ask");
-      if (task) bindThread(botId, task.threadId, row._id);
+      if (task) {
+        if (!own) {
+          const state = readState(files.state);
+          writeState(files.state, { ...state, imported: { ...state.imported, [task.threadId]: row._id } });
+        }
+        bindThread(botId, task.threadId, row._id);
+      }
     }
   };
 
@@ -264,13 +271,19 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     const wanted = new Map<string, () => () => void>();
     for (const bot of sharedBots()) {
       const shared = bot.shared!;
-      wanted.set(`agent:${shared.agentId}:${bot.id}`, () => cloud.subscribe("agentThreads:list", { agentId: shared.agentId }, (value) => {
-        discover(bot.id, value as { _id: string; title: string; clientId?: string }[]);
+      const key = `agent:${shared.agentId}:${bot.id}`;
+      if (!agentPages.has(key)) agentPages.set(key, new Set([null]));
+      for (const cursor of agentPages.get(key)!) wanted.set(`${key}:${cursor ?? "first"}`, () => cloud.subscribe("agentThreads:listPage", { agentId: shared.agentId, paginationOpts: { cursor, numItems: 50 } }, (value) => {
+        const page = value as { page: { _id: string; title: string; clientId?: string; createdBy?: string }[]; isDone: boolean; continueCursor: string };
+        discover(bot.id, page.page);
+        if (!page.isDone && !agentPages.get(key)?.has(page.continueCursor)) {
+          agentPages.get(key)?.add(page.continueCursor);
+          syncWatches();
+        }
       }));
       wanted.set(`team:${shared.teamId}`, () => cloud.subscribe("agentRuns:pendingForMe", { teamId: shared.teamId }, (value) => {
         hostedRows.set(shared.teamId, value as HostedRow[]);
-        adoptHosted(shared.teamId);
-        lease?.pending(shared.teamId, value as { runId: string; status: string }[]);
+        processPending(shared.teamId);
       }));
     }
     for (const [key, stop] of watches) {
@@ -292,7 +305,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     for (const row of rows) {
       if (!row.hostedFor?.messageId || remembered.has(row.runId)) continue;
       const threadId = local.find(([, cloudThreadId]) => cloudThreadId === row.threadId)?.[0];
-      if (!threadId || lease.runFor(threadId) === row.runId || lease.holds(threadId)) continue;
+      if (!threadId || !mirror?.isCaughtUp(threadId, row.threadSeq) || lease.runFor(threadId) === row.runId || lease.holds(threadId)) continue;
       const bot = store.botByThread(threadId);
       const message = store.messagesFor(threadId).find((candidate) => candidate.remote?.cloudId === row.hostedFor!.messageId);
       if (!bot || !message) continue;
@@ -301,6 +314,17 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
         sender: { name: row.hostedFor.name, id: `origin:${row.hostedFor.userId}` },
       });
     }
+  };
+
+  const processPending = (teamId: string) => {
+    const rows = hostedRows.get(teamId) ?? [];
+    for (const row of rows) {
+      if (row.status !== "running") continue;
+      const threadId = Object.entries(threads()).find(([, cloudId]) => cloudId === row.threadId)?.[0];
+      if (!threadId || !mirror?.isCaughtUp(threadId, row.threadSeq)) return;
+    }
+    adoptHosted(teamId);
+    lease?.pending(teamId, rows);
   };
 
   const disconnect = () => {
@@ -312,10 +336,14 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     lease = null;
     connection?.cloud.close();
     connection = null;
+    agentPages.clear();
+    hostedRows.clear();
+    outbox?.close();
+    outbox = null;
   };
 
   /** Follows the Origin session the bots use; a new account or sign-out starts over. */
-  const ensureConnection = async () => {
+  const connectCurrent = async () => {
     const { url, sessionToken } = readOriginCloud(files.cloud);
     if (!url || !sessionToken || !sharedBots().length) {
       if (connection) disconnect();
@@ -332,6 +360,8 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       cloud.close();
       return;
     }
+    const current = readOriginCloud(files.cloud);
+    if (sharedStopped || current.url !== url || current.sessionToken !== sessionToken) { cloud.close(); return; }
     connection = { url, token: sessionToken, cloud, me };
     lease = createRunLease({
       mutation: (name, args) => cloud.mutation(name, args),
@@ -358,7 +388,8 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       store, outbox: box(), cloud, threads, runFor: (threadId) => lease?.runFor(threadId), me: () => connection?.me?.id ?? null,
       redact: deps.redact, kick: () => schedule(),
       onSnapshot: (threadId, snapshot) => {
-        for (const teamId of hostedRows.keys()) adoptHosted(teamId);
+        if (snapshot.more) return;
+        for (const teamId of hostedRows.keys()) processPending(teamId);
         const me = connection?.me?.id;
         const bot = store.botByThread(threadId);
         if (!bot || deps.isBusy(bot.id, threadId) || snapshot.activeRun?.requesterUserId === me || snapshot.queued.some(run => run.requesterUserId === me)) return;
@@ -368,6 +399,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     syncWatches();
     schedule();
   };
+  const ensureConnection = () => connecting ??= connectCurrent().finally(() => { connecting = null; });
 
   const publishHost = async () => {
     if (!connection || Date.now() - hostPublishedAt < HOST_EVERY_MS) return;
@@ -393,14 +425,65 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   };
 
   const tick = async () => {
+    if (sharedStopped) return;
     await ensureConnection().catch(() => undefined);
     syncWatches();
-    for (const teamId of hostedRows.keys()) adoptHosted(teamId);
+    await shareLocalThreads().catch(() => undefined);
+    for (const teamId of hostedRows.keys()) processPending(teamId);
     await hostedRequests.tick();
     await lease?.tick().catch(() => undefined);
     await publishHost().catch(() => undefined);
     await heartbeat().catch(() => undefined);
     schedule();
+  };
+
+  const ensureThread = (botId: string, threadId: string): Promise<string> => {
+    const pending = binding.get(threadId);
+    if (pending) return pending;
+    const work = (async () => {
+      const bot = store.bot(botId), task = store.taskByThread(botId, threadId), scope = connection;
+      if (!bot?.shared || !task || task.sharedPrivate || !scope) throw refusal(409, "This conversation cannot be shared");
+      let cloudThreadId = threads()[threadId];
+      if (!cloudThreadId) {
+        cloudThreadId = await scope.cloud.mutation("agentThreads:create", { agentId: bot.shared.agentId, title: task.title, clientId: threadId }) as string;
+        if (connection !== scope || sharedStopped) throw refusal(409, "The shared account changed");
+        bindThread(botId, threadId, cloudThreadId);
+      }
+      if (readState(files.state).imported?.[threadId] !== cloudThreadId) {
+        const local = store.messagesFor(threadId).filter(message => !message.remote && !message.sharedMessage);
+        let batch: NonNullable<ReturnType<typeof toCloudRow>>[] = [];
+        const send = async () => {
+          if (!batch.length) return;
+          if (connection !== scope || sharedStopped) throw refusal(409, "The shared account changed");
+          await scope.cloud.mutation("agentRuns:importMessages", { threadId: cloudThreadId, messages: batch });
+          batch = [];
+        };
+        for (const message of local) {
+          const row = toCloudRow(message, deps.redact);
+          if (!row) continue;
+          if (batch.length >= 10 || JSON.stringify([...batch, row]).length > 100_000) await send();
+          mirror?.expect(row.clientId);
+          batch.push(row);
+        }
+        await send();
+        if (connection !== scope || sharedStopped) throw refusal(409, "The shared account changed");
+        const state = readState(files.state);
+        writeState(files.state, { ...state, imported: { ...state.imported, [threadId]: cloudThreadId } });
+      }
+      return cloudThreadId;
+    })().finally(() => binding.delete(threadId));
+    binding.set(threadId, work);
+    return work;
+  };
+
+  const shareLocalThreads = async () => {
+    if (!connection) return;
+    let count = 0;
+    for (const bot of sharedBots()) for (const task of bot.tasks ?? []) {
+      if (task.sharedPrivate || readState(files.state).imported?.[task.threadId] === threads()[task.threadId] && threads()[task.threadId]) continue;
+      await ensureThread(bot.id, task.threadId).catch(() => undefined);
+      if (++count >= 10) return;
+    }
   };
 
   /** Called before a direct message is admitted. Null: the thread is not shared and runs as before. */
@@ -423,8 +506,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     const task = store.taskByThread(bot.id, input.threadId);
     if (!task) return null;
     let cloudThreadId = threads()[input.threadId];
-    const meta = readState(files.state).bots[bot.id];
-    const eligible = !cloudThreadId && !task.sharedPrivate && meta && task.createdAt >= meta.boundAt && !store.messagesFor(input.threadId).some((m) => m.role === "user");
+    const eligible = !cloudThreadId && !task.sharedPrivate;
     if (!cloudThreadId && !eligible) {
       if (hosted) throw refusal(409, "A private conversation cannot run on another person's model account", "model_host_private_thread");
       return null;
@@ -432,23 +514,27 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     await ensureConnection();
     assertAdmission();
     if (!connection || !lease) throw refusal(503, "Origin is unreachable, so this shared thread can't take a message right now.", "shared_offline");
+    const sendingLease = lease;
+    const sendingMirror = mirror;
     admissionConnection = connection;
-    if (!cloudThreadId) {
+    if (!cloudThreadId || readState(files.state).imported?.[input.threadId] !== cloudThreadId) {
       try {
-        cloudThreadId = await connection.cloud.mutation("agentThreads:create", { agentId: shared.agentId, title: task.title, clientId: input.threadId }) as string;
+        cloudThreadId = await ensureThread(bot.id, input.threadId);
       } catch (error) {
-        if (sharingWithdrawn(error)) return null;
+        if (sharingWithdrawn(error)) throw refusal(403, "Origin no longer permits this shared conversation");
         throw error;
       }
       assertAdmission();
-      bindThread(bot.id, input.threadId, cloudThreadId);
     }
     const me = connection.me!.id;
+    await mirror?.caughtUp(input.threadId);
+    assertAdmission();
     if (task.lastRunnerUserId !== me || remoteBacklogExceedsCaps(store.messagesFor(input.threadId))) {
       const replay = remoteBacklogExceedsCaps(store.messagesFor(input.threadId));
       store.patchTask(bot.id, input.threadId, { lastRunnerUserId: me, ...(replay ? { resumeCursors: {} } : {}) });
     }
     const sendId = input.sendId ?? randomUUID();
+    mirror?.expect(`send:${sendId}`);
     if (hosted) {
       if (!deps.validateHostedSelection || !bot.modelSelection.source) throw refusal(409, "Teammate model hosting is unavailable on this server");
       if (/<attached-(?:image|file|audio)\b/i.test(input.text)) throw refusal(409, "Teammate-hosted chats currently accept text only; local attachments cannot be forwarded as another computer's file paths");
@@ -470,23 +556,30 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     }
     let begun: Awaited<ReturnType<RunLease["begin"]>>;
     try {
-      begun = await lease.begin({
-        botId: bot.id, threadId: input.threadId, cloudThreadId, teamId: shared.teamId, text: input.text, clientId: `send:${sendId}`,
+      begun = await sendingLease.begin({
+        botId: bot.id, threadId: input.threadId, cloudThreadId, teamId: shared.teamId, text: deps.redact(input.text), clientId: `send:${sendId}`,
         engineLabel: (task.modelSelection ?? bot.modelSelection).model || undefined,
       });
     } catch (error) {
       const overBudget = budgetRefusalLine(error);
       if (overBudget) throw refusal(402, overBudget, "budget_exceeded");
       if (!sharingWithdrawn(error)) throw error;
-      unbindThread(bot.id, input.threadId);
-      return null;
+      throw refusal(403, "Origin no longer permits this shared conversation");
     }
     if (!admissionCurrent()) {
       await connection.cloud.mutation("agentRuns:cancel", { runId: begun.runId }).catch(() => undefined);
-      lease.handover(input.threadId, begun.runId);
+      sendingLease.handover(input.threadId, begun.runId);
       assertAdmission();
     }
     if (begun.status === "hosted") return { status: "remote", sendId, runner: begun.runner };
+    if (begun.status === "running") {
+      try { await sendingMirror?.caughtUp(input.threadId, begun.seq); assertAdmission(); }
+      catch {
+        sendingLease.failed(input.threadId);
+        assertAdmission();
+        throw refusal(503, "The shared conversation could not finish syncing before this turn started");
+      }
+    }
     if (begun.status === "running" && bot.quotaFallback && bot.fallback?.some(selection => selection.source)) mirror?.hold(input.threadId, begun.runId);
     return begun.status === "running"
       ? { status: "running", sendId, ...(begun.fallback ? { fallback: begun.fallback } : {}) }
@@ -510,6 +603,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   const mentionRefusal = (botId: string, body: Record<string, unknown> | null): MentionRefusal | null => {
     const op = sharedThreadMention(store, threads(), botId, body);
     if ("error" in op) return op;
+    if (!connection) return { status: 503, error: "Origin is unreachable; reconnect before tagging people" };
     const now = Date.now();
     while (mentionTimes.length && now - mentionTimes[0]! > 60_000) mentionTimes.shift();
     if (mentionTimes.length >= MENTION_REQUESTS_PER_MINUTE) return { status: 429, error: "Too many mentions. Try again in a minute." };
@@ -642,6 +736,8 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
   };
 
   return {
+    delta(event: RuntimeEvent): void { mirror?.delta(event); },
+    completeText(threadId: string, itemId?: string): string | undefined { return mirror?.completeText(threadId, itemId); },
     routes,
     beforeSend,
     async transferToHost(input: { botId: string; threadId: string; messageId: string; selection: ModelSelection; visited: string[]; blockedAccounts: string[]; current(): boolean }) {
@@ -675,7 +771,14 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
     },
     start(): void {
       stops.push(store.onChange((change) => {
-        if (change.type === "bot") lease?.observe(change.botId);
+        if (change.type === "bot") {
+          lease?.observe(change.botId);
+          if (!scanTimer && connection && !sharedStopped) scanTimer = setTimeout(() => {
+            scanTimer = null;
+            syncWatches();
+            void shareLocalThreads().catch(() => undefined);
+          }, 100);
+        }
       }));
       tickTimer = setInterval(() => void tick(), TICK_MS);
       tickTimer.unref?.();
@@ -687,6 +790,7 @@ export function createSharedAgents(deps: SharedAgentsDeps) {
       hostedRequests.stop();
       if (tickTimer) clearInterval(tickTimer);
       if (flushTimer) clearTimeout(flushTimer);
+      if (scanTimer) clearTimeout(scanTimer);
       for (const stop of stops.splice(0)) stop();
       disconnect();
       outbox?.close();
