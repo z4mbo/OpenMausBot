@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, GripVertical, Pin, Plus, UserPlus, X } from "lucide-react";
+import { Archive, ArrowUpDown, Check, ChevronRight, ChevronsUpDown, GripVertical, Pin, Plus, Trash2, UserPlus, X } from "lucide-react";
 import { RuntimeHelp, WorkspaceMembersPanel } from "./origin-members";
 import { useCloudLinks } from "@/lib/origin-cloud-links";
+import { useWorkspaceAccess } from "@/lib/origin-members";
+import { DeleteWorkspaceDialog } from "./DeleteWorkspaceDialog";
 import type { Bot } from "@/state/store";
 import { UnreadBadge } from "./UnreadBadge";
 import { cn } from "@/lib/cn";
@@ -67,8 +69,12 @@ function Menu({ label, icon, children, className, floating = false }: { label: s
 const menuItem = "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink hover:bg-raised";
 
 export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = false }: { heads: readonly Bot[]; activeId?: string; onNewWorkspace(): void; compact?: boolean }) {
-  const [panel, setPanel] = useState<"members" | null>(null);
+  const [panel, setPanel] = useState<"members" | "delete" | null>(null);
   const cloudLinks = useCloudLinks();
+  const activeHead = heads.find((head) => head.id === activeId);
+  const activeTeamId = (activeId && cloudLinks.workspaces[activeId]) || null;
+  const access = useWorkspaceAccess(activeTeamId);
+  const canDelete = Boolean(activeHead) && (!activeTeamId || access?.role === "owner" || access?.role === "admin");
   return (
     <>
     <Menu label="Switch workspace" icon={<ChevronsUpDown size={compact ? 12 : 14} />} floating={compact}
@@ -82,8 +88,11 @@ export function WorkspaceSwitcher({ heads, activeId, onNewWorkspace, compact = f
       <div className="my-1 h-px bg-hairline/50" />
       <button type="button" role="menuitem" onClick={onNewWorkspace} className={menuItem}><Plus size={13} />New workspace</button>
       <button type="button" role="menuitem" onClick={() => setPanel("members")} className={menuItem}><UserPlus size={13} />Members & invites…</button>
+      {canDelete && <button type="button" role="menuitem" onClick={() => setPanel("delete")} className={cn(menuItem, "text-danger hover:text-danger")}><Trash2 size={13} />Delete workspace…</button>}
     </Menu>
-    {panel === "members" && <MembersDialog cloudTeamId={(activeId && cloudLinks.workspaces[activeId]) || null} onClose={() => setPanel(null)} />}
+    {panel === "members" && <MembersDialog cloudTeamId={activeTeamId} onClose={() => setPanel(null)} />}
+    {panel === "delete" && activeHead && <DeleteWorkspaceDialog head={activeHead} cloudTeamId={activeTeamId}
+      nextHeadId={heads.find((head) => head.id !== activeHead.id)?.id} onClose={() => setPanel(null)} />}
     </>
   );
 }

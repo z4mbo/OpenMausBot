@@ -9,6 +9,7 @@ import { track } from "@/lib/analytics";
 import { activeWorkspace, addAccountWorkspace, inWorkspace, reportActiveWorkspace, switchableWorkspaceHeads, switchWorkspace, useWorkspaces } from "@/lib/origin-workspaces";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
 import { NewAgentDialog, SidebarGroups, SidebarProjectIcons, SidebarProjects, WorkspaceSwitcher, splitPinnedProjects } from "./SidebarProjects";
+import { DeleteWorkspaceDialog } from "./DeleteWorkspaceDialog";
 import { UnreadBadge } from "./UnreadBadge";
 import { OriginNav } from "./OriginPages";
 import { sidebarRowLead } from "@/lib/sidebar-row-geometry";
@@ -1431,6 +1432,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const importReturnRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const [confirm, setConfirm] = useState<{ kind: BotConfirmKind; bot: Bot } | null>(null);
+  const [deletingWorkspace, setDeletingWorkspace] = useState<Bot | null>(null);
   const cancelConfirm = useCallback(() => setConfirm(null), []);
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [sectionPicker, setSectionPicker] = useState<MenuState | null>(null);
@@ -2325,11 +2327,8 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           menu={menu}
           onClose={() => setMenu(null)}
           onArchive={requestArchive}
-          onDelete={(bot) => setConfirm({ kind: "delete", bot })}
-          onMoveToSection={(botId) => {
-            if (!menu) return;
-            setSectionPicker({ botId, x: menu.x, y: menu.y });
-          }}
+          onDelete={(bot) => bot.chiefOfStaff && isWorkspaceSection(bot.section) ? setDeletingWorkspace(bot) : setConfirm({ kind: "delete", bot })}
+          onMoveToSection={(botId) => { if (menu) setSectionPicker({ botId, x: menu.x, y: menu.y }); }}
           onNewFolder={setNewFolderBotId}
           onNewTaskFolder={setNewTaskFolderBotId}
           projectArchive={WORKSPACE_NAV ? originRows.projectArchive : undefined}
@@ -2352,6 +2351,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           else dispatch({ type: "deleteBot", botId: bot.id });
         }}
       />
+      {deletingWorkspace && <DeleteWorkspaceDialog head={deletingWorkspace} cloudTeamId={cloudLinks.workspaces[deletingWorkspace.id] ?? null} nextHeadId={workspaceHeads.find((head) => head.id !== deletingWorkspace.id)?.id} onClose={() => setDeletingWorkspace(null)} />}
       {newTeam && <TeamDialog onClose={() => setNewTeam(false)} />}
       {renameTeam && <TeamDialog section={renameTeam} rename onRenamed={renamedTeam} onClose={() => setRenameTeam(null)} />}
       {teamMotion.shown && teamMotion.value && createPortal(<div className={cn("fixed inset-0 z-40", teamMotion.closing && "pointer-events-none")} onMouseDown={closeTeamMenu}>
