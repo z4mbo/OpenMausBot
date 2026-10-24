@@ -2,7 +2,6 @@ import { NewConversationInstead } from "./NewConversationInstead";
 export { NewConversationInstead } from "./NewConversationInstead";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
 import { SharedAgentRunsOn } from "./RunsOnBadge";
-import { ChatUsagePopover } from "./ChatUsagePopover";
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useAdvancedMode } from "@/lib/interface-mode";
@@ -103,7 +102,6 @@ import { useCloudProjectFor } from "@/lib/origin-cloud-links";
 import type { MentionPeer } from "@/lib/mentions";
 import { useAgentThreadFocus } from "@/lib/origin-chat-focus";
 import { ChatErrorBanner, ChatNotice } from "./ChatErrorBanner";
-import { AgentBudgetPill, ThreadContextWarning } from "./ContextWarning";
 import { ChatFindBar } from "./ChatFindBar";
 import { ReplyQuote } from "./ReplyQuote";
 import { ConnectorCard } from "./ConnectorCard";
@@ -116,7 +114,6 @@ import { ScreenFrame } from "./ScreenFrame";
 import { CompactionChip, DigestChip } from "./DigestChip";
 import { RenameTitle } from "./RenameTitle";
 import { BotActivityPicker, TaskPicker } from "./TaskPicker";
-import { ModelPicker } from "./ModelPicker";
 import { CitationSelectionToolbar, SentCitations } from "./CitationUI";
 import { SpeakButton } from "./SpeakButton";
 import { CallOverlay } from "./CallView";
@@ -1355,13 +1352,14 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
               {t("chat.backToMainThread")}
             </button>
           )}
+          <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
         </div>
         <div
           data-chathead-controls
           className="flex shrink-0 items-center gap-1.5 @max-[30rem]/chathead:ml-auto @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:justify-end @min-[30rem]/chathead:col-start-3 @min-[30rem]/chathead:justify-self-end"
           style={controlsShiftStyle}
         >
-          {(bot.busy || bot.waitingForTeammates) && (
+          {canWrite === false && (bot.busy || bot.waitingForTeammates) && (
             <button
               onClick={() => dispatch({ type: "interrupt", botId: bot.id, threadId: bot.threadId })}
               className={cn(
@@ -1374,11 +1372,6 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
               <span className="@max-4xl/chathead:hidden">{t("chat.stop")}</span>
             </button>
           )}
-          <ThreadContextWarning bot={bot} messages={messages} />
-          <AgentBudgetPill shared={bot.shared} />
-          <ChatUsagePopover bot={bot} messages={messages} />
-          {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
-          <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
           <SharedAgentRunsOn bot={bot} />
           {projectPage && window.ogb && <VoiceWakeButton bot={bot} />}
           <button

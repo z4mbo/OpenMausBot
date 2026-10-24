@@ -202,13 +202,19 @@ describe("thread control placement", () => {
     fixture.advanced = true;
   });
 
-  it("gives the editor its own row above the composer's controls", () => {
+  it("stacks the editor above one toolbar row inside a single composer card", () => {
     const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
-    expect(markup).toContain("@container/composer");
-    const row = /data-composer-row="[^"]*" class="([^"]*)"/.exec(markup)!;
-    expect(row[1].split(" ")).toContain("flex-wrap");
+    expect(markup).toMatch(/data-composer-card="true" class="@container\/composer /);
+    const card = markup.slice(markup.indexOf("data-composer-card"));
+    expect(card.indexOf('class="mention-editor ')).toBeGreaterThan(-1);
+    expect(card.indexOf('class="mention-editor ')).toBeLessThan(card.indexOf("data-composer-row"));
     const editor = /class="mention-editor ([^"]*)"/.exec(markup)!;
-    expect(editor[1].split(" ")).toEqual(expect.arrayContaining(["min-w-0", "flex-1", "order-first", "basis-full"]));
+    expect(editor[1].split(" ")).toEqual(expect.arrayContaining(["min-w-0", "self-stretch"]));
+    const row = /data-composer-row="[^"]*" class="([^"]*)"/.exec(markup)!;
+    expect(row[1].split(" ")).not.toContain("flex-wrap");
+    const tools = card.slice(card.indexOf("data-composer-tools"), card.indexOf("data-composer-actions"));
+    expect(tools).toContain('aria-label="Attach a file"');
+    expect(card.slice(card.indexOf("data-composer-actions"))).toContain('aria-label="Show plan usage and context"');
   });
 
   it("keeps the composer inert until the deleted thread's replacement transcript arrives", () => {
@@ -450,13 +456,16 @@ describe("thread control placement", () => {
     expect(badge[2].split(" ")).toContain("@max-4xl/chathead:sr-only");
   });
 
-  it("keeps the selected thread's model in the header and permissions inside the composer pill", () => {
+  it("keeps the selected thread's model and permissions in the composer card, not the header", () => {
     const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
     expect(markup.match(/data-test-model-control/g)).toHaveLength(1);
-    expect(markup.indexOf("data-test-model-control")).toBeLessThan(markup.indexOf('role="log"'));
-    expect(markup.indexOf("rounded-3xl bg-composer")).toBeGreaterThan(-1);
-    expect(markup.indexOf("data-test-approval-control")).toBeGreaterThan(markup.indexOf("rounded-3xl bg-composer"));
-    expect(markup.indexOf("data-test-approval-control")).toBeLessThan(markup.indexOf("<textarea"));
+    const header = markup.slice(markup.indexOf("data-chathead-row"), markup.indexOf('role="log"'));
+    expect(header).not.toContain("data-test-model-control");
+    expect(header).not.toContain("Show plan usage and context");
+    const tools = markup.slice(markup.indexOf("data-composer-tools"), markup.indexOf("data-composer-actions"));
+    expect(markup.indexOf("data-composer-tools")).toBeGreaterThan(markup.indexOf("<textarea"));
+    expect(tools.indexOf('aria-label="Attach a file"')).toBeLessThan(tools.indexOf("data-test-model-control"));
+    expect(tools.indexOf("data-test-model-control")).toBeLessThan(tools.indexOf("data-test-approval-control"));
     expect(markup).not.toContain('aria-label="Thread settings"');
     expect(fixture.model).toMatchObject({ threadId: "selected", bot: { busy: false, modelSelection: { model: "thread-model" } } });
     expect(fixture.approval).toMatchObject({ approvalMode: "ask", disabled: false, trustedModesAvailable: false });
@@ -475,7 +484,7 @@ describe("thread control placement", () => {
   it.each([true, false])("pins a place per conversation from the composer only in Advanced (advanced: %s)", (advanced) => {
     fixture.advanced = advanced;
     const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
-    const pill = markup.slice(markup.indexOf("rounded-3xl bg-composer"), markup.indexOf("<textarea"));
+    const pill = markup.slice(markup.indexOf("data-composer-tools"), markup.indexOf("data-composer-actions"));
     expect(pill.match(/data-testid="place-chip"/g) ?? []).toHaveLength(advanced ? 1 : 0);
     expect(markup.includes("Where this conversation works")).toBe(advanced);
     fixture.advanced = true;

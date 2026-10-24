@@ -38,3 +38,8 @@ export function modelBlurb(option: { id: string; label: string }): string | unde
   const match = BLURBS.find(([pattern]) => pattern.test(name));
   return match ? t(match[1]) : undefined;
 }
+
+export function compactModelLabel(label: string, family: string | undefined): string {
+  if (family !== "claude") return label;
+  return label.replace(/^Claude\s+/i, "") || label;
+}

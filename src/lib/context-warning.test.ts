@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Bot, Message } from "@/state/store";
-import { RoomContextWarningsView, ThreadContextWarningView } from "@/components/ContextWarning";
+import { RoomContextWarningsView } from "@/components/ContextWarning";
 import { CONTEXT_WARNING_PERCENT, compactedSinceReading, roomContextWarnings, threadContextWarning } from "./context-warning";
 
 const usage = (tokens: number, window?: number) => ({ input: 0, output: 0, costUsd: null, turns: 1, context: { tokens, ...(window ? { window } : {}) } });
@@ -39,14 +39,5 @@ describe("context warning", () => {
     const onCompact = vi.fn();
     const markup = renderToStaticMarkup(createElement(RoomContextWarningsView, { warnings, pendingBotId: null, onCompact }));
     expect(text(markup)).toBe("Scout's context in this room is 85% full. Compact now Quill's context in this room is 95% full. Compacts before its next turn.");
-  });
-
-  it("offers Compact now in the 1:1 header, locked while the bot works", () => {
-    const idle = renderToStaticMarkup(createElement(ThreadContextWarningView, { name: "Scout", percent: 91, busy: false, pending: false, onCompact: vi.fn() }));
-    expect(text(idle)).toBe("Context 91% Compact now");
-    expect(idle).not.toContain("disabled=\"\"");
-    const busy = renderToStaticMarkup(createElement(ThreadContextWarningView, { name: "Scout", percent: 91, busy: true, pending: false, onCompact: vi.fn() }));
-    expect(busy).toContain("disabled=\"\"");
-    expect(busy).toContain("Stop this bot&#x27;s turn first");
   });
 });

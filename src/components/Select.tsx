@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 const VARIANTS = {
   field: "rounded-lg border border-hairline/40 bg-inset text-ink",
   pill: "h-8 rounded-full border border-hairline/40 bg-raised/60 font-medium text-ink hover:bg-raised",
+  ghost: "rounded-lg bg-transparent font-medium text-ink-secondary hover:bg-control/70 hover:text-ink",
 } as const;
 
 // The 14px chevron draws its stroke ~3.5px inside its box, so the box sits that much nearer the edge than the text's padding.

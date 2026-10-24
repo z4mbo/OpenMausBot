@@ -17,7 +17,7 @@ chief.tasks = [{ threadId: chief.threadId, title: "Main", createdAt: 0, usage: {
 type Active = "chief" | "echo" | null;
 function RetainedChats({ active }: { active: Active }) {
   return createElement("main", null, ...[chief, echo].map(source => createElement("section", { key: source.id, "data-chat": source.id, style: { display: active === source.id ? "block" : "none" } },
-    createElement("div", { "data-glass-bar": "top" }, createElement(ChatUsagePopover, { bot: source, messages: [] })))));
+    createElement("div", { "data-composer-card": "" }, createElement(ChatUsagePopover, { bot: source, messages: [] })))));
 }
 
 let host: HTMLDivElement, root: Root;
@@ -40,7 +40,7 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
     if (collapsed(this)) return new DOMRect(0, 0, 0, 0);
     if (this.tagName === "MAIN") return new DOMRect(0, 0, 375, 667);
-    return this.dataset.glassBar === "top" ? new DOMRect(0, 60, 375, 65) : new DOMRect(300, 90, 30, 30);
+    return "composerCard" in this.dataset ? new DOMRect(20, 560, 335, 96) : new DOMRect(300, 610, 30, 30);
   });
   vi.spyOn(HTMLElement.prototype, "getClientRects").mockImplementation(function (this: HTMLElement) {
     const bounds = this.getBoundingClientRect();
@@ -54,7 +54,7 @@ afterEach(() => {
 });
 
 describe("retained chat usage visibility", () => {
-  it("only portals the visible chat when a hidden Chief remains mounted", () => {
+  it("only renders the visible chat's panel when a hidden Chief remains mounted", () => {
     show("echo");
     act(() => trigger("echo").click());
     expect(panels()).toHaveLength(1);

@@ -3,6 +3,7 @@ import { Check, FilePen, Hand, ListChecks, Settings, ShieldAlert, ShieldCheck } 
 
 import { approvalModeFor, hasNativeAutoReview, supportsApprovalMode, type ApprovalMode } from "../../shared/approval-mode";
 import { cn } from "@/lib/cn";
+import { COMPOSER_TOOL, COMPOSER_TOOL_ACTIVE } from "@/lib/composer-tool";
 import { useMenuMotion } from "./MenuMotion";
 import { APPROVAL_LEVELS_URL, openExternalLink } from "@/lib/app-links";
 import { t } from "@/lib/i18n";
@@ -164,7 +165,7 @@ export function ApprovalModeSelector({
         className={cn(
           wide
             ? "flex h-10 w-full items-center justify-between rounded-lg border border-hairline/40 bg-inset px-3.5 text-[13px] text-ink hover:bg-raised"
-            : "flex size-8 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-control hover:text-ink",
+            : cn(COMPOSER_TOOL, open && COMPOSER_TOOL_ACTIVE, mode === "full" && "text-warning hover:text-warning"),
           triggerDisabled && "cursor-not-allowed opacity-45 hover:bg-transparent hover:text-ink-secondary",
         )}
       >

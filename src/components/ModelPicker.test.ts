@@ -26,7 +26,9 @@ vi.mock("@/state/store", async (importOriginal) => ({
 // These cases cover the full picker; Simple mode has its own file.
 vi.mock("@/lib/interface-mode", () => ({ useAdvancedMode: () => true, setAdvancedMode: () => {} }));
 
-const { ClaudeAccountSelect, EffortRow, ModelEngineRail, ModelPicker, ModelVariantRow, modelSelectionForPick } = await import("./ModelPicker");
+const { ClaudeAccountSelect, EffortRow, ModelPicker, ModelVariantRow, modelSelectionForPick } = await import("./ModelPicker");
+const { ModelPickerList } = await import("./ModelPickerList");
+const { groupModels, pickerGroups } = await import("./model-picker-groups");
 
 afterAll(() => vi.unstubAllGlobals());
 
@@ -296,12 +298,13 @@ describe("ModelPicker trigger", () => {
     ]);
   });
 
-  it("shows the model and its effort together in the header", () => {
+  it("shows the model and its effort together in the composer pill", () => {
     const markup = renderTrigger("high");
 
     expect(markup).toContain("GPT-5.6");
     expect(effortChip(markup)).toBe("· High");
     expect(markup).toContain("Codex · GPT-5.6 · High effort");
+    expect(markup).toContain('aria-label="Model: Codex · GPT-5.6 · High effort"');
   });
 
   it("says nothing about effort when the bot sends no level", () => {
@@ -310,8 +313,21 @@ describe("ModelPicker trigger", () => {
     expect(markup).toContain("GPT-5.6");
     expect(effortChip(markup)).toBeUndefined();
     expect(markup).not.toContain("effort");
-    expect(markup).toContain("@max-4xl/chathead:size-[30px]");
-    expect(markup).not.toContain("data-model-account-compact");
+    expect(markup).not.toContain("data-model-account");
+  });
+
+  it("folds to its provider mark on a narrow composer, dropping the effort first", () => {
+    const markup = renderTrigger("high");
+    expect(markup).toMatch(/<span class="[^"]*@max-\[22rem\]\/composer:hidden[^"]*">/);
+    expect(markup).toMatch(/data-model-effort="true" class="[^"]*@max-\[30rem\]\/composer:hidden/);
+  });
+
+  it("drops a repeated Claude from the name the pill shows, but not from what it announces", () => {
+    fixture.instances = [{ ...engine(), instanceId: "claude", driverKind: "claudeAgent", displayName: "Claude",
+      models: { default: "claude-sonnet-5", options: [{ id: "claude-sonnet-5", label: "Claude Sonnet 5" }] } }];
+    const markup = renderToStaticMarkup(createElement(ModelPicker, { bot: { ...bot(), modelSelection: { instanceId: "claude", model: "claude-sonnet-5" } } }));
+    expect(markup).toContain('<span class="min-w-0 truncate">Sonnet 5</span>');
+    expect(markup).toContain('aria-label="Model: Claude · Claude Sonnet 5"');
   });
 
   it("visibly identifies the selected account when Claude has multiple instances", () => {
@@ -324,74 +340,56 @@ describe("ModelPicker trigger", () => {
     }));
     expect(markup).toMatch(/<span data-model-account[^>]*>Work · <\/span>/);
     expect(markup).not.toMatch(/<span data-model-account[^>]*>Personal/);
-    expect(markup).toMatch(/<span data-model-account-compact="true" class="hidden max-w-20 truncate @max-4xl\/chathead:inline">Work<\/span><span class="[^"]*@max-4xl\/chathead:hidden"/);
-    expect(markup).not.toContain("@max-4xl/chathead:size-[30px]");
+    expect(markup).toMatch(/data-model-account="true" class="[^"]*@max-\[34rem\]\/composer:hidden/);
   });
 });
 
-describe("OpenAI sign-ins in the rail", () => {
+describe("model groups", () => {
   const codex: InstanceInfo = { ...engine(), instanceId: "codex", driverKind: "codex", displayName: "Codex" };
   const plan: InstanceInfo = { ...engine(), instanceId: "chatgpt", driverKind: "codex", displayName: "ChatGPT plan" };
   const apiKey: InstanceInfo = { ...engine(), instanceId: "openai", driverKind: "openai-compat", displayName: "OpenAI", access: "api" };
-
-  it("folds Codex and the ChatGPT plan into one OpenAI button, apart from the API-key OpenAI", () => {
-    const markup = renderToStaticMarkup(createElement(ModelEngineRail, {
-      instances: [codex, plan, apiKey], selectedInstance: plan, onSelect: () => {},
-    }));
-    expect(markup.match(/aria-label="OpenAI"/g)).toHaveLength(2);
-    expect(markup).toContain('aria-label="OpenAI" aria-pressed="true"');
-    expect(markup).not.toContain('aria-label="Codex"');
-    expect(markup).not.toContain('aria-label="ChatGPT plan"');
-    expect(markup.match(/data-rail-key-badge/g)).toHaveLength(1);
-  });
-
-  it("opens the remembered OpenAI sign-in", () => {
-    const onSelect = vi.fn();
-    const rail = ModelEngineRail({ instances: [codex, plan], openaiInstance: plan, onSelect });
-    const button = Children.toArray(rail.props.children).find((child) => (child as ReactElement).type === "button") as ReactElement<{ onClick: () => void }>;
-    button.props.onClick();
-    expect(onSelect).toHaveBeenLastCalledWith(plan);
-  });
-});
-
-describe("Claude provider and account selection", () => {
   const personal: InstanceInfo = { ...engine(), instanceId: "claude-personal", driverKind: "claudeAgent", displayName: "Personal" };
   const work: InstanceInfo = { ...engine(), instanceId: "claude-work", driverKind: "claudeAgent", displayName: "Work", access: "custom" };
 
-  it("renders one Claude provider across Cloud and Local, pressed for either account", () => {
-    for (const selectedInstance of [personal, work]) {
-      const markup = renderToStaticMarkup(createElement(ModelEngineRail, {
-        instances: [engine(), personal, work], selectedInstance, claudeInstance: work, onSelect: () => {},
-      }));
-      expect(markup.match(/aria-label="Claude"/g)).toHaveLength(1);
-      expect(markup).toContain('aria-label="Claude" aria-pressed="true"');
-      expect(markup).toContain('aria-label="OpenAI" aria-pressed="false"');
-      expect(markup).not.toContain('aria-label="Personal"');
-      expect(markup).not.toContain('aria-label="Work"');
-      expect(markup).toContain("w-14");
+  it("folds Codex and the ChatGPT plan into one OpenAI group, apart from the API-key OpenAI", () => {
+    const groups = pickerGroups([codex, plan, apiKey], { instanceId: "chatgpt" });
+    expect(groups.map((group) => [group.label, group.access, group.accounts.map((account) => account.instanceId)]))
+      .toEqual([["OpenAI", "subscription", ["codex", "chatgpt"]], ["OpenAI", "api", ["openai"]]]);
+    expect(groups[0]!.instance).toBe(plan);
+    expect(groups.map((group) => group.current)).toEqual([true, false]);
+  });
+
+  it("shows the account chosen in the group, else the selected one, else the first that is ready", () => {
+    expect(pickerGroups([codex, plan], { instanceId: "elsewhere" }, { openai: "chatgpt" })[0]!.instance).toBe(plan);
+    expect(pickerGroups([personal, work], { instanceId: "claude-work" })[0]!.instance).toBe(work);
+    const signedOut: InstanceInfo = { ...personal, snapshot: { state: "available", authenticated: false } };
+    expect(pickerGroups([signedOut, work], { instanceId: "elsewhere" })[0]!.instance).toBe(work);
+  });
+
+  it("keeps one Claude group across plan and local accounts, current for either account", () => {
+    for (const selected of [personal, work]) {
+      const groups = pickerGroups([codex, personal, work], { instanceId: selected.instanceId });
+      const claude = groups.filter((group) => group.label === "Claude");
+      expect(claude).toHaveLength(1);
+      expect(claude[0]!.current).toBe(true);
+      expect(claude[0]!.accounts).toEqual([personal, work]);
+      expect(groups.find((group) => group.label === "OpenAI")!.current).toBe(false);
     }
   });
 
-  it("opens the remembered concrete Claude account, falling back to the first account", () => {
-    const onSelect = vi.fn();
-    for (const claudeInstance of [work, undefined]) {
-      const rail = ModelEngineRail({ instances: [personal, work], claudeInstance, onSelect });
-      const button = Children.toArray(rail.props.children).find((child) => (child as ReactElement).type === "button") as ReactElement<{ onClick: () => void }>;
-      button.props.onClick();
-      expect(onSelect).toHaveBeenLastCalledWith(claudeInstance ?? personal);
-    }
+  it("orders plans, then API keys, then local engines", () => {
+    const local: InstanceInfo = { ...engine(), instanceId: "pi", driverKind: "piAgent", displayName: "pi", access: "custom",
+      models: { default: "", options: [{ id: "qwen", label: "Qwen", custom: true }] } };
+    expect(pickerGroups([local, apiKey, codex], { instanceId: "codex" }).map((group) => group.access)).toEqual(["subscription", "api", "custom"]);
   });
 
-  it("shows the icon of the concrete Claude account the rail selects", () => {
-    const personalIcon: InstanceInfo = { ...personal, icon: { kind: "preset", preset: "anthropic" } };
-    const workIcon: InstanceInfo = { ...work, icon: { kind: "preset", preset: "azure" } };
-    for (const claudeInstance of [workIcon, undefined]) {
-      const target = claudeInstance ?? personalIcon;
-      const rail = ModelEngineRail({ instances: [personalIcon, workIcon], claudeInstance, onSelect: () => {} });
-      const button = Children.toArray(rail.props.children).find((child) => (child as ReactElement).type === "button") as ReactElement<{ children: ReactNode }>;
-      const mark = Children.toArray(button.props.children)[0] as ReactElement<{ instance: InstanceInfo }>;
-      expect(mark.props.instance).toBe(target);
-    }
+  it("suggests five models with the current and default first, and searches every model of the group", () => {
+    const many = Array.from({ length: 8 }, (_, index) => ({ id: `m${index}`, label: `Model ${index}` }));
+    const group = pickerGroups([{ ...codex, models: { default: "m3", options: many } }], { instanceId: "codex" })[0]!;
+    expect(groupModels(group, "", false, "m6").shown.map((option) => option.id)).toEqual(["m6", "m3", "m0", "m1", "m2"]);
+    expect(groupModels(group, "", false, "m6").more).toBe(3);
+    expect(groupModels(group, "", true, "m6").shown).toHaveLength(8);
+    expect(groupModels(group, "model 7", false, undefined).shown.map((option) => option.id)).toEqual(["m7"]);
   });
 
   it("maps named native options to concrete instances without committing a model", () => {
@@ -407,13 +405,50 @@ describe("Claude provider and account selection", () => {
   });
 });
 
-describe("organisation policy", () => {
-  it("shows an engine the organisation disallows as managed and dimmed, not hidden", () => {
+describe("the grouped model list", () => {
+  const props = (instances: InstanceInfo[], selection = { instanceId: "codex", model: "gpt-5.6" }) => ({
+    instances, selection, refreshing: false, onRefresh: vi.fn(), probing: null, onProbe: vi.fn(), onPick: vi.fn(),
+    onSettings: vi.fn(), onApiKeys: vi.fn(), apiKeysLabel: "Add API keys", onClose: vi.fn(),
+  });
+  const row = (html: string, id: string) => {
+    const start = html.indexOf(`data-model-row="${id}"`);
+    return html.slice(start, html.indexOf("</button>", start));
+  };
+
+  it("lists each provider under its heading with a description, badges and a check on the current model", () => {
+    const claude: InstanceInfo = { ...engine(), instanceId: "claude", driverKind: "claudeAgent", displayName: "Claude", access: "subscription",
+      models: { default: "claude-sonnet-5", options: [{ id: "claude-opus-5-5", label: "Claude Opus 5.5", contextWindow: 1_000_000 }, { id: "claude-sonnet-5", label: "Claude Sonnet 5" }] } };
+    const html = renderToStaticMarkup(createElement(ModelPickerList, props([engine(), claude], { instanceId: "claude", model: "claude-sonnet-5" })));
+    expect(html).toContain('aria-label="Search models"');
+    expect(html.indexOf('data-model-group="family:openai"')).toBeLessThan(html.indexOf('data-model-group="family:claude"'));
+    expect(html).toContain('data-model-row="claude-sonnet-5" aria-current="true"');
+    expect(html).not.toContain('data-model-row="claude-opus-5-5" aria-current');
+    expect(row(html, "claude-sonnet-5")).toContain(">Default</span>");
+    expect(row(html, "claude-opus-5-5")).toContain("Smartest. Best for hard, long jobs.");
+    expect(row(html, "claude-opus-5-5")).toContain(">1M</span>");
+    expect(html).toContain(">Your plan</span>");
+  });
+
+  it("shows an engine the organisation disallows as managed and dimmed, not hidden or pickable", () => {
     const blocked: InstanceInfo = { ...engine(), policy: { organizationName: "Fixture Agency", reason: "Fixture Agency allows only company models on this computer. Choose a Company model for this bot." } };
-    const markup = renderToStaticMarkup(createElement(ModelEngineRail, { instances: [blocked], onSelect: () => {} }));
-    expect(markup).toContain('aria-label="OpenAI · Managed by Fixture Agency"');
-    expect(markup).toContain("opacity-40");
-    const allowed = renderToStaticMarkup(createElement(ModelEngineRail, { instances: [engine()], onSelect: () => {} }));
-    expect(allowed).not.toContain("Managed by");
+    const html = renderToStaticMarkup(createElement(ModelPickerList, props([blocked])));
+    expect(html).toContain("Managed by Fixture Agency");
+    expect(html).toContain("opacity-60");
+    expect(html).toContain("data-policy-blocked");
+    expect(html).not.toContain("data-model-row");
+    expect(renderToStaticMarkup(createElement(ModelPickerList, props([engine()])))).not.toContain("Managed by");
+  });
+
+  it("puts an update behind one row instead of above the models", () => {
+    const outdated: InstanceInfo = { ...engine(), snapshot: { ...engine().snapshot, update: { title: "Update Codex to 9.9.9", message: "A long explanation", command: "npm i -g codex" } } };
+    const html = renderToStaticMarkup(createElement(ModelPickerList, props([outdated])));
+    expect(html).toMatch(/data-model-update="true"[^>]*>(?:(?!<\/button>).)*Update Codex to 9\.9\.9/s);
+    expect(html).not.toContain("A long explanation");
+    expect(html).toContain('data-model-row="gpt-5.6"');
+  });
+
+  it("ends with a way to add API keys", () => {
+    const html = renderToStaticMarkup(createElement(ModelPickerList, props([engine()])));
+    expect(html).toMatch(/data-model-add-api-keys="true"[^>]*>(?:(?!<\/button>).)*Add API keys/s);
   });
 });

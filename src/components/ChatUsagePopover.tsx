@@ -1,20 +1,18 @@
-import { useId, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type RefObject } from "react";
 import { ChevronRight, Gauge, X } from "lucide-react";
 import { useStore, type Bot, type InstanceInfo, type Message } from "@/state/store";
 import { cn } from "@/lib/cn";
+import { COMPOSER_TOOL_ACTIVE, COMPOSER_TOOL_SHAPE } from "@/lib/composer-tool";
 import { t } from "@/lib/i18n";
 import { formatTokens, usageDetail } from "@/lib/usage";
-import { compactedSinceReading } from "@/lib/context-warning";
+import { compactedSinceReading, threadContextWarning } from "@/lib/context-warning";
 import { setChatContextDetails, setChatUsageOpen, useChatContextDetails, useChatUsageOpen } from "@/lib/chat-usage-preferences";
+import { useSpaceAbove } from "@/hooks/use-space-above";
+import { useCompact } from "./ContextWarning";
 import { PlanUsage } from "./PlanUsage";
 
-export function chatUsagePosition(header: { bottom: number; right: number; left: number }, viewport: { width: number; height: number }) {
-  const width = Math.max(0, Math.min(320, viewport.width - 16, header.right - header.left - 16));
-  const left = Math.max(8, Math.min(header.right - width - 8, viewport.width - width - 8));
-  const top = Math.max(8, Math.min(header.bottom + 8, viewport.height - 96));
-  return { left, top, width, maxHeight: Math.max(80, viewport.height - top - 8) };
-}
+const PEEK_OPEN_MS = 280;
+const PEEK_CLOSE_MS = 180;
 
 export function chatContextReading(bot: Bot, messages: readonly Message[], instances: readonly InstanceInfo[]) {
   const usage = bot.tasks?.find(task => task.threadId === bot.threadId)?.usage;
@@ -28,18 +26,19 @@ export function chatContextReading(bot: Bot, messages: readonly Message[], insta
   return { usage, stale, tokens, window, reported: reportedWindow !== undefined, percent };
 }
 
-function contextTone(percent: number): string {
+export function contextTone(percent: number): string {
   return percent >= 95 ? "text-danger" : percent >= 80 ? "text-warning" : "text-accent";
 }
 
-export function ContextRing({ percent }: { percent: number }) {
-  const radius = 7;
-  const circumference = 2 * Math.PI * radius;
-  return <svg aria-hidden="true" width={18} height={18} viewBox="0 0 18 18" className="-rotate-90">
-    <circle cx={9} cy={9} r={radius} fill="none" strokeWidth={2} stroke="currentColor" opacity={0.35} />
-    <circle cx={9} cy={9} r={radius} fill="none" strokeWidth={2} strokeLinecap="round" stroke="currentColor"
-      strokeDasharray={circumference} strokeDashoffset={circumference * (1 - Math.max(percent, 2) / 100)}
-      className={cn("transition-[stroke-dashoffset] duration-500", contextTone(percent))} />
+export function ContextRing({ percent, size = 18 }: { percent: number; size?: number }) {
+  const center = size / 2;
+  const wedge = size / 2 - 3.5;
+  const circumference = 2 * Math.PI * (wedge / 2);
+  return <svg aria-hidden="true" width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={cn("-rotate-90", percent >= 80 ? contextTone(percent) : "text-ink-secondary")}>
+    <circle cx={center} cy={center} r={center - 0.75} fill="none" strokeWidth={1.5} stroke="currentColor" opacity={0.45} />
+    <circle cx={center} cy={center} r={wedge / 2} fill="none" strokeWidth={wedge} stroke="currentColor"
+      strokeDasharray={`${circumference * Math.max(percent, 4) / 100} ${circumference}`}
+      className="transition-[stroke-dasharray] duration-500" />
   </svg>;
 }
 
@@ -47,13 +46,32 @@ export function ChatContextDetails({ bot, messages }: { bot: Bot; messages: read
   const { state } = useStore();
   const expanded = useChatContextDetails();
   const { usage, stale, tokens, window, reported, percent } = chatContextReading(bot, messages, state.instances);
+  const warning = threadContextWarning(usage, messages);
+  const { pending, run } = useCompact();
   return <section aria-label={t("chatUsage.context")} className="grid gap-2">
     <div className="flex min-w-0 items-baseline justify-between gap-3">
-      <span className="text-[12px] font-medium text-ink">{t("chatUsage.context")}</span>
-      <span className="whitespace-nowrap text-[11.5px] tabular-nums text-ink-secondary">{tokens === undefined ? t("chatUsage.notReported") : window ? `${formatTokens(tokens)} / ${formatTokens(window)} · ${percent}%` : formatTokens(tokens)}</span>
+      <h3 className="text-[12.5px] font-medium text-ink">{t("chatUsage.context")}</h3>
+      <span className={cn("whitespace-nowrap text-[13px] font-semibold tabular-nums", percent === undefined ? "font-normal text-ink-tertiary" : percent >= 80 ? contextTone(percent) : "text-ink")}>
+        {percent === undefined ? t("chatUsage.notReported") : `${percent}%`}
+      </span>
     </div>
     {percent !== undefined && <div role="meter" aria-label={t("chatUsage.context")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} className="h-1.5 overflow-hidden rounded-full bg-inset">
-      <div className={cn("h-full rounded-full bg-current transition-[width] duration-500", contextTone(percent))} style={{ width: `${Math.max(percent, 1)}%` }} />
+      <div className={cn("h-full rounded-full bg-current transition-[width] duration-500", contextTone(percent))} style={{ width: `${Math.max(percent, 1.5)}%` }} />
+    </div>}
+    <div className="flex min-w-0 items-baseline justify-between gap-3 text-[11.5px]">
+      <span className="whitespace-nowrap tabular-nums text-ink-secondary">
+        {tokens === undefined ? (stale ? t("chatUsage.afterCompaction") : t("chatUsage.notReported"))
+          : window ? t("chatUsage.tokensOf", { used: formatTokens(tokens), limit: formatTokens(window) }) : t("chatUsage.tokens", { used: formatTokens(tokens) })}
+      </span>
+      <span className="min-w-0 truncate font-mono text-[11px] text-ink-tertiary" title={bot.modelSelection.model}>{bot.modelSelection.model}</span>
+    </div>
+    {warning && <div role="status" className="mt-1 flex items-start gap-3 rounded-xl bg-warning/10 px-3 py-2.5">
+      <p className="min-w-0 flex-1 text-[11.5px] leading-relaxed text-ink-secondary">{t("contextWarning.threadHint", { name: bot.name, percent: warning.percent })}</p>
+      <button type="button" disabled={Boolean(bot.busy) || pending} onClick={() => run(`/api/bots/${bot.id}/compact`, { threadId: bot.threadId })}
+        title={bot.busy ? t("contextWarning.busy") : undefined}
+        className="ui-button ui-button-sm shrink-0 rounded-full">
+        {pending ? t("contextWarning.compacting") : t("contextWarning.compactNow")}
+      </button>
     </div>}
     <details open={expanded} onToggle={event => setChatContextDetails(event.currentTarget.open)} className="group/context">
       <summary className="flex w-fit cursor-pointer list-none items-center gap-1 rounded text-[11.5px] text-ink-secondary hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus [&::-webkit-details-marker]:hidden"><ChevronRight size={12} aria-hidden="true" className="transition-transform group-open/context:rotate-90" />{t("chatUsage.contextDetails")}</summary>
@@ -67,52 +85,67 @@ export function ChatContextDetails({ bot, messages }: { bot: Bot; messages: read
   </section>;
 }
 
-export function ChatUsagePopover({ bot, messages }: { bot: Bot; messages: readonly Message[] }) {
-  const open = useChatUsageOpen();
-  const id = useId();
-  const trigger = useRef<HTMLButtonElement>(null);
-  const [position, setPosition] = useState<ReturnType<typeof chatUsagePosition> | null>(null);
+function useShown(trigger: RefObject<HTMLElement | null>, active: boolean) {
+  const [shown, setShown] = useState(false);
   useLayoutEffect(() => {
-    if (!open || !trigger.current) return;
-    const button = trigger.current;
-    const header = button.closest<HTMLElement>('[data-glass-bar="top"]') ?? button;
+    const element = trigger.current;
+    if (!active || !element) { setShown(false); return; }
     const update = () => {
-      const triggerBounds = button.getBoundingClientRect();
-      const visibility = window.getComputedStyle(button).visibility;
-      if (!button.isConnected || !button.getClientRects().length || triggerBounds.width <= 0 || triggerBounds.height <= 0 || visibility === "hidden" || visibility === "collapse") {
-        setPosition(null);
-        return;
-      }
-      const bounds = header.getBoundingClientRect();
-      const main = button.closest("main")?.getBoundingClientRect() ?? bounds;
-      const next = chatUsagePosition({ bottom: bounds.bottom, left: main.left, right: main.right }, { width: window.innerWidth, height: window.innerHeight });
-      setPosition(current => current && Object.keys(next).every(key => current[key as keyof typeof next] === next[key as keyof typeof next]) ? current : next);
+      const visibility = window.getComputedStyle(element).visibility;
+      setShown(element.isConnected && element.getClientRects().length > 0 && visibility !== "hidden" && visibility !== "collapse");
     };
     update();
-    const observer = new ResizeObserver(update); observer.observe(header); observer.observe(button);
-    window.addEventListener("resize", update); window.addEventListener("scroll", update, true);
-    return () => { observer.disconnect(); window.removeEventListener("resize", update); window.removeEventListener("scroll", update, true); };
-  }, [open, bot.id, bot.threadId]);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(element);
+    window.addEventListener("resize", update);
+    return () => { observer?.disconnect(); window.removeEventListener("resize", update); };
+  }, [trigger, active]);
+  return shown;
+}
+
+export function ChatUsagePopover({ bot, messages }: { bot: Bot; messages: readonly Message[] }) {
+  const pinned = useChatUsageOpen();
+  const [peek, setPeek] = useState(false);
+  const open = pinned || peek;
+  const id = useId();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const shown = useShown(trigger, open);
+  const space = useSpaceAbove(open && shown, trigger, 560);
   const { state } = useStore();
-  const { percent } = chatContextReading(bot, messages, state.instances);
-  const close = () => { setChatUsageOpen(false); trigger.current?.focus(); };
-  return <>
-    <button ref={trigger} type="button" aria-label={t("chatUsage.toggle")} aria-expanded={open} aria-controls={id} aria-haspopup="dialog" onClick={() => setChatUsageOpen(!open)} onKeyDown={event => { if (open && event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } }}
+  const { percent, stale } = chatContextReading(bot, messages, state.instances);
+  const alert = percent !== undefined && percent >= 80 && !stale;
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const hover = (next: boolean) => (event: PointerEvent) => {
+    if (event.pointerType !== "mouse") return;
+    window.clearTimeout(timer.current);
+    if (next === peek) return;
+    timer.current = window.setTimeout(() => setPeek(next), next ? PEEK_OPEN_MS : PEEK_CLOSE_MS);
+  };
+  const close = () => { window.clearTimeout(timer.current); setPeek(false); setChatUsageOpen(false); trigger.current?.focus(); };
+  const closeOnEscape = (event: KeyboardEvent) => {
+    if (!open || event.key !== "Escape") return;
+    event.preventDefault();
+    event.stopPropagation();
+    close();
+  };
+  return <div className="flex shrink-0" onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
+    <button ref={trigger} type="button" aria-label={t("chatUsage.toggle")} aria-expanded={open && shown} aria-controls={id} aria-haspopup="dialog"
+      onClick={() => { window.clearTimeout(timer.current); setPeek(false); setChatUsageOpen(!pinned); }} onKeyDown={closeOnEscape}
       title={percent === undefined ? t("chatUsage.toggle") : t("chatUsage.contextPercent", { percent })} data-context-percent={percent}
-      className={cn("flex h-8 min-w-8 items-center justify-center gap-1.5 rounded-full transition-colors hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", percent !== undefined && "px-2 @max-4xl/chathead:px-0", open ? "bg-raised text-accent" : "text-ink-secondary hover:text-ink")}>
-      {percent === undefined ? <Gauge size={17} /> : <><ContextRing percent={percent} /><span aria-hidden="true" className="text-[12px] font-medium tabular-nums @max-4xl/chathead:hidden">{percent}%</span></>}
+      className={cn(COMPOSER_TOOL_SHAPE, "min-w-8 gap-1", alert ? "pl-1.5 pr-2" : "w-8", open && COMPOSER_TOOL_ACTIVE)}>
+      {percent === undefined ? <Gauge size={16} aria-hidden="true" /> : <ContextRing percent={percent} />}
+      {alert && <span aria-hidden="true" className={cn("text-[12px] font-semibold tabular-nums", contextTone(percent))}>{percent}%</span>}
     </button>
-    {open && position && createPortal(<aside id={id} role="dialog" aria-label={t("chatUsage.title")} aria-modal="false" onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } }}
-      data-chat-usage-popover style={position} className="animate-pop-in fixed z-[45] flex min-w-0 flex-col gap-3.5 overflow-y-auto rounded-2xl border border-hairline/50 bg-menu p-4">
-      <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h2 className="text-[13px] font-semibold text-ink">{t("chatUsage.title")}</h2>
-          <p className="mt-0.5 truncate font-mono text-[11px] text-ink-secondary" title={bot.modelSelection.model}>{bot.modelSelection.model}</p>
-        </div>
-        <button type="button" aria-label={t("common.close")} onClick={close} className="-mr-1 -mt-1 shrink-0 rounded-full p-1.5 text-ink-secondary hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} /></button>
+    {open && shown && <aside id={id} role="dialog" aria-label={t("chatUsage.title")} aria-modal="false" onKeyDown={closeOnEscape}
+      data-chat-usage-popover style={{ maxHeight: space }}
+      className="animate-pop-in absolute bottom-full right-0 z-30 mb-2 flex w-[min(21rem,100%)] origin-bottom-right flex-col gap-4 overflow-y-auto overscroll-contain rounded-2xl border border-hairline/60 bg-menu p-4">
+      <div className="-mb-1 flex min-w-0 items-center justify-between gap-2">
+        <h2 className="text-[13px] font-semibold text-ink">{t("chatUsage.title")}</h2>
+        <button type="button" aria-label={t("common.close")} onClick={close} className="-mr-1.5 shrink-0 rounded-full p-1.5 text-ink-secondary hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} aria-hidden="true" /></button>
       </div>
       <ChatContextDetails bot={bot} messages={messages} />
-      <div className="border-t border-hairline/40 pt-3.5"><PlanUsage key={bot.modelSelection.instanceId} providerId={bot.modelSelection.instanceId} compact /></div>
-    </aside>, document.body)}
-  </>;
+      <div className="border-t border-hairline/40 pt-4"><PlanUsage key={bot.modelSelection.instanceId} providerId={bot.modelSelection.instanceId} compact /></div>
+    </aside>}
+  </div>;
 }
