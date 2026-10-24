@@ -9,7 +9,10 @@ button on the right. While the agent works, the send button is **Stop this
 turn**; once there is a draft, Stop moves beside it and the send button steers
 or queues. The header keeps the agent and thread pills, the runs-on badge,
 **Listen** on project pages, the computer and **More**. It shows Stop only when
-the thread has no composer (a shared thread the reader cannot write in).
+the thread has no composer (a shared thread the reader cannot write in). Below
+30rem of header width it stays one row: the agent pill shrinks to the avatar
+(the agent's name stays in its accessible name and tooltip,
+`Open <name>'s profile`) and the thread pill truncates its title.
 
 ## The model picker
 
@@ -42,11 +45,24 @@ the room between the composer and the header:
 
 `button "Show plan usage and context"` draws a quiet ring for the context
 window. From 80% the ring and the percentage turn warning, from 95% danger. A
-mouse hover peeks at the panel; a click pins it open (the choice persists, as
-before); Escape or the close button unpins it and returns focus to the ring.
-The panel shows the context bar with tokens used and the window, **Compact now**
-once the context is nearly full, the collapsed "How this is measured", and the
-plan's session and weekly limits with their reset times.
+mouse hover peeks at the panel; a click pins it open for this conversation
+only. Like the other popovers it closes on a click outside it, on Escape
+(focus returns to the ring when it was inside the panel), on its close button,
+and when the chat or thread changes or the ring leaves the screen; nothing is
+remembered across chats. The panel shows the context bar with tokens used and
+the window, **Compact now** from 80%, the collapsed "How this is measured",
+and the plan's session and weekly limits with their reset times.
+
+## The Compact chip
+
+From 90% of the context a `button "Compact conversation (93% of context
+used)"` sits left of the ring. It runs the same compaction as **Compact now**
+(`useThreadCompaction`, one request per conversation shared by both), reads
+**Compacting…** with `aria-busy="true"` from the click until the compaction
+turn has finished, and is gone once the compaction lands, because the context
+reading is discarded until the next reply. While the bot works on a turn of
+its own it is disabled with the title "Stop this bot's turn first". Below
+24rem of composer width it keeps only its icon.
 
 ## Run
 
@@ -58,7 +74,7 @@ OMB_VERIFY_PLAYWRIGHT=<path to playwright's index.mjs> \
 It starts disposable fake-engine servers on ports 26610–26800 with the
 repository's fake Claude and Codex, creates Pepper, sends two turns, and serves
 the full app (`scripts/testing/threads-preview.tsx`) with a synthetic
-`/api/plan-usage` report. Headless Chromium captures Midnight and Meadow at
+`/api/plan-usage` report (`scripts/testing/composer-fixture.ts`). Headless Chromium captures Midnight and Meadow at
 1280 and 375 px: the chat, a focused draft, the model picker and the usage
 panel; at 1280 also a search, the update page, attachment chips, a group
 chat's composer and the open picker in every skin. A second server in the fake
@@ -75,10 +91,29 @@ pnpm control:omb ui eval --ui $H --js "document.querySelector('[data-tour=model]
 pnpm control:omb ui snapshot --ui $H --interactive
 ```
 
+### Header, Compact chip and usage dismissal
+
+```sh
+OMB_VERIFY_PLAYWRIGHT=<path to playwright's index.mjs>   node --experimental-strip-types scripts/verify-composer-followups.ts
+```
+
+It starts the same fixture on ports 26810–26900 with Pepper's context at 93%
+of its window, makes Pepper a project's Chief of Staff (so the header has
+**Listen**) and stubs the desktop bridge. In Midnight and Meadow at 1280 and
+375 px it crops the header and records that it is one row with no overlap,
+the runs-on badge, Listen, computer and More present and the agent pill's
+name and tooltip; it records the chip's accessible name, and closes the usage
+panel by clicking the composer and by Escape (focus back on the ring). At 1280
+it also switches to another chat and back, and to a new thread and back, with
+DOM clicks that send no pointerdown, so only the switch can close the panel.
+Last it holds the compaction request to capture **Compacting…**, then waits
+for the chip to go. `docs/verification/evidence/composer-followups/report.json`
+must show `noPageErrors: true` and no `false` check.
+
 ## Tests
 
 ```sh
-pnpm exec vitest run src/components/ModelPicker.test.ts src/components/ModelPicker.interaction.test.ts src/components/ModelPicker.simple.test.ts src/components/ChatUsagePopover.test.ts src/components/ChatUsagePopover.visibility.test.ts src/components/ChatView.controls.test.ts src/components/CallView.composer.test.ts
+pnpm exec vitest run src/components/ModelPicker.test.ts src/components/ModelPicker.interaction.test.ts src/components/ModelPicker.follow.test.ts src/components/ChatUsagePopover.test.ts src/components/ComposerContextTools.test.ts src/components/ChatUsagePopover.visibility.test.ts src/components/ChatView.controls.test.ts src/components/CallView.composer.test.ts
 OMB_UI_E2E=1 pnpm exec vitest run scripts/testing/control-omb-ui.e2e.test.ts scripts/testing/usage-details-ui.e2e.test.ts
 pnpm check:contrast
 ```
@@ -103,6 +138,16 @@ pnpm check:contrast
 The rest of each matrix sits beside these files; `after/skins/` holds the open
 picker and composer in each of the nine skins.
 
+| Follow-up | Dark | Light |
+| --- | --- | --- |
+| Header, 375 | [PNG](evidence/composer-followups/dark-375-header.png) | [PNG](evidence/composer-followups/light-375-header.png) |
+| Header, 1280 | [PNG](evidence/composer-followups/dark-1280-header.png) | [PNG](evidence/composer-followups/light-1280-header.png) |
+| Compact chip at 93%, 1280 | [PNG](evidence/composer-followups/dark-1280-compact-chip.png) | [PNG](evidence/composer-followups/light-1280-compact-chip.png) |
+| Compact chip at 93%, 375 | [PNG](evidence/composer-followups/dark-375-compact-chip.png) | [PNG](evidence/composer-followups/light-375-compact-chip.png) |
+| Usage open, then closed by a click outside | [open](evidence/composer-followups/dark-1280-usage-open.png), [closed](evidence/composer-followups/dark-1280-usage-closed-outside.png) | [open](evidence/composer-followups/light-375-usage-open.png), [closed](evidence/composer-followups/light-375-usage-closed-outside.png) |
+| Usage after a chat switch and back | [PNG](evidence/composer-followups/dark-1280-usage-after-chat-switch.png) | [PNG](evidence/composer-followups/light-1280-usage-after-chat-switch.png) |
+| Compacting, then compacted | [compacting](evidence/composer-followups/dark-1280-compacting.png), [compacted](evidence/composer-followups/dark-1280-compacted.png) | — |
+
 ## What this proves, and what it does not
 
 Proven: the real renderer and store against disposable fake-engine servers,
@@ -111,4 +156,7 @@ nine skins), with real model switching, effort, scope and Stop; the renderer
 tests cover the picker's groups, pages and keyboard model, the usage ring's
 pin, peek and compact action, and the composer's structure. Not proven: a real
 provider's catalog, the Electron shell's dictation and calls, or the packaged
-desktop app.
+desktop app. The follow-up run renders **Listen** with a stubbed desktop
+bridge, so it proves the header's room for the button, not wake listening;
+its compaction is the server's real compaction turn with the fake engine's
+canned summary, not a real model's.

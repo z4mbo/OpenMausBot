@@ -147,6 +147,21 @@ describe("header name", () => {
     expect(button(pinned)).toContain('data-testid="computer-button-live"');
   });
 
+  it.each([true, false])("keeps a narrow header on one row: the agent pill shrinks to its avatar, still named (advanced %s)", (advanced) => {
+    fixture.advanced = advanced;
+    const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
+    const row = markup.match(/data-chathead-row="true" class="([^"]*)"/)?.[1] ?? "";
+    const controls = markup.match(/data-chathead-controls="true" class="([^"]*)"/)?.[1] ?? "";
+    expect(row).not.toContain("flex-wrap");
+    expect(controls).not.toContain("flex-wrap");
+    expect(markup).not.toMatch(/data-chathead-identity="true" class="[^"]*basis-full/);
+    const pill = markup.slice(markup.indexOf("data-chathead-pill"), markup.indexOf("data-chathead-thread"));
+    expect(pill).toContain("@max-[30rem]/chathead:shrink-0");
+    expect(pill).toMatch(/title="Open Pepper&#x27;s profile" aria-label="Open Pepper&#x27;s profile"/);
+    expect(pill).toMatch(/class="[^"]*@max-\[30rem\]\/chathead:hidden[^"]*"[^>]*>(<span[^>]*>)*[^<]*Pepper/);
+    fixture.advanced = true;
+  });
+
   it("centres the bot in the header's middle column, with the controls in the last", () => {
     const markup = renderToStaticMarkup(createElement(ChatView, { bot }));
     const row = markup.match(/data-chathead-row="true" class="([^"]*)"/)?.[1] ?? "";
@@ -438,15 +453,14 @@ describe("thread control placement", () => {
     expect(markup).not.toMatch(/class="[^"]*chat-text[^"\n]*bg-bubble-user/);
   });
 
-  it("wraps the header into a name line and a chip line when the column is narrow", () => {
+  it("keeps a narrow header on one row: the identity gives way, the controls keep their size", () => {
     const markup = renderToStaticMarkup(createElement(ChatView, { bot: { ...bot, busy: false } }));
     expect(markup).toContain("@container/chathead");
-    const row = /data-chathead-row="[^"]*" class="([^"]*)"/.exec(markup)!;
-    expect(row[1].split(" ")).toContain("@max-[30rem]/chathead:flex-wrap");
     const identity = /data-chathead-identity="[^"]*" class="([^"]*)"/.exec(markup)!;
-    expect(identity[1].split(" ")).toEqual(expect.arrayContaining(["min-w-0", "@max-[30rem]/chathead:basis-full"]));
+    expect(identity[1].split(" ")).toContain("min-w-0");
     const controls = /data-chathead-controls="[^"]*" class="([^"]*)"/.exec(markup)!;
-    expect(controls[1].split(" ")).toEqual(expect.arrayContaining(["shrink-0", "@max-[30rem]/chathead:ml-auto", "@max-[30rem]/chathead:flex-wrap"]));
+    expect(controls[1].split(" ")).toContain("shrink-0");
+    expect(`${identity[1]} ${controls[1]}`).not.toMatch(/flex-wrap|basis-full/);
   });
 
   it("keeps the Chief of Staff badge on one line instead of stacking a word per line", () => {

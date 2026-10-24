@@ -6,9 +6,10 @@ import { COMPOSER_TOOL_ACTIVE, COMPOSER_TOOL_SHAPE } from "@/lib/composer-tool";
 import { t } from "@/lib/i18n";
 import { formatTokens, usageDetail } from "@/lib/usage";
 import { compactedSinceReading, threadContextWarning } from "@/lib/context-warning";
-import { setChatContextDetails, setChatUsageOpen, useChatContextDetails, useChatUsageOpen } from "@/lib/chat-usage-preferences";
+import { setChatContextDetails, useChatContextDetails } from "@/lib/chat-usage-preferences";
+import { usePopoverDismiss } from "@/hooks/use-popover-dismiss";
 import { useSpaceAbove } from "@/hooks/use-space-above";
-import { useCompact } from "./ContextWarning";
+import { useThreadCompaction } from "@/hooks/use-thread-compaction";
 import { PlanUsage } from "./PlanUsage";
 
 const PEEK_OPEN_MS = 280;
@@ -47,7 +48,7 @@ export function ChatContextDetails({ bot, messages }: { bot: Bot; messages: read
   const expanded = useChatContextDetails();
   const { usage, stale, tokens, window, reported, percent } = chatContextReading(bot, messages, state.instances);
   const warning = threadContextWarning(usage, messages);
-  const { pending, run } = useCompact();
+  const { compacting, blocked, compact } = useThreadCompaction(bot);
   return <section aria-label={t("chatUsage.context")} className="grid gap-2">
     <div className="flex min-w-0 items-baseline justify-between gap-3">
       <h3 className="text-[12.5px] font-medium text-ink">{t("chatUsage.context")}</h3>
@@ -67,10 +68,10 @@ export function ChatContextDetails({ bot, messages }: { bot: Bot; messages: read
     </div>
     {warning && <div role="status" className="mt-1 flex items-start gap-3 rounded-xl bg-warning/10 px-3 py-2.5">
       <p className="min-w-0 flex-1 text-[11.5px] leading-relaxed text-ink-secondary">{t("contextWarning.threadHint", { name: bot.name, percent: warning.percent })}</p>
-      <button type="button" disabled={Boolean(bot.busy) || pending} onClick={() => run(`/api/bots/${bot.id}/compact`, { threadId: bot.threadId })}
-        title={bot.busy ? t("contextWarning.busy") : undefined}
+      <button type="button" disabled={blocked || compacting} onClick={compact}
+        title={blocked ? t("contextWarning.busy") : undefined}
         className="ui-button ui-button-sm shrink-0 rounded-full">
-        {pending ? t("contextWarning.compacting") : t("contextWarning.compactNow")}
+        {compacting ? t("contextWarning.compacting") : t("contextWarning.compactNow")}
       </button>
     </div>}
     <details open={expanded} onToggle={event => setChatContextDetails(event.currentTarget.open)} className="group/context">
@@ -103,11 +104,22 @@ function useShown(trigger: RefObject<HTMLElement | null>, active: boolean) {
   return shown;
 }
 
+function useOnHidden(shown: boolean, onHidden: () => void) {
+  const was = useRef(shown);
+  useEffect(() => {
+    if (was.current && !shown) onHidden();
+    was.current = shown;
+  });
+}
+
 export function ChatUsagePopover({ bot, messages }: { bot: Bot; messages: readonly Message[] }) {
-  const pinned = useChatUsageOpen();
+  const conversation = `${bot.id}:${bot.threadId}`;
+  const [pinnedIn, setPinnedIn] = useState<string | null>(null);
+  const pinned = pinnedIn === conversation;
   const [peek, setPeek] = useState(false);
   const open = pinned || peek;
   const id = useId();
+  const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const timer = useRef<number | undefined>(undefined);
   const shown = useShown(trigger, open);
@@ -122,16 +134,19 @@ export function ChatUsagePopover({ bot, messages }: { bot: Bot; messages: readon
     if (next === peek) return;
     timer.current = window.setTimeout(() => setPeek(next), next ? PEEK_OPEN_MS : PEEK_CLOSE_MS);
   };
-  const close = () => { window.clearTimeout(timer.current); setPeek(false); setChatUsageOpen(false); trigger.current?.focus(); };
+  const dismiss = () => { window.clearTimeout(timer.current); setPeek(false); setPinnedIn(null); };
+  const closeToGauge = () => { dismiss(); trigger.current?.focus(); };
+  usePopoverDismiss(open && shown, root, dismiss);
+  useOnHidden(open && shown, dismiss);
   const closeOnEscape = (event: KeyboardEvent) => {
     if (!open || event.key !== "Escape") return;
     event.preventDefault();
     event.stopPropagation();
-    close();
+    closeToGauge();
   };
-  return <div className="flex shrink-0" onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
+  return <div ref={root} className="flex shrink-0" onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
     <button ref={trigger} type="button" aria-label={t("chatUsage.toggle")} aria-expanded={open && shown} aria-controls={id} aria-haspopup="dialog"
-      onClick={() => { window.clearTimeout(timer.current); setPeek(false); setChatUsageOpen(!pinned); }} onKeyDown={closeOnEscape}
+      onClick={() => { window.clearTimeout(timer.current); setPeek(false); setPinnedIn(pinned ? null : conversation); }} onKeyDown={closeOnEscape}
       title={percent === undefined ? t("chatUsage.toggle") : t("chatUsage.contextPercent", { percent })} data-context-percent={percent}
       className={cn(COMPOSER_TOOL_SHAPE, "min-w-8 gap-1", alert ? "pl-1.5 pr-2" : "w-8", open && COMPOSER_TOOL_ACTIVE)}>
       {percent === undefined ? <Gauge size={16} aria-hidden="true" /> : <ContextRing percent={percent} />}
@@ -142,7 +157,7 @@ export function ChatUsagePopover({ bot, messages }: { bot: Bot; messages: readon
       className="animate-pop-in absolute bottom-full right-0 z-30 mb-2 flex w-[min(21rem,100%)] origin-bottom-right flex-col gap-4 overflow-y-auto overscroll-contain rounded-2xl border border-hairline/60 bg-menu p-4">
       <div className="-mb-1 flex min-w-0 items-center justify-between gap-2">
         <h2 className="text-[13px] font-semibold text-ink">{t("chatUsage.title")}</h2>
-        <button type="button" aria-label={t("common.close")} onClick={close} className="-mr-1.5 shrink-0 rounded-full p-1.5 text-ink-secondary hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} aria-hidden="true" /></button>
+        <button type="button" aria-label={t("common.close")} onClick={closeToGauge} className="-mr-1.5 shrink-0 rounded-full p-1.5 text-ink-secondary hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} aria-hidden="true" /></button>
       </div>
       <ChatContextDetails bot={bot} messages={messages} />
       <div className="border-t border-hairline/40 pt-4"><PlanUsage key={bot.modelSelection.instanceId} providerId={bot.modelSelection.instanceId} compact /></div>

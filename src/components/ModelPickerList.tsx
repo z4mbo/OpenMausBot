@@ -157,7 +157,6 @@ export function ModelPickerList({
   onApiKeys,
   apiKeysLabel,
   onClose,
-  startOn,
 }: {
   instances: InstanceInfo[];
   selection: ModelSelection;
@@ -172,10 +171,9 @@ export function ModelPickerList({
   onApiKeys?: () => void;
   apiKeysLabel: string;
   onClose: () => void;
-  startOn?: string;
 }) {
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState<Page>(() => startOn ? { kind: "provider", key: startOn } : { kind: "list" });
+  const [page, setPage] = useState<Page>({ kind: "list" });
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
   const [chosen, setChosen] = useState<Partial<Record<SignInFamily, string>>>({});
   const searchRef = useRef<HTMLInputElement>(null);

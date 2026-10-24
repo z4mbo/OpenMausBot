@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { Check, ChevronDown, Link2, Search, X } from "lucide-react";
+import { Check, ChevronDown, Link2, X } from "lucide-react";
 import { useStore, currentTaskBot, type Bot, type InstanceInfo, type ModelSelection } from "@/state/store";
 import type { EffortLevel } from "../../shared/wire";
 import type { ModelVariantOption } from "../../shared/runtime-events";
-import { filterCustomModels, partitionCustomModels, suggestedModels } from "@/lib/custom-models";
-import { configuredModelInstances, isClaudeAccount, isCustomOnly, SIGN_IN_FAMILY_LABEL, signInFamily, splitEngineRail, type SignInFamily } from "@/lib/engine-rail";
+import { configuredModelInstances, isClaudeAccount, signInFamily } from "@/lib/engine-rail";
 import { InstanceProviderMark } from "./ProviderIcons";
 import { hasSavedApiKey, needsCli, needsSignIn } from "./EngineSetup";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -12,25 +11,20 @@ import { approvalModeFor, modelSwitchNeedsAsk } from "../../shared/approval-mode
 import { cn } from "@/lib/cn";
 import { COMPOSER_TOOL_ACTIVE } from "@/lib/composer-tool";
 import { useMenuMotion } from "./MenuMotion";
-import { repeatedModelLabels, SimpleModelPane } from "./SimpleModelPane";
-import { useAdvancedMode } from "@/lib/interface-mode";
-import { useOwnerOrAdmin } from "@/lib/use-owner-or-admin";
-import { compactModelLabel, friendlyEffort, simpleEffortLevels } from "@/lib/model-friendly";
+import { compactModelLabel } from "@/lib/model-friendly";
 import { t } from "@/lib/i18n";
 import { threadsOnOwnModel } from "../../shared/thread-model";
 import { ThreadModelsLine } from "./ThreadModelsLine";
 import { Select } from "./Select";
 import { ModelFallbackSettings, modelLabel } from "./ModelFallbackSettings";
 import { RemoteModelPicker } from "./RemoteModelPicker";
-import { ClaudeAccountSelect, ModelPickerList } from "./ModelPickerList";
-import { offersLocalModels, pickerGroupKey, probeLocalModels } from "./model-picker-groups";
+import { ModelPickerList } from "./ModelPickerList";
+import { probeLocalModels } from "./model-picker-groups";
 import { useSpaceAbove } from "@/hooks/use-space-above";
 import { modelSelectionForPick } from "@/lib/model-picker-selection";
 export { modelSelectionForPick } from "@/lib/model-picker-selection";
 export { ClaudeAccountSelect } from "./ModelPickerList";
 export { LOCAL_PROBE_TIMEOUT_MS, offersLocalModels, probeLocalModels } from "./model-picker-groups";
-
-const COMPACT_MODEL_COUNT = 5;
 
 function modelProvider(instance: InstanceInfo | undefined, model: string): string | undefined {
   return instance?.models.options.find((option) => option.id === model)?.provider;
@@ -226,70 +220,6 @@ export function FollowBotModelRow({ name, model, follows, onPick }: { name: stri
   );
 }
 
-function ModelSearch({
-  value,
-  onChange,
-  onEscape,
-  local,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onEscape: () => void;
-  local: boolean;
-}) {
-  return (
-    <div className="shrink-0 px-2 pb-2">
-      <div className="flex items-center gap-2 rounded-lg border border-hairline/40 bg-inset px-2.5 py-1.5 focus-within:border-focus">
-        <Search size={13} className="shrink-0 text-ink-secondary" />
-        <input
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key !== "Escape") return;
-            event.stopPropagation();
-            onEscape();
-          }}
-          placeholder={t("model.search")}
-          aria-label={local ? t("model.searchLocal") : t("model.search")}
-          className="w-full bg-transparent text-[12.5px] text-ink placeholder:text-ink-secondary focus:outline-none"
-        />
-      </div>
-    </div>
-  );
-}
-
-export type RailProvider = {
-  instance: InstanceInfo;
-  target: InstanceInfo;
-  label: string;
-  selected: boolean;
-};
-
-export function railProviders(instances: InstanceInfo[], selectedInstance: InstanceInfo | undefined,
-  claudeInstance: InstanceInfo | undefined, openaiInstance: InstanceInfo | undefined) {
-  const firstOf: Record<SignInFamily, InstanceInfo | undefined> = {
-    claude: instances.find((instance) => isClaudeAccount(instance) && instance.claudeAccount?.isDefault)
-      ?? instances.find(isClaudeAccount),
-    openai: instances.find((instance) => signInFamily(instance) === "openai"),
-  };
-  const opensOn: Record<SignInFamily, InstanceInfo | undefined> = { claude: claudeInstance, openai: openaiInstance };
-  const providers = instances.filter((instance) => {
-    const family = signInFamily(instance);
-    return !family || instance === firstOf[family];
-  });
-  const entry = (instance: InstanceInfo): RailProvider => {
-    const family = signInFamily(instance);
-    return {
-      instance,
-      target: family ? opensOn[family] ?? instance : instance,
-      label: family ? SIGN_IN_FAMILY_LABEL[family] : instance.displayName,
-      selected: family ? signInFamily(selectedInstance) === family : instance.instanceId === selectedInstance?.instanceId,
-    };
-  };
-  const { subscription, api, custom } = splitEngineRail(providers);
-  return { subscription: subscription.map(entry), api: api.map(entry), custom: custom.map(entry) };
-}
-
 function apiKeysLabel(instances: InstanceInfo[]): string {
   return t(instances.some(hasSavedApiKey) ? "model.addOrChangeApiKeys" : "model.addApiKeys");
 }
@@ -335,8 +265,6 @@ export function ScopeSegments({ scope, onScope }: { scope: "thread" | "bot"; onS
 }
 
 const POPOVER_WIDTH = 420;
-export const SIMPLE_POPOVER_WIDTH = 380;
-const SIMPLE_SEARCH_AFTER = 12;
 
 export function ModelPicker({
   bot,
@@ -354,19 +282,9 @@ export function ModelPicker({
   const { state, dispatch, refreshInstances, refreshModels: refreshInstanceModels } = useStore();
   const [open, setOpen] = useState(false);
   const motion = useMenuMotion(open && !bot.busy);
-  const [railId, setRailId] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [showAll, setShowAll] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [probingLocal, setProbingLocal] = useState<string | null>(null);
   const [scope, setScope] = useState<"bot" | "thread">("thread");
-  const advanced = useAdvancedMode();
-  const ownerOrAdmin = useOwnerOrAdmin();
-  // Cloud guests change only their own conversation's model, never the shared bot's default; thread-only until
-  // authority loads.
-  const simpleUpdatesBotDefault = !state.config?.cloudHome || ownerOrAdmin === true;
-  const [fullView, setFullView] = useState(false);
-  const [setupFor, setSetupFor] = useState<string | undefined>(undefined);
   const [pendingSwitch, setPendingSwitch] = useState<{ botId: string; threadId: string;
     selection: ModelSelection; updateBotDefault: boolean; name: string } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -374,12 +292,7 @@ export function ModelPicker({
   const [changedBotModel, setChangedBotModel] = useState(false);
   const refreshingRef = useRef(false);
   const remoteConfirmation = useRef(false);
-  const lastClaudeIdRef = useRef<string | null>(null);
-  const lastOpenaiIdRef = useRef<string | null>(null);
   const space = useSpaceAbove(open && !contained, triggerRef, 600);
-
-  const simpleView = !advanced && !fullView;
-  const popoverWidth = simpleView ? SIMPLE_POPOVER_WIDTH : POPOVER_WIDTH;
 
   const selection = bot.modelSelection;
   const active = state.instances.find((instance) => instance.instanceId === selection.instanceId);
@@ -388,13 +301,8 @@ export function ModelPicker({
     active?.models.options.find((option) => option.id === selection.model)?.variants?.find((option) => option.id === selection.variant)
       ?? { id: selection.variant, label: selection.variant },
   );
-  const claudeAccounts = pickerInstances.filter(isClaudeAccount);
-  const openaiAccounts = pickerInstances.filter((instance) => signInFamily(instance) === "openai");
   const multipleClaudeAccounts = state.instances.filter(isClaudeAccount).length > 1;
   const showActiveAccount = (multipleClaudeAccounts && isClaudeAccount(active)) || Boolean(active?.snapshot.chatgptPlan);
-  const railInstance =
-    pickerInstances.find((instance) => instance.instanceId === (railId ?? selection.instanceId)) ?? pickerInstances[0];
-  const customOnly = isCustomOnly(railInstance);
 
   const refreshLocalInstances = useCallback(() => {
     if (refreshingRef.current) return;
@@ -445,8 +353,7 @@ export function ModelPicker({
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (remoteConfirmation.current || event.key !== "Escape") return;
-      if (simpleView && query) setQuery("");
-      else close();
+      close();
     };
     window.addEventListener("mousedown", closeOnOutsideClick);
     window.addEventListener("keydown", closeOnEscape);
@@ -454,12 +361,7 @@ export function ModelPicker({
       window.removeEventListener("mousedown", closeOnOutsideClick);
       window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [open, query, simpleView, close]);
-
-  const resetList = () => {
-    setQuery("");
-    setShowAll(false);
-  };
+  }, [open, close]);
 
   const lookForLocal = (instance: InstanceInfo) => {
     if (needsCli(instance) || instance.policy || probingLocal === instance.instanceId) return;
@@ -476,13 +378,6 @@ export function ModelPicker({
   const openEngines = () => {
     setOpen(false);
     dispatch({ type: "toggleAppSettings", open: true, section: "engines" });
-  };
-
-  const selectRail = (instance: InstanceInfo) => {
-    if (isClaudeAccount(instance)) lastClaudeIdRef.current = instance.instanceId;
-    if (signInFamily(instance) === "openai") lastOpenaiIdRef.current = instance.instanceId;
-    setRailId(instance.instanceId);
-    resetList();
   };
 
   const profile = state.bots.find((candidate) => candidate.id === bot.id) ?? bot;
@@ -511,7 +406,7 @@ export function ModelPicker({
   const pick = (instance: InstanceInfo, model: string) => {
     if (bot.busy || instance.policy) return;
     const nextSelection = modelSelectionForPick(selection, instance, model);
-    const updateBotDefault = !threadId || (simpleView ? simpleUpdatesBotDefault : scope === "bot");
+    const updateBotDefault = !threadId || scope === "bot";
     const targets = updateBotDefault ? [currentTaskBot(profile, threadId ?? bot.threadId), profile] : [bot];
     if (targets.some((target) => modelSwitchNeedsAsk(approvalModeFor(target),
       state.instances.find((candidate) => candidate.instanceId === target.modelSelection.instanceId)?.driverKind,
@@ -532,54 +427,9 @@ export function ModelPicker({
     close();
   };
 
-  const official = railInstance?.models.options.filter((option) => !option.custom) ?? [];
-  const custom = railInstance?.models.options.filter((option) => option.custom) ?? [];
-  const currentModel = selection.instanceId === railInstance?.instanceId ? selection.model : undefined;
-
-  const simpleOpensOn = (accounts: InstanceInfo[], lastId: string | null) =>
-    accounts.find((account) => account.instanceId === lastId)
-      ?? accounts.find((account) => account.instanceId === selection.instanceId)
-      ?? accounts.find((account) => !needsCli(account) && !needsSignIn(account))
-      ?? accounts[0];
-  const simpleProviders = (() => {
-    const groups = railProviders(pickerInstances, railInstance,
-      simpleOpensOn(claudeAccounts, lastClaudeIdRef.current), simpleOpensOn(openaiAccounts, lastOpenaiIdRef.current));
-    return [...groups.subscription, ...groups.api, ...groups.custom];
-  })();
-  const simpleFamily = signInFamily(railInstance);
-  const simpleAccounts = simpleFamily === "claude" ? claudeAccounts : simpleFamily === "openai" ? openaiAccounts : [];
-  const simpleLabel = simpleProviders.find((provider) => provider.selected)?.label ?? railInstance?.displayName ?? "";
-  const simpleSignIn = !customOnly && needsSignIn(railInstance);
-  const simpleOfficial = customOnly || simpleSignIn ? [] : official;
-  const simpleLocal = partitionCustomModels(custom);
-  const simpleAll = [...simpleOfficial, ...simpleLocal.pinned, ...simpleLocal.rest];
-  const simpleSetup = Boolean(railInstance && (railInstance.policy || needsCli(railInstance) || (simpleSignIn && simpleAll.length === 0)));
-  const simpleSuggested = railInstance
-    ? suggestedModels(simpleAll, railInstance.models.default, currentModel, COMPACT_MODEL_COUNT)
-    : [];
-  const simpleOpened = [...simpleSuggested, ...simpleAll.filter((option) => !simpleSuggested.includes(option))];
-  const simpleSearch = showAll && simpleAll.length > SIMPLE_SEARCH_AFTER;
-  const simpleQuery = simpleSearch ? query : "";
-  const simpleModels = simpleQuery ? filterCustomModels(simpleOpened, simpleQuery) : showAll ? simpleOpened : simpleSuggested;
-  const lookForLocalIn = (instance: InstanceInfo) => {
-    if (offersLocalModels(instance, instance.models.options.filter((option) => option.custom).length)) lookForLocal(instance);
-  };
-  const browseSimple = (instance: InstanceInfo) => {
-    selectRail(instance);
-    lookForLocalIn(instance);
-  };
   const activeLevels = active?.capabilities?.effortLevels ?? [];
   const setEffort = (level: EffortLevel | undefined, updateBotDefault: boolean) => dispatch({ type: "setModel", botId: bot.id, threadId,
     ...(updateBotDefault ? { updateBotDefault: true } : {}), selection: { ...selection, effort: level } });
-  const simpleEffort = activeLevels.length > 0 ? {
-    levels: simpleEffortLevels(activeLevels, selection.effort),
-    current: selection.effort,
-    onPick: (level: EffortLevel) => setEffort(level, Boolean(threadId) && simpleUpdatesBotDefault),
-  } : null;
-
-  const botModelId = follows !== undefined && profile.modelSelection.instanceId === railInstance?.instanceId
-    ? profile.modelSelection.model : undefined;
-
   const summary = active
     ? `${active.displayName} · ${modelLabel(active, selection.model)}${
         modelProvider(active, selection.model) ? ` · ${modelProvider(active, selection.model)}` : ""
@@ -587,7 +437,7 @@ export function ModelPicker({
     : selection.model;
   const followLine = follows === true ? `\n${t("model.followsBot", { name: profile.name })}` : follows === false ? `\n${t("model.ownModel")}` : "";
   const shownLabel = contained ? modelLabel(active, selection.model) : compactModelLabel(modelLabel(active, selection.model), signInFamily(active));
-  const footer = !simpleView && !contained && (Boolean(threadId) || activeLevels.length > 0 || Boolean(active?.capabilities?.modelVariants));
+  const footer = !contained && (Boolean(threadId) || activeLevels.length > 0 || Boolean(active?.capabilities?.modelVariants));
 
   const trigger = (
     <button data-tour="model"
@@ -596,20 +446,8 @@ export function ModelPicker({
       disabled={Boolean(bot.busy)}
       onClick={() => {
         if (bot.busy) return;
-        if (active && isClaudeAccount(active)) lastClaudeIdRef.current = active.instanceId;
-        if (active && signInFamily(active) === "openai") lastOpenaiIdRef.current = active.instanceId;
-        const initial = pickerInstances.find((instance) => instance.instanceId === selection.instanceId) ?? pickerInstances[0];
-        setRailId(initial?.instanceId ?? null);
         setChangedBotModel(false);
-        setOpen((wasOpen) => {
-          const next = !wasOpen;
-          if (next) {
-            resetList();
-            setFullView(false);
-            setSetupFor(undefined);
-          }
-          return next;
-        });
+        setOpen((wasOpen) => !wasOpen);
       }}
       aria-expanded={open && !bot.busy}
       aria-haspopup="dialog"
@@ -634,7 +472,7 @@ export function ModelPicker({
           <span data-model-variant className="max-w-[120px] shrink-0 truncate font-normal text-ink-tertiary">· {selectedVariantLabel}</span>
         ) : selection.effort && (
           <span data-model-effort className="shrink-0 font-normal text-ink-tertiary @max-[30rem]/composer:hidden">
-            · {advanced ? effortLabel(selection.effort) : friendlyEffort(selection.effort)}
+            · {effortLabel(selection.effort)}
           </span>
         )}
       </span>
@@ -662,7 +500,7 @@ export function ModelPicker({
           role="dialog"
           aria-label={t("model.choose")}
           {...motion.exitProps}
-          style={contained ? undefined : { width: popoverWidth, maxHeight: space }}
+          style={contained ? undefined : { width: POPOVER_WIDTH, maxHeight: space }}
           className={cn(
             "@container/picker flex flex-col overflow-hidden rounded-2xl border border-hairline/60 bg-menu",
             contained
@@ -671,78 +509,21 @@ export function ModelPicker({
             motion.className,
           )}
         >
-          {simpleView ? (
-            <>
-              {followRow && <div className="shrink-0 border-b border-hairline/40 py-1.5">{followRow}</div>}
-              <div className="flex min-h-0 min-w-0 flex-1">
-                <SimpleModelPane
-                  providers={simpleProviders}
-                  onProvider={browseSimple}
-                  account={railInstance && simpleAccounts.length > 1 ? (
-                    <ClaudeAccountSelect accounts={simpleAccounts} selectedId={railInstance.instanceId} onSelect={browseSimple} />
-                  ) : undefined}
-                  managedBy={railInstance?.policy?.organizationName ?? null}
-                  needsSetup={railInstance && simpleSetup ? { name: simpleAccounts.length > 1 ? railInstance.displayName : simpleLabel } : null}
-                  signIn={railInstance && simpleSignIn && !simpleSetup ? { name: simpleLabel } : null}
-                  onSetUp={() => {
-                    setSetupFor(railInstance ? pickerGroupKey(railInstance) : undefined);
-                    setFullView(true);
-                  }}
-                  models={simpleModels}
-                  repeatedLabels={repeatedModelLabels(simpleAll)}
-                  query={simpleQuery}
-                  showAll={simpleAll.length > simpleSuggested.length && !simpleQuery ? {
-                    count: simpleAll.length,
-                    open: showAll,
-                    onToggle: () => {
-                      if (showAll) {
-                        resetList();
-                        return;
-                      }
-                      setShowAll(true);
-                      if (railInstance) lookForLocalIn(railInstance);
-                    },
-                  } : null}
-                  onRefresh={() => refreshFor(railInstance?.instanceId)}
-                  refreshing={refreshing}
-                  search={simpleSearch ? (
-                    <ModelSearch
-                      value={query}
-                      local={simpleOfficial.length === 0}
-                      onChange={setQuery}
-                      onEscape={() => (query ? setQuery("") : setOpen(false))}
-                    />
-                  ) : undefined}
-                  currentModelId={currentModel}
-                  botModelId={botModelId}
-                  onPick={(model) => railInstance && pick(railInstance, model)}
-                  variantsRow={active?.capabilities?.modelVariants ? (
-                    <ModelVariantRow compact wide bot={bot} threadId={threadId} updateBotDefault={Boolean(threadId) && simpleUpdatesBotDefault}
-                      label={<span className="shrink-0 text-[12px] font-medium text-ink-secondary">{t("model.simple.reasoning")}</span>} />
-                  ) : undefined}
-                  effort={simpleEffort}
-                  onManage={openEngines}
-                />
-              </div>
-            </>
-          ) : (
-            <ModelPickerList
-              instances={pickerInstances}
-              selection={selection}
-              botModel={follows !== undefined ? profile.modelSelection : undefined}
-              lead={followRow}
-              refreshing={refreshing}
-              onRefresh={(instance) => refreshFor(instance.instanceId)}
-              probing={probingLocal}
-              onProbe={lookForLocal}
-              onPick={pick}
-              onSettings={openEngines}
-              onApiKeys={window.ogb?.remoteClient?.active === true ? undefined : openApiKeys}
-              apiKeysLabel={apiKeysLabel(pickerInstances)}
-              onClose={close}
-              startOn={setupFor}
-            />
-          )}
+          <ModelPickerList
+            instances={pickerInstances}
+            selection={selection}
+            botModel={follows !== undefined ? profile.modelSelection : undefined}
+            lead={followRow}
+            refreshing={refreshing}
+            onRefresh={(instance) => refreshFor(instance.instanceId)}
+            probing={probingLocal}
+            onProbe={lookForLocal}
+            onPick={pick}
+            onSettings={openEngines}
+            onApiKeys={window.ogb?.remoteClient?.active === true ? undefined : openApiKeys}
+            apiKeysLabel={apiKeysLabel(pickerInstances)}
+            onClose={close}
+          />
           {footer && (
             <div data-model-picker-footer className="@container/pickerfoot shrink-0 border-t border-hairline/40 px-3 py-2.5">
             <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 @max-[22rem]/pickerfoot:grid-cols-1 @max-[22rem]/pickerfoot:gap-y-1.5">
@@ -765,7 +546,7 @@ export function ModelPicker({
             </div>
             </div>
           )}
-          <RemoteModelPicker key={`${profile.id}:${threadId ?? bot.threadId}`} bot={bot} threadId={threadId} updateBotDefault={!threadId || (simpleView ? simpleUpdatesBotDefault : scope === "bot")} onChosen={() => setOpen(false)} confirmationRef={remoteConfirmation} />
+          <RemoteModelPicker key={`${profile.id}:${threadId ?? bot.threadId}`} bot={bot} threadId={threadId} updateBotDefault={!threadId || scope === "bot"} onChosen={() => setOpen(false)} confirmationRef={remoteConfirmation} />
           <ModelFallbackSettings key={profile.id} bot={profile} compact />
         </div>
       )}

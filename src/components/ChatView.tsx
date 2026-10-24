@@ -2,6 +2,7 @@ import { NewConversationInstead } from "./NewConversationInstead";
 export { NewConversationInstead } from "./NewConversationInstead";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
 import { SharedAgentRunsOn } from "./RunsOnBadge";
+import { ChatHeadAgentPill } from "./ChatHeadAgentPill";
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useAdvancedMode } from "@/lib/interface-mode";
@@ -14,7 +15,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  Crown,
   Monitor,
   Pin,
   RefreshCw,
@@ -66,11 +66,9 @@ import { isCancelledTranscriptRow } from "../../shared/client-cancel";
 import { BotAvatar } from "./Avatar";
 import { AgentProjectBar, ChiefSectionBar, ChiefSectionFrame, useChiefSection } from "./ChiefSections";
 import { isWorkspaceSection } from "../../shared/origin-workspaces";
-import { HEADER_RENAME, SHOWS_CHIEF_LABEL } from "@/lib/origin-teams";
-import { ProjectMark } from "./ProjectMark";
 import { TurnPresence } from "./TurnPresence";
 import { showToolCallsEnabled, skillAuthoringEnabled } from "@/lib/feature-flags";
-import { normalizeState, stateForBot } from "@/lib/mascot";
+import { normalizeState } from "@/lib/mascot";
 import { peerLine, peerRequest, type PeerLine } from "@/lib/peer-message";
 import { showWorkingDots } from "@/lib/turn-tail";
 import { lastNonReceipt } from "@/lib/receipts";
@@ -1024,18 +1022,6 @@ function PinnedBanner({
   );
 }
 
-const CHATHEAD_PILL = "flex h-9 min-w-0 items-center gap-2.5 rounded-full border border-hairline/50 bg-control/50 pl-1.5 text-ink transition-colors @min-[30rem]/chathead:min-w-[8rem]";
-
-function chiefOfStaffBadge(bot: Bot) {
-  if (!bot.chiefOfStaff || isWorkspaceSection(bot.section)) return null;
-  if (!SHOWS_CHIEF_LABEL) return <ProjectMark botId={bot.id} size={13} />;
-  return (
-    <span title={t("chat.chiefOfStaff")} className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-accent/12 px-2 py-0.5 text-[11px] font-medium text-accent @max-4xl/chathead:px-1.5">
-      <Crown size={11} aria-hidden="true" /> <span className="@max-4xl/chathead:sr-only">{t("chat.chiefOfStaff")}</span>
-    </span>
-  );
-}
-
 function DelegatedTranscript({ agent, threadId, messages }: { agent: Bot; threadId: string; messages: Message[] }) {
   const parent = useChatRows();
   const rows = useMemo((): ChatRows => ({
@@ -1279,66 +1265,9 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
           embedded || projectPage ? "pl-3 md:pl-5" : "pl-11 md:pl-5",
         )}
       >
-        <div data-chathead-row className="flex items-center justify-between @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:gap-y-1 @min-[30rem]/chathead:grid @min-[30rem]/chathead:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(max-content,1fr)]">
-        <div data-chathead-identity className="flex min-w-0 items-center gap-2 @max-[30rem]/chathead:basis-full @min-[30rem]/chathead:col-start-2 @min-[30rem]/chathead:justify-self-center" style={headerNoDragStyle}>
-          {advanced ? (
-            <div data-chathead-pill className={cn(CHATHEAD_PILL, "pr-2")}>
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
-                className="flex shrink-0 items-center justify-center rounded-full"
-                title={t("chat.openProfile")}
-                aria-label={t("chat.openProfileAria", { name: bot.name })}
-              >
-                <BotAvatar
-                  bot={bot}
-                  state={stateForBot({ ...bot, messages })}
-                  size={26}
-                  motion={mascotMotion?.kind ?? "none"}
-                  motionKey={mascotMotion?.nonce ?? 0}
-                  animated={headerAnimated}
-                />
-              </button>
-              <RenameTitle
-                value={bot.name}
-                onCommit={(name) => {
-                  if (window.ogb?.remoteClient?.active) {
-                    void api(`/api/bots/${bot.id}/profile`, { method: "PATCH", body: JSON.stringify({ name }) })
-                      .then(({ bot: updated }) => dispatch({ type: "botPatched", bot: updated }))
-                      .catch((cause) => dispatch({ type: "error", message: cause instanceof Error ? cause.message : String(cause) }));
-                  } else {
-                    dispatch({ type: "updateBot", botId: bot.id, patch: { name } });
-                  }
-                }}
-                onActivate={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
-                showEditButton={HEADER_RENAME}
-                className="truncate text-[14px] font-semibold text-ink"
-                editButtonClassName="size-6 rounded-full"
-                inputClassName="max-w-[220px] rounded-full bg-inset px-2 py-0.5 text-[14px] font-semibold"
-              />
-              {chiefOfStaffBadge(bot)}
-            </div>
-          ) : (
-            <button
-              type="button"
-              data-chathead-pill
-              onClick={() => dispatch({ type: "toggleSettings", open: true, ...(embedded ? { botId: bot.id } : {}) })}
-              title={t("chat.openProfile")}
-              aria-label={t("chat.openProfileAria", { name: bot.name })}
-              className={cn(CHATHEAD_PILL, "pr-5 hover:bg-raised-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus")}
-            >
-              <BotAvatar
-                bot={bot}
-                state={stateForBot({ ...bot, messages })}
-                size={26}
-                motion={mascotMotion?.kind ?? "none"}
-                motionKey={mascotMotion?.nonce ?? 0}
-                animated={headerAnimated}
-              />
-              <span className="min-w-0 truncate text-[14px] font-semibold text-ink">{bot.name}</span>
-              {chiefOfStaffBadge(bot)}
-            </button>
-          )}
+        <div data-chathead-row className="flex items-center justify-between @max-[30rem]/chathead:gap-2 @min-[30rem]/chathead:grid @min-[30rem]/chathead:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(max-content,1fr)]">
+        <div data-chathead-identity className="flex min-w-0 items-center gap-2 @max-[30rem]/chathead:gap-1.5 @min-[30rem]/chathead:col-start-2 @min-[30rem]/chathead:justify-self-center" style={headerNoDragStyle}>
+          <ChatHeadAgentPill bot={bot} messages={messages} advanced={advanced} embedded={embedded} motion={mascotMotion} animated={headerAnimated} />
           <TaskPicker bot={bot} />
           <span role="status" className="sr-only" data-chathead-status>{bot.busy ? t("sidebar.preview.working") : ""}</span>
           {!bot.busy && bot.waitingForTeammates && <span className="truncate text-[12px] text-ink-secondary" role="status">Teammates working</span>}
@@ -1356,7 +1285,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
         </div>
         <div
           data-chathead-controls
-          className="flex shrink-0 items-center gap-1.5 @max-[30rem]/chathead:ml-auto @max-[30rem]/chathead:flex-wrap @max-[30rem]/chathead:justify-end @min-[30rem]/chathead:col-start-3 @min-[30rem]/chathead:justify-self-end"
+          className="flex shrink-0 items-center gap-1.5 @max-[30rem]/chathead:gap-1 @min-[30rem]/chathead:col-start-3 @min-[30rem]/chathead:justify-self-end"
           style={controlsShiftStyle}
         >
           {canWrite === false && (bot.busy || bot.waitingForTeammates) && (
