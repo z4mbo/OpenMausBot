@@ -1,9 +1,10 @@
 # Local workspace deletion and residual sidebar sections
 
-The workspace head's sidebar menu uses the ordinary **Delete {name}?** bot
-confirmation. It removes that local bot, its conversation, files, memory and
-owned computers. It does not delete the shared Origin cloud workspace or its
-projects. Shared team computers remain.
+Deleting a whole workspace, in Origin and on this computer, is described in
+[Deleting a workspace and switching between workspaces](origin-workspace-delete-cascade.md);
+the head's sidebar Delete now opens that dialog. This page covers what
+deleting the head bot itself leaves behind: the bot, its conversation, files,
+memory and owned computers go; shared team computers remain.
 
 With two synthetic local workspaces, Primary and Secondary, deleting the
 Secondary head previously left `Workspace: Secondary` in the saved section
@@ -68,8 +69,7 @@ conversations or files. A reserved section containing another bot, group or
 shared computer also remains rather than discarding work. Deleting a local
 head while its shared cloud workspace remains visible can cause cloud sync
 to import that head again; this fix removes the orphan section/name suffix,
-not the cloud workspace. A dedicated shared-workspace deletion flow is a
-separate product concern.
+not the cloud workspace.
 
 Bot and section files are separate durable writes. A normal section-write
 failure restores the bot roster before deleting transcript or bot data, as
