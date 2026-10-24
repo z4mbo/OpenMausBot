@@ -12,7 +12,7 @@ import { saveShareFile, SHARE_VIEW_START, shareRefused, tickedSkills, type Share
 import { teamImportPreview } from "@/lib/team-import";
 import { ApiError } from "@/state/store";
 import { ShareSkillChoices, ShareTeamContents } from "./ShareTeamDialog";
-import { TeamMenuItems } from "./Sidebar";
+import { TeamMenuItems } from "./SidebarSectionHeader";
 import { shareableTeamList, TeamImportDetails } from "./TeamLibraryPanel";
 import { packageSummary, parsePackageDocument } from "../../shared/package-format";
 

@@ -7,7 +7,8 @@ import {
   dismissLiveNotice, hangUpLiveCall, isLiveCallRunning, liveCallChord, setLiveMuted, takeLiveCallAction, useLiveMedia,
   type LiveCallAction, type LiveMediaState,
 } from "@/lib/live-call-media";
-import { api, liveCallFromFrame, nextLiveCallLookup, useStore, type Action, type Bot } from "@/state/store";
+import { api, useStore, type Action, type Bot } from "@/state/store";
+import { liveCallFromFrame, nextLiveCallLookup } from "@/lib/live-call-frame";
 import { cn } from "@/lib/cn";
 import type { LiveCallState, LiveClient } from "../../shared/wire";
 import { LiveCallSettings } from "./LiveCallSettings";

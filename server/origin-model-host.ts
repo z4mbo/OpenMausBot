@@ -6,7 +6,8 @@ import { definitionHash, definitionOf } from "../shared/origin-shared-agents.ts"
 import { DATA_DIR } from "./config.ts";
 import type { ModelSelection, ProviderInstance } from "./contracts.ts";
 import type { SelectableInstance } from "./default-model-selection.ts";
-import { cloudProjectFor, defaultOriginCloudFile, readOriginCloud, type OriginProjectFolder } from "./origin-cloud.ts";
+import { defaultOriginCloudFile, readOriginCloud, type OriginProjectFolder } from "./origin-cloud.ts";
+import { cloudProjectFor } from "./origin-project-links.ts";
 import { modelHostConnection } from "./origin-model-host-connection.ts";
 import { createModelHostRoutes, type SourceSettings } from "./origin-model-host-routes.ts";
 import { createModelHostState, modelHostOrigin, type ModelHostAccountState, type ModelHostSourceState } from "./origin-model-host-state.ts";

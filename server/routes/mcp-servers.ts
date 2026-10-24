@@ -18,16 +18,25 @@ export interface McpServerRouteDeps {
   mcpConfigBusy: BusyFlag;
   /** Secrets as booleans, sign-in state attached. */
   mcpServerResponse(): Record<string, unknown>;
-  mcpServerBody(body: unknown): Record<string, unknown>;
   mcpPolicyRefusal(name: string, server: object): string | undefined;
   persistMcpServers(next: Record<string, unknown>): void;
   savedCustomDomain(): string | null;
 }
 
+function mcpServerBody(body: unknown): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (!body || typeof body !== "object") return out;
+  const record = body as Record<string, unknown>;
+  for (const key of ["command", "args", "env", "type", "url", "headers", "oauth", "enabled", "resultBudget"]) {
+    if (record[key] !== undefined) out[key] = record[key];
+  }
+  return out;
+}
+
 export function createMcpServerRoutes(deps: McpServerRouteDeps): RouteHandler {
   const {
     cfg, sessions, mcpOAuth, cloudHome: CLOUD_HOME, fallbackPublicUrl: FALLBACK_PUBLIC_URL, mcpConfigBusy,
-    mcpServerResponse, mcpServerBody, mcpPolicyRefusal, persistMcpServers, savedCustomDomain,
+    mcpServerResponse, mcpPolicyRefusal, persistMcpServers, savedCustomDomain,
   } = deps;
   const MAX_CONCURRENT_MCP_PROBES = 2;
   let mcpProbesInFlight = 0;
