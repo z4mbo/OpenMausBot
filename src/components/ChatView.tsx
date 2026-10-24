@@ -1,6 +1,7 @@
 import { NewConversationInstead } from "./NewConversationInstead";
 export { NewConversationInstead } from "./NewConversationInstead";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
+import { SharedAgentRunsOn } from "./RunsOnBadge";
 import { ChatUsagePopover } from "./ChatUsagePopover";
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -1375,6 +1376,7 @@ export function ChatView({ bot: profile, embedded = false, headerSlot }: { bot: 
           <ChatUsagePopover bot={bot} messages={messages} />
           {!remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} />}
           <LiveCallChip currentBotId={bot.id} onOpen={(botId, threadId) => openThread(dispatch, { botId, threadId }, state, showThreads)} />
+          <SharedAgentRunsOn bot={bot} />
           <button
             data-tour="computer"
             onClick={() => dispatch({ type: "toggleComputer" })}

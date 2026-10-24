@@ -1,4 +1,4 @@
-export type CloudUser = { _id: string; email: string; name?: string; username?: string };
+export type CloudUser = { _id: string; email: string; name?: string; username?: string; avatarUrl?: string | null };
 
 export type CloudWorkspace = { _id: string; name: string; slug?: string };
 

@@ -12,7 +12,7 @@ export const HOST_ONLINE_MS = 3 * 60_000;
 export const hostOnline = (host: Pick<Doc<"agentHosts">, "online" | "heartbeatAt" | "revoked">, now: number) =>
   !host.revoked && host.online && now - host.heartbeatAt <= HOST_ONLINE_MS;
 
-export type Runner = { userId: Id<"users">; membershipId: Id<"teamMembers">; hostId: Id<"agentHosts">; hostName: string; ownerName: string };
+export type Runner = { userId: Id<"users">; membershipId: Id<"teamMembers">; hostId: Id<"agentHosts">; hostName: string; hostKind: Doc<"agentHosts">["kind"]; ownerName: string };
 
 /** Where the agent's runs go: its chosen host when that host is shared, on, and its owner may still use the agent; null runs on the sender's app. */
 export async function chosenRunner(ctx: Ctx, agent: Doc<"workspaceAgents">, now: number): Promise<{ runner: Runner | null; unavailable?: string }> {
@@ -24,5 +24,5 @@ export async function chosenRunner(ctx: Ctx, agent: Doc<"workspaceAgents">, now:
   if (!hostOnline(host, now)) return { runner: null, unavailable: `${ownerName}'s ${host.kind === "local" ? "computer" : "server"} (${host.name}) is offline` };
   const access = owner && owner.status === "active" ? await agentAccess(ctx, agent, owner) : null;
   if (!access?.canSend) return { runner: null, unavailable: `${ownerName} can no longer run ${agent.name}` };
-  return { runner: { userId: host.ownerUserId, membershipId: access.membership._id, hostId: host._id, hostName: host.name, ownerName } };
+  return { runner: { userId: host.ownerUserId, membershipId: access.membership._id, hostId: host._id, hostName: host.name, hostKind: host.kind, ownerName } };
 }

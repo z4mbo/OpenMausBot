@@ -26,7 +26,8 @@ async function fixture() {
   await t.mutation(api.agents.setSharedAgents, { sessionToken: people.owner.token, teamId, enabled: true });
   const [{ agentId }] = await t.mutation(api.agents.publishProjectTeam, { sessionToken: people.owner.token, teamId, projectId, agents: [{ roleKey: "chief", kind: "chief", name: "App" }] });
   const threadId = await t.mutation(api.agentThreads.create, { sessionToken: people.owner.token, agentId, title: "Plan" });
-  const host = (person: { token: string }, name: string) => t.mutation(api.agents.publishHost, { sessionToken: person.token, teamId, name, engines: ["claude"], models: ["claude-sonnet-5"], computers: [] });
+  const host = (person: { token: string }, name: string, extra: { kind?: "local" | "server"; plans?: { agentId: typeof agentId; provider: "claude" | "chatgpt" | "grok" | "key"; plan?: string }[] } = {}) =>
+    t.mutation(api.agents.publishHost, { sessionToken: person.token, teamId, name, engines: ["claude"], models: ["claude-sonnet-5"], computers: [], ...extra });
   return { t, ...people, teamId, agentId, threadId, host };
 }
 
@@ -80,5 +81,42 @@ describe("where an agent runs", () => {
     await f.t.mutation(api.agentHosts.setRunsOn, { sessionToken: f.owner.token, agentId: f.agentId, hostId: memberPc });
     const run = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId: f.threadId, clientId: "send:2", text: "Go" });
     expect(run.runner).toMatchObject({ userId: f.member.id, host: "Member laptop" });
+  });
+
+  test("the runs-on badge learns the mode and whose plan pays, never a credential", async () => {
+    const f = await fixture();
+    expect(await f.t.query(api.agentHosts.runsOn, { sessionToken: f.member.token, agentId: f.agentId })).toMatchObject({ mode: "sender", host: null, canEdit: false });
+    const ownerPc = await f.host(f.owner, "Owner PC", { plans: [{ agentId: f.agentId, provider: "claude", plan: "  max\n" }] });
+    await f.t.mutation(api.agentHosts.setRunsOn, { sessionToken: f.owner.token, agentId: f.agentId, hostId: ownerPc });
+    expect(await f.t.query(api.agentHosts.runsOn, { sessionToken: f.member.token, agentId: f.agentId })).toMatchObject({
+      mode: "member", host: { name: "Owner PC", ownerName: "Owner", ownerAvatarUrl: null, mine: false, online: true, plan: { provider: "claude", plan: "max" } },
+    });
+    expect((await f.t.query(api.agentHosts.list, { sessionToken: f.member.token, teamId: f.teamId })).map((host) => host.plan)).toEqual([null]);
+    expect((await f.t.query(api.agentHosts.list, { sessionToken: f.member.token, teamId: f.teamId, agentId: f.agentId }))[0]!.plan).toEqual({ provider: "claude", plan: "max" });
+    const server = await f.host(f.owner, "origin-vps", { kind: "server", plans: [{ agentId: f.agentId, provider: "key", plan: "Anthropic" }] });
+    await f.t.mutation(api.agentHosts.setRunsOn, { sessionToken: f.owner.token, agentId: f.agentId, hostId: server });
+    expect(await f.t.query(api.agentHosts.runsOn, { sessionToken: f.member.token, agentId: f.agentId })).toMatchObject({ mode: "cloud", host: { kind: "server", plan: { provider: "key", plan: "Anthropic" } } });
+  });
+
+  test("a server runs even its owner's messages, and only the host a run went to picks it up", async () => {
+    const f = await fixture();
+    const laptop = await f.host(f.owner, "Owner laptop");
+    const server = await f.host(f.owner, "origin-vps", { kind: "server" });
+    await f.t.mutation(api.agentHosts.setRunsOn, { sessionToken: f.owner.token, agentId: f.agentId, hostId: server });
+    const own = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId: f.threadId, clientId: "send:own", text: "Nightly report" });
+    expect(own.runner).toMatchObject({ userId: f.owner.id, host: "origin-vps" });
+    const onServer = await f.t.query(api.agentRuns.pendingForMe, { sessionToken: f.owner.token, teamId: f.teamId, hostId: server });
+    expect(onServer).toMatchObject([{ runId: own.runId, hostedFor: { userId: f.owner.id, messageId: own.messageId } }]);
+    const onLaptop = await f.t.query(api.agentRuns.pendingForMe, { sessionToken: f.owner.token, teamId: f.teamId, hostId: laptop });
+    expect(onLaptop).toHaveLength(1);
+    expect(onLaptop[0]!.hostedFor).toBeUndefined();
+    await f.t.mutation(api.agentRuns.finish, { sessionToken: f.owner.token, runId: own.runId, status: "succeeded" });
+
+    await f.t.mutation(api.agentHosts.setRunsOn, { sessionToken: f.owner.token, agentId: f.agentId, hostId: laptop });
+    const teammate = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.member.token, threadId: f.threadId, clientId: "send:t", text: "Hi" });
+    expect(teammate.runner).toMatchObject({ host: "Owner laptop" });
+    expect(await f.t.query(api.agentRuns.pendingForMe, { sessionToken: f.owner.token, teamId: f.teamId, hostId: server })).toEqual([]);
+    expect(await f.t.query(api.agentRuns.pendingForMe, { sessionToken: f.owner.token, teamId: f.teamId, hostId: laptop }))
+      .toMatchObject([{ runId: teammate.runId, hostedFor: { userId: f.member.id } }]);
   });
 });

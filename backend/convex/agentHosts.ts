@@ -1,26 +1,32 @@
 import { v } from "convex/values";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { requireAgent, requireSharedAgents } from "./lib/agentAccess";
 import { hostOnline } from "./lib/agentRunner";
 import { requireTeamMember } from "./lib/permissions";
 
+const plan = v.object({ provider: v.string(), plan: v.optional(v.string()) });
 const hostView = v.object({
-  _id: v.id("agentHosts"), name: v.string(), kind: v.string(), ownerUserId: v.id("users"), ownerName: v.string(),
+  _id: v.id("agentHosts"), name: v.string(), kind: v.string(), ownerUserId: v.id("users"), ownerName: v.string(), ownerAvatarUrl: v.union(v.string(), v.null()),
   mine: v.boolean(), shared: v.boolean(), online: v.boolean(), models: v.array(v.string()),
+  /** The account this host runs the asked-about agent on, once it has said. */
+  plan: v.union(plan, v.null()),
 });
 
-async function view(ctx: QueryCtx, host: Doc<"agentHosts">, me: Doc<"users">["_id"], now: number) {
+async function view(ctx: QueryCtx, host: Doc<"agentHosts">, me: Id<"users">, now: number, agentId?: Id<"workspaceAgents">) {
   const owner = await ctx.db.get(host.ownerUserId);
+  const entry = agentId ? host.plans?.find((candidate) => candidate.agentId === agentId) : undefined;
   return {
     _id: host._id, name: host.name, kind: host.kind, ownerUserId: host.ownerUserId, ownerName: owner?.name || owner?.email || "Someone",
+    ownerAvatarUrl: owner?.avatarStorageId ? await ctx.storage.getUrl(owner.avatarStorageId) : null,
     mine: host.ownerUserId === me, shared: host.shared, online: hostOnline(host, now), models: host.capabilities.models.slice(0, 20),
+    plan: entry ? { provider: entry.provider, ...(entry.plan ? { plan: entry.plan } : {}) } : null,
   };
 }
 
 /** The computers and servers that can run this workspace's agents: every member's own, and others' that they shared. */
 export const list = query({
-  args: { sessionToken: v.string(), teamId: v.id("teams") },
+  args: { sessionToken: v.string(), teamId: v.id("teams"), agentId: v.optional(v.id("workspaceAgents")) },
   returns: v.array(hostView),
   handler: async (ctx, args) => {
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
@@ -29,20 +35,21 @@ export const list = query({
     const out = [];
     for (const host of hosts) {
       if (host.revoked || (host.ownerUserId !== user._id && !host.shared)) continue;
-      out.push(await view(ctx, host, user._id, now));
+      out.push(await view(ctx, host, user._id, now, args.agentId));
     }
     return out.sort((a, b) => Number(b.mine) - Number(a.mine) || Number(b.online) - Number(a.online) || a.name.localeCompare(b.name));
   },
 });
 
-/** Where an agent runs: the sender's own app (null), or one shared computer or server for everyone. */
+/** Where an agent runs: "sender" on each writer's own app, "member" on one person's computer, "cloud" on an always-on server. */
 export const runsOn = query({
   args: { sessionToken: v.string(), agentId: v.id("workspaceAgents") },
-  returns: v.object({ host: v.union(hostView, v.null()), canEdit: v.boolean() }),
+  returns: v.object({ mode: v.union(v.literal("sender"), v.literal("member"), v.literal("cloud")), host: v.union(hostView, v.null()), canEdit: v.boolean() }),
   handler: async (ctx, args) => {
     const { agent, access } = await requireAgent(ctx, args.agentId, args.sessionToken);
     const host = agent.defaultHostId ? await ctx.db.get(agent.defaultHostId) : null;
-    return { host: host && !host.revoked ? await view(ctx, host, access.user._id, Date.now()) : null, canEdit: access.canEdit };
+    if (!host || host.revoked || !host.shared) return { mode: "sender" as const, host: null, canEdit: access.canEdit };
+    return { mode: host.kind === "local" ? "member" as const : "cloud" as const, host: await view(ctx, host, access.user._id, Date.now(), agent._id), canEdit: access.canEdit };
   },
 });
 
