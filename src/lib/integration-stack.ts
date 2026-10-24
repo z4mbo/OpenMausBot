@@ -1,6 +1,6 @@
 import type { IntegrationStatus } from "../../shared/integration-keys";
 
-export type StackStepId = "github" | "studio" | "social";
+export type StackStepId = "github" | "deploy";
 
 export interface StackStep {
   id: StackStepId;
@@ -14,8 +14,7 @@ export interface StackStep {
 /** The services a workspace connects to go from idea to launch, in the order the journey reaches them. */
 export const STACK: readonly StackStep[] = [
   { id: "github", title: "GitHub", unlocks: "Repositories, issues and pushes for every member", providers: [] },
-  { id: "studio", title: "Studio generation", unlocks: "Images, video and voice", providers: ["fal", "openai", "elevenlabs"] },
-  { id: "social", title: "Social accounts", unlocks: "Posts and reels from Publish", providers: ["x", "bluesky", "linkedin", "meta", "tiktok"] },
+  { id: "deploy", title: "Deploys", unlocks: "Production deploys of the releases Ship publishes", providers: ["vercel", "netlify", "cloudflare"] },
 ];
 
 export type StepState = "done" | "partial" | "todo";

@@ -1,9 +1,5 @@
-import { setDesignViewOf } from "./origin-design-view";
-
 /** Which page each project shows: its chat, or one of its sections. Messages count as read only while the chat is on screen. */
-export type ShownSection = "chat" | "issues" | "team-chat" | "call" | "studio" | "design" | "broadcast" | "assets" | "vault" | "repo" | "feedback" | "settings";
-/** A page that can be asked for: a shown section, or "draw", which opens Design on its design files. */
-export type ChiefSection = ShownSection | "draw";
+export type ShownSection = "chat" | "issues" | "team-chat" | "call" | "assets" | "vault" | "repo" | "feedback" | "settings";
 
 const chosen = new Map<string, ShownSection>();
 
@@ -11,9 +7,7 @@ export const chiefSectionOf = (botId: string): ShownSection => chosen.get(botId)
 const listeners = new Set<() => void>();
 let version = 0;
 
-export const setChiefSectionOf = (botId: string, requested: ChiefSection) => {
-  if (requested === "draw") setDesignViewOf(botId, "design");
-  const section = requested === "draw" ? "design" : requested;
+export const setChiefSectionOf = (botId: string, section: ShownSection) => {
   if (chosen.get(botId) === section) return;
   chosen.set(botId, section);
   version += 1;

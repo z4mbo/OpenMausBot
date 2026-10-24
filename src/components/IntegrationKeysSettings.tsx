@@ -26,7 +26,7 @@ export function IntegrationKeysSettings() {
   const { teamId } = useActiveOriginWorkspace();
   return (<>
     <ConnectStackChecklist teamId={teamId} canEdit />
-    <Card subtitle="Keys for the services Studio and Publish use. Yours stay on this computer and are never shown again after saving; an owner or admin can share theirs with the whole workspace or with one project, and a key of your own always wins over a shared one.">
+    <Card subtitle="Keys for the services your projects connect to, such as the deploy targets Ship uses. Yours stay on this computer and are never shown again after saving; an owner or admin can share theirs with the whole workspace or with one project, and a key of your own always wins over a shared one.">
       {teamId && <div className="-mx-1 mb-1 border-b border-hairline/30 pb-1"><WorkspaceGitHubCard teamId={teamId} /></div>}
       <IntegrationKeyList teamId={teamId} />
     </Card>
@@ -188,7 +188,7 @@ function IntegrationRow({ integration, open, teamId, project, targets, workspace
             </label>
           ))}
           {integration.source === "shared" && integration.shared && (
-            <p className="text-[12px] text-ink-tertiary">{shareLabel(integration.shared)}. Studio and your agents use it{integration.shared.projectName ? ` in ${integration.shared.projectName}` : ""} until you add a key of your own.</p>
+            <p className="text-[12px] text-ink-tertiary">{shareLabel(integration.shared)}. This computer uses it{integration.shared.projectName ? ` in ${integration.shared.projectName}` : ""} until you add a key of your own.</p>
           )}
           {shares.length > 0 && (
             <ul className="flex flex-col gap-1" aria-label={`Where ${integration.label} is shared`}>

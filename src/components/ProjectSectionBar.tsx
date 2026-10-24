@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { ChevronDown, type LucideIcon } from "lucide-react";
 import { unreadReplies } from "@/lib/origin-unread";
 import type { Bot } from "@/state/store";
-import type { ChiefSection } from "@/lib/origin-chief-section";
+import type { ShownSection } from "@/lib/origin-chief-section";
 import { sectionsThatFit } from "@/lib/section-overflow";
 import { cn } from "@/lib/cn";
 import { UnreadBadge } from "./UnreadBadge";
@@ -65,7 +65,7 @@ function TabFace({ icon: Icon, label, current }: { icon: LucideIcon; label: stri
   );
 }
 
-function SectionTabs({ tabs, section, onSection }: { tabs: readonly ProjectSectionEntry[]; section: ChiefSection; onSection(section: ChiefSection): void }) {
+function SectionTabs({ tabs, section, onSection }: { tabs: readonly ProjectSectionEntry[]; section: ShownSection; onSection(section: ShownSection): void }) {
   const currentIndex = tabs.findIndex((item) => item.id === section);
   const strip = useRef<HTMLDivElement>(null);
   const { ruler, visible } = useVisibleTabs(strip, tabs, currentIndex);
@@ -109,7 +109,7 @@ function SectionTabs({ tabs, section, onSection }: { tabs: readonly ProjectSecti
 }
 
 /** `joined` sits inside a glass header; otherwise the bar wears the same glass on its own. */
-export function ChiefSectionBar({ bot, section, onSection, joined = false }: { bot: Bot; section: ChiefSection; onSection(section: ChiefSection): void; joined?: boolean }) {
+export function ChiefSectionBar({ bot, section, onSection, joined = false }: { bot: Bot; section: ShownSection; onSection(section: ShownSection): void; joined?: boolean }) {
   const chief = section === "chat";
   const { dragProps, noDragStyle } = useCaptionChrome();
   return (
