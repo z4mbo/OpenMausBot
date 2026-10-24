@@ -6,7 +6,7 @@ import { botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
 export { ArchivedBotRow, ArchivedBotsPanel } from "./ArchivedBotsPanel";
 export { archivedDeleteAllCopy, botConfirmCopy, type BotConfirmKind } from "./bot-confirm-copy";
 import { track } from "@/lib/analytics";
-import { activeWorkspace, addAccountWorkspace, inWorkspace, reportActiveWorkspace, switchWorkspace, useWorkspaces, workspaceHeadsOf } from "@/lib/origin-workspaces";
+import { activeWorkspace, addAccountWorkspace, inWorkspace, reportActiveWorkspace, switchableWorkspaceHeads, switchWorkspace, useWorkspaces } from "@/lib/origin-workspaces";
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
 import { NewAgentDialog, SidebarGroups, SidebarProjectIcons, SidebarProjects, WorkspaceSwitcher, splitPinnedProjects } from "./SidebarProjects";
 import { UnreadBadge } from "./UnreadBadge";
@@ -1645,7 +1645,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     unsectionedBots,
   } = partitionSidebarBots(matchingBots, { universalPins });
   const workspaces = useWorkspaces();
-  const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : workspaceHeadsOf(sectionChiefs);
+  const workspaceHeads = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : switchableWorkspaceHeads(state.bots);
   const standaloneTeams = new Set([STANDALONE_SECTION, ...state.bots.filter((bot) => bot.installedPackage).map((bot) => bot.section?.trim() ?? "").filter(Boolean)]);
   const standaloneAgents = SIDEBAR_SHOWS_LOOSE_BOTS ? [] : state.bots.filter((bot) => !bot.hidden && bot.section?.trim() === STANDALONE_SECTION);
   const activeHeadId = activeWorkspace(workspaces, workspaceHeads);

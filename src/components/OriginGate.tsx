@@ -202,7 +202,9 @@ export function OriginSync() {
           const workspaces = await guarded(() => cloud.workspaces.list());
           setEmpty(workspaces.length === 0);
           if (!workspaces.length) return;
-          const projects = (await guarded(() => Promise.all(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id))))).flat();
+          const listed = await guarded(() => Promise.allSettled(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id))));
+          const projects = listed.flatMap((outcome) => outcome.status === "fulfilled" ? outcome.value : []);
+          const listingProblems = listed.flatMap((outcome, index) => outcome.status === "rejected" ? [{ name: workspaces[index]!.name, error: errorText(outcome.reason) }] : []);
           const links = await guarded(() => api<CloudLinks>("/api/origin/cloud-links"));
           const roundBots = new Map(bots.current.map(bot => [bot.id, bot]));
           const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
@@ -216,7 +218,7 @@ export function OriginSync() {
           const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
           assertCurrent();
           await sharedAgentsRound({
-            call, bots: [...roundBots.values()], instances: instances.current, projects,
+            call, bots: [...roundBots.values()], instances: instances.current, projects, teams: workspaces.map((workspace) => workspace._id),
             cloud: {
               query: (name, args) => guarded(() => cloudQueryOnce(name, args)),
               mutation: (name, args) => guarded(() => cloudMutation(name, args)),
@@ -227,7 +229,7 @@ export function OriginSync() {
           const linkedHeads = Object.entries(synced.links.workspaces).filter(([, teamId]) => accountTeams.has(teamId)).map(([headId]) => headId);
           const created = synced.result.createdWorkspaces.map((workspace) => workspace.botId);
           setAccountWorkspaces([...linkedHeads, ...created]);
-          setSyncProblems(synced.result.failures);
+          setSyncProblems([...listingProblems, ...synced.result.failures]);
           const known = new Set([...linkedHeads, ...created]);
           if (!known.has(activeWorkspaceId() ?? "")) {
             const first = workspaceHeadsOf(bots.current).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];

@@ -199,3 +199,39 @@ describe("sharing withdrawn", () => {
     expect(binds[2]).toMatchObject({ botId: "chief", agentId: "other" });
   });
 });
+
+describe("one team failing", () => {
+  it("still brings in another workspace's project agents, and leaves links to teams outside the account alone", async () => {
+    const asked: string[] = [];
+    const created: unknown[] = [];
+    const cloud = {
+      async query<T>(name: string, args: Record<string, unknown>): Promise<T> {
+        asked.push(`${name}:${String(args.teamId)}`);
+        if (args.teamId === "team-a") throw new Error("No active team access");
+        if (name === "agents:teamSettings") return { sharedAgents: true, userId: "me" } as T;
+        if (name === "agents:listForTeam") return [agent({ _id: "head-b-cloud", teamId: "team-b", projectId: undefined, kind: "head", roleKey: "head", name: "Shop" }), agent({ _id: "chief-b", teamId: "team-b", projectId: "p-b", kind: "chief", roleKey: "chief", name: "Bakery" }), agent({ _id: "dana-b", teamId: "team-b", projectId: "p-b", roleKey: "designer" })] as T;
+        return [] as T;
+      },
+      async mutation<T>(): Promise<T> { throw new Error("must not publish"); },
+    };
+    const call = async <T,>(path: string, init?: { body?: string }): Promise<T> => {
+      if (path === "/api/origin/shared-agents") return { bots: {} } as T;
+      if (path === "/api/bots") { created.push(JSON.parse(init!.body!)); return { bot: { id: "dana-local", name: "Dana", section: "Bakery" } } as T; }
+      return {} as T;
+    };
+    const result = await syncSharedAgents({
+      cloud, call, looks: {}, driverKindOf: () => undefined,
+      links: { workspaces: { "head-a": "team-a", "head-b": "team-b", "head-old": "team-old" }, projects: { "chief-local": "p-b" }, agents: {} },
+      bots: [
+        { id: "head-a", name: "Studio", chiefOfStaff: true, section: "Workspace: Studio" },
+        { id: "head-b", name: "Shop", chiefOfStaff: true, section: "Workspace: Shop" },
+        { id: "head-old", name: "Old", chiefOfStaff: true, section: "Workspace: Old" },
+        { id: "chief-local", name: "Bakery", chiefOfStaff: true, section: "Bakery" },
+      ],
+    }, [{ _id: "p-b", teamId: "team-b" }], ["team-a", "team-b"]);
+    expect(result.failures).toEqual([{ teamId: "team-a", error: "No active team access" }]);
+    expect(created).toEqual([expect.objectContaining({ name: "Dana", section: "Bakery" })]);
+    expect(result).toMatchObject({ created: 1 });
+    expect(asked.some((entry) => entry.endsWith(":team-old"))).toBe(false);
+  });
+});

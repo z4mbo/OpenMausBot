@@ -83,6 +83,26 @@ describe("Origin sync account isolation", () => {
     expect(fixture.state.bots).toEqual([]);
   });
 
+  it("still imports one workspace's projects and agents when another workspace's projects cannot be listed", async () => {
+    fixture.workspaces.mockResolvedValue([{ _id: "team-a", name: "Studio" }, { _id: "team-b", name: "Shop" }]);
+    fixture.projects.mockImplementation(async (teamId: string) => {
+      if (teamId === "team-a") throw new Error("Project discovery limit exceeded");
+      return [{ _id: "bakery", teamId: "team-b", name: "Bakery" }];
+    });
+    fixture.api.mockImplementation(async (path: string, init?: { body?: string }) => {
+      if (path === "/api/origin/cloud-links") return { workspaces: { "head-a": "team-a", "head-b": "team-b" }, projects: {} };
+      if (path === "/api/origin/import/projects") return { bot: { id: "bakery-chief", name: "Bakery", chiefOfStaff: true, section: "Bakery" }, members: [], body: init?.body };
+      throw new Error(`Unexpected fixture path: ${path}`);
+    });
+    render();
+    await vi.waitFor(() => expect(fixture.sharedRound).toHaveBeenCalledOnce());
+    const imported = fixture.api.mock.calls.filter(([path]) => path === "/api/origin/import/projects").map(([, init]) => JSON.parse(init.body));
+    expect(imported).toEqual([expect.objectContaining({ cloudProjectId: "bakery", cloudTeamId: "team-b", workspaceId: "head-b" })]);
+    expect(fixture.sharedRound.mock.calls[0][0]).toMatchObject({ projects: [{ _id: "bakery", teamId: "team-b" }], teams: ["team-a", "team-b"] });
+    expect(fixture.accountWorkspaces).toHaveBeenLastCalledWith(["head-a", "head-b"]);
+    await vi.waitFor(() => expect(host.textContent).toContain("Studio: Project discovery limit exceeded"));
+  });
+
   it("chooses a workspace from the current account when older accounts retain local links", async () => {
     fixture.workspaces.mockResolvedValue([{ _id: "current-team", name: "Current" }]);
     fixture.api.mockResolvedValue({ workspaces: { "old-head": "old-team", "current-head": "current-team" }, projects: {} });
