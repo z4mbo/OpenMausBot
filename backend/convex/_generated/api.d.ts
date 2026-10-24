@@ -92,6 +92,7 @@ import type * as tasks from "../tasks.js";
 import type * as teamGitHub from "../teamGitHub.js";
 import type * as teams from "../teams.js";
 import type * as wiki from "../wiki.js";
+import type * as workspaceDeletion from "../workspaceDeletion.js";
 import type * as workspaceSearch from "../workspaceSearch.js";
 import type * as workspaces from "../workspaces.js";
 
@@ -186,6 +187,7 @@ declare const fullApi: ApiFromModules<{
   teamGitHub: typeof teamGitHub;
   teams: typeof teams;
   wiki: typeof wiki;
+  workspaceDeletion: typeof workspaceDeletion;
   workspaceSearch: typeof workspaceSearch;
   workspaces: typeof workspaces;
 }>;

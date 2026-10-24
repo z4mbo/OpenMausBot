@@ -5,6 +5,7 @@ import { normalizeEmail, projectMember, requireTeamAdmin, requireTeamMember } fr
 import schema from "./schema";
 import { roleValidator } from "./lib/validators";
 import { reviewGitHubAccess } from "./lib/githubAccess";
+import { startWorkspaceDeletion } from "./workspaceDeletion";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 
@@ -102,9 +103,8 @@ export const remove = mutation({
     if (member.role !== "owner") throw new Error("Owner role required");
     const projects = await ctx.db.query("projects").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).collect();
     if (projects.length) throw new Error("Delete projects before deleting team");
-    const members = await ctx.db.query("teamMembers").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).collect();
-    for (const item of members) await ctx.db.delete(item._id);
-    await ctx.db.delete(args.teamId);
+    const team = await ctx.db.get(args.teamId);
+    if (team) await startWorkspaceDeletion(ctx, team);
   },
 });
 

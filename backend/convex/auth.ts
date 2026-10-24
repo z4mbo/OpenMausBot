@@ -208,7 +208,8 @@ export const acceptInviteAccount = internalMutation({
     const project = projectInvite ? await ctx.db.get(projectInvite.projectId) : null;
     if (projectInvite && !project) throw new Error("Project no longer exists");
     const teamId = project?.teamId ?? teamInvite?.teamId;
-    if (teamId && !await ctx.db.get(teamId)) throw new Error("Workspace no longer exists");
+    const team = teamId ? await ctx.db.get(teamId) : null;
+    if (teamId && (!team || team.deletingAt !== undefined)) throw new Error("Workspace no longer exists");
 
     const now = Date.now();
     const email = normalizeEmail(invite.email);
