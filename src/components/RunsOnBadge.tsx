@@ -56,16 +56,16 @@ export function RunsOnBadge(props: RunsOnBadgeProps) {
 type RunsOnHost = { name: string; kind: string; ownerName: string; ownerAvatarUrl: string | null; mine: boolean; online: boolean; plan: AgentSubscription | null };
 type RunsOnAnswer = { mode: "sender" | "member" | "cloud"; host: RunsOnHost | null };
 
-/** The badge for a shared agent: who answers the person reading this chat, and on whose subscription. */
+/** Who answers the person reading this chat, and on whose subscription: this computer unless a shared agent's setting says otherwise. */
 export function SharedAgentRunsOn({ bot }: { bot: Bot }) {
   const shared = bot.shared;
-  const runsOn = useCloudQuery<RunsOnAnswer>("agentHosts:runsOn", shared ? { agentId: shared.agentId } : "skip");
+  const reply = useCloudQuery<RunsOnAnswer>("agentHosts:runsOn", shared ? { agentId: shared.agentId } : "skip");
+  const runsOn = shared && reply && typeof reply.mode === "string" ? reply : null;
   const { user } = useCloudSession();
   const instanceId = (bot.tasks?.find((task) => task.threadId === bot.threadId)?.modelSelection ?? bot.modelSelection)?.instanceId;
   const host = runsOn?.host ?? null;
-  const yours = useLocalSubscription(instanceId, Boolean(shared && runsOn && (!host || host.mine)));
-  if (!shared || !runsOn) return null;
-  if (runsOn.mode === "cloud" && host) {
+  const yours = useLocalSubscription(instanceId, !host || host.mine);
+  if (runsOn?.mode === "cloud" && host) {
     return <RunsOnBadge kind="cloud" name={host.name} subscription={subscriptionLabel(host.plan)} offline={!host.online} />;
   }
   if (host && !host.mine) {

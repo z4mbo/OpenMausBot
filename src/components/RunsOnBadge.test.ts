@@ -71,8 +71,17 @@ describe("runs-on badge", () => {
     await vi.waitFor(() => expect(host.textContent).toContain("You · Claude Pro"));
   });
 
-  it("stays out of chats with agents that are not shared", () => {
-    fixture.runsOn = { mode: "sender", host: null };
-    expect(mount(createElement(SharedAgentRunsOn, { bot: { ...bot, shared: undefined } as Bot }))).toBeNull();
+  it("says You for agents that are not shared, which always run on this computer", async () => {
+    fixture.runsOn = { mode: "member", host: hostRow };
+    fixture.local = { claude: { provider: "claude", plan: "pro" } };
+    mount(createElement(SharedAgentRunsOn, { bot: { ...bot, shared: undefined } as Bot }));
+    await vi.waitFor(() => expect(host.textContent).toContain("You · Claude Pro"));
+  });
+
+  it("says You when the cloud does not answer with a setting yet", async () => {
+    fixture.runsOn = { host: hostRow } as never;
+    fixture.local = { claude: { provider: "claude", plan: "pro" } };
+    mount(createElement(SharedAgentRunsOn, { bot }));
+    await vi.waitFor(() => expect(host.textContent).toContain("You · Claude Pro"));
   });
 });
