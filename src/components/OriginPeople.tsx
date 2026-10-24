@@ -44,12 +44,12 @@ export function PresenceStack({ viewers, max = 2, className }: { viewers: readon
     <span role="img" aria-label={label} title={label} data-presence-stack className={cn("flex items-center", className)}>
       {viewers.slice(0, max).map((viewer, index) => (
         <span key={viewer.userId} style={{ zIndex: max - index }}
-          className={cn("relative flex rounded-[6px] ring-[1.5px] ring-panel animate-pop-in", index > 0 && "-ml-[5px]", !viewer.self && "after:absolute after:-bottom-px after:-right-px after:size-[6px] after:rounded-full after:bg-success after:ring-1 after:ring-panel")}>
+          className={cn("relative flex rounded-[6px] animate-pop-in", index > 0 && "-ml-[5px]", !viewer.self && "after:absolute after:-bottom-px after:-right-px after:size-[6px] after:rounded-full after:bg-success after:ring-1 after:ring-panel")}>
           <MemberAvatar person={viewer} size={18} />
         </span>
       ))}
       {viewers.length > max && (
-        <span className="-ml-[5px] flex h-[18px] min-w-[18px] items-center justify-center rounded-[6px] border border-hairline/70 bg-raised px-1 text-[9px] font-semibold text-ink-secondary ring-[1.5px] ring-panel">+{viewers.length - max}</span>
+        <span className="-ml-[5px] flex h-[18px] min-w-[18px] items-center justify-center rounded-[6px] border border-hairline/70 bg-raised px-1 text-[9px] font-semibold text-ink-secondary">+{viewers.length - max}</span>
       )}
     </span>
   );
