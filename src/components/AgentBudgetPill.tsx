@@ -15,15 +15,27 @@ function budgetStatus(budget: AgentBudget) {
   return budget.level === "over" ? `${whose} is used up` : `${budgetPercent(budget)}% of ${whose}`;
 }
 
-export function AgentBudgetPillView({ budget, onRaise, onDetails, panelId, open }: {
+export function AgentBudgetPillView({ budget, onRaise, onDetails, panelId, open, compact = false }: {
   budget: AgentBudget;
   onRaise?: (event: MouseEvent<HTMLButtonElement>) => void;
   onDetails?: (event: MouseEvent<HTMLButtonElement>) => void;
   panelId?: string;
   open?: boolean;
+  compact?: boolean;
 }) {
   if (budget.level === "ok") return null;
   const over = budget.level === "over";
+  if (compact && onDetails) {
+    return (
+      <span role="status" data-testid="agent-budget" className="flex shrink-0" title={`${formatUsd(budget.spentUsd)} of ${formatUsd(budget.monthlyUsd)} this month`}>
+        <button type="button" aria-label="Monthly budget details" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? panelId : undefined}
+          className={cn("flex size-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", over ? "text-danger hover:bg-danger/10" : "text-warning hover:bg-warning/10", open && (over ? "bg-danger/10" : "bg-warning/10"))}
+          onClick={onDetails}>
+          <Wallet size={16} aria-hidden="true" /><span className="sr-only">{budgetStatus(budget)}</span>
+        </button>
+      </span>
+    );
+  }
   return (
     <span role="status" data-testid="agent-budget" className={cn(pill, onDetails && "@max-[48rem]/chathead:rounded-md @max-[48rem]/chathead:p-0", over ? "border-danger/40 bg-danger/10" : "border-warning/40 bg-warning/10")}
       title={`${formatUsd(budget.spentUsd)} of ${formatUsd(budget.monthlyUsd)} this month`}>
@@ -41,7 +53,7 @@ export function AgentBudgetPillView({ budget, onRaise, onDetails, panelId, open 
   );
 }
 
-function AgentBudgetControl({ budget, target }: { budget: AgentBudget; target: BudgetTarget }) {
+function AgentBudgetControl({ budget, target, composer }: { budget: AgentBudget; target: BudgetTarget; composer: boolean }) {
   const [panel, setPanel] = useState<"details" | "edit" | null>(null);
   const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
   const id = useId();
@@ -52,7 +64,7 @@ function AgentBudgetControl({ budget, target }: { budget: AgentBudget; target: B
   const close = () => { setPanel(null); opener.current?.focus(); };
   usePopoverDismiss(panel !== null, boundary, close);
   useLayoutEffect(() => {
-    if (!panel || !root.current) return;
+    if (!panel || !root.current || composer) return;
     const header = root.current.closest<HTMLElement>('[data-glass-bar="top"]') ?? root.current;
     const update = () => {
       const width = Math.min(320, Math.max(0, window.innerWidth - 16));
@@ -64,28 +76,31 @@ function AgentBudgetControl({ budget, target }: { budget: AgentBudget; target: B
     observer?.observe(header);
     window.addEventListener("resize", update); window.addEventListener("scroll", update, true);
     return () => { observer?.disconnect(); window.removeEventListener("resize", update); window.removeEventListener("scroll", update, true); };
-  }, [panel]);
+  }, [panel, composer]);
   const toggle = (next: "details" | "edit", event: MouseEvent<HTMLButtonElement>) => {
     opener.current = event.currentTarget;
     setPanel(current => current === next ? null : next);
   };
+  const content = panel && (
+    <div ref={dialog} id={id} role="dialog" aria-label="Monthly budget" aria-modal="false" style={composer ? undefined : position ?? undefined}
+      className={cn("z-[45] overflow-y-auto rounded-xl border border-hairline/60 bg-menu p-3 text-[12.5px] text-ink", composer ? "animate-pop-in absolute bottom-full right-0 mb-2 w-[min(20rem,100%)] origin-bottom-right rounded-2xl" : "fixed")}>
+      <div className="flex items-start justify-between gap-2"><span role="status" className="min-w-0 break-words">{budgetStatus(budget)}</span><button type="button" aria-label="Close monthly budget" autoFocus={panel === "details"} onClick={close} className="shrink-0 rounded p-1 text-ink-secondary hover:bg-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} /></button></div>
+      <p className="mt-1 text-ink-secondary">{formatUsd(budget.spentUsd)} of {formatUsd(budget.monthlyUsd)} this month</p>
+      {panel === "edit" && budget.canRaise ? <BudgetEditor teamId={budget.teamId} target={target} label={budget.name} monthlyUsd={budget.monthlyUsd} onDone={close} />
+        : budget.canRaise && <button type="button" onClick={() => setPanel("edit")} className="mt-2 rounded px-1 py-1 font-medium text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">Raise budget</button>}
+    </div>
+  );
   return (
     <span ref={root} className="shrink-0">
-      <AgentBudgetPillView budget={budget} panelId={id} open={panel !== null} onDetails={event => toggle("details", event)} onRaise={budget.canRaise ? event => toggle("edit", event) : undefined} />
-      {panel && position && createPortal(<div ref={dialog} id={id} role="dialog" aria-label="Monthly budget" aria-modal="false" style={position}
-        className="fixed z-[45] overflow-y-auto rounded-xl border border-hairline/60 bg-menu p-3 text-[12.5px] text-ink">
-        <div className="flex items-start justify-between gap-2"><span role="status" className="min-w-0 break-words">{budgetStatus(budget)}</span><button type="button" aria-label="Close monthly budget" autoFocus={panel === "details"} onClick={close} className="shrink-0 rounded p-1 text-ink-secondary hover:bg-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"><X size={13} /></button></div>
-        <p className="mt-1 text-ink-secondary">{formatUsd(budget.spentUsd)} of {formatUsd(budget.monthlyUsd)} this month</p>
-        {panel === "edit" && budget.canRaise ? <BudgetEditor teamId={budget.teamId} target={target} label={budget.name} monthlyUsd={budget.monthlyUsd} onDone={close} />
-          : budget.canRaise && <button type="button" onClick={() => setPanel("edit")} className="mt-2 rounded px-1 py-1 font-medium text-accent-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">Raise budget</button>}
-      </div>, document.body)}
+      <AgentBudgetPillView budget={budget} panelId={id} open={panel !== null} compact={composer} onDetails={event => toggle("details", event)} onRaise={budget.canRaise ? event => toggle("edit", event) : undefined} />
+      {composer ? content : content && position && createPortal(content, document.body)}
     </span>
   );
 }
 
-export function AgentBudgetPill({ shared }: { shared?: SharedBotLink }) {
+export function AgentBudgetPill({ shared, placement = "header" }: { shared?: SharedBotLink; placement?: "header" | "composer" }) {
   const budget = useCloudQuery<AgentBudget | null>("budgets:forAgent", shared ? { agentId: shared.agentId } : "skip");
   if (!shared || !budget || budget.level === "ok") return null;
   const target = budget.scope === "project" && budget.projectId ? { projectId: budget.projectId } : { agentId: shared.agentId };
-  return <AgentBudgetControl key={"projectId" in target ? target.projectId : target.agentId} budget={budget} target={target} />;
+  return <AgentBudgetControl key={"projectId" in target ? target.projectId : target.agentId} budget={budget} target={target} composer={placement === "composer"} />;
 }

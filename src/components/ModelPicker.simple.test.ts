@@ -49,9 +49,9 @@ vi.mock("@/state/store", async (importOriginal) => ({
   }),
 }));
 
-const { ClaudeAccountSelect, FollowBotModelRow, ModelEngineRail, ModelPicker, ModelVariantRow, SIMPLE_POPOVER_WIDTH } = await import("./ModelPicker");
+const { ClaudeAccountSelect, FollowBotModelRow, ModelPicker, ModelVariantRow, ScopeSegments, SIMPLE_POPOVER_WIDTH } = await import("./ModelPicker");
+const { ModelPickerList } = await import("./ModelPickerList");
 const { SimpleModelPane } = await import("./SimpleModelPane");
-const { EngineSetup } = await import("./EngineSetup");
 const { InstanceProviderMark } = await import("./ProviderIcons");
 
 afterAll(() => vi.unstubAllGlobals());
@@ -159,7 +159,7 @@ describe("the model picker in Simple mode", () => {
     const opened = open(bot("high"));
     const html = menu(opened.html);
     expect(pane(opened)).toBeDefined();
-    expect(opened.nodes.some((node) => node.type === ModelEngineRail)).toBe(false);
+    expect(opened.nodes.some((node) => node.type === ModelPickerList)).toBe(false);
     expect(html).toContain("Claude");
     expect(html).toContain("Opus 5.5");
     for (const step of ["Quick", "Balanced", "Deep", "Max"]) expect(html).toContain(`>${step}</button>`);
@@ -385,8 +385,8 @@ describe("the model picker in Simple mode", () => {
     click(inside(back).find((node) => node.props["data-simple-sign-in"] !== undefined));
     const full = render(forBot);
     expect(pane(full)).toBeUndefined();
-    const setup = full.nodes.find((node) => node.type === EngineSetup);
-    expect(setup?.props).toMatchObject({ intent: "cloud" });
+    expect(full.nodes.find((node) => node.type === ModelPickerList)?.props.startOn).toBe("family:claude");
+    expect(menu(full.html)).toContain("data-claude-sign-in");
   });
 
   it("offers no sign-in row on a signed-in engine", () => {
@@ -458,7 +458,7 @@ describe("the model picker in Simple mode", () => {
     fixture.advanced = true;
     const forBot = bot();
     const full = open(forBot);
-    click(full.nodes.find((node) => node.type === "button" && node.props.children === "Thread + bot default"));
+    (full.nodes.find((node) => node.type === ScopeSegments)!.props.onScope as (scope: "thread" | "bot") => void)("bot");
     fixture.advanced = false;
     pane(render(forBot))!.props.onPick("claude-sonnet-5-5");
     expect(fixture.dispatch).toHaveBeenLastCalledWith(expect.objectContaining({ updateBotDefault: false }));
@@ -538,7 +538,7 @@ describe("the model picker in Simple mode", () => {
     click(inside(open(forBot)).find((node) => node.props["data-simple-set-up"] !== undefined));
     const full = render(forBot);
     expect(pane(full)).toBeUndefined();
-    expect(full.nodes.some((node) => node.type === ModelEngineRail)).toBe(true);
+    expect(full.nodes.some((node) => node.type === ModelPickerList)).toBe(true);
   });
 
   it("starts over in the Simple view the next time it opens", () => {
@@ -753,7 +753,7 @@ describe("the model picker in Simple mode", () => {
     fixture.advanced = true;
     const opened = open(bot());
     expect(pane(opened)).toBeUndefined();
-    expect(opened.nodes.some((node) => node.type === ModelEngineRail)).toBe(true);
+    expect(opened.nodes.some((node) => node.type === ModelPickerList)).toBe(true);
   });
 });
 

@@ -226,14 +226,15 @@ export function CallTargetButton({
         data-call-button={placement}
         className={cn(
           "relative flex shrink-0 items-center justify-center disabled:opacity-60",
-          "rounded-l-3xl rounded-r-lg active:rounded-3xl transition-[color,background,border-radius]",
-          composer ? "size-8" : "size-9",
+          composer
+            ? cn("size-8 transition-colors", canLive ? "rounded-l-full rounded-r-md" : "rounded-full")
+            : "size-9 rounded-l-3xl rounded-r-lg active:rounded-3xl transition-[color,background,border-radius]",
           active
             ? "bg-danger text-white hover:brightness-110"
             : composer
               ? unavailable
-                ? "bg-control text-ink-tertiary hover:text-ink-secondary"
-                : "bg-control text-ink hover:bg-raised-hover"
+                ? "text-ink-tertiary hover:bg-ink/[0.07] hover:text-ink-secondary"
+                : "text-ink-secondary hover:bg-ink/[0.07] hover:text-ink"
               : unavailable
                 ? "text-ink-tertiary hover:bg-raised-hover hover:text-ink-secondary"
                 : "text-ink-secondary hover:bg-raised-hover hover:text-ink",
@@ -262,10 +263,10 @@ export function CallTargetButton({
           aria-label={t("call.mode.menu")}
           title={t("call.mode.menu")}
           className={cn(
-              "grid place-content-center",
-              "bg-control w-8 hover:bg-raised-hover text-ink-secondary hover:text-ink disabled:opacity-40 transition-colors",
-              "rounded-l-lg rounded-r-3xl active:rounded-3xl transition-[color,background,border-radius]",
-              composer ? "h-8" : "h-9"
+              "grid place-content-center disabled:opacity-40",
+              composer
+                ? "h-8 w-5 rounded-l-md rounded-r-full text-ink-tertiary transition-colors hover:bg-ink/[0.07] hover:text-ink"
+                : "h-9 w-8 rounded-l-lg rounded-r-3xl bg-control text-ink-secondary hover:bg-raised-hover hover:text-ink active:rounded-3xl transition-[color,background,border-radius]",
             )}
         >
           <ChevronDown size={13} className={cn("transition-transform", menuOpen && "rotate-180")} />

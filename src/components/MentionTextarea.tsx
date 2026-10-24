@@ -22,13 +22,15 @@ export function MentionTextarea({ inputRef, peers, everyone = false, wrapperClas
     const input = inputRef.current;
     if (!input) return;
     const scrollTop = input.scrollTop;
-    const line = parseFloat(getComputedStyle(input).lineHeight) || 24;
+    const style = getComputedStyle(input);
+    const line = parseFloat(style.lineHeight) || 24;
+    const padding = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
     input.style.height = "auto";
-    input.style.height = `${Math.min(input.scrollHeight, line * 6)}px`;
+    input.style.height = `${Math.min(input.scrollHeight, line * 6 + padding)}px`;
     input.scrollTop = scrollTop;
     sync();
   }, [inputRef, sync]);
-  useLayoutEffect(resize, [props.value, resize]);
+  useLayoutEffect(resize, [props.value, props.placeholder, resize]);
   useLayoutEffect(() => {
     let width = inputRef.current?.clientWidth;
     const observer = new ResizeObserver(() => {

@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { COMPOSER_TOOL, COMPOSER_TOOL_ACTIVE } from "@/lib/composer-tool";
 import { useMenuMotion } from "./MenuMotion";
 import { t } from "@/lib/i18n";
 import { instanceSupportsLocalComputer, localComputerDisabledReason, localComputerSelectable } from "@/lib/local-computer";
@@ -86,8 +87,10 @@ export function PlaceChip({ bot, task, live, disabled = false, onPin }: {
         data-testid="place-chip"
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "relative flex size-8 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-control hover:text-ink",
-          pinned && "text-accent hover:text-accent",
+          COMPOSER_TOOL,
+          "relative",
+          open && COMPOSER_TOOL_ACTIVE,
+          pinned && "text-accent-text hover:text-accent-text",
           (disabled || off) && "cursor-not-allowed opacity-45 hover:bg-transparent",
         )}
       >

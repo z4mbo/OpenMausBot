@@ -63,6 +63,7 @@ Use only mapped, tested commands:
 - [Peer approval denial, expiry, and cancellation](peer-approvals.md)
 - [Waiting for an occupied desktop](computer-wait.md)
 - [Chat UI, driven headlessly](chat-ui.md)
+- [Composer, model picker and usage in the chat](composer-redesign.md)
 - [Chat widgets](widgets.md)
 - [Chat widgets: prompts to try with a real bot](widget-prompts.md)
 - [Phone web app installation and safe areas](phone-web-app.md)

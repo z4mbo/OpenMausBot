@@ -210,6 +210,27 @@ the new thread's title and the menu lists both threads, newest first.
 `src/components/TaskPicker.thread-pill.test.ts` holds the ordering, focus,
 search threshold, actions and 375 px placement.
 
+## Composer, model picker and usage
+
+The header no longer carries the model or the usage. Both live in the
+composer card's toolbar: `button "Model: <provider> · <model>"` (the pill,
+`data-tour="model"`) opens `dialog "Choose model"` above the composer, and
+`button "Show plan usage and context"` (the ring) opens `dialog "Usage and
+context"`. While the bot works, the send button is `button "Stop this turn"`.
+
+```sh
+pnpm control:omb ui click --ui $H --name "Show plan usage and context"
+pnpm control:omb ui eval --ui $H --js "document.querySelector('[data-tour=model]').click(); true"
+pnpm control:omb ui snapshot --ui $H --interactive
+```
+
+Expected: the picker has `textbox "Search models"`, one row per model whose
+name starts with the model's label, `group "Reasoning effort"` and
+`group "Apply model changes to"` with **Only this thread** pressed. The
+asserted recipe above switches the thread and the bot default through these
+rows. [Composer, model picker and usage](composer-redesign.md) has the full
+behaviour, the screenshot matrix and its fixture.
+
 ## Bot setup and MCP access recipe
 
 `scripts/testing/bot-tools-ui.e2e.test.ts` uses the same full-app launcher and

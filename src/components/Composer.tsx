@@ -1,9 +1,10 @@
 import { ComposerSendButton } from "./ComposerSendButton";
 import { track } from "@/lib/analytics";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type SetStateAction } from "react";
-import { BookOpen, Mic, Paperclip, Sparkles, Square, Target, Users, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
+import { Mic, Paperclip, Target, X } from "lucide-react";
 import { useStore, visibleMessages, currentTaskBot, type Bot, type Group, type Message } from "@/state/store";
 import { cn } from "@/lib/cn";
+import { COMPOSER_TOOL } from "@/lib/composer-tool";
 import { useMenuMotion } from "./MenuMotion";
 import { activeLocale, t } from "@/lib/i18n";
 import { useOwnerOrAdmin } from "@/lib/use-owner-or-admin";
@@ -28,8 +29,10 @@ import {
   type ComposerSendSnapshot,
   type FailedComposerSend,
 } from "@/lib/drafts";
-import { BotAvatar } from "./Avatar";
-import { ComposerMenuRow } from "./ComposerMenuRow";
+import { ComposerCommandList, ComposerMentionList, type MentionChoice, type MentionTeammate } from "./ComposerSuggestions";
+import { ModelPicker } from "./ModelPicker";
+import { ChatUsagePopover } from "./ChatUsagePopover";
+import { AgentBudgetPill } from "./AgentBudgetPill";
 import { MentionTextarea } from "./MentionTextarea";
 import { ComposerAttachments, pathForFile } from "./ComposerAttachments";
 import { splitTranscriptCitations, type CitationAttachment } from "@/lib/citations";
@@ -57,7 +60,6 @@ import {
   type Attachment,
   type PasteAttachment,
 } from "@/lib/composer-attachments";
-import { normalizeState } from "@/lib/mascot";
 import { goalCoordinatorForComposer, groupComposerHint, jevRoomRoutingOn, openTaskWorking, roomRespondersForComposer } from "@/lib/group-routing";
 import { PendingApprovalActions, PendingApprovalPanel, pendingApprovals } from "./PendingApproval";
 import { CallButton } from "./CallView";
@@ -72,7 +74,7 @@ import {
   doubleEnterSteersQueue,
 } from "./ComposerQueuedMessages";
 import { skillAuthoringEnabled } from "@/lib/feature-flags";
-import { mentionChoicesForQuery, mentionedPeople, mentionQueryAt, mentionRowDescription, type MentionPeer } from "@/lib/mentions";
+import { mentionChoicesForQuery, mentionedPeople, mentionQueryAt, type MentionPeer } from "@/lib/mentions";
 import { serializeThreadRefs, threadTokenFromPaste, threadTokenSpacing } from "@/lib/thread-refs";
 import {
   composerSlashTrigger,
@@ -84,9 +86,7 @@ import {
 } from "@/lib/composer-commands";
 import { useSlashSkills } from "@/lib/use-slash-skills";
 
-export type MentionTeammate = { id: string; name: string; avatar: ReactNode; kind: string; description?: string };
-
-type MentionChoice = { id: string; name: string; bot?: Bot; teammate?: MentionTeammate };
+export type { MentionTeammate };
 
 interface ComposerDraftSnapshot extends ComposerSendSnapshot {
   reply: Message | null;
@@ -137,7 +137,8 @@ export function Composer({
     state.instances.find((i) => i.instanceId === steerInstanceId)?.capabilities?.queueing === true;
   const composerTask = profile?.tasks?.find((task) => task.threadId === threadId);
   // Visible branch only: an approval left on an abandoned branch must not block the composer.
-  const approvals = pendingApprovals(group ? group.messages : bot ? visibleMessages(bot) : []);
+  const transcript = group ? group.messages : bot ? visibleMessages(bot) : [];
+  const approvals = pendingApprovals(transcript);
   const approval = approvals[0];
   const approvalBot = group
     ? members?.find((member) => member.id === approval?.message.from?.botId) ??
@@ -274,6 +275,7 @@ export function Composer({
   const effectiveText = typedGoalText ?? text;
   const effectiveChannelMode = typedGoalText !== null ? "goal" : channelMode;
   const engineSupportsImages = imageTargetsSupport(effectiveText, effectiveChannelMode);
+  const botTakesCommands = Boolean(!group && bot && state.instances.find((instance) => instance.instanceId === bot.modelSelection.instanceId)?.capabilities?.agentsMcp);
 
   const slash = composerSlashTrigger(text, caret);
   const locale = activeLocale();
@@ -721,10 +723,12 @@ export function Composer({
     setRecording((r) => !r);
   };
 
+  const stopTurn = !locked && (busy || Boolean(!group && bot?.waitingForTeammates)) ? interruptTurn : undefined;
+
   return (
     <div className="pointer-events-none relative px-5 pb-3">
       {speechError && (
-        <div className="pointer-events-auto mb-2 w-full rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-[12px] text-warning">
+        <div role="status" className="pointer-events-auto mb-2 w-full rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-[12px] text-warning">
           {speechError}
         </div>
       )}
@@ -732,7 +736,7 @@ export function Composer({
         {failedSends.map((failed) => (
           <div
             key={failed.id}
-            className="mb-2 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-[12.5px] text-danger"
+            className="mb-2 flex items-center gap-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-[12.5px] text-danger"
           >
             <span className="min-w-0 flex-1 truncate">
               {t("composer.failed.notSent", {
@@ -757,97 +761,10 @@ export function Composer({
             </button>
           </div>
         ))}
-        {commandMotion.shown && (
-          <div
-            ref={commandListRef}
-            role="listbox"
-            aria-label={t("composer.commands.aria")}
-            className={cn("absolute bottom-full left-2 z-20 mb-2 max-h-80 w-80 max-w-[calc(100%-1rem)] overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl border border-hairline/40 bg-raised shadow-lg", commandMotion.className)} {...commandMotion.exitProps}
-          >
-            <div className="border-b border-hairline/20 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-secondary">
-              {t("composer.commands.title")}
-            </div>
-            {commandCandidates.map((command, index) => (
-              <button
-                key={`${command.kind}:${command.id}`}
-                data-command-index={index}
-                type="button"
-                role="option"
-                aria-selected={index === highlight}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => pickCommand(command)}
-                onMouseEnter={() => setHighlight(index)}
-                className={cn(
-                  "flex w-full items-center gap-3 px-3 py-2.5 text-left",
-                  index === highlight ? "bg-raised-hover" : "",
-                )}
-              >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                  {command.kind === "skill" ? (
-                    <Sparkles size={15} aria-hidden="true" />
-                  ) : command.id === "goal" ? (
-                    <Target size={15} aria-hidden="true" />
-                  ) : (
-                    <BookOpen size={15} aria-hidden="true" />
-                  )}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-[14px] font-medium text-accent">{command.label}</span>
-                    {command.kind === "skill" && (
-                      <span className="shrink-0 rounded-full bg-accent/10 px-1.5 text-[11px] font-medium leading-4 text-accent">{t("composer.command.skillTag")}</span>
-                    )}
-                  </span>
-                  <span className="block truncate text-xs text-ink-secondary">
-                    {command.description}
-                  </span>
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-        {mentionMotion.shown && (
-          <div
-            ref={mentionListRef}
-            role="listbox"
-            aria-label={t("composer.mention.aria")}
-            className={cn("absolute bottom-full start-2 z-20 mb-2 max-h-72 w-72 overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl border border-hairline/40 bg-raised shadow-lg", mentionMotion.className)} {...mentionMotion.exitProps}
-          >
-            {candidates.map((peer, i) => {
-              const description = peer.teammate ? peer.teammate.description : mentionRowDescription(peer.bot
-                ? { kind: "bot", title: peer.bot.title }
-                : { kind: "everyone", count: mentionEveryoneCount });
-              return (
-                <ComposerMenuRow
-                  key={peer.id}
-                  id={`composer-mention-${peer.id}`}
-                  data-mention-index={i}
-                  role="option"
-                  aria-selected={i === highlight}
-                  onClick={() => pickMention(peer)}
-                  onMouseEnter={() => setHighlight(i)}
-                  selected={i === highlight}
-                  icon={peer.teammate ? peer.teammate.avatar : peer.bot ? (
-                    <BotAvatar
-                      bot={peer.bot}
-                      state={normalizeState(peer.bot.mascotExpression) ?? "happy"}
-                      size={24}
-                    />
-                  ) : (
-                    <span className="flex size-6 items-center justify-center rounded-full bg-raised text-ink-secondary">
-                      <Users size={14} aria-hidden="true" />
-                    </span>
-                  )}
-                  name={peer.name}
-                  description={description || undefined}
-                  kind={peer.teammate ? peer.teammate.kind : peer.bot ? t("composer.mention.agent") : t("composer.mention.channel")}
-                />
-              );
-            })}
-          </div>
-        )}
+        <ComposerCommandList listRef={commandListRef} motion={commandMotion} commands={commandCandidates} highlight={highlight} onPick={pickCommand} onHighlight={setHighlight} />
+        <ComposerMentionList listRef={mentionListRef} motion={mentionMotion} candidates={candidates} highlight={highlight} everyoneCount={mentionEveryoneCount} onPick={pickMention} onHighlight={setHighlight} />
         {approval && (
-          <div className="mb-2 overflow-hidden rounded-3xl bg-composer ring-1 ring-composer-ring">
+          <div className="mb-2 overflow-hidden rounded-[20px] border border-hairline/50 bg-composer ring-1 ring-composer-ring">
             <PendingApprovalPanel
               key={approval.requestId}
               pending={approval}
@@ -860,18 +777,6 @@ export function Composer({
             />
           </div>
         )}
-        <ComposerAttachments
-          items={attachments}
-          onAdd={addAttachments}
-          onRemove={removeAttachment}
-          onChangeCitation={(citation: CitationAttachment) => editAttachments((current) => current.map((attachment) => attachment.id === citation.id ? citation : attachment))}
-          onDisplayInChatBox={displayPasteInChatBox}
-          allowImages={engineSupportsImages}
-          notice={attachmentNotice}
-          onNotice={setAttachmentNotice}
-          onPendingChange={(pending) => changeDraftAttachmentPending(draftId, pending)}
-          uploadImage={uploadImage}
-        />
         <QueuedComposerMessages
           items={queuedMessages}
           onSteer={canSteerQueued ? steerQueued : undefined}
@@ -888,90 +793,28 @@ export function Composer({
           <div
             aria-hidden
             data-composer-backdrop
-            className="pointer-events-none absolute -left-5 -right-5 -bottom-3 top-1/2 bg-app"
+            className="pointer-events-none absolute -inset-x-5 -bottom-3 -top-6 bg-[linear-gradient(to_bottom,transparent,var(--color-app)_1.5rem)]"
           />
-        <div data-tour="composer" className="@container/composer relative z-[1] rounded-3xl bg-composer px-2.5 pb-2 pt-2.5 ring-1 ring-composer-ring transition-[border-color,box-shadow] border border-hairline/40 focus-within:border-focus/50">
-        {replyTo && <ComposerReplyStrip message={replyTo} fallbackName={bot?.name} onClear={onClearReply} />}
-        <div data-composer-row className="flex flex-wrap items-center gap-1">
-          <input
-            ref={fileInput}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              void pickFiles(e.target.files);
-              // Reset so picking the same file again still fires onChange.
-              e.target.value = "";
-            }}
-          />
-          {!locked && (
-            <div className="flex flex-wrap items-center gap-1">
-              <button
-                type="button"
-                onClick={() => fileInput.current?.click()}
-                aria-label={t("composer.attach")}
-                title={t("composer.attach")}
-                className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-control hover:text-ink"
-              >
-                <Paperclip size={17} />
-              </button>
-              {group && !group.dm && (
-                <button
-                  type="button"
-                  aria-pressed={effectiveChannelMode === "goal"}
-                  aria-label={t("composer.goal.aria")}
-                  title={t("composer.goal.title")}
-                  onClick={() => {
-                    markDraftEdited(draftId);
-                    if (typedGoalText !== null) {
-                      const nextCaret = Math.max(0, caret - (text.length - typedGoalText.length));
-                      editText(typedGoalText);
-                      setCaret(nextCaret);
-                      setChannelMode("chat");
-                      requestAnimationFrame(() => {
-                        inputRef.current?.focus();
-                        inputRef.current?.setSelectionRange(nextCaret, nextCaret);
-                      });
-                      return;
-                    }
-                    setChannelMode((current) => current === "goal" ? "chat" : "goal");
-                  }}
-                  className={cn(
-                    "flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[13px] transition-colors",
-                    effectiveChannelMode === "goal"
-                      ? "border-accent/35 bg-accent/10 text-accent"
-                      : "border-hairline/20 bg-transparent text-ink-secondary hover:bg-raised hover:text-ink",
-                  )}
-                >
-                  <Target size={14} aria-hidden="true" />
-                  {effectiveChannelMode === "goal" ? "/goal" : t("composer.goal.chip")}
-                </button>
-              )}
-              {modeBot && approvalEngine && !remoteClient && (
-                <ApprovalModeSelector
-                  approvalMode={modeBot.approvalMode}
-                  autoApprove={modeBot.autoApprove}
-                  providerName={approvalEngine.displayName}
-                  driverKind={approvalEngine.driverKind}
-                  onSelect={setApprovalMode}
-                  disabled={Boolean(modeBot.busy)}
-                  trustedModesAvailable={trustedThreadAccess}
-                  onManageCommandAllowlist={ownerOrAdmin === true ? () => setCommandAllowlistTarget({ botId: modeBot.id, botName: modeBot.name, threadId: modeBot.threadId }) : undefined}
-                />
-              )}
-              {modeBot && !remoteClient && advanced && (
-                <PlaceChip
-                  bot={modeBot}
-                  task={composerTask}
-                  live={Boolean(modeBot.busy)}
-                  disabled={Boolean(modeBot.busy)}
-                  onPin={(surface) => dispatch({ type: "updateTask", botId: modeBot.id, threadId: modeBot.threadId, patch: { surface } })}
-                />
-              )}
-            </div>
-          )}
+        <div
+          data-tour="composer"
+          data-composer-card
+          className="@container/composer relative z-[1] flex flex-col rounded-[20px] border border-hairline/50 bg-composer shadow-[var(--composer-shadow)] ring-1 ring-composer-ring transition-[border-color,box-shadow] has-[textarea:focus]:border-focus/70 has-[textarea:focus]:shadow-[var(--composer-shadow),0_0_0_3px_color-mix(in_srgb,var(--color-focus)_16%,transparent)]"
+        >
+        {replyTo && <div className="px-2 pt-2"><ComposerReplyStrip message={replyTo} fallbackName={bot?.name} onClear={onClearReply} /></div>}
+        <ComposerAttachments
+          items={attachments}
+          onAdd={addAttachments}
+          onRemove={removeAttachment}
+          onChangeCitation={(citation: CitationAttachment) => editAttachments((current) => current.map((attachment) => attachment.id === citation.id ? citation : attachment))}
+          onDisplayInChatBox={displayPasteInChatBox}
+          allowImages={engineSupportsImages}
+          notice={attachmentNotice}
+          onNotice={setAttachmentNotice}
+          onPendingChange={(pending) => changeDraftAttachmentPending(draftId, pending)}
+          uploadImage={uploadImage}
+        />
           <MentionTextarea
-          wrapperClassName="order-first basis-full pb-1"
+          wrapperClassName="self-stretch [--mention-editor-pad:12px_14px_6px]"
           inputRef={inputRef}
           peers={mentionPeers}
           everyone={Boolean(group && !group.dm)}
@@ -1082,41 +925,110 @@ export function Composer({
                         name: group.name,
                         hint: groupComposerHint(group, members ?? [], { jevOn: jevRoomRoutingOn(state.config) }),
                       })
-                  : t("composer.placeholder.bot", { name: bot?.name ?? "" })
+                  : t(botTakesCommands ? "composer.placeholder.botCommands" : "composer.placeholder.bot", { name: bot?.name ?? "" })
           }
           aria-label={t("composer.placeholder.bot", { name: group ? group.name : (bot?.name ?? "") })}
-            className="block max-h-[12rem] min-h-10 w-full resize-none overflow-y-auto bg-transparent px-1.5 py-0.5 text-[15px] leading-6 placeholder:text-ink-tertiary focus:outline-none"
+            className="block max-h-[13rem] min-h-11 w-full resize-none overflow-y-auto bg-transparent text-[15px] leading-6 placeholder:text-ink-tertiary focus:outline-none"
           />
-          <div data-composer-actions className="ml-auto flex items-center gap-1">
-          {busy && !locked && (
-          <button
-            onClick={interruptTurn}
-            aria-label={t("chat.stopTurn")}
-            className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-raised hover:text-ink"
-            title={t("chat.stop")}
-          >
-            <Square size={14} className="fill-current" />
-          </button>
-        )}
-        {!locked && !busy && !hasContent && capabilities.dictation.available && (
-          <button
-            onClick={toggleMic}
-            aria-label={recording ? t("composer.dictation.stop") : t("composer.dictation.start")}
-            className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full",
-              recording
-                ? "animate-pulse bg-danger/20 text-danger"
-                : "text-ink-secondary hover:bg-raised hover:text-ink",
-            )}
-            title={recording ? t("composer.dictation.stopHint") : t("composer.dictation.hint")}
-          >
-            <Mic size={18} />
-          </button>
-        )}
-        {bot && !group && <CallButton bot={bot} placement="composer" />}
-        {hasContent && !locked && (
-          <ComposerSendButton busy={busy} canSteer={canSteer} attachmentPending={attachmentPending} sendLabel={sendLabel} onSend={send} />
+        <div data-composer-row className="flex min-w-0 items-center gap-1 px-2 pb-2 pt-1">
+          <input
+            ref={fileInput}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              void pickFiles(e.target.files);
+              // Reset so picking the same file again still fires onChange.
+              e.target.value = "";
+            }}
+          />
+          <div data-composer-tools className="flex min-w-0 flex-1 items-center gap-0.5">
+          {!locked && (
+            <>
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                aria-label={t("composer.attach")}
+                title={t("composer.attach")}
+                className={COMPOSER_TOOL}
+              >
+                <Paperclip size={17} aria-hidden="true" />
+              </button>
+              {bot && !group && !remoteClient && <ModelPicker key={bot.threadId} bot={bot} threadId={bot.threadId} className="min-w-0" />}
+              {group && !group.dm && (
+                <button
+                  type="button"
+                  aria-pressed={effectiveChannelMode === "goal"}
+                  aria-label={t("composer.goal.aria")}
+                  title={t("composer.goal.title")}
+                  onClick={() => {
+                    markDraftEdited(draftId);
+                    if (typedGoalText !== null) {
+                      const nextCaret = Math.max(0, caret - (text.length - typedGoalText.length));
+                      editText(typedGoalText);
+                      setCaret(nextCaret);
+                      setChannelMode("chat");
+                      requestAnimationFrame(() => {
+                        inputRef.current?.focus();
+                        inputRef.current?.setSelectionRange(nextCaret, nextCaret);
+                      });
+                      return;
+                    }
+                    setChannelMode((current) => current === "goal" ? "chat" : "goal");
+                  }}
+                  className={cn(
+                    "flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[13px] font-medium transition-colors",
+                    effectiveChannelMode === "goal"
+                      ? "bg-accent/12 text-accent-text"
+                      : "text-ink-secondary hover:bg-ink/[0.07] hover:text-ink",
+                  )}
+                >
+                  <Target size={15} aria-hidden="true" />
+                  {effectiveChannelMode === "goal" ? "/goal" : t("composer.goal.chip")}
+                </button>
+              )}
+              {modeBot && approvalEngine && !remoteClient && (
+                <ApprovalModeSelector
+                  approvalMode={modeBot.approvalMode}
+                  autoApprove={modeBot.autoApprove}
+                  providerName={approvalEngine.displayName}
+                  driverKind={approvalEngine.driverKind}
+                  onSelect={setApprovalMode}
+                  disabled={Boolean(modeBot.busy)}
+                  trustedModesAvailable={trustedThreadAccess}
+                  onManageCommandAllowlist={ownerOrAdmin === true ? () => setCommandAllowlistTarget({ botId: modeBot.id, botName: modeBot.name, threadId: modeBot.threadId }) : undefined}
+                />
+              )}
+              {modeBot && !remoteClient && advanced && (
+                <PlaceChip
+                  bot={modeBot}
+                  task={composerTask}
+                  live={Boolean(modeBot.busy)}
+                  disabled={Boolean(modeBot.busy)}
+                  onPin={(surface) => dispatch({ type: "updateTask", botId: modeBot.id, threadId: modeBot.threadId, patch: { surface } })}
+                />
+              )}
+            </>
           )}
+          </div>
+          <div data-composer-actions className="flex shrink-0 items-center gap-0.5">
+            {bot && !group && <AgentBudgetPill shared={bot.shared} placement="composer" />}
+            {bot && !group && <ChatUsagePopover bot={bot} messages={transcript} />}
+            {!locked && !busy && !hasContent && capabilities.dictation.available && (
+              <button
+                type="button"
+                onClick={toggleMic}
+                aria-label={recording ? t("composer.dictation.stop") : t("composer.dictation.start")}
+                className={cn(COMPOSER_TOOL, recording && "animate-pulse bg-danger/15 text-danger hover:bg-danger/20 hover:text-danger")}
+                title={recording ? t("composer.dictation.stopHint") : t("composer.dictation.hint")}
+              >
+                <Mic size={17} aria-hidden="true" />
+              </button>
+            )}
+            {bot && !group && <CallButton bot={bot} placement="composer" />}
+            {!locked && (
+              <ComposerSendButton busy={busy} canSteer={canSteer} hasContent={hasContent} attachmentPending={attachmentPending} sendLabel={sendLabel} onSend={send} onStop={stopTurn} />
+            )}
           </div>
         </div>
         </div>

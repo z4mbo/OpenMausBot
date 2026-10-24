@@ -1,33 +1,35 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, KeyRound, Loader2, Plus, RefreshCw, Search, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Check, ChevronDown, Link2, Search, X } from "lucide-react";
 import { useStore, currentTaskBot, type Bot, type InstanceInfo, type ModelSelection } from "@/state/store";
 import type { EffortLevel } from "../../shared/wire";
 import type { ModelVariantOption } from "../../shared/runtime-events";
 import { filterCustomModels, partitionCustomModels, suggestedModels } from "@/lib/custom-models";
 import { configuredModelInstances, isClaudeAccount, isCustomOnly, SIGN_IN_FAMILY_LABEL, signInFamily, splitEngineRail, type SignInFamily } from "@/lib/engine-rail";
 import { InstanceProviderMark } from "./ProviderIcons";
-import { EngineSetup, EngineUpdateNotice, hasSavedApiKey, needsCli, needsSignIn } from "./EngineSetup";
-import { EngineGroupLabel } from "./EngineGroupLabel";
+import { hasSavedApiKey, needsCli, needsSignIn } from "./EngineSetup";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { ChatGptPlanStatus } from "./ChatGptPlanStatus";
 import { approvalModeFor, modelSwitchNeedsAsk } from "../../shared/approval-mode";
 import { cn } from "@/lib/cn";
+import { COMPOSER_TOOL_ACTIVE } from "@/lib/composer-tool";
 import { useMenuMotion } from "./MenuMotion";
 import { repeatedModelLabels, SimpleModelPane } from "./SimpleModelPane";
 import { useAdvancedMode } from "@/lib/interface-mode";
 import { useOwnerOrAdmin } from "@/lib/use-owner-or-admin";
-import { friendlyEffort, simpleEffortLevels } from "@/lib/model-friendly";
+import { compactModelLabel, friendlyEffort, simpleEffortLevels } from "@/lib/model-friendly";
 import { t } from "@/lib/i18n";
-import { COMPACT_SQUARE } from "@/lib/compact-chip";
 import { threadsOnOwnModel } from "../../shared/thread-model";
 import { ThreadModelsLine } from "./ThreadModelsLine";
 import { Select } from "./Select";
 import { ModelFallbackSettings, modelLabel } from "./ModelFallbackSettings";
 import { RemoteModelPicker } from "./RemoteModelPicker";
+import { ClaudeAccountSelect, ModelPickerList } from "./ModelPickerList";
+import { offersLocalModels, pickerGroupKey, probeLocalModels } from "./model-picker-groups";
+import { useSpaceAbove } from "@/hooks/use-space-above";
 import { modelSelectionForPick } from "@/lib/model-picker-selection";
 export { modelSelectionForPick } from "@/lib/model-picker-selection";
+export { ClaudeAccountSelect } from "./ModelPickerList";
+export { LOCAL_PROBE_TIMEOUT_MS, offersLocalModels, probeLocalModels } from "./model-picker-groups";
 
-type ModelOption = InstanceInfo["models"]["options"][number];
 const COMPACT_MODEL_COUNT = 5;
 
 function modelProvider(instance: InstanceInfo | undefined, model: string): string | undefined {
@@ -38,29 +40,6 @@ export function engineStatus(instance: InstanceInfo): string {
   if (needsCli(instance)) return t("model.setupRequired");
   if (needsSignIn(instance)) return t("model.signInRequired");
   return instance.snapshot.version ?? t("model.ready");
-}
-
-export const LOCAL_PROBE_TIMEOUT_MS = 5_000;
-
-export function probeLocalModels(
-  instanceId: string,
-  refreshModels: (instanceId: string) => Promise<void>,
-  timeoutMs = LOCAL_PROBE_TIMEOUT_MS,
-): Promise<void> {
-  return new Promise((resolve) => {
-    const timer = setTimeout(resolve, timeoutMs);
-    void refreshModels(instanceId)
-      .catch(() => {})
-      .finally(() => {
-        clearTimeout(timer);
-        resolve();
-      });
-  });
-}
-
-export function offersLocalModels(instance: InstanceInfo | undefined, localCount: number): boolean {
-  if (!instance) return false;
-  return localCount > 0 || (instance.driverKind === "claudeAgent" && !needsCli(instance) && !instance.policy);
 }
 
 export function effortLabel(level: EffortLevel): string {
@@ -223,68 +202,26 @@ export function ModelVariantRow({ bot, threadId, updateBotDefault, className, la
   );
 }
 
-function ModelRow({
-  option,
-  current,
-  defaultId,
-  botModel = false,
-  onPick,
-}: {
-  option: ModelOption;
-  current: boolean;
-  defaultId: string;
-  botModel?: boolean;
-  onPick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onPick}
-      className={cn(
-        "flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] text-ink transition-colors hover:bg-control/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-        current && "bg-control font-medium",
-      )}
-    >
-      <span className="flex min-w-0 items-center gap-2">
-        <span className="truncate">{option.label}</span>
-        {option.provider && (
-          <span
-            className="shrink-0 rounded bg-inset px-1.5 py-px text-[10px] text-ink-secondary"
-            title={t("model.provider", { name: option.provider })}
-          >
-            {option.provider}
-          </span>
-        )}
-        {option.id === defaultId && (
-          <span className="shrink-0 rounded bg-inset px-1.5 py-px text-[10px] text-ink-secondary">Default</span>
-        )}
-        {option.loaded && (
-          <span className="shrink-0 rounded bg-accent/10 px-1.5 py-px text-[10px] text-accent">Loaded</span>
-        )}
-        {botModel && <span data-bot-model className="shrink-0 text-[11px] text-ink-secondary">{t("model.botModelTag")}</span>}
-      </span>
-      {current && <Check size={14} className="shrink-0 text-accent" />}
-    </button>
-  );
-}
-
 export function FollowBotModelRow({ name, model, follows, onPick }: { name: string; model: string; follows: boolean; onPick: () => void }) {
   return (
     <button
       type="button"
       data-follow-bot-model
       aria-pressed={follows}
+      data-picker-item
       onClick={onPick}
       className={cn(
-        "flex w-full shrink-0 items-center justify-between gap-2 border-b border-hairline/40 px-4 py-2.5 text-left text-[13px] text-ink hover:bg-control/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-        follows && "bg-control/40",
+        "mx-1.5 flex w-[calc(100%-0.75rem)] shrink-0 items-center gap-2.5 rounded-xl px-1.5 py-2 text-left outline-none transition-colors hover:bg-control/70 focus-visible:bg-control/70 focus-visible:ring-2 focus-visible:ring-focus/60",
+        follows && "bg-control/50",
       )}
     >
-      <span className="flex min-w-0 items-baseline gap-2">
-        <span className="shrink-0 font-medium">{t("model.useBotModel", { name })}</span>
-        <span className="truncate text-[12px] text-ink-secondary">{model}</span>
+      <span className="flex size-5 shrink-0 items-center justify-center">
+        {follows ? <Check size={15} strokeWidth={2.25} className="text-accent-text" aria-hidden="true" /> : <Link2 size={14} className="text-ink-secondary" aria-hidden="true" />}
       </span>
-      {follows && <Check size={14} className="shrink-0 text-accent" aria-hidden="true" />}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-medium text-ink">{t("model.useBotModel", { name })}</span>
+        <span className="block truncate text-[11.5px] text-ink-tertiary">{model}</span>
+      </span>
     </button>
   );
 }
@@ -357,81 +294,43 @@ function apiKeysLabel(instances: InstanceInfo[]): string {
   return t(instances.some(hasSavedApiKey) ? "model.addOrChangeApiKeys" : "model.addApiKeys");
 }
 
-export function ModelEngineRail({ instances, selectedInstance, claudeInstance, openaiInstance, onSelect, onAddApiKeys }: {
-  instances: InstanceInfo[];
-  selectedInstance?: InstanceInfo;
-  claudeInstance?: InstanceInfo;
-  openaiInstance?: InstanceInfo;
-  onSelect: (instance: InstanceInfo) => void;
-  onAddApiKeys?: () => void;
+const SEGMENTS = "grid min-w-0 gap-0.5 rounded-xl bg-inset p-0.5";
+const SEGMENT = "min-w-0 truncate rounded-[10px] px-1 py-1 text-[12px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 @max-[22rem]/pickerfoot:px-0 @max-[22rem]/pickerfoot:text-[11.5px]";
+const SEGMENT_ON = "bg-menu text-ink shadow-sm ring-1 ring-hairline/40";
+const SEGMENT_OFF = "text-ink-secondary hover:text-ink";
+
+export function EffortSegments({ levels, current, disabled, onPick }: {
+  levels: readonly EffortLevel[];
+  current?: EffortLevel;
+  disabled: boolean;
+  onPick: (level: EffortLevel | undefined) => void;
 }) {
-  const { subscription, api, custom: local } = railProviders(instances, selectedInstance, claudeInstance, openaiInstance);
-  const railButton = ({ instance, target, selected, label }: RailProvider) => {
-    const attention = needsCli(target) || needsSignIn(target) || Boolean(target.snapshot.update);
-    const managedBy = target.policy ? t("policy.managedBy", { organization: target.policy.organizationName }) : undefined;
-    return (
-      <button
-        type="button"
-        key={instance.instanceId}
-        onClick={() => onSelect(target)}
-        aria-label={managedBy ? `${label} · ${managedBy}` : label}
-        aria-pressed={selected}
-        title={`${label} · ${managedBy ?? engineStatus(target)}`}
-        className={cn("relative flex size-9 items-center justify-center rounded-lg", selected ? "bg-control ring-1 ring-hairline/50" : "hover:bg-control/60", managedBy && "opacity-40")}
-      >
-        <InstanceProviderMark instance={target} size={18} />
-        {target.access === "api" && (
-          <span data-rail-key-badge className="absolute bottom-0 left-0 flex size-3.5 items-center justify-center rounded-full bg-panel text-ink-secondary">
-            <KeyRound size={9} aria-hidden="true" />
-          </span>
-        )}
-        {attention && <span className="absolute bottom-0.5 right-0.5 size-1.5 rounded-full bg-warning ring-2 ring-panel" />}
-      </button>
-    );
-  };
+  const options = [undefined, ...levels];
   return (
-    <div className="flex w-14 shrink-0 flex-col gap-1 overflow-y-auto border-r border-hairline/40 bg-panel p-2">
-      {subscription.length > 0 && <EngineGroupLabel className="px-0 pb-0.5 pt-0.5 text-center text-[9px]">{t("model.rail.cloud")}</EngineGroupLabel>}
-      {subscription.map(railButton)}
-      {(api.length > 0 || onAddApiKeys) && <EngineGroupLabel className={cn("px-0 pb-0.5 text-center text-[9px] leading-tight", subscription.length > 0 ? "pt-2" : "pt-0.5")}>{t("model.rail.apiKeys")}</EngineGroupLabel>}
-      {api.map(railButton)}
-      {onAddApiKeys && (
-        <button
-          type="button"
-          data-rail-add-api-key
-          onClick={onAddApiKeys}
-          aria-label={apiKeysLabel(instances)}
-          title={apiKeysLabel(instances)}
-          className="flex size-9 items-center justify-center rounded-lg border border-dashed border-hairline text-ink-secondary hover:bg-control/60 hover:text-ink"
-        >
-          <Plus size={16} aria-hidden="true" />
+    <div role="group" aria-label={t("model.simple.effort")} data-model-effort-control className={SEGMENTS}
+      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+      {options.map((level) => (
+        <button key={level ?? "default"} type="button" aria-pressed={current === level} disabled={disabled}
+          title={level === undefined ? t("model.effort.defaultHint") : t("model.effort.levelHint", { level: effortLabel(level) })}
+          onClick={() => onPick(level)} className={cn(SEGMENT, current === level ? SEGMENT_ON : SEGMENT_OFF)}>
+          {level === undefined ? t("model.effort.default") : effortLabel(level)}
         </button>
-      )}
-      {local.length > 0 && <EngineGroupLabel className="px-0 pb-0.5 pt-2 text-center text-[9px]">{t("model.rail.local")}</EngineGroupLabel>}
-      {local.map(railButton)}
+      ))}
     </div>
   );
 }
 
-export function ClaudeAccountSelect({ accounts, selectedId, onSelect }: {
-  accounts: InstanceInfo[];
-  selectedId: string;
-  onSelect: (instance: InstanceInfo) => void;
-}) {
+export function ScopeSegments({ scope, onScope }: { scope: "thread" | "bot"; onScope: (scope: "thread" | "bot") => void }) {
   return (
-    <label className="mt-2 flex min-w-0 items-center gap-2 text-[12px] text-ink-secondary">
-      <span>{t("model.account")}:</span>
-      <Select size="sm" className="flex-1"
-        aria-label={t("model.account")}
-        value={selectedId}
-        onChange={(event) => {
-          const account = accounts.find((instance) => instance.instanceId === event.target.value);
-          if (account) onSelect(account);
-        }}
-      >
-        {accounts.map((account) => <option key={account.instanceId} value={account.instanceId}>{account.displayName}</option>)}
-      </Select>
-    </label>
+    <div role="group" aria-label={t("model.scope.aria")} className={cn(SEGMENTS, "grid-cols-2")}>
+      {(["thread", "bot"] as const).map((value) => (
+        <button key={value} type="button" aria-pressed={scope === value} onClick={() => onScope(value)}
+          title={t(value === "bot" ? "model.scope.botHint" : "model.scope.threadHint")}
+          className={cn(SEGMENT, scope === value ? SEGMENT_ON : SEGMENT_OFF)}>
+          {t(value === "bot" ? "model.scope.bot" : "model.scope.thread")}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -456,7 +355,6 @@ export function ModelPicker({
   const [open, setOpen] = useState(false);
   const motion = useMenuMotion(open && !bot.busy);
   const [railId, setRailId] = useState<string | null>(null);
-  const [pane, setPane] = useState<"main" | "custom">("main");
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -468,31 +366,20 @@ export function ModelPicker({
   // authority loads.
   const simpleUpdatesBotDefault = !state.config?.cloudHome || ownerOrAdmin === true;
   const [fullView, setFullView] = useState(false);
+  const [setupFor, setSetupFor] = useState<string | undefined>(undefined);
   const [pendingSwitch, setPendingSwitch] = useState<{ botId: string; threadId: string;
     selection: ModelSelection; updateBotDefault: boolean; name: string } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const [placement, setPlacement] = useState<{ left: number; maxHeight: number }>();
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [changedBotModel, setChangedBotModel] = useState(false);
   const refreshingRef = useRef(false);
   const remoteConfirmation = useRef(false);
   const lastClaudeIdRef = useRef<string | null>(null);
   const lastOpenaiIdRef = useRef<string | null>(null);
+  const space = useSpaceAbove(open && !contained, triggerRef, 600);
 
   const simpleView = !advanced && !fullView;
   const popoverWidth = simpleView ? SIMPLE_POPOVER_WIDTH : POPOVER_WIDTH;
-  useLayoutEffect(() => {
-    if (!open || contained) return;
-    const place = () => {
-      const rect = rootRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const width = Math.min(popoverWidth, window.innerWidth - 32);
-      setPlacement({ left: Math.max(16, Math.min(rect.right - width, window.innerWidth - width - 16)) - rect.left,
-        maxHeight: Math.max(0, Math.min(600, window.innerHeight - rect.bottom - 24)) });
-    };
-    place();
-    window.addEventListener("resize", place);
-    return () => window.removeEventListener("resize", place);
-  }, [open, contained, popoverWidth]);
 
   const selection = bot.modelSelection;
   const active = state.instances.find((instance) => instance.instanceId === selection.instanceId);
@@ -503,28 +390,11 @@ export function ModelPicker({
   );
   const claudeAccounts = pickerInstances.filter(isClaudeAccount);
   const openaiAccounts = pickerInstances.filter((instance) => signInFamily(instance) === "openai");
-  const openaiRailInstance = openaiAccounts.find((instance) => instance.instanceId === lastOpenaiIdRef.current)
-    ?? openaiAccounts.find((instance) => instance.instanceId === selection.instanceId) ?? openaiAccounts[0];
   const multipleClaudeAccounts = state.instances.filter(isClaudeAccount).length > 1;
   const showActiveAccount = (multipleClaudeAccounts && isClaudeAccount(active)) || Boolean(active?.snapshot.chatgptPlan);
-  const claudeRailInstance = claudeAccounts.find((instance) => instance.instanceId === lastClaudeIdRef.current)
-    ?? claudeAccounts.find((instance) => instance.instanceId === selection.instanceId) ?? claudeAccounts[0];
   const railInstance =
     pickerInstances.find((instance) => instance.instanceId === (railId ?? selection.instanceId)) ?? pickerInstances[0];
-  const displayedInstanceId = railInstance?.instanceId;
-  // A plan account discovers its allowed models only after sign-in: an empty catalog must still lead to cloud sign-in,
-  // never local models.
-  const hasOfficialModels = Boolean(railInstance?.snapshot.chatgptPlan || railInstance?.models.options.some((option) => !option.custom));
   const customOnly = isCustomOnly(railInstance);
-  useEffect(() => {
-    if (railId !== null && railId !== displayedInstanceId) {
-      setPane(customOnly || !hasOfficialModels ? "custom" : "main");
-      setQuery("");
-      setShowAll(false);
-    } else if (customOnly || !hasOfficialModels) {
-      setPane("custom");
-    }
-  }, [railId, displayedInstanceId, hasOfficialModels, customOnly]);
 
   const refreshLocalInstances = useCallback(() => {
     if (refreshingRef.current) return;
@@ -539,11 +409,10 @@ export function ModelPicker({
       });
   }, [refreshInstances]);
 
-  const refreshModels = useCallback(() => {
+  const refreshFor = useCallback((instanceId: string | undefined) => {
     if (refreshingRef.current) return;
     refreshingRef.current = true;
     setRefreshing(true);
-    const instanceId = displayedInstanceId;
     void refreshInstances()
       .then(() => instanceId ? refreshInstanceModels(instanceId) : undefined)
       .catch(() => {
@@ -552,7 +421,7 @@ export function ModelPicker({
         refreshingRef.current = false;
         setRefreshing(false);
       });
-  }, [displayedInstanceId, refreshInstanceModels, refreshInstances]);
+  }, [refreshInstanceModels, refreshInstances]);
 
   useEffect(() => {
     if (open) refreshLocalInstances();
@@ -562,6 +431,11 @@ export function ModelPicker({
     if (bot.busy) setOpen(false);
   }, [bot.busy]);
 
+  const close = useCallback(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const closeOnOutsideClick = (event: MouseEvent) => {
@@ -570,11 +444,9 @@ export function ModelPicker({
       if (!rootRef.current?.contains(clickedNode)) setOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (remoteConfirmation.current) return;
-      if (event.key !== "Escape") return;
-      if (query) setQuery("");
-      else if (!simpleView && pane === "custom" && railInstance?.models.options.some((option) => !option.custom)) setPane("main");
-      else setOpen(false);
+      if (remoteConfirmation.current || event.key !== "Escape") return;
+      if (simpleView && query) setQuery("");
+      else close();
     };
     window.addEventListener("mousedown", closeOnOutsideClick);
     window.addEventListener("keydown", closeOnEscape);
@@ -582,20 +454,11 @@ export function ModelPicker({
       window.removeEventListener("mousedown", closeOnOutsideClick);
       window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [open, pane, query, railInstance, simpleView]);
+  }, [open, query, simpleView, close]);
 
   const resetList = () => {
     setQuery("");
     setShowAll(false);
-  };
-
-  const openFor = (instance: InstanceInfo | undefined) => {
-    const official = instance?.models.options.filter((option) => !option.custom) ?? [];
-    const selectedIsCustom = instance?.models.options.some(
-      (option) => option.id === selection.model && option.custom,
-    );
-    setPane(selectedIsCustom || isCustomOnly(instance) || (official.length === 0 && !instance?.snapshot.chatgptPlan) ? "custom" : "main");
-    resetList();
   };
 
   const lookForLocal = (instance: InstanceInfo) => {
@@ -605,23 +468,20 @@ export function ModelPicker({
       setProbingLocal((current) => (current === instance.instanceId ? null : current)));
   };
 
-  const openLocalModels = (instance: InstanceInfo) => {
-    setPane("custom");
-    resetList();
-    lookForLocal(instance);
-  };
-
   const openApiKeys = () => {
     setOpen(false);
     dispatch({ type: "toggleAppSettings", open: true, section: "connections" });
+  };
+
+  const openEngines = () => {
+    setOpen(false);
+    dispatch({ type: "toggleAppSettings", open: true, section: "engines" });
   };
 
   const selectRail = (instance: InstanceInfo) => {
     if (isClaudeAccount(instance)) lastClaudeIdRef.current = instance.instanceId;
     if (signInFamily(instance) === "openai") lastOpenaiIdRef.current = instance.instanceId;
     setRailId(instance.instanceId);
-    const official = instance.models.options.filter((option) => !option.custom);
-    setPane(isCustomOnly(instance) || (official.length === 0 && !instance.snapshot.chatgptPlan) ? "custom" : "main");
     resetList();
   };
 
@@ -645,6 +505,7 @@ export function ModelPicker({
       return;
     }
     dispatch({ type: "setModel", botId: bot.id, threadId: threadId ?? bot.threadId, updateBotDefault: false, selection: profile.modelSelection });
+    triggerRef.current?.focus();
   };
 
   const pick = (instance: InstanceInfo, model: string) => {
@@ -668,33 +529,12 @@ export function ModelPicker({
       selection: nextSelection,
     });
     if (updateBotDefault && threadId) setChangedBotModel(true);
-    setOpen(false);
+    close();
   };
 
   const official = railInstance?.models.options.filter((option) => !option.custom) ?? [];
   const custom = railInstance?.models.options.filter((option) => option.custom) ?? [];
   const currentModel = selection.instanceId === railInstance?.instanceId ? selection.model : undefined;
-  const filteredOfficial = filterCustomModels(official, query);
-  const compactOfficial = railInstance
-    ? suggestedModels(official, railInstance.models.default, currentModel, COMPACT_MODEL_COUNT)
-    : [];
-  const shownOfficial = query ? filteredOfficial : showAll ? official : compactOfficial;
-  const filteredCustom = filterCustomModels(custom, query);
-  const { pinned, rest } = partitionCustomModels(filteredCustom);
-  const blocked = railInstance
-    ? pane === "custom"
-      ? needsCli(railInstance)
-      : needsCli(railInstance) || needsSignIn(railInstance)
-    : false;
-  const canOpenCustom = Boolean(railInstance && !needsCli(railInstance));
-  const canReturnToOfficial = official.length > 0 && !isCustomOnly(railInstance);
-  const lookingForLocal = Boolean(railInstance && probingLocal === railInstance.instanceId);
-  const lookingForLocalStatus = (
-    <span role="status" className="flex items-center justify-center gap-2">
-      <Loader2 size={12} className="animate-spin" aria-hidden="true" />
-      {t("model.lookingLocal")}
-    </span>
-  );
 
   const simpleOpensOn = (accounts: InstanceInfo[], lastId: string | null) =>
     accounts.find((account) => account.instanceId === lastId)
@@ -729,25 +569,16 @@ export function ModelPicker({
     lookForLocalIn(instance);
   };
   const activeLevels = active?.capabilities?.effortLevels ?? [];
+  const setEffort = (level: EffortLevel | undefined, updateBotDefault: boolean) => dispatch({ type: "setModel", botId: bot.id, threadId,
+    ...(updateBotDefault ? { updateBotDefault: true } : {}), selection: { ...selection, effort: level } });
   const simpleEffort = activeLevels.length > 0 ? {
     levels: simpleEffortLevels(activeLevels, selection.effort),
     current: selection.effort,
-    onPick: (level: EffortLevel) => dispatch({ type: "setModel", botId: bot.id, threadId,
-      ...(threadId && simpleUpdatesBotDefault ? { updateBotDefault: true } : {}), selection: { ...selection, effort: level } }),
+    onPick: (level: EffortLevel) => setEffort(level, Boolean(threadId) && simpleUpdatesBotDefault),
   } : null;
 
   const botModelId = follows !== undefined && profile.modelSelection.instanceId === railInstance?.instanceId
     ? profile.modelSelection.model : undefined;
-  const renderRow = (option: ModelOption) => (
-    <ModelRow
-      key={option.id}
-      option={option}
-      current={selection.instanceId === railInstance?.instanceId && selection.model === option.id}
-      defaultId={railInstance?.models.default ?? ""}
-      botModel={option.id === botModelId}
-      onPick={() => railInstance && pick(railInstance, option.id)}
-    />
-  );
 
   const summary = active
     ? `${active.displayName} · ${modelLabel(active, selection.model)}${
@@ -755,9 +586,12 @@ export function ModelPicker({
       }${selectedVariantLabel ? ` · ${selectedVariantLabel}` : selection.effort ? ` · ${effortLabel(selection.effort)} effort` : ""}`
     : selection.model;
   const followLine = follows === true ? `\n${t("model.followsBot", { name: profile.name })}` : follows === false ? `\n${t("model.ownModel")}` : "";
+  const shownLabel = contained ? modelLabel(active, selection.model) : compactModelLabel(modelLabel(active, selection.model), signInFamily(active));
+  const footer = !simpleView && !contained && (Boolean(threadId) || activeLevels.length > 0 || Boolean(active?.capabilities?.modelVariants));
 
   const trigger = (
     <button data-tour="model"
+      ref={triggerRef}
       type="button"
       disabled={Boolean(bot.busy)}
       onClick={() => {
@@ -770,57 +604,49 @@ export function ModelPicker({
         setOpen((wasOpen) => {
           const next = !wasOpen;
           if (next) {
-            openFor(initial);
+            resetList();
             setFullView(false);
+            setSetupFor(undefined);
           }
           return next;
         });
       }}
       aria-expanded={open && !bot.busy}
       aria-haspopup="dialog"
+      aria-label={t("model.triggerAria", { summary })}
       className={cn(
-        "flex h-8 items-center gap-2 rounded-full border border-hairline/50 bg-control/50 pl-2.5 pr-3 text-[13px] font-medium text-ink transition-colors hover:bg-raised-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-control/50",
-        open && "bg-raised-hover",
-        !contained && active && !showActiveAccount && COMPACT_SQUARE,
+        contained
+          ? "flex h-8 items-center gap-2 rounded-full border border-hairline/50 bg-control/50 pl-2.5 pr-3 text-[13px] font-medium text-ink transition-colors hover:bg-raised-hover"
+          : "flex h-8 min-w-0 items-center gap-1.5 rounded-full pl-2 pr-1.5 text-[13px] font-medium text-ink-secondary transition-colors hover:bg-ink/[0.07] hover:text-ink",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50",
+        open && (contained ? "bg-raised-hover" : COMPOSER_TOOL_ACTIVE),
       )}
       title={bot.busy ? `${summary}${followLine}\n${t(threadId ? "model.threadBusy" : "model.busy")}` : `${summary}${followLine}`}
     >
-      {active && <InstanceProviderMark instance={active} size={14} />}
-      {!contained && active && showActiveAccount && (
-        <span data-model-account-compact className="hidden max-w-20 truncate @max-4xl/chathead:inline">{active.displayName}</span>
-      )}
-      <span className={cn("flex min-w-0 items-center gap-1", !contained && active && "@max-4xl/chathead:hidden")}>
-        <span className="max-w-[160px] truncate">
-          {active && showActiveAccount && (
-            <span data-model-account className="text-ink-secondary">{active.displayName} · </span>
-          )}
-          {modelLabel(active, selection.model)}
-          {selection.source && <span className="text-ink-secondary"> · {t("modelHost.shared")}</span>}
-          {active && modelProvider(active, selection.model) && (
-            <span className="text-ink-secondary"> · {modelProvider(active, selection.model)}</span>
-          )}
-        </span>
+      {active && <InstanceProviderMark instance={active} size={15} className="shrink-0" />}
+      <span className="flex min-w-0 items-center gap-1 @max-[22rem]/composer:hidden">
+        {active && showActiveAccount && (
+          <span data-model-account className="shrink-0 text-ink-tertiary @max-[34rem]/composer:hidden">{active.displayName} · </span>
+        )}
+        <span className="min-w-0 truncate">{shownLabel}</span>
+        {selection.source && <span className="shrink-0 text-ink-tertiary">· {t("modelHost.shared")}</span>}
         {selectedVariantLabel !== undefined ? (
-          <span data-model-variant className="max-w-[120px] truncate font-normal text-ink-secondary">· {selectedVariantLabel}</span>
+          <span data-model-variant className="max-w-[120px] shrink-0 truncate font-normal text-ink-tertiary">· {selectedVariantLabel}</span>
         ) : selection.effort && (
-          <span data-model-effort className="shrink-0 font-normal text-ink-secondary">
+          <span data-model-effort className="shrink-0 font-normal text-ink-tertiary @max-[30rem]/composer:hidden">
             · {advanced ? effortLabel(selection.effort) : friendlyEffort(selection.effort)}
           </span>
         )}
       </span>
-      <ChevronDown
-        size={14}
-        className={cn(
-          "text-ink-secondary transition-transform",
-          open && "rotate-180",
-          !contained && active && "@max-4xl/chathead:hidden",
-        )}
-      />
+      <ChevronDown size={13} aria-hidden="true" className={cn("shrink-0 text-ink-tertiary transition-transform", open && "rotate-180")} />
     </button>
   );
+  const followRow = follows !== undefined
+    ? <FollowBotModelRow name={profile.name} model={botModelName} follows={follows} onPick={pickBotModel} />
+    : undefined;
 
   return (
-    <div ref={rootRef} className={cn(contained ? "w-full min-w-0" : "relative", className)}>
+    <div ref={rootRef} className={cn(contained ? "w-full min-w-0" : "flex min-w-0", className)}>
       {contained ? (
         <div className="flex min-w-0 items-center justify-between gap-4">
           {label}
@@ -836,339 +662,116 @@ export function ModelPicker({
           role="dialog"
           aria-label={t("model.choose")}
           {...motion.exitProps}
-          style={contained ? undefined : { ...placement, width: popoverWidth }}
+          style={contained ? undefined : { width: popoverWidth, maxHeight: space }}
           className={cn(
-            "flex flex-col overflow-hidden rounded-2xl border border-hairline/50 bg-menu",
+            "flex flex-col overflow-hidden rounded-2xl border border-hairline/60 bg-menu",
             contained
-              ? "relative mt-3 w-full max-h-[min(420px,50dvh)]"
-              : "absolute right-0 top-full z-30 mt-2 max-w-[calc(100vw-2rem)] max-h-[min(600px,calc(100dvh-7rem))] shadow-2xl shadow-black/50",
+              ? "relative mt-3 w-full max-h-[min(460px,60dvh)]"
+              : "absolute bottom-full left-0 z-40 mb-2 max-w-full origin-bottom-left",
             motion.className,
           )}
         >
-          {follows !== undefined && (
-            <FollowBotModelRow name={profile.name} model={botModelName} follows={follows} onPick={pickBotModel} />
-          )}
-          <div className="flex min-h-0 min-w-0 flex-1">
           {simpleView ? (
-            <SimpleModelPane
-              providers={simpleProviders}
-              onProvider={browseSimple}
-              account={railInstance && simpleAccounts.length > 1 ? (
-                <ClaudeAccountSelect accounts={simpleAccounts} selectedId={railInstance.instanceId} onSelect={browseSimple} />
-              ) : undefined}
-              managedBy={railInstance?.policy?.organizationName ?? null}
-              needsSetup={railInstance && simpleSetup ? { name: simpleAccounts.length > 1 ? railInstance.displayName : simpleLabel } : null}
-              signIn={railInstance && simpleSignIn && !simpleSetup ? { name: simpleLabel } : null}
-              onSetUp={() => {
-                if (simpleSignIn && hasOfficialModels) setPane("main");
-                setFullView(true);
-              }}
-              models={simpleModels}
-              repeatedLabels={repeatedModelLabels(simpleAll)}
-              query={simpleQuery}
-              showAll={simpleAll.length > simpleSuggested.length && !simpleQuery ? {
-                count: simpleAll.length,
-                open: showAll,
-                onToggle: () => {
-                  if (showAll) {
-                    resetList();
-                    return;
-                  }
-                  setShowAll(true);
-                  if (railInstance) lookForLocalIn(railInstance);
-                },
-              } : null}
-              onRefresh={refreshModels}
-              refreshing={refreshing}
-              search={simpleSearch ? (
-                <ModelSearch
-                  value={query}
-                  local={simpleOfficial.length === 0}
-                  onChange={setQuery}
-                  onEscape={() => (query ? setQuery("") : setOpen(false))}
+            <>
+              {followRow && <div className="shrink-0 border-b border-hairline/40 py-1.5">{followRow}</div>}
+              <div className="flex min-h-0 min-w-0 flex-1">
+                <SimpleModelPane
+                  providers={simpleProviders}
+                  onProvider={browseSimple}
+                  account={railInstance && simpleAccounts.length > 1 ? (
+                    <ClaudeAccountSelect accounts={simpleAccounts} selectedId={railInstance.instanceId} onSelect={browseSimple} />
+                  ) : undefined}
+                  managedBy={railInstance?.policy?.organizationName ?? null}
+                  needsSetup={railInstance && simpleSetup ? { name: simpleAccounts.length > 1 ? railInstance.displayName : simpleLabel } : null}
+                  signIn={railInstance && simpleSignIn && !simpleSetup ? { name: simpleLabel } : null}
+                  onSetUp={() => {
+                    setSetupFor(railInstance ? pickerGroupKey(railInstance) : undefined);
+                    setFullView(true);
+                  }}
+                  models={simpleModels}
+                  repeatedLabels={repeatedModelLabels(simpleAll)}
+                  query={simpleQuery}
+                  showAll={simpleAll.length > simpleSuggested.length && !simpleQuery ? {
+                    count: simpleAll.length,
+                    open: showAll,
+                    onToggle: () => {
+                      if (showAll) {
+                        resetList();
+                        return;
+                      }
+                      setShowAll(true);
+                      if (railInstance) lookForLocalIn(railInstance);
+                    },
+                  } : null}
+                  onRefresh={() => refreshFor(railInstance?.instanceId)}
+                  refreshing={refreshing}
+                  search={simpleSearch ? (
+                    <ModelSearch
+                      value={query}
+                      local={simpleOfficial.length === 0}
+                      onChange={setQuery}
+                      onEscape={() => (query ? setQuery("") : setOpen(false))}
+                    />
+                  ) : undefined}
+                  currentModelId={currentModel}
+                  botModelId={botModelId}
+                  onPick={(model) => railInstance && pick(railInstance, model)}
+                  variantsRow={active?.capabilities?.modelVariants ? (
+                    <ModelVariantRow compact wide bot={bot} threadId={threadId} updateBotDefault={Boolean(threadId) && simpleUpdatesBotDefault}
+                      label={<span className="shrink-0 text-[12px] font-medium text-ink-secondary">{t("model.simple.reasoning")}</span>} />
+                  ) : undefined}
+                  effort={simpleEffort}
+                  onManage={openEngines}
                 />
-              ) : undefined}
-              currentModelId={currentModel}
-              botModelId={botModelId}
-              onPick={(model) => railInstance && pick(railInstance, model)}
-              variantsRow={active?.capabilities?.modelVariants ? (
-                <ModelVariantRow compact wide bot={bot} threadId={threadId} updateBotDefault={Boolean(threadId) && simpleUpdatesBotDefault}
-                  label={<span className="shrink-0 text-[12px] font-medium text-ink-secondary">{t("model.simple.reasoning")}</span>} />
-              ) : undefined}
-              effort={simpleEffort}
-              onManage={() => {
-                setOpen(false);
-                dispatch({ type: "toggleAppSettings", open: true, section: "engines" });
-              }}
-            />
-          ) : (
-          <>
-          {pickerInstances.length > 0 && <ModelEngineRail instances={pickerInstances} selectedInstance={railInstance} claudeInstance={claudeRailInstance} openaiInstance={openaiRailInstance} onSelect={selectRail}
-            onAddApiKeys={window.ogb?.remoteClient?.active === true ? undefined : openApiKeys} />}
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
-            {threadId && (
-              <div className="shrink-0 border-b border-hairline/40 px-3 py-2">
-                <div role="group" aria-label="Apply model changes to" className="flex gap-1">
-                  {(["thread", "bot"] as const).map((value) => (
-                    <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)}
-                      className={cn("rounded-lg px-2 py-1 text-[12px]", scope === value ? "bg-control text-ink" : "text-ink-secondary hover:bg-control/60")}>
-                      {value === "bot" ? "Thread + bot default" : "Only this thread"}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-1 text-[11px] text-ink-secondary">
-                  {scope === "bot" ? "The bot's model: this thread, groups, and every thread that uses the bot's model." : "This thread only. It keeps this model when the bot's model changes."}
-                </p>
               </div>
-            )}
-            {railInstance ? (
-              <>
-                <div className="shrink-0 px-4 pb-2 pt-3.5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="truncate text-[14px] font-semibold text-ink">{signInFamily(railInstance) ? SIGN_IN_FAMILY_LABEL[signInFamily(railInstance)!] : railInstance.displayName}</div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <button
-                        type="button"
-                        data-model-refresh
-                        disabled={refreshing}
-                        onClick={refreshModels}
-                        aria-label={
-                          refreshing
-                            ? t("model.refreshing", { name: railInstance.displayName })
-                            : t("model.refresh", { name: railInstance.displayName })
-                        }
-                        title={t("model.refreshTitle")}
-                        className="flex size-6 items-center justify-center rounded-md text-ink-secondary hover:bg-control hover:text-ink disabled:cursor-wait disabled:opacity-70"
-                      >
-                        {refreshing ? (
-                          <Loader2 size={12} className="animate-spin" aria-hidden="true" />
-                        ) : (
-                          <RefreshCw size={12} aria-hidden="true" />
-                        )}
-                      </button>
-                      <span
-                        className={cn(
-                          "shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-medium",
-                          blocked ? "bg-warning/10 text-warning" : "bg-success/10 text-success",
-                        )}
-                      >
-                        {pane === "custom" && !blocked && railInstance.access !== "api" ? t("model.localModels") : engineStatus(railInstance)}
-                      </span>
-                    </div>
-                  </div>
-                  {isClaudeAccount(railInstance) && claudeAccounts.length > 1 && (
-                    <ClaudeAccountSelect accounts={claudeAccounts} selectedId={railInstance.instanceId} onSelect={selectRail} />
-                  )}
-                  {signInFamily(railInstance) === "openai" && openaiAccounts.length > 1 && (
-                    <ClaudeAccountSelect accounts={openaiAccounts} selectedId={railInstance.instanceId} onSelect={selectRail} />
-                  )}
-                  {railInstance.snapshot.authenticated && railInstance.snapshot.account && (
-                    <p className="mt-1 truncate text-[11px] text-ink-secondary" title={[railInstance.snapshot.account.email, railInstance.snapshot.account.organization].filter(Boolean).join(" · ")}>
-                      {[railInstance.snapshot.account.email, railInstance.snapshot.account.organization].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                  {railInstance.snapshot.chatgptPlan && railInstance.snapshot.authenticated && (
-                    <ChatGptPlanStatus key={railInstance.instanceId} instanceId={railInstance.instanceId} />
-                  )}
-                  {railInstance.access === "api"
-                    ? <div className="mt-0.5 text-[11.5px] text-ink-secondary">{t("model.apiKeyHint")}</div>
-                    : pane === "custom" && <div className="mt-0.5 text-[11.5px] text-ink-secondary">{t("model.localHint")}</div>}
-                </div>
-
-                {pane === "custom" && canReturnToOfficial && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPane("main");
-                      resetList();
-                    }}
-                    className="mx-2 mb-1 flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-[12px] text-ink-secondary hover:bg-control/60"
-                  >
-                    <ChevronLeft size={13} /> {t("model.backTo", { name: railInstance.displayName })}
-                  </button>
-                )}
-
-                {railInstance.policy ? (
-                  <div data-policy-blocked className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-1 text-[12.5px] leading-relaxed text-ink-secondary">
-                    <p className="font-medium text-ink">{t("policy.managedBy", { organization: railInstance.policy.organizationName })}</p>
-                    <p className="mt-1">{t("policy.modelBlocked", { organization: railInstance.policy.organizationName })}</p>
-                  </div>
-                ) : blocked ? (
-                  <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-1">
-                    <EngineSetup instance={railInstance} intent={pane === "custom" ? "inject" : "cloud"} />
-                    {railInstance.claudeAccount && needsSignIn(railInstance) && pane !== "custom" && (
-                      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-secondary">
-                        {railInstance.claudeAccount.signInShell === "powershell" && `${t("engines.account.powershell")} `}
-                        {t("engines.account.signInHint")}
-                      </p>
-                    )}
-                    <p className="mt-2 text-center text-[11.5px] text-ink-tertiary">
-                      {railInstance.snapshot.chatgptPlan ? t("engineSetup.chatgpt.modelsAfterSignIn") : pane === "main" && official.length > 0
-                        ? official.length === 1
-                          ? t("model.afterSetupOne")
-                          : t("model.afterSetupMany", { count: official.length })
-                        : t("model.localSoon")}
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {((pane === "main" && official.length > COMPACT_MODEL_COUNT) ||
-                      (pane === "custom" && custom.length > COMPACT_MODEL_COUNT)) && (
-                      <ModelSearch
-                        value={query}
-                        local={pane === "custom"}
-                        onChange={(value) => {
-                          setQuery(value);
-                          if (value) setShowAll(true);
-                        }}
-                        onEscape={() => {
-                          if (query) setQuery("");
-                          else if (pane === "custom" && canReturnToOfficial) setPane("main");
-                        }}
-                      />
-                    )}
-
-                    <div data-model-list className="min-h-[min(180px,30dvh)] flex-1 overflow-y-auto px-2 pb-2">
-                      {pane === "main" ? (
-                        <>
-                          {railInstance.snapshot.update && (
-                            <EngineUpdateNotice update={railInstance.snapshot.update} instance={railInstance} className="mx-1 mb-2" />
-                          )}
-                          <EngineGroupLabel className="px-2 pb-1 pt-0.5">
-                            {query
-                              ? t("model.results", { count: filteredOfficial.length })
-                              : showAll
-                                ? t("model.allModels", { count: official.length })
-                                : t("model.suggested")}
-                          </EngineGroupLabel>
-                          {shownOfficial.map(renderRow)}
-                          {shownOfficial.length === 0 && (
-                            <div className="px-2 py-5 text-center text-[12.5px] text-ink-secondary">
-                              {t("model.noMatch", { query: query.trim() })}
-                            </div>
-                          )}
-                          {!query && !showAll && official.length > compactOfficial.length && (
-                            <button
-                              type="button"
-                              onClick={() => setShowAll(true)}
-                              className="mt-1 flex w-full items-center justify-between rounded-lg border-t border-hairline/40 px-2.5 py-2 text-[12.5px] font-medium text-ink-secondary hover:bg-control/60 hover:text-ink"
-                            >
-                              {t("model.showAll", { count: official.length })} <ChevronDown size={13} />
-                            </button>
-                          )}
-                          {!query && showAll && official.length > COMPACT_MODEL_COUNT && (
-                            <button
-                              type="button"
-                              onClick={() => setShowAll(false)}
-                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[12px] text-ink-secondary hover:bg-control/60 hover:text-ink"
-                            >
-                              {t("model.showSuggested")}
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          {lookingForLocal && custom.length > 0 && (
-                            <div className="flex px-2 pb-1.5 pt-0.5 text-[11.5px] text-ink-secondary">{lookingForLocalStatus}</div>
-                          )}
-                          {pinned.length > 0 && (
-                            <EngineGroupLabel className="px-2 pb-1 pt-0.5">{t("model.loadedNow")}</EngineGroupLabel>
-                          )}
-                          {pinned.map(renderRow)}
-                          {pinned.length > 0 && rest.length > 0 && (
-                            <div className="mx-2 my-2 border-t border-hairline/40" role="separator" />
-                          )}
-                          {rest.map(renderRow)}
-                          {custom.length === 0 && (
-                            <div className="mx-1 rounded-xl border border-dashed border-hairline/50 px-3 py-5 text-center">
-                              {lookingForLocal ? (
-                                <div className="text-[12.5px] text-ink-secondary">{lookingForLocalStatus}</div>
-                              ) : (
-                                <>
-                                  <div className="text-[12.5px] font-medium text-ink">{t("model.noLocal")}</div>
-                                  <div className="mt-1 text-[11.5px] leading-relaxed text-ink-secondary">
-                                    {t("model.noLocalHint")}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                          {custom.length > 0 && filteredCustom.length === 0 && (
-                            <div className="px-2 py-5 text-center text-[12.5px] text-ink-secondary">
-                              {t("model.noMatch", { query: query.trim() })}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {!contained && (
-                  <EffortRow
-                    compact
-                    bot={bot}
-                    threadId={threadId}
-                    updateBotDefault={Boolean(threadId && scope === "bot")}
-                    className="shrink-0 border-t border-hairline/40 px-4 py-2"
-                    label={<span className="text-[12.5px] font-medium text-ink">{active?.capabilities?.modelVariants ? "Reasoning" : "Effort"}</span>}
-                  />
-                )}
-
-                {pane === "main" && offersLocalModels(railInstance, custom.length) && (
-                  <button
-                    type="button"
-                    data-model-local-entry
-                    aria-label={
-                      custom.length > 0
-                        ? t("model.useLocalCount", { count: custom.length })
-                        : t("model.useLocal")
-                    }
-                    disabled={!canOpenCustom}
-                    onClick={() => openLocalModels(railInstance)}
-                    className="flex w-full shrink-0 items-center justify-between gap-2 border-t border-hairline/40 px-4 py-3 text-left text-[12.5px] font-medium text-ink hover:bg-control/60 disabled:cursor-not-allowed disabled:text-ink-secondary/40 disabled:hover:bg-transparent"
-                  >
-                    <span>{t("model.useLocal")}</span>
-                    <span className="flex items-center gap-2">
-                      {custom.length > 0 && (
-                        <span className="rounded-full bg-inset px-2 py-0.5 text-[10.5px] text-ink-secondary">
-                          {t("model.available", { count: custom.length })}
-                        </span>
-                      )}
-                      <ChevronRight size={14} className="text-ink-secondary" />
-                    </span>
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="px-4 py-5 text-[13px] text-ink-secondary">{t("model.noProviders")}</div>
-            )}
-            <div className="flex shrink-0 border-t border-hairline/40">
-              <button type="button" onClick={() => {
-                setOpen(false);
-                dispatch({ type: "toggleAppSettings", open: true, section: "engines" });
-              }} className="flex-1 px-4 py-2 text-left text-[12px] text-ink-secondary hover:bg-control/60 hover:text-ink">
-                {t("settings.engines.title")}
-              </button>
-              {window.ogb?.remoteClient?.active !== true && (
-                <button type="button" data-model-add-api-keys onClick={openApiKeys} className="flex shrink-0 items-center gap-1.5 px-4 py-2 text-[12px] text-ink-secondary hover:bg-control/60 hover:text-ink">
-                  <KeyRound size={12} aria-hidden="true" />
-                  {apiKeysLabel(pickerInstances)}
-                </button>
+            </>
+          ) : (
+            <ModelPickerList
+              instances={pickerInstances}
+              selection={selection}
+              botModel={follows !== undefined ? profile.modelSelection : undefined}
+              lead={followRow}
+              refreshing={refreshing}
+              onRefresh={(instance) => refreshFor(instance.instanceId)}
+              probing={probingLocal}
+              onProbe={lookForLocal}
+              onPick={pick}
+              onSettings={openEngines}
+              onApiKeys={window.ogb?.remoteClient?.active === true ? undefined : openApiKeys}
+              apiKeysLabel={apiKeysLabel(pickerInstances)}
+              onClose={close}
+              startOn={setupFor}
+            />
+          )}
+          {footer && (
+            <div data-model-picker-footer className="@container/pickerfoot shrink-0 border-t border-hairline/40 px-3 py-2.5">
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 @max-[22rem]/pickerfoot:grid-cols-1 @max-[22rem]/pickerfoot:gap-y-1.5">
+              {active?.capabilities?.modelVariants ? (
+                <ModelVariantRow compact wide bot={bot} threadId={threadId} updateBotDefault={Boolean(threadId && scope === "bot")} className="col-span-full"
+                  label={<span className="shrink-0 text-[12px] font-medium text-ink-secondary">{t("model.simple.reasoning")}</span>} />
+              ) : activeLevels.length > 0 && (
+                <>
+                  <span className="text-[12px] font-medium text-ink-secondary">{t("model.effort.label")}</span>
+                  <EffortSegments levels={activeLevels} current={selection.effort} disabled={Boolean(bot.busy)}
+                    onPick={(level) => setEffort(level, Boolean(threadId && scope === "bot"))} />
+                </>
+              )}
+              {threadId && (
+                <>
+                  <span className="text-[12px] font-medium text-ink-secondary">{t("model.scope.label")}</span>
+                  <ScopeSegments scope={scope} onScope={setScope} />
+                </>
               )}
             </div>
-          </div>
-          </>
+            </div>
           )}
-          </div>
           <RemoteModelPicker key={`${profile.id}:${threadId ?? bot.threadId}`} bot={bot} threadId={threadId} updateBotDefault={!threadId || (simpleView ? simpleUpdatesBotDefault : scope === "bot")} onChosen={() => setOpen(false)} confirmationRef={remoteConfirmation} />
           <ModelFallbackSettings key={profile.id} bot={profile} compact />
         </div>
       )}
       {!contained && changedBotModel && !open && ownModelThreads > 0 && (
         <div data-thread-models-notice role="status"
-          className="absolute right-0 top-full z-30 mt-2 flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-xl border border-hairline/50 bg-card py-2 pl-3 pr-2 shadow-xl shadow-black/30">
+          className="absolute bottom-full left-0 z-30 mb-2 flex max-w-full items-center gap-2 rounded-xl border border-hairline/50 bg-menu py-2 pl-3 pr-2">
           <ThreadModelsLine bot={profile} />
           <button type="button" aria-label={t("common.close")} onClick={() => setChangedBotModel(false)}
             className="shrink-0 rounded-md p-1 text-ink-secondary hover:bg-control/60 hover:text-ink">
