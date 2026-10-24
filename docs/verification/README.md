@@ -135,6 +135,7 @@ Use only mapped, tested commands:
 - [Channels](channels.md)
 - [In-chat team coordination](room-coordination.md)
 - [Chief access to additional teams](team-access.md)
+- [Project agent scope and workspace control](origin-project-agent-scope.md)
 - [Revoked additional-team grants in the client cache and workspace sidebar](origin-team-access-cache.md)
 - [Personal-key Live calls without upstream subscriptions](origin-live-policy.md)
 - [Origin self-hosted release lookup and update instructions](origin-update-channel.md)

@@ -63,7 +63,7 @@ const FULL = "skills+shared+voice+escalations";
 /** The fullest profile as a bot with a tool selection gets it: every domain tool's schema whole. */
 const WHOLE = `${FULL}+whole-schemas`;
 const PROFILES = profiles();
-const CHIEF_ONLY_TOOLS = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup"];
+const CHIEF_ONLY_TOOLS = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup", "read_agent_transcript"];
 const CHIEF_TARGET_TOOLS = ["propose_profile", "propose_model"];
 const CHIEF_PROFILE_TARGET = " A Chief of Staff may pass for_bot_id (from list_bots) for a requested change to another bot in its section.";
 const TEAMWORK_TOOLS = ["list_room_targets", "coordinate_bots", "assignment_status", "list_bots", "list_rooms", "list_threads", "close_thread", "start_thread", "post_to_room"];

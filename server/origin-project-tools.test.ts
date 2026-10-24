@@ -260,7 +260,8 @@ describe("per-turn Origin context", () => {
     const head = (await context(client).parts("head")).map((part) => part.text).join("");
     expect(head).toContain("- Kai (Origin project kai) · repo ggs/kai · Chief Kai");
     expect(head).toContain("- Yuki (Origin project yuki) · repo ggs/yuki · Chief Yuki");
-    expect(head).toContain("you route, project Chiefs deliver");
+    expect(head).toContain("send them work with coordinate_bots");
+    expect(head).toContain("read_agent_transcript");
     expect(head).toContain("- Kai: 2 open issue(s), 1 high priority");
   });
 
@@ -289,7 +290,7 @@ describe("per-turn Origin context", () => {
       }),
     });
     const head = (await turn.parts("head")).map((part) => part.text).join("");
-    expect(head).toContain("you route, project Chiefs deliver");
+    expect(head).toContain("You may act on any managed project's Origin data");
     expect(head).toContain('- Kai: 2 open issue(s), 1 high priority. Top: ORI-AB12 "Set up CI"');
     expect(head).toContain('- Routines (2): "Stand-up" by Kai next 2026-10-24 09:00 UTC; "Scan" by Scout (paused)');
     expect(head).toContain('- Routine runs that need the person: "Stand-up" failed (2026-10-23 09:00 UTC)');

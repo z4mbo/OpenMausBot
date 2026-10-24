@@ -28,6 +28,7 @@ import { vaultAgentSecrets } from "./origin-vault-agent.ts";
 import { callNotesTools } from "./origin-call-notes.ts";
 import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 import { chatLine, type OriginTeamChat } from "./origin-team-chat.ts";
+import { isWorkspaceSection } from "../shared/origin-workspaces.ts";
 
 export interface OriginCloudState {
   url?: string;
@@ -155,11 +156,11 @@ export function convexOriginClient(url: string, siteUrl = process.env.ORIGIN_CON
 }
 
 export function cloudProjectFor(bots: readonly ProjectBot[], links: Record<string, string>, botId: string): string | null {
-  if (links[botId]) return links[botId];
   const bot = bots.find((candidate) => candidate.id === botId);
-  if (!bot) return null;
+  if (!bot || bot.hidden || isWorkspaceSection(bot.section)) return null;
+  if (links[botId]) return links[botId];
   const section = sectionKey(bot.section);
-  const chiefs = bots.filter((candidate) => candidate.chiefOfStaff && links[candidate.id]);
+  const chiefs = bots.filter((candidate) => !candidate.hidden && candidate.chiefOfStaff && !isWorkspaceSection(candidate.section) && links[candidate.id]);
   const leader = chiefs.find((chief) => sectionKey(chief.section) === section)
     ?? chiefs.find((chief) => chief.managedSections?.some((managed) => sectionKey(managed) === section));
   return leader ? links[leader.id] : null;
@@ -173,22 +174,28 @@ export interface ReachableProject {
   own: boolean;
 }
 
-/** A bot reaches its own team's project; a Chief also reaches the projects of the sections it manages, and nothing further down. */
+/** Project agents reach one project; workspace heads reach the projects in their managed teams. */
 export function reachableCloudProjects(bots: readonly ProjectBot[], links: Record<string, string>, botId: string): ReachableProject[] {
   const bot = bots.find((candidate) => candidate.id === botId);
   if (!bot || bot.hidden) return [];
   const found = new Map<string, ReachableProject>();
   const own = cloudProjectFor(bots, links, botId);
   if (own) found.set(own, { projectId: own, section: sectionKey(bot.section), own: true });
-  if (bot.chiefOfStaff) {
+  if (bot.chiefOfStaff && isWorkspaceSection(bot.section)) {
     const managed = new Set((bot.managedSections ?? []).map((section) => sectionKey(section)).filter(Boolean));
     for (const candidate of bots) {
       const projectId = links[candidate.id];
-      if (!projectId || candidate.hidden || found.has(projectId) || !managed.has(sectionKey(candidate.section))) continue;
+      if (!projectId || candidate.hidden || !candidate.chiefOfStaff || isWorkspaceSection(candidate.section) || found.has(projectId) || !managed.has(sectionKey(candidate.section))) continue;
       found.set(projectId, { projectId, section: sectionKey(candidate.section), own: false });
     }
   }
   return [...found.values()];
+}
+
+export function projectPeerTeams(bots: readonly ProjectBot[], links: Record<string, string>, botId: string): { projectId: string; teams: string[] } | null {
+  const projectId = cloudProjectFor(bots, links, botId);
+  if (!projectId) return null;
+  return { projectId, teams: [...new Set(bots.filter((bot) => !bot.hidden && cloudProjectFor(bots, links, bot.id) === projectId).map((bot) => sectionKey(bot.section)))] };
 }
 
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
@@ -401,11 +408,11 @@ function sortIssues(tasks: Args[]): Args[] {
 function resolveAgent(ctx: ToolContext, wanted: unknown): ProjectBot {
   const name = trimmed(wanted);
   if (!name) return refuse("origin_assign_issue needs bot_id: the agent's id from origin_list_projects or list_bots.");
-  const live = ctx.bots.filter((bot) => !bot.hidden && bot.id !== ctx.caller.id);
+  const reached = new Set(ctx.reachable.map((project) => project.projectId));
+  const live = ctx.bots.filter((bot) => !bot.hidden && bot.id !== ctx.caller.id && reached.has(cloudProjectFor(ctx.bots, ctx.links, bot.id) ?? ""));
   const byId = live.find((bot) => bot.id === name);
   if (byId) return byId;
-  const reached = new Set(ctx.reachable.map((project) => project.projectId));
-  const named = live.filter((bot) => bot.name.trim().toLowerCase() === name.toLowerCase() && reached.has(cloudProjectFor(ctx.bots, ctx.links, bot.id) ?? ""));
+  const named = live.filter((bot) => bot.name.trim().toLowerCase() === name.toLowerCase());
   if (named.length === 1) return named[0];
   return refuse(named.length
     ? `Several agents are called ${clip(name, 60)}; pass the bot id from origin_list_projects.`
@@ -425,7 +432,7 @@ export function pullRequestNumber(url: string, repoUrl: string): number | null {
 }
 
 function projectChief(ctx: ToolContext, project: ReachableProject): ProjectBot | undefined {
-  const live = ctx.bots.filter((bot) => !bot.hidden && bot.chiefOfStaff);
+  const live = ctx.bots.filter((bot) => !bot.hidden && bot.chiefOfStaff && cloudProjectFor(ctx.bots, ctx.links, bot.id) === project.projectId);
   return live.find((bot) => sectionKey(bot.section) === project.section)
     ?? live.find((bot) => bot.managedSections?.some((managed) => sectionKey(managed) === project.section));
 }
@@ -504,7 +511,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
   async origin_list_projects(_args, ctx) {
     const lines = await Promise.all(ctx.reachable.map(async (project) => {
       const doc = await projectDoc(ctx, project.projectId);
-      const team = ctx.bots.filter((bot) => !bot.hidden && project.section && sectionKey(bot.section) === project.section);
+      const team = ctx.bots.filter((bot) => !bot.hidden && project.section && sectionKey(bot.section) === project.section && cloudProjectFor(ctx.bots, ctx.links, bot.id) === project.projectId);
       const chief = team.find((bot) => bot.chiefOfStaff);
       const agents = team.filter((bot) => bot !== chief);
       return [
@@ -567,7 +574,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     if (linkedPulls.length) {
       lines.push("", "Pull requests:", ...linkedPulls.map((pr) => `- #${String(pr.number)} ${text(pr.state)} ${text(pr.url)} · checks ${text(pr.checks) || "?"} · review ${text(pr.review) || "?"}`));
     }
-    const related = list(record(relations).relations);
+    const related = list(record(relations).relations).filter((relation) => ctx.reachable.some((project) => project.projectId === relation.projectId));
     if (related.length) {
       lines.push("", "Related issues:", ...related.map((relation) => `- ${relation.outgoing ? "" : "is "}${text(relation.kind)}${relation.outgoing ? "" : " of"} ${text(relation.taskId)} ${text(relation.title)}${relation.done ? " (done)" : ""}`));
     }
@@ -666,6 +673,12 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     }
     if (!changed.length) return { text: "origin_update_issue changed nothing: pass at least one of title, description, priority, done, column, assignee, due_date or labels.", isError: true };
     return { text: `Updated issue ${taskId}: ${changed.join(", ")}.`, cards: await issueCardsFor(ctx, target, "Issue updated") };
+  },
+
+  async origin_delete_issue(args, ctx) {
+    const target = await resolveIssue(ctx, args, "origin_delete_issue");
+    await ctx.client.mutation("tasks:deleteTask", { projectId: target.project.projectId, sessionToken: ctx.sessionToken, taskId: target.taskId });
+    return { text: `Deleted issue ${target.taskId} (${originIssueKey(target.taskId)}) from ${await projectName(ctx, target.project.projectId)}.` };
   },
 
   async origin_comment_issue(args, ctx) {
@@ -848,6 +861,26 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     ];
     if (!assets.length) return { text: lines.join("\n") };
     return { text: `${lines.join("\n")}\n${CARD_NOTE}`, card: assetsCard(project.projectId, await projectName(ctx, project.projectId), assets, `${assets.length} asset${assets.length === 1 ? "" : "s"}`) };
+  },
+
+  async origin_vault_store(args, ctx) {
+    const project = await pickProject(ctx, args.project);
+    const title = trimmed(args.title);
+    const path = trimmed(args.path);
+    if (!title || title.length > 150 || !path) return { text: "origin_vault_store needs title (at most 150 characters) and path to an encrypted Vault payload.", isError: true };
+    if (!ctx.file) return { text: "Reading encrypted Vault payloads is not available in this conversation.", isError: true };
+    const file = await ctx.file(path);
+    if (file.data.byteLength > 32_768) return { text: "The encrypted Vault payload is too large.", isError: true };
+    let payload: Args;
+    try { payload = record(JSON.parse(Buffer.from(file.data).toString("utf8"))); }
+    catch { return { text: "The encrypted Vault payload must be JSON.", isError: true }; }
+    const fields = ["ciphertext", "iv", "salt", "iterations", "kdf"];
+    const bytes = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9+/]+={0,2}$/.test(value) && value.length % 4 === 0 ? Buffer.from(value, "base64").byteLength : 0;
+    if (Object.keys(payload).some((key) => !fields.includes(key)) || payload.kdf !== "PBKDF2-SHA256/AES-256-GCM" || !Number.isSafeInteger(payload.iterations) || Number(payload.iterations) < 210_000 || Number(payload.iterations) > 2_000_000 || bytes(payload.iv) !== 12 || bytes(payload.salt) !== 16 || bytes(payload.ciphertext) < 17) {
+      return { text: "Use an encrypted Vault payload with ciphertext, iv, salt, iterations and kdf; plaintext and passphrases are not accepted.", isError: true };
+    }
+    const credentialId = text(await ctx.client.mutation("credentials:create", { projectId: project.projectId, sessionToken: ctx.sessionToken, kind: "api_key", title, ...payload }));
+    return { text: `Stored encrypted API key "${title}" (${credentialId}) in ${await projectName(ctx, project.projectId)}'s Vault. A member must mark it usable by agents and unlock it before origin_vault_list can supply its value.` };
   },
 
   async origin_add_asset(args, ctx) {

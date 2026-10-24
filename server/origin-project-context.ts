@@ -1,7 +1,7 @@
 import { originIssueKey } from "../shared/origin-issues.ts";
 import { brandContextLine, type BrandKit } from "../shared/brand-kit.ts";
 import {
-  folderLine, reachableCloudProjects, repoCoordinates,
+  cloudProjectFor, folderLine, reachableCloudProjects, repoCoordinates,
   type OriginCloudClient, type OriginCloudState, type OriginGitHub, type OriginProjectBot, type OriginProjectFolder, type ReachableProject,
 } from "./origin-cloud.ts";
 import type { OriginTeamChat } from "./origin-team-chat.ts";
@@ -165,8 +165,8 @@ async function workspaceChatLines(chat: OriginTeamChat | undefined, teamId: stri
   return lines.length ? [`- Workspace chat, latest: ${lines.map((line) => `${oneLine(line.authorName, 40)}: ${quoted(line.body, 140)}`).join(" | ")}`] : [];
 }
 
-function chiefOf(bots: readonly OriginProjectBot[], section: string): OriginProjectBot | undefined {
-  const live = bots.filter((bot) => !bot.hidden && bot.chiefOfStaff);
+function chiefOf(bots: readonly OriginProjectBot[], links: Record<string, string>, projectId: string, section: string): OriginProjectBot | undefined {
+  const live = bots.filter((bot) => !bot.hidden && bot.chiefOfStaff && cloudProjectFor(bots, links, bot.id) === projectId);
   return live.find((bot) => sectionKey(bot.section) === section)
     ?? live.find((bot) => bot.managedSections?.some((managed) => sectionKey(managed) === section));
 }
@@ -176,7 +176,7 @@ const CHIEF_RULE = (name: string) =>
 const AGENT_RULE = (name: string, chief?: string) =>
   `You do the hands-on work for ${name} yourself, in its project folder. Keep the issue you work on current with origin_comment_issue and finish it with origin_complete_issue${chief ? `; ask ${chief}, your Chief, when the brief is unclear` : ""}.`;
 const HEAD_RULE =
-  "How you lead the workspace: you route, project Chiefs deliver. Send each request to the Chief of the project it concerns with coordinate_bots, with a clear brief and what done looks like, and let that Chief plan it with its agents. Do not do project work yourself or brief a project's agents directly. When a request names no project, ask which one, unless this overview makes it clear.";
+  "How you lead the workspace: list project Chiefs with origin_list_projects or list_bots, send them work with coordinate_bots, and end your turn while they work. Results resume you; assignment_status can wait briefly or read a receipt. Use list_threads and read_agent_transcript to inspect their work. You may act on any managed project's Origin data by passing project to its tools. Route hands-on work through its Chief with a clear brief and what done looks like. When a request names no project, ask which one, unless this overview makes it clear.";
 
 const WORKSPACE_AGENT_RULE = (head: string) =>
   `Use the overview below to answer questions about the workspace and to connect your work to it. You do not reach project data or project agents with tools: work inside a project belongs to its Chief, so point the person to that Chief, or to ${head}, who heads the workspace.`;
@@ -185,7 +185,7 @@ export function projectIdentityPrompt(snapshot: Pick<ProjectSnapshot, "projectId
   const { name } = snapshot;
   const repo = repoCoordinates(snapshot.repoUrl);
   const lines = [
-    `Origin project: you work on ${name} (Origin project ${snapshot.projectId})${role === "chief" ? " as its Chief" : chief ? ` on the team ${chief} leads` : ""}. Everything here is about ${name} unless the person names another project: "the project", "the app", "the repo", "the site" and "localhost" mean ${name}'s. You reach only ${name}'s Origin data (issues, vault, assets, feedback, team chat, Draw); never look for another project's.`,
+    `Origin project: you work on ${name} (Origin project ${snapshot.projectId})${role === "chief" ? " as its Chief" : chief ? ` on the team ${chief} leads` : ""}. "The project", "the app", "the repo", "the site" and "localhost" mean ${name}'s. You reach only ${name}'s Origin data (issues, vault, assets, feedback, team chat, Draw), even if another project is named. Ask the workspace head to route work for another project.`,
     snapshot.description.trim() ? `About ${name}: ${oneLine(snapshot.description, 300)}` : "",
     repo
       ? `Repository: ${repo.slug} ${repo.web}${snapshot.defaultBranch ? `, default branch ${snapshot.defaultBranch}` : ""}. Clone it with: git clone ${repo.clone}. Origin clones it into an empty project folder and answers git's GitHub sign-in there with the workspace's access, so pull and push work as they are; never put a token in a command or a remote URL`
@@ -315,7 +315,7 @@ export function createOriginTurnContext(deps: OriginContextDeps) {
       const snapshot = await snapshotOf(own.projectId, wait);
       if (!snapshot) return [];
       const folder = deps.folder?.(own.projectId) ?? null;
-      const chief = chiefOf(bots, own.section);
+      const chief = chiefOf(bots, state.projects, own.projectId, own.section);
       const role = bot.chiefOfStaff ? "chief" : "agent";
       return [
         { id: "origin-project", label: "Origin project", text: projectIdentityPrompt(snapshot, role, folder, role === "agent" ? chief?.name : undefined) },
@@ -331,7 +331,7 @@ export function createOriginTurnContext(deps: OriginContextDeps) {
       ...deps.activity ? workspaceActivityLines(workspaceMembers(bots, head), deps.activity(), now()) : [],
     ];
     const status: PromptPart = { id: "origin-status", label: "Origin workspace status", text: workspaceStatusPrompt(snapshots.map(({ snapshot }) => snapshot), activity, now()) };
-    const named = snapshots.map(({ snapshot, project }) => ({ projectId: snapshot.projectId, name: snapshot.name, repoUrl: snapshot.repoUrl, chief: chiefOf(bots, project.section)?.name }));
+    const named = snapshots.map(({ snapshot, project }) => ({ projectId: snapshot.projectId, name: snapshot.name, repoUrl: snapshot.repoUrl, chief: chiefOf(bots, state.projects, project.projectId, project.section)?.name }));
     if (head.id !== botId) return [{ id: "origin-project", label: "Origin workspace", text: workspaceAgentPrompt(head.name, named) }, status];
     if (!snapshots.length) return status.text ? [status] : [];
     return [{ id: "origin-project", label: "Origin workspace", text: workspaceIdentityPrompt(named) }, status];

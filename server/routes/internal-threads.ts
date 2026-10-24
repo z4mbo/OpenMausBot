@@ -1,7 +1,10 @@
 import { chiefTidies } from "../chief-of-staff.ts";
 import type { Coordinator } from "../coordinator.ts";
-import { reachablePeers } from "../peer-roster.ts";
-import type { BotRecord, Store, TaskRecord } from "../store.ts";
+import { canReachPeer, coordinatorSupervises, reachablePeers } from "../peer-roster.ts";
+import { isWorkspaceSection } from "../../shared/origin-workspaces.ts";
+import { redactSecretsInText as scrub } from "../../shared/redact.ts";
+import { audienceWithin, roomFeeds, sameAudience } from "../bot-visibility.ts";
+import type { BotRecord, GroupRecord, Store, TaskRecord } from "../store.ts";
 import { PASS, type RouteHandler } from "./table.ts";
 
 type ThreadState = "running" | "waiting-on-you" | "queued" | "idle" | "closed";
@@ -15,7 +18,7 @@ interface ThreadRow {
 
 /** Only dispatch inside the internal capability gate: `from` and `fromThreadId` come from the caller's capability. */
 export function createInternalThreadRoutes(deps: {
-  store: Pick<Store, "bot" | "bots" | "tasks" | "taskByThread" | "appendMessage" | "patchTask" | "setTaskClosedBy">;
+  store: Pick<Store, "bot" | "bots" | "tasks" | "taskByThread" | "appendMessage" | "patchTask" | "setTaskClosedBy" | "activePath" | "groupByThread">;
   coordinator: Pick<Coordinator, "awaitingAnswer" | "parkedDirect" | "activeDirect">;
   from: BotRecord;
   fromThreadId: string;
@@ -26,8 +29,63 @@ export function createInternalThreadRoutes(deps: {
   queuedThreadPosition(botId: string, threadId: string): number | null;
 }): RouteHandler {
   const { store, coordinator, from, fromThreadId } = deps;
-  return async ({ res, path, method, json }) => {
-    // list_threads: the caller's own threads plus, on reachable peers, only threads it opened; a peer's other threads are its own business.
+  const supervises = (peer: BotRecord) => Boolean(!from.hidden && !store.groupByThread(fromThreadId) && isWorkspaceSection(from.section) && coordinatorSupervises(from, peer) && canReachPeer(from, peer));
+  const readableRoom = (room: GroupRecord, threadId: string) => {
+    if (!deps.shown(threadId) || !audienceWithin(from.visibility, room.audienceFloor)) return false;
+    const members = room.memberIds.map((id) => store.bot(id));
+    if (members.some((member) => !member || member.id !== from.id && !canReachPeer(from, member))) return false;
+    return roomFeeds(members.map((member) => member?.visibility), from.visibility);
+  };
+  const readable = (task: TaskRecord): boolean => {
+    const seen = new Set<string>();
+    let current: TaskRecord | undefined = task;
+    while (current) {
+      if (seen.has(current.threadId) || seen.size >= 20 || !deps.shown(current.threadId)) return false;
+      seen.add(current.threadId);
+      const opener = current.openedBy;
+      if (!opener?.threadId) return !opener?.roomLane;
+      const room = store.groupByThread(opener.threadId);
+      if (room) return readableRoom(room, opener.threadId);
+      const source = store.bot(opener.botId);
+      if (opener.roomLane || !source || !sameAudience(from.visibility, source.visibility) || source.id !== from.id && !canReachPeer(from, source)) return false;
+      current = store.taskByThread(source.id, opener.threadId);
+      if (!current) return false;
+    }
+    return false;
+  };
+  return async ({ res, url, path, method, json }) => {
+    if (method === "GET" && path === "/api/internal/agent-transcript") {
+      if (!deps.ownsThread(from.id, fromThreadId) || store.groupByThread(fromThreadId)) return json(res, 403, { error: "Read agent transcripts from your own direct conversation" });
+      const target = store.bot(url.searchParams.get("targetBotId") ?? "");
+      const threadId = url.searchParams.get("threadId") ?? "";
+      const task = target && store.taskByThread(target.id, threadId);
+      if (!target || !task || !supervises(target) || !readable(task)) return json(res, 404, { error: "No supervised agent conversation; call list_threads" });
+      const rawLimit = Number(url.searchParams.get("limit"));
+      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(100, Math.trunc(rawLimit)) : 30;
+      const path = store.activePath(threadId);
+      let remaining = 20_000;
+      let truncated = path.length > limit;
+      const messages = path.slice(-limit).reverse().flatMap((message) => {
+        if (remaining <= 0) { truncated = true; return []; }
+        let messageRemaining = Math.min(4_000, remaining);
+        const excerpt = (value: string) => {
+          const full = scrub(value);
+          const text = full.slice(0, messageRemaining);
+          truncated ||= text.length < full.length;
+          messageRemaining -= text.length;
+          remaining -= text.length;
+          return text;
+        };
+        const text = excerpt(message.text ?? "");
+        const tool = message.tool ? {
+          name: excerpt(message.tool.name.slice(0, 200)), ok: message.tool.ok,
+          ...(message.tool.input ? { input: excerpt(message.tool.input) } : {}),
+          ...(message.tool.output ? { output: excerpt(message.tool.output) } : {}),
+        } : undefined;
+        return [{ id: message.id, role: message.role, text, ...(tool ? { tool } : {}) }];
+      }).reverse();
+      return json(res, 200, { botId: target.id, threadId, title: scrub(task.title).slice(0, 250), messages, truncated });
+    }
     if (method === "GET" && path === "/api/internal/threads") {
       if (!deps.ownsThread(from.id, fromThreadId)) {
         return json(res, 403, { error: "source conversation does not belong to sender" });
@@ -53,14 +111,16 @@ export function createInternalThreadRoutes(deps: {
       for (const peer of reachablePeers(store.bots, from)) {
         for (const task of store.tasks(peer.id)) {
           const opener = task.openedBy;
-          if (!opener || !deps.shown(task.threadId)) continue;
-          const mine = opener.botId === from.id;
-          if (!mine && !chiefTidies(from, task, store.bot(opener.botId))) continue;
+          if (!deps.shown(task.threadId)) continue;
+          const mine = opener?.botId === from.id;
+          const managed = supervises(peer);
+          if (managed && !readable(task)) continue;
+          if (!mine && !managed && (!opener || !chiefTidies(from, task, store.bot(opener.botId)))) continue;
           rows.push({
             threadId: task.threadId, botId: peer.id, botName: peer.name, title: task.title,
-            state: stateOf(peer, task), unread: task.unread === true, openedAt: opener.at,
-            delegationId: opener.delegationId, own: false,
-            ...(mine ? {} : { openedBy: opener.name }),
+            state: stateOf(peer, task), unread: task.unread === true, openedAt: opener?.at ?? task.createdAt,
+            delegationId: opener?.delegationId, own: false,
+            ...(mine || !opener ? {} : { openedBy: opener.name }),
           });
         }
       }

@@ -29,6 +29,37 @@
       }
     },
     {
+      "name": "read_agent_transcript",
+      "description": "As a workspace head, read a supervised agent's direct conversation from list_threads. Bounded, redacted text; managed teams, allowed peers and audience restrictions apply. Call from direct chat.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "bot_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "bot_id",
+          "thread_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "list_shared_computers",
       "description": "List online desktop computers explicitly shared with this workspace, and their allowed folders/capabilities. These are the user's computers, not this server. An offline or unshared computer cannot be accessed. Folder paths use opaque folder IDs and relative paths.",
       "inputSchema": {
@@ -1665,7 +1696,7 @@
     },
     {
       "name": "origin_list_projects",
-      "description": "List the Origin projects you reach (a Chief also reaches the teams it manages) with each one's Chief and agents and their bot ids. If Origin is not connected or nothing is linked, tell the person.",
+      "description": "List your own Origin project, or a workspace head's managed projects, with each one's Chief, agents and bot ids. If Origin is not connected or nothing is linked, tell the person.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1680,7 +1711,7 @@
     },
     {
       "name": "origin_list_issues",
-      "description": "List Origin issues (column, priority, assignee, due, labels), filtered by status, priority, assignee or text: which are open, urgent (high priority) or whose, and their ids. A Chief without a project of its own gets every project it reaches. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "List Origin issues (column, priority, assignee, due, labels), filtered by status, priority, assignee or text: which are open, urgent (high priority) or whose, and their ids. A Chief without a project of its own gets every project it reaches. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1728,7 +1759,7 @@
     },
     {
       "name": "origin_get_issue",
-      "description": "Read one Origin issue in full: description, comments, attachments, pull requests with checks and review, labels and related issues. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Read one Origin issue in full: description, comments, attachments, pull requests with checks and review, labels and related issues. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1758,7 +1789,7 @@
     },
     {
       "name": "origin_create_issue",
-      "description": "Create an Origin issue for work to track or a bug or follow-up you found. Check origin_list_issues first for a duplicate. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Create an Origin issue for work to track or a bug or follow-up you found. Check origin_list_issues first for a duplicate. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1815,7 +1846,7 @@
     },
     {
       "name": "origin_update_issue",
-      "description": "Change an Origin issue: title, description, priority, labels, assignee, due date, column or done. A done column marks it done unless you pass done. Finish your own work with origin_complete_issue. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Change an Origin issue: title, description, priority, labels, assignee, due date, column or done. A done column marks it done unless you pass done. Finish your own work with origin_complete_issue. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1879,8 +1910,32 @@
       }
     },
     {
+      "name": "origin_delete_issue",
+      "description": "Permanently delete an Origin issue and its comments and attachments. Use completion for finished work; deletion removes the record. Only your project; workspace heads may select a managed project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Issue id or ORI- key from origin_list_issues."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "issue_id"
+        ]
+      }
+    },
+    {
       "name": "origin_comment_issue",
-      "description": "Comment on an Origin issue: progress, a finding, a question or a result. Members are notified; keep it short. Acts on your team's Origin project unless you pass project.",
+      "description": "Comment on an Origin issue: progress, a finding, a question or a result. Members are notified; keep it short. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1911,7 +1966,7 @@
     },
     {
       "name": "origin_assign_issue",
-      "description": "Hand an Origin issue to an agent of its project's team, or to the Chief of a project you manage, through coordinate_bots in a new thread: it branches, opens a pull request and finishes with origin_complete_issue. The issue gets the agent's label and moves to In progress. The result resumes you; end your turn. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Hand an Origin issue to an agent of its project's team, or to the Chief of a project you manage, through coordinate_bots in a new thread: it branches, opens a pull request and finishes with origin_complete_issue. The issue gets the agent's label and moves to In progress. The result resumes you; end your turn. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1951,7 +2006,7 @@
     },
     {
       "name": "origin_complete_issue",
-      "description": "Finish your work on an Origin issue: links your pull request to its GitHub issue (adds \"Closes #n\"), comments the summary, moves it to review and asks the project's Chief to review and merge. The issue is done only when the pull request merges; never mark it done yourself. In a project with a GitHub repository, pull_request_url is required. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Finish your work on an Origin issue: links your pull request to its GitHub issue (adds \"Closes #n\"), comments the summary, moves it to review and asks the project's Chief to review and merge. The issue is done only when the pull request merges; never mark it done yourself. In a project with a GitHub repository, pull_request_url is required. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1987,7 +2042,7 @@
     },
     {
       "name": "origin_review_pr",
-      "description": "As a project's Chief, review its pull requests: list the open ones (checks, review, the issues each closes), read one (changed files, checks, whether it can merge), or approve it with a review comment. Merge with origin_merge_pr. Acts on your team's Origin project unless you pass project.",
+      "description": "As a project's Chief, review its pull requests: list the open ones (checks, review, the issues each closes), read one (changed files, checks, whether it can merge), or approve it with a review comment. Merge with origin_merge_pr. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2021,7 +2076,7 @@
     },
     {
       "name": "origin_merge_pr",
-      "description": "As a project's Chief, merge a reviewed pull request into the default branch once its checks pass. Irreversible, always asks the person first, and completes the issues it closes. Read it with origin_review_pr first and pass the head_sha it reports. Acts on your team's Origin project unless you pass project.",
+      "description": "As a project's Chief, merge a reviewed pull request into the default branch once its checks pass. Irreversible, always asks the person first, and completes the issues it closes. Read it with origin_review_pr first and pass the head_sha it reports. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2050,7 +2105,7 @@
     },
     {
       "name": "origin_list_assets",
-      "description": "List an Origin project's design assets (with links) and tokens, to reuse its logos, images and colours. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's design assets (with links) and tokens, to reuse its logos, images and colours. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2071,7 +2126,7 @@
     },
     {
       "name": "origin_add_asset",
-      "description": "Add a design asset to an Origin project: a link (url) or a file from your working folder (path, at most 15 MB). Acts on your team's Origin project unless you pass project.",
+      "description": "Add a design asset to an Origin project: a link (url) or a file from your working folder (path, at most 15 MB). Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2122,8 +2177,37 @@
       }
     },
     {
+      "name": "origin_vault_store",
+      "description": "Store an API key from an encrypted Vault JSON file in your working folder. Payload: ciphertext, iv, salt, iterations, kdf (PBKDF2-SHA256/AES-256-GCM). Never pass plaintext or a passphrase. A member must permit agent use and unlock it before reading its value. Only your project; workspace heads may select a managed project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "title",
+          "path"
+        ]
+      }
+    },
+    {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2144,7 +2228,7 @@
     },
     {
       "name": "origin_repo_status",
-      "description": "Show an Origin project's repository: URL, clone command and default branch, the project's folder on this computer (empty, or the branch checked out), open pull requests with checks and review, and recent commits. Acts on your team's Origin project unless you pass project.",
+      "description": "Show an Origin project's repository: URL, clone command and default branch, the project's folder on this computer (empty, or the branch checked out), open pull requests with checks and review, and recent commits. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2165,7 +2249,7 @@
     },
     {
       "name": "origin_team_chat",
-      "description": "Read the latest messages of an Origin project's team chat, where its members and agents talk. Acts on your team's Origin project unless you pass project.",
+      "description": "Read the latest messages of an Origin project's team chat, where its members and agents talk. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2192,7 +2276,7 @@
     },
     {
       "name": "origin_team_chat_post",
-      "description": "Post a message in an Origin project's team chat under your own name, for the project's members to read. Acts on your team's Origin project unless you pass project.",
+      "description": "Post a message in an Origin project's team chat under your own name, for the project's members to read. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2216,7 +2300,7 @@
     },
     {
       "name": "origin_feedback",
-      "description": "List the feedback an Origin project's users sent through its public portal (bugs and ideas), or read one item in full with entry_id. Acts on your team's Origin project unless you pass project.",
+      "description": "List the feedback an Origin project's users sent through its public portal (bugs and ideas), or read one item in full with entry_id. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2302,7 +2386,7 @@
     },
     {
       "name": "origin_design_submit",
-      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Acts on your team's Origin project unless you pass project.",
+      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

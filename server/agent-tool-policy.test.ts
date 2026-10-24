@@ -9,6 +9,7 @@ describe("built-in agent tool read policy", () => {
       "list_shared_computers",
       "list_rooms",
       "list_threads",
+      "read_agent_transcript",
       "assignment_status",
       "session_search",
       "session_read",
@@ -51,7 +52,7 @@ describe("built-in agent tool read policy", () => {
     "create_bot", "request_credential", "request_sign_in", "memory_update", "propose_routine",
     "propose_routine_action", "propose_profile", "skill_manage",
     "propose_team_setup", "propose_bot_deletion",
-    "origin_create_issue", "origin_update_issue", "origin_comment_issue", "origin_assign_issue", "origin_complete_issue", "origin_add_asset",
+    "origin_create_issue", "origin_update_issue", "origin_delete_issue", "origin_vault_store", "origin_comment_issue", "origin_assign_issue", "origin_complete_issue", "origin_add_asset",
     "list_secrets", "read_credentials", "list_bots_and_delete", "unknown", "",
     "mcp__agents__list_bots", "agents.list_bots", "LIST_BOTS", " list_bots",
   ])("does not infer read access for %s", (name) => {

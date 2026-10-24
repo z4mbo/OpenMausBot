@@ -116,6 +116,18 @@ describe("agent design tools", () => {
     expect(await run(client, "origin_canvas_screenshot", { node: "nope" })).toMatchObject({ isError: true });
   });
 
+  it("refuses a design linked to a foreign issue before changing the canvas", async () => {
+    const { client, calls } = convex();
+    const query = client.query;
+    client.query = async (name, args) => {
+      if (name === "tasks:details") throw new Error("Task not found");
+      return query(name, args);
+    };
+    const result = await run(client, "origin_design_submit", { issue_id: "foreign-task", frames: ["Pricing"] });
+    expect(result.isError).toBe(true);
+    expect(calls.some((call) => ["canvasCollab:linkDesign", "draw:updateElements", "canvasCollab:addComment"].includes(call.name))).toBe(false);
+  });
+
   it("comments as the agent and submits a design for the Chief's review", async () => {
     const { client, calls, rows } = convex();
     const made = await run(client, "origin_canvas_edit", { ops: [{ op: "create", node: { type: "frame", key: "pricing", name: "Pricing", w: 400, h: 300 } }] });

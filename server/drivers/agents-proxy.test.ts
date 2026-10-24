@@ -619,6 +619,7 @@ describe("agents-proxy MCP surface", () => {
     const list = await rpc("tools/list");
     expect(list.result.tools.map((t: { name: string }) => t.name)).toEqual([
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "shared_computer",
       "list_room_targets",
@@ -663,6 +664,7 @@ describe("agents-proxy MCP surface", () => {
       "origin_get_issue",
       "origin_create_issue",
       "origin_update_issue",
+      "origin_delete_issue",
       "origin_comment_issue",
       "origin_assign_issue",
       "origin_complete_issue",
@@ -670,6 +672,7 @@ describe("agents-proxy MCP surface", () => {
       "origin_merge_pr",
       "origin_list_assets",
       "origin_add_asset",
+      "origin_vault_store",
       "origin_vault_list",
       "origin_repo_status",
       "origin_team_chat",
@@ -777,6 +780,7 @@ describe("agents-proxy MCP surface", () => {
     const list = await rpc("tools/list");
     const readNames = [
       "tool_result_read",
+      "read_agent_transcript",
       "list_shared_computers",
       "assignment_status", "list_bots", "list_rooms", "list_threads",
       "list_team_setup",
@@ -2078,7 +2082,7 @@ describe("standing external runtime", () => {
   it("sees the same one tool surface as every turn: the switches it sets change nothing", async () => {
     const list = await externalRpc("tools/list");
     // the main child is a Chief's turn; this one is not, so only the role differs
-    const chiefOnly = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup"];
+    const chiefOnly = ["create_bot", "list_team_setup", "propose_team_setup", "propose_bot_deletion", "create_room", "manage_room", "retry_thread", "origin_assign_issue", "origin_review_pr", "origin_merge_pr", "origin_standup", "read_agent_transcript"];
     const everyTurn = (await rpc("tools/list")).result.tools.filter((tool: any) => !chiefOnly.includes(tool.name));
     const names = list.result.tools.map((tool: any) => tool.name);
     expect(names).toEqual(everyTurn.map((tool: any) => tool.name));

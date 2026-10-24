@@ -29,6 +29,37 @@
       }
     },
     {
+      "name": "read_agent_transcript",
+      "description": "As a workspace head, read a supervised agent's direct conversation from list_threads. Bounded, redacted text; managed teams, allowed peers and audience restrictions apply. Call from direct chat.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "bot_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "bot_id",
+          "thread_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "list_shared_computers",
       "description": "List online desktop computers explicitly shared with this workspace, and their allowed folders/capabilities. These are the user's computers, not this server. An offline or unshared computer cannot be accessed. Folder paths use opaque folder IDs and relative paths.",
       "inputSchema": {
@@ -1665,7 +1696,7 @@
     },
     {
       "name": "origin_list_projects",
-      "description": "List the Origin projects you reach (a Chief also reaches the teams it manages) with each one's Chief and agents and their bot ids. If Origin is not connected or nothing is linked, tell the person.",
+      "description": "List your own Origin project, or a workspace head's managed projects, with each one's Chief, agents and bot ids. If Origin is not connected or nothing is linked, tell the person.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1680,7 +1711,7 @@
     },
     {
       "name": "origin_list_issues",
-      "description": "List Origin issues (column, priority, assignee, due, labels), filtered by status, priority, assignee or text: which are open, urgent (high priority) or whose, and their ids. A Chief without a project of its own gets every project it reaches. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "List Origin issues (column, priority, assignee, due, labels), filtered by status, priority, assignee or text: which are open, urgent (high priority) or whose, and their ids. A Chief without a project of its own gets every project it reaches. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1728,7 +1759,7 @@
     },
     {
       "name": "origin_get_issue",
-      "description": "Read one Origin issue in full: description, comments, attachments, pull requests with checks and review, labels and related issues. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Read one Origin issue in full: description, comments, attachments, pull requests with checks and review, labels and related issues. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1758,7 +1789,7 @@
     },
     {
       "name": "origin_create_issue",
-      "description": "Create an Origin issue for work to track or a bug or follow-up you found. Check origin_list_issues first for a duplicate. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Create an Origin issue for work to track or a bug or follow-up you found. Check origin_list_issues first for a duplicate. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1815,7 +1846,7 @@
     },
     {
       "name": "origin_update_issue",
-      "description": "Change an Origin issue: title, description, priority, labels, assignee, due date, column or done. A done column marks it done unless you pass done. Finish your own work with origin_complete_issue. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Change an Origin issue: title, description, priority, labels, assignee, due date, column or done. A done column marks it done unless you pass done. Finish your own work with origin_complete_issue. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1879,8 +1910,32 @@
       }
     },
     {
+      "name": "origin_delete_issue",
+      "description": "Permanently delete an Origin issue and its comments and attachments. Use completion for finished work; deletion removes the record. Only your project; workspace heads may select a managed project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Issue id or ORI- key from origin_list_issues."
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "issue_id"
+        ]
+      }
+    },
+    {
       "name": "origin_comment_issue",
-      "description": "Comment on an Origin issue: progress, a finding, a question or a result. Members are notified; keep it short. Acts on your team's Origin project unless you pass project.",
+      "description": "Comment on an Origin issue: progress, a finding, a question or a result. Members are notified; keep it short. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1911,7 +1966,7 @@
     },
     {
       "name": "origin_assign_issue",
-      "description": "Hand an Origin issue to an agent of its project's team, or to the Chief of a project you manage, through coordinate_bots in a new thread: it branches, opens a pull request and finishes with origin_complete_issue. The issue gets the agent's label and moves to In progress. The result resumes you; end your turn. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Hand an Origin issue to an agent of its project's team, or to the Chief of a project you manage, through coordinate_bots in a new thread: it branches, opens a pull request and finishes with origin_complete_issue. The issue gets the agent's label and moves to In progress. The result resumes you; end your turn. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1951,7 +2006,7 @@
     },
     {
       "name": "origin_complete_issue",
-      "description": "Finish your work on an Origin issue: links your pull request to its GitHub issue (adds \"Closes #n\"), comments the summary, moves it to review and asks the project's Chief to review and merge. The issue is done only when the pull request merges; never mark it done yourself. In a project with a GitHub repository, pull_request_url is required. The person sees issue cards; do not repeat them. Acts on your team's Origin project unless you pass project.",
+      "description": "Finish your work on an Origin issue: links your pull request to its GitHub issue (adds \"Closes #n\"), comments the summary, moves it to review and asks the project's Chief to review and merge. The issue is done only when the pull request merges; never mark it done yourself. In a project with a GitHub repository, pull_request_url is required. The person sees issue cards; do not repeat them. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1987,7 +2042,7 @@
     },
     {
       "name": "origin_review_pr",
-      "description": "As a project's Chief, review its pull requests: list the open ones (checks, review, the issues each closes), read one (changed files, checks, whether it can merge), or approve it with a review comment. Merge with origin_merge_pr. Acts on your team's Origin project unless you pass project.",
+      "description": "As a project's Chief, review its pull requests: list the open ones (checks, review, the issues each closes), read one (changed files, checks, whether it can merge), or approve it with a review comment. Merge with origin_merge_pr. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2021,7 +2076,7 @@
     },
     {
       "name": "origin_merge_pr",
-      "description": "As a project's Chief, merge a reviewed pull request into the default branch once its checks pass. Irreversible, always asks the person first, and completes the issues it closes. Read it with origin_review_pr first and pass the head_sha it reports. Acts on your team's Origin project unless you pass project.",
+      "description": "As a project's Chief, merge a reviewed pull request into the default branch once its checks pass. Irreversible, always asks the person first, and completes the issues it closes. Read it with origin_review_pr first and pass the head_sha it reports. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2050,7 +2105,7 @@
     },
     {
       "name": "origin_list_assets",
-      "description": "List an Origin project's design assets (with links) and tokens, to reuse its logos, images and colours. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's design assets (with links) and tokens, to reuse its logos, images and colours. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2071,7 +2126,7 @@
     },
     {
       "name": "origin_add_asset",
-      "description": "Add a design asset to an Origin project: a link (url) or a file from your working folder (path, at most 15 MB). Acts on your team's Origin project unless you pass project.",
+      "description": "Add a design asset to an Origin project: a link (url) or a file from your working folder (path, at most 15 MB). Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2122,8 +2177,37 @@
       }
     },
     {
+      "name": "origin_vault_store",
+      "description": "Store an API key from an encrypted Vault JSON file in your working folder. Payload: ciphertext, iv, salt, iterations, kdf (PBKDF2-SHA256/AES-256-GCM). Never pass plaintext or a passphrase. A member must permit agent use and unlock it before reading its value. Only your project; workspace heads may select a managed project.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Name or id from origin_list_projects."
+          }
+        },
+        "required": [
+          "title",
+          "path"
+        ]
+      }
+    },
+    {
       "name": "origin_vault_list",
-      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's vault and the signed-in person's: titles, kinds, URLs, usernames, and the values (a service sign-in's as env vars) members let agents use and unlocked here. Ask for any other with request_credential. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2144,7 +2228,7 @@
     },
     {
       "name": "origin_repo_status",
-      "description": "Show an Origin project's repository: URL, clone command and default branch, the project's folder on this computer (empty, or the branch checked out), open pull requests with checks and review, and recent commits. Acts on your team's Origin project unless you pass project.",
+      "description": "Show an Origin project's repository: URL, clone command and default branch, the project's folder on this computer (empty, or the branch checked out), open pull requests with checks and review, and recent commits. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2165,7 +2249,7 @@
     },
     {
       "name": "origin_team_chat",
-      "description": "Read the latest messages of an Origin project's team chat, where its members and agents talk. Acts on your team's Origin project unless you pass project.",
+      "description": "Read the latest messages of an Origin project's team chat, where its members and agents talk. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2192,7 +2276,7 @@
     },
     {
       "name": "origin_team_chat_post",
-      "description": "Post a message in an Origin project's team chat under your own name, for the project's members to read. Acts on your team's Origin project unless you pass project.",
+      "description": "Post a message in an Origin project's team chat under your own name, for the project's members to read. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2216,7 +2300,7 @@
     },
     {
       "name": "origin_feedback",
-      "description": "List the feedback an Origin project's users sent through its public portal (bugs and ideas), or read one item in full with entry_id. Acts on your team's Origin project unless you pass project.",
+      "description": "List the feedback an Origin project's users sent through its public portal (bugs and ideas), or read one item in full with entry_id. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2254,7 +2338,7 @@
     },
     {
       "name": "origin_canvas",
-      "description": "List an Origin project's canvases (design files, boards and presentations), or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's canvases (design files, boards and presentations), or read one (or one frame of it with node) as compact JSON: frames, shapes, text, images, layout, pages, components and what people have selected, editable with origin_canvas_edit. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2289,7 +2373,7 @@
     },
     {
       "name": "origin_canvas_edit",
-      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both, wrap}; children of a layout frame need no x, y; grow:true shares its free space, absolute:true opts out, minW/maxW/minH/maxH bound it. Outside layout, constraints {h: left|right|center|stretch|scale, v: top|bottom|center|stretch|scale} follow a resized parent. component {set, props} makes a frame a component (variants share set); {op:\"instance\",component,parent?,key?,set} places a copy whose layers you update by id. fillStyle (primary, secondary, background, text, neutral-N) and textStyle (display, h1, h2, h3, body-lg, body, small, caption) bind to the brand kit; shadow {x,y,blur,color} and blur are allowed but keep designs flat. prototype {to: frame} links a click in Present mode. Paths take points with curves [inDx,inDy,outDx,outDy per point]. A group with boolean (union|subtract|intersect|exclude) draws its shapes combined, still editable. radii [tl,tr,br,bl] rounds corners apart; gradient {kind: linear|radial, angle, stops [{at,color}]} replaces the fill; images take imageFit cover|contain|stretch|crop|tile with crop {scale,x,y}. {op:\"design_system\"} builds a Design system frame from the brand kit: colour and text styles plus Button, Input, Card and Nav components. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Acts on your team's Origin project unless you pass project.",
+      "description": "Design on an Origin project's canvas: the people on it see each change live. ops run in order: {op:\"create\",parent?,node}, {op:\"update\",id,set}, {op:\"delete\",id}. A node is {type: frame|rect|ellipse|line|arrow|text|image|group|path, name, x, y (relative to its parent), w, h, fill, stroke, strokeWidth, radius, opacity, rotation, text, fontSize, fontWeight, align, font: sans|serif|mono, points [[x,y]], asset (an image asset's name), link (an https or mailto address it opens on a published page), key, children}. Frames take layout {direction: row|column, gap, padding, align: start|center|end|stretch, justify: start|center|end|between, hug: width|height|both, wrap}; children of a layout frame need no x, y; grow:true shares its free space, absolute:true opts out, minW/maxW/minH/maxH bound it. Outside layout, constraints {h: left|right|center|stretch|scale, v: top|bottom|center|stretch|scale} follow a resized parent. component {set, props} makes a frame a component (variants share set); {op:\"instance\",component,parent?,key?,set} places a copy whose layers you update by id. fillStyle (primary, secondary, background, text, neutral-N) and textStyle (display, h1, h2, h3, body-lg, body, small, caption) bind to the brand kit; shadow {x,y,blur,color} and blur are allowed but keep designs flat. prototype {to: frame} links a click in Present mode. Paths take points with curves [inDx,inDy,outDx,outDy per point]. A group with boolean (union|subtract|intersect|exclude) draws its shapes combined, still editable. radii [tl,tr,br,bl] rounds corners apart; gradient {kind: linear|radial, angle, stops [{at,color}]} replaces the fill; images take imageFit cover|contain|stretch|crop|tile with crop {scale,x,y}. {op:\"design_system\"} builds a Design system frame from the brand kit: colour and text styles plus Button, Input, Card and Nav components. leadForm {fields: [name, email, phone, message], button, accent} turns an empty frame into a signup form on the published page. Build a section as one frame, e.g. a 1440-wide column frame with hug height holding a heading and a row of cards. Read the canvas first to reuse its ids and style. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2344,7 +2428,7 @@
     },
     {
       "name": "origin_canvas_screenshot",
-      "description": "See a canvas frame or node (or the canvas's first page) as a PNG, to check your own design work. Acts on your team's Origin project unless you pass project.",
+      "description": "See a canvas frame or node (or the canvas's first page) as a PNG, to check your own design work. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2380,7 +2464,7 @@
     },
     {
       "name": "origin_canvas_comment",
-      "description": "Read a canvas's comment threads, or comment as yourself: pinned to a node, or as a reply. Answer a comment that mentions you here. Acts on your team's Origin project unless you pass project.",
+      "description": "Read a canvas's comment threads, or comment as yourself: pinned to a node, or as a reply. Answer a comment that mentions you here. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2418,7 +2502,7 @@
     },
     {
       "name": "origin_design_submit",
-      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Acts on your team's Origin project unless you pass project.",
+      "description": "Link the canvas frames that design an Origin issue to it: they show as Design on the issue, the issue key shows on each frame, your rationale is pinned on the canvas, and in review the project's Chief is asked to review. A Chief approves with status approved. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2471,7 +2555,7 @@
     },
     {
       "name": "origin_canvas_board",
-      "description": "Work on an Origin project's whiteboard (a board on its Design page) as people do: sticky notes, text, labelled shapes, freehand strokes and connector arrows, live for everyone on it. items run in order: {type: sticky|text|shape|stroke|connector, key, text, color, x, y}; stickies take color yellow|pink|green|blue|purple|orange|gray; shapes take shape box|pill|circle, w, h; strokes take points [[x,y],...] (world coordinates), width, highlight; connectors take from and to (keys from this call or node ids). Items without x and y are laid out in a grid beside what is there. delete removes nodes by id. Read the board first with origin_canvas, and look at it with origin_canvas_screenshot. Acts on your team's Origin project unless you pass project.",
+      "description": "Work on an Origin project's whiteboard (a board on its Design page) as people do: sticky notes, text, labelled shapes, freehand strokes and connector arrows, live for everyone on it. items run in order: {type: sticky|text|shape|stroke|connector, key, text, color, x, y}; stickies take color yellow|pink|green|blue|purple|orange|gray; shapes take shape box|pill|circle, w, h; strokes take points [[x,y],...] (world coordinates), width, highlight; connectors take from and to (keys from this call or node ids). Items without x and y are laid out in a grid beside what is there. delete removes nodes by id. Read the board first with origin_canvas, and look at it with origin_canvas_screenshot. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2511,7 +2595,7 @@
     },
     {
       "name": "origin_canvas_deck",
-      "description": "Build or edit an Origin presentation (a pitch deck on the project's Design page) as people do: its slides are 1920×1080 frames played top to bottom, styled with the brand kit. slides adds slides from an outline: {layout: title|section|bullets|two-column|stat|image|quote|closing, title, subtitle, body, bullets [..], columns [left, right], stat, image (an image asset's name), notes (speaker notes), key, replace (a slide id to replace)}; at inserts them at a position (default the end). order reorders by slide ids, notes [{slide, text}] writes speaker notes, delete removes slides. Refine any slide's layers with origin_canvas_edit and check it with origin_canvas_screenshot. Acts on your team's Origin project unless you pass project.",
+      "description": "Build or edit an Origin presentation (a pitch deck on the project's Design page) as people do: its slides are 1920×1080 frames played top to bottom, styled with the brand kit. slides adds slides from an outline: {layout: title|section|bullets|two-column|stat|image|quote|closing, title, subtitle, body, bullets [..], columns [left, right], stat, image (an image asset's name), notes (speaker notes), key, replace (a slide id to replace)}; at inserts them at a position (default the end). order reorders by slide ids, notes [{slide, text}] writes speaker notes, delete removes slides. Refine any slide's layers with origin_canvas_edit and check it with origin_canvas_screenshot. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2606,7 +2690,7 @@
     },
     {
       "name": "origin_studio_generate",
-      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect and template one of the project's own templates, both from origin_studio_presets; fill sets their blanks. Images and audio wait for the result (up to 40 s); video returns at once. Acts on your team's Origin project unless you pass project.",
+      "description": "Generate images, video or audio in an Origin project's Studio with fal.ai, on the person's own fal key: the team watches it live and every finished output lands in Assets (folder Studio) by itself. count makes variations. Animate, upscale, extend or remix a result by passing it in sources with a model that starts from it. preset picks a ready-made effect and template one of the project's own templates, both from origin_studio_presets; fill sets their blanks. Images and audio wait for the result (up to 40 s); video returns at once. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2849,7 +2933,7 @@
     },
     {
       "name": "origin_studio_list",
-      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Publish. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Studio generations, newest first: id, status, model, prompt, output links, the asset ids of saved outputs and which are picked for Publish. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2886,7 +2970,7 @@
     },
     {
       "name": "origin_studio_save_asset",
-      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Publish posts. Returns the asset ids. Acts on your team's Origin project unless you pass project.",
+      "description": "Save a finished Studio generation to the project's Assets (all its outputs, or one with index; finished outputs are usually there already) and with broadcast true pick it for Publish posts. Returns the asset ids. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2920,7 +3004,7 @@
     },
     {
       "name": "origin_studio_workflow_list",
-      "description": "List an Origin project's Studio workflows (node graphs that chain fal models, such as product shot to music reel) and the built-in templates, with each one's input nodes and the latest runs and their outputs. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Studio workflows (node graphs that chain fal models, such as product shot to music reel) and the built-in templates, with each one's input nodes and the latest runs and their outputs. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2952,7 +3036,7 @@
     },
     {
       "name": "origin_studio_workflow_run",
-      "description": "Run a Studio workflow or template on the person's fal key; the team watches each step live and Output nodes save to Assets (folder Studio). Acts on your team's Origin project unless you pass project.",
+      "description": "Run a Studio workflow or template on the person's fal key; the team watches each step live and Output nodes save to Assets (folder Studio). Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3010,7 +3094,7 @@
     },
     {
       "name": "origin_studio_workflow_save",
-      "description": "Save a Studio workflow the team can open, edit and run: from a template id (such as template:talking-avatar), a copy of a saved workflow, or a finished generation, whose animate, remix and upscale steps become one model node each with its prompt as an input. Returns its id for origin_studio_workflow_run. Acts on your team's Origin project unless you pass project.",
+      "description": "Save a Studio workflow the team can open, edit and run: from a template id (such as template:talking-avatar), a copy of a saved workflow, or a finished generation, whose animate, remix and upscale steps become one model node each with its prompt as an input. Returns its id for origin_studio_workflow_run. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3044,7 +3128,7 @@
     },
     {
       "name": "origin_studio_template_save",
-      "description": "Save a finished Studio generation as one of the project's templates: its model, settings and starting files as examples, its result as the cover. Write prompt with the words people should change as [Label: default words]; each becomes a blank in Studio's prompt bar and in fill. Acts on your team's Origin project unless you pass project.",
+      "description": "Save a finished Studio generation as one of the project's templates: its model, settings and starting files as examples, its result as the cover. Write prompt with the words people should change as [Label: default words]; each becomes a blank in Studio's prompt bar and in fill. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3087,7 +3171,7 @@
     },
     {
       "name": "origin_studio_presets",
-      "description": "List the templates Studio offers: the project's own (saved from generations, with [blanks] to fill) and the ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt. Pass a preset id as preset, or a project template as template, to origin_studio_generate. Acts on your team's Origin project unless you pass project.",
+      "description": "List the templates Studio offers: the project's own (saved from generations, with [blanks] to fill) and the ready-made effects (motion transfer, talking photo, start to end frame, new camera angle, relight, virtual try-on, product scene, voice-over and more), each with its model, the sources it needs in order and its prompt. Pass a preset id as preset, or a project template as template, to origin_studio_generate. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3119,7 +3203,7 @@
     },
     {
       "name": "origin_studio_library",
-      "description": "List an Origin project's Studio library (characters, products and styles saved from reference images), or save one so every later generation and workflow keeps it consistent. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Studio library (characters, products and styles saved from reference images), or save one so every later generation and workflow keeps it consistent. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3174,7 +3258,7 @@
     },
     {
       "name": "origin_broadcast_draft",
-      "description": "Draft a social post in an Origin project's Publish section, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Match the brand voice. Acts on your team's Origin project unless you pass project.",
+      "description": "Draft a social post in an Origin project's Publish section, or change one with post_id: text per channel (X 280, Bluesky 300, LinkedIn 3000, Facebook, Instagram 2200 and media required, TikTok 2200 and one video required) and media from the project's Assets or Studio. A person approves it before it can be scheduled; your edit to a post clears its approval. Match the brand voice. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3238,7 +3322,7 @@
     },
     {
       "name": "origin_broadcast_list",
-      "description": "List an Origin project's Publish posts, or one campaign's: id, status, approval, schedule, channels with their published links or errors, media and text. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's Publish posts, or one campaign's: id, status, approval, schedule, channels with their published links or errors, media and text. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3277,7 +3361,7 @@
     },
     {
       "name": "origin_broadcast_schedule",
-      "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first. Acts on your team's Origin project unless you pass project.",
+      "description": "Schedule an approved Publish post to go out at a time, or now; the person's app publishes it with their channel keys. A post an agent wrote needs a person's approval first. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3305,7 +3389,7 @@
     },
     {
       "name": "origin_broadcast_unschedule",
-      "description": "Take a scheduled Publish post off the calendar so it does not go out; it becomes a draft again. Acts on your team's Origin project unless you pass project.",
+      "description": "Take a scheduled Publish post off the calendar so it does not go out; it becomes a draft again. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3328,7 +3412,7 @@
     },
     {
       "name": "origin_campaign_create",
-      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Publish posts, Studio generations and issues of one push. Acts on your team's Origin project unless you pass project.",
+      "description": "Create a launch campaign in an Origin project, or change one with campaign: goal, audience, channels, dates, budget note and status. It ties together the Publish posts, Studio generations and issues of one push. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3399,7 +3483,7 @@
     },
     {
       "name": "origin_campaign_get",
-      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations and issues. Acts on your team's Origin project unless you pass project.",
+      "description": "List an Origin project's campaigns, or read one with campaign: its brief, posts with per-channel status, links and likes or reposts, Studio generations and issues. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3425,7 +3509,7 @@
     },
     {
       "name": "origin_campaign_link",
-      "description": "Attach a Publish post, Studio generation or Origin issue to a campaign, or detach it with remove. Acts on your team's Origin project unless you pass project.",
+      "description": "Attach a Publish post, Studio generation or Origin issue to a campaign, or detach it with remove. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3468,7 +3552,7 @@
     },
     {
       "name": "origin_brand_get",
-      "description": "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Read it before you design, generate media or write copy. Acts on your team's Origin project unless you pass project.",
+      "description": "Read an Origin project's brand kit: name, tagline, voice (adjectives, do and don't), colours with contrast checks, heading and body fonts, logo and icon assets and imagery style. Read it before you design, generate media or write copy. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -3489,7 +3573,7 @@
     },
     {
       "name": "origin_brand_update",
-      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Publish all use it. Acts on your team's Origin project unless you pass project.",
+      "description": "Draft or change an Origin project's brand kit; fields you leave out keep their value. Draft it from the project's description and brief; the team reviews it in Assets > Brand. Canvas, Pages, Studio and Publish all use it. Only your project; workspace heads may select a managed project.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
