@@ -199,14 +199,6 @@ export function normalizeBrandKit(input: unknown, base: BrandKit): { kit: BrandK
   return { kit, problems };
 }
 
-/** What Studio puts ahead of an image or video prompt when the generation uses the brand. */
-export function brandedPrompt(kit: Pick<BrandKit, "imagery" | "colors">, prompt: string): string {
-  const palette = brandPalette(kit);
-  const style = kit.imagery.length ? `Visual style: ${kit.imagery.join(", ")}. ` : "";
-  const colors = `Brand colours: primary ${palette.primary}, secondary ${palette.secondary}, neutrals ${palette.neutrals.join(", ")}.`;
-  return `${style}${colors}\n\n${prompt.trim()}`;
-}
-
 /** The kit's voice as guidance for an agent drafting posts, emails and page copy; empty when it has none. */
 export function brandVoiceGuide(kit: Pick<BrandKit, "name" | "tagline" | "voice">): string {
   const parts = [
@@ -235,7 +227,7 @@ export function brandKitText(kit: StoredBrandKit, projectName: string): string {
     `Fonts: headings ${font(kit.fonts.heading)}, body ${font(kit.fonts.body)}`,
     `Logos: ${kit.logos.length ? kit.logos.map(asset).join(", ") : "none"}${kit.icon ? ` · Icon: ${asset(kit.icon)}` : ""}`,
     `Imagery: ${kit.imagery.join(", ") || "not set"}`,
-    "On Canvas, give headings and body text these families and use these colours; Studio adds the imagery and colours to image and video prompts unless brand is false; write Publish posts in this voice.",
+    "In anything you design, give headings and body text these families and use these colours and this imagery; write copy in this voice.",
   ].join("\n");
 }
 

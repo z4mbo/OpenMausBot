@@ -1,6 +1,3 @@
-import type { BroadcastChannel, BroadcastStatus } from "./broadcast.ts";
-import type { CampaignStatus } from "./origin-campaigns.ts";
-
 export type OriginCardMediaKind = "image" | "video" | "audio" | "other";
 
 /** A file a card previews. `url` is absent when the file has no address the app can load. */
@@ -8,34 +5,6 @@ export interface OriginCardMedia {
   name: string;
   kind: OriginCardMediaKind;
   url?: string;
-}
-
-/** One Publish post as an agent tool read or wrote it. */
-export interface OriginPostCardItem {
-  id: string;
-  status: BroadcastStatus;
-  /** An agent wrote it and no person approved it yet; it cannot be scheduled until a person does. */
-  needsApproval: boolean;
-  format?: "post" | "reel";
-  agentName?: string;
-  scheduledAt?: number;
-  /** `truncated`: `text` is the start of a longer text, so the whole post is read in Publish. */
-  channels: Array<{ channel: BroadcastChannel; text: string; truncated?: true; result?: "published" | "failed"; url?: string; error?: string }>;
-  media: OriginCardMedia[];
-}
-
-export interface OriginCampaignCardItem {
-  id: string;
-  name: string;
-  status: CampaignStatus;
-  goal?: string;
-  /** YYYY-MM-DD. */
-  startDate?: string;
-  endDate?: string;
-  channels: BroadcastChannel[];
-  slug?: string;
-  /** `approval`: posts an agent wrote that wait for a person's approval. */
-  counts: { posts: number; published: number; generations: number; openIssues: number; approval?: number };
 }
 
 export interface OriginAssetCardItem {
@@ -92,11 +61,8 @@ interface CardBase {
   projectName?: string;
 }
 
-/** A Publish post, campaign or list of campaigns, asset, vault entry, repository, feedback or call an Origin agent tool returned, drawn in chat as a card that opens it in its project. Clients that do not know a kind ignore it. */
+/** An asset, vault entry, repository, feedback or call an Origin agent tool returned, drawn in chat as a card that opens it in its project. Clients that do not know a kind ignore it. */
 export type OriginChatCard = CardBase & (
-  | { kind: "broadcast"; heading: string; posts: OriginPostCardItem[]; more?: number }
-  | { kind: "campaign"; campaign: OriginCampaignCardItem }
-  | { kind: "campaigns"; heading: string; campaigns: OriginCampaignCardItem[]; more?: number }
   | { kind: "assets"; heading: string; assets: OriginAssetCardItem[]; more?: number }
   | { kind: "vault"; items: OriginVaultCardItem[]; more?: number }
   | { kind: "repo"; repo: OriginRepoCardItem }

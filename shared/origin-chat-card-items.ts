@@ -1,8 +1,5 @@
-import { isBroadcastChannel, type BroadcastChannel, type BroadcastStatus } from "./broadcast.ts";
-import { isCampaignStatus } from "./origin-campaigns.ts";
 import type {
-  OriginAssetCardItem, OriginCallCardItem, OriginCampaignCardItem, OriginCardMedia, OriginCardMediaKind, OriginFeedbackCardItem,
-  OriginPostCardItem, OriginVaultCardItem,
+  OriginAssetCardItem, OriginCallCardItem, OriginCardMediaKind, OriginFeedbackCardItem, OriginVaultCardItem,
 } from "./origin-chat-cards.ts";
 
 type Row = Record<string, unknown>;
@@ -14,9 +11,7 @@ const count = (value: unknown): number => (typeof value === "number" && Number.i
 const optional = <K extends string>(key: K, value: string): Partial<Record<K, string>> => (value ? { [key]: value } as Record<K, string> : {});
 const clip = (value: string, max: number) => (value.length > max ? `${value.slice(0, max)}…` : value);
 
-const POST_STATUSES = new Set<BroadcastStatus>(["draft", "scheduled", "publishing", "published", "failed"]);
 const FEEDBACK_STATUSES = new Set(["new", "planned", "completed", "dismissed"]);
-const TEXT_MAX = 4_000;
 
 export function mediaKindOf(contentType: string, type = "", name = ""): OriginCardMediaKind {
   const lower = contentType.toLowerCase();
@@ -24,50 +19,6 @@ export function mediaKindOf(contentType: string, type = "", name = ""): OriginCa
   if (lower.startsWith("video/") || type === "video" || /\.(mp4|mov|webm|m4v)$/i.test(name)) return "video";
   if (lower.startsWith("audio/") || type === "audio" || /\.(mp3|wav|m4a|ogg|flac)$/i.test(name)) return "audio";
   return "other";
-}
-
-export function postCardItem(value: unknown): OriginPostCardItem {
-  const post = row(value);
-  const status = text(post.status) as BroadcastStatus;
-  return {
-    id: text(post._id),
-    status: POST_STATUSES.has(status) ? status : "draft",
-    needsApproval: post.needsApproval === true,
-    ...(post.format === "reel" ? { format: "reel" as const } : {}),
-    ...optional("agentName", text(post.agentName)),
-    ...(typeof post.scheduledAt === "number" ? { scheduledAt: post.scheduledAt } : {}),
-    channels: rows(post.variants).filter((variant) => isBroadcastChannel(variant.channel)).map((variant) => ({
-      channel: variant.channel as BroadcastChannel,
-      text: clip(text(variant.text), TEXT_MAX),
-      ...(text(variant.text).length > TEXT_MAX ? { truncated: true as const } : {}),
-      ...(variant.result === "published" || variant.result === "failed" ? { result: variant.result } : {}),
-      ...optional("url", text(variant.url)),
-      ...optional("error", clip(text(variant.error), 240)),
-    })),
-    media: rows(post.media).map((item): OriginCardMedia => ({
-      name: text(item.name), kind: item.kind === "image" || item.kind === "video" ? item.kind : mediaKindOf(text(item.contentType), "", text(item.name)),
-      ...optional("url", text(item.url)),
-    })),
-  };
-}
-
-export function campaignCardItem(value: unknown): OriginCampaignCardItem {
-  const campaign = row(value);
-  const counts = row(campaign.counts);
-  return {
-    id: text(campaign._id),
-    name: text(campaign.name),
-    status: isCampaignStatus(campaign.status) ? campaign.status : "planning",
-    ...optional("goal", clip(text(campaign.goal), 400)),
-    ...optional("startDate", text(campaign.startDate)),
-    ...optional("endDate", text(campaign.endDate)),
-    channels: (Array.isArray(campaign.channels) ? campaign.channels : []).filter(isBroadcastChannel),
-    ...optional("slug", text(campaign.slug)),
-    counts: {
-      posts: count(counts.posts), published: count(counts.published), generations: count(counts.generations),
-      openIssues: count(counts.openIssues), ...(count(counts.approval) ? { approval: count(counts.approval) } : {}),
-    },
-  };
 }
 
 export function assetCardItem(value: unknown): OriginAssetCardItem {

@@ -8,8 +8,6 @@ import {
 import { isDraftColumn } from "../shared/origin-columns.ts";
 import { columnNames, findColumn, normalizedTitle } from "./origin-cloud-columns.ts";
 import { createOriginCloudSession } from "./origin-cloud-session.ts";
-import { DESIGN_BRIEF, canvasTools, type CanvasToolProject } from "./origin-canvas-tools.ts";
-import { canvasFonts, svgToPng } from "./canvas-raster.ts";
 import { isReadOnlyAgentTool } from "./agent-tool-policy.ts";
 import { DATA_DIR } from "./config.ts";
 import type { MirrorResult } from "./github/sync.ts";
@@ -21,13 +19,10 @@ import { addedAssetCard, appendOriginCards, assetsCard, CARD_NOTE, feedbackCard,
 import { PASS, type RouteHandler } from "./routes/table.ts";
 import { sectionKey, type Store } from "./store.ts";
 import { cloudProjectFor, reachableCloudProjects, type OriginProjectBot as ProjectBot, type ReachableProject } from "./origin-project-links.ts";
-import { broadcastDraft, broadcastList, broadcastSchedule, broadcastUnschedule, type BroadcastToolScope } from "./broadcast/tools.ts";
 import { standupTools } from "./origin-standup-tool.ts";
-import { campaignTools } from "./origin-campaign-tools.ts";
 import { brandTools } from "./origin-brand-tools.ts";
 import { vaultAgentSecrets } from "./origin-vault-agent.ts";
 import { callNotesTools } from "./origin-call-notes.ts";
-import { runStudioTool, STUDIO_TOOL_NAMES, type StudioRunner, type StudioToolResult, type WorkflowExecutor } from "./origin-studio-tools.ts";
 import { chatLine, type OriginTeamChat } from "./origin-team-chat.ts";
 
 export interface OriginCloudState {
@@ -63,17 +58,14 @@ export interface OriginReviewRequest {
   reason: string;
 }
 
-export interface OriginToolResult extends Pick<StudioToolResult, "studio"> {
+export interface OriginToolResult {
   text: string;
   isError?: boolean;
   cards?: OriginIssueCards;
   pullRequest?: OriginPullRequestCard;
   card?: OriginChatCard;
-  design?: import("../shared/origin-design.ts").OriginDesignCard;
   handoff?: OriginHandoff;
   reviewer?: OriginReviewRequest;
-  /** A picture the model sees with the text, such as a canvas screenshot. */
-  image?: { mimeType: string; data: string };
 }
 
 /** GitHub work of the Origin tools, each call through the named project's own GitHub connection. */
@@ -243,9 +235,6 @@ interface ToolContext {
   github?: OriginGitHub;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  cloudUrl: string;
-  studio?: StudioRunner;
-  studioWorkflows?: WorkflowExecutor;
   projectDocs: Map<string, Promise<Args>>;
 }
 
@@ -438,28 +427,9 @@ function feedbackLine(entry: Args): string {
   return `- ${text(entry._id)} [${text(entry.kind)}, ${text(entry.status)}] ${clip(text(entry.title), 180)} (${new Date(Number(entry.createdAt)).toISOString().slice(0, 10)})`;
 }
 
-async function canvasProject(ctx: ToolContext, args: Args): Promise<CanvasToolProject> {
-  const project = await pickProject(ctx, args.project);
-  const doc = await projectDoc(ctx, project.projectId);
-  const name = text(doc.name) || project.projectId;
-  const chief = projectChief(ctx, project);
-  return {
-    client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, name, teamId: text(doc.teamId), canEdit: text(doc.memberRole) !== "viewer", refuse,
-    agent: { id: ctx.caller.id, name: ctx.caller.name }, chief: chief ? { id: chief.id, name: chief.name } : null,
-  };
-}
-
-async function broadcastScope(ctx: ToolContext, args: Args): Promise<BroadcastToolScope> {
+async function projectScope(ctx: ToolContext, args: Args) {
   const project = await pickProject(ctx, args.project);
   return { client: ctx.client, sessionToken: ctx.sessionToken, projectId: project.projectId, projectName: await projectName(ctx, project.projectId), caller: { id: ctx.caller.id, name: ctx.caller.name } };
-}
-
-async function studioScope(ctx: ToolContext, args: Args) {
-  const project = await pickProject(ctx, args.project);
-  return {
-    cloud: { client: ctx.client, sessionToken: ctx.sessionToken, url: ctx.cloudUrl }, projectId: project.projectId,
-    projectName: await projectName(ctx, project.projectId), agentName: ctx.caller.name, agentId: ctx.caller.id, runner: ctx.studio, workflows: ctx.studioWorkflows,
-  };
 }
 
 const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginToolResult>> = {
@@ -663,17 +633,13 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
         priority: text(found.task.priority) || "medium", dueDate: text(found.task.dueDate) || undefined, labels,
         githubIssueNumber: Number(found.task.githubIssueNumber) || undefined,
       });
-      const design = args.design === true;
-      const briefed = design ? `${brief}\n\n${DESIGN_BRIEF}` : brief;
       return {
         text: `Ready to hand ${key} to ${agent.name}.`,
         handoff: {
           botId: agent.id,
           botName: agent.name,
-          message: clip(note ? `${briefed}\n\nFrom ${ctx.caller.name}: ${note}` : briefed, 4_000),
-          doneWhen: design
-            ? `${key} has canvas frames linked through origin_design_submit with a rationale, or the reason it cannot be designed is commented on the issue.`
-            : `${key} has a pull request linked in an issue comment and is in review or done through origin_complete_issue, or the reason it cannot be done is commented on the issue.`,
+          message: clip(note ? `${brief}\n\nFrom ${ctx.caller.name}: ${note}` : brief, 4_000),
+          doneWhen: `${key} has a pull request linked in an issue comment and is in review or done through origin_complete_issue, or the reason it cannot be done is commented on the issue.`,
           reason: clip(`Origin issue ${key}: ${text(found.task.title)}`, 200),
         },
       };
@@ -943,16 +909,7 @@ const TOOLS: Record<string, (args: Args, ctx: ToolContext) => Promise<OriginTool
     return { text: `${FEEDBACK_NOTE}\n${shown.length} ${status === "all" ? "" : `${status} `}feedback item(s) for ${name}, newest first:\n${lines.join("\n")}${more}\n${CARD_NOTE}`, card: feedbackCard(project.projectId, name, teamId, shown, `${shown.length} ${status === "all" ? "" : `${status} `}feedback`) };
   },
 
-  ...canvasTools((args, ctx: ToolContext) => canvasProject(ctx, args), svgToPng, canvasFonts),
-
-  async origin_broadcast_draft(args, ctx) { return broadcastDraft(args, await broadcastScope(ctx, args)); },
-  async origin_broadcast_list(args, ctx) { return broadcastList(args, await broadcastScope(ctx, args)); },
-  async origin_broadcast_schedule(args, ctx) { return broadcastSchedule(args, await broadcastScope(ctx, args)); },
-  async origin_broadcast_unschedule(args, ctx) { return broadcastUnschedule(args, await broadcastScope(ctx, args)); },
-
-  ...Object.fromEntries(STUDIO_TOOL_NAMES.map((name) => [name, async (args: Args, ctx: ToolContext) => runStudioTool(name, args, await studioScope(ctx, args))])),
-
-  ...campaignTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...brandTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), ...callNotesTools((args, ctx: ToolContext) => broadcastScope(ctx, args)), origin_vault_list: (args, ctx) => vaultAgentSecrets().tools((a, c: ToolContext) => broadcastScope(c, a)).origin_vault_list(args, ctx),
+  ...brandTools((args, ctx: ToolContext) => projectScope(ctx, args)), ...callNotesTools((args, ctx: ToolContext) => projectScope(ctx, args)), origin_vault_list: (args, ctx) => vaultAgentSecrets().tools((a, c: ToolContext) => projectScope(c, a)).origin_vault_list(args, ctx),
   ...standupTools(async (args, ctx: ToolContext) => Promise.all((trimmed(args.project) || ctx.reachable.length === 1 ? [await pickProject(ctx, args.project)] : ctx.reachable).map(async ({ projectId }) => { const doc = await projectDoc(ctx, projectId); return { client: ctx.client, sessionToken: ctx.sessionToken, projectId, projectName: text(doc.name) || projectId, teamId: text(doc.teamId) }; }))),
 };
 
@@ -967,8 +924,6 @@ export interface OriginToolDeps {
   file?(path: string): Promise<OriginAssetFile>;
   teamChat?: OriginTeamChat;
   folder?(projectId: string): OriginProjectFolder | null;
-  studio?: StudioRunner;
-  studioWorkflows?: WorkflowExecutor;
 }
 
 export async function runOriginTool(name: string, args: Args, botId: string, deps: OriginToolDeps, phase?: "record"): Promise<OriginToolResult> {
@@ -988,7 +943,7 @@ export async function runOriginTool(name: string, args: Args, botId: string, dep
       client: deps.connect(url), sessionToken, bots: deps.bots, links: deps.state.projects, caller, reachable,
       ...(phase ? { phase } : {}), ...(deps.file ? { file: deps.file } : {}), ...(deps.github ? { github: deps.github } : {}),
       ...(deps.teamChat ? { teamChat: deps.teamChat } : {}), ...(deps.folder ? { folder: deps.folder } : {}),
-      cloudUrl: url, ...(deps.studio ? { studio: deps.studio } : {}), ...(deps.studioWorkflows ? { studioWorkflows: deps.studioWorkflows } : {}), projectDocs: new Map(),
+      projectDocs: new Map(),
     });
   } catch (error) {
     if (error instanceof OriginRefusal) return { text: error.message, isError: true };

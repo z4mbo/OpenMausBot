@@ -43,10 +43,6 @@ export interface ProjectSnapshot {
   feedbackOpen: number | null;
   feedback: string[];
   chat: string[];
-  canvases: string[];
-  studio: string[];
-  workflows: string[];
-  publish: string[];
   call: string;
   brand: string;
   members: string[];
@@ -61,15 +57,12 @@ const VAULT_SHOWN = 8;
 const ASSETS_SHOWN = 6;
 const FEEDBACK_SHOWN = 3;
 const CHAT_SHOWN = 8;
-const STUDIO_SHOWN = 4;
-const PUBLISH_SHOWN = 4;
-const WORKFLOWS_SHOWN = 6;
 const MEMBERS_SHOWN = 10;
 const HEAD_PROJECTS_SHOWN = 25;
 const WORKSPACE_DETAILED_PROJECTS = 8;
 const WORKSPACE_TOP_ISSUES = 2;
 const WORKSPACE_CHAT_SHOWN = 3;
-const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat, origin_canvas (design files with origin_canvas_edit, whiteboards with origin_canvas_board, pitch decks with origin_canvas_deck), origin_broadcast_list (Publish posts), origin_studio_generate (images, video, audio) and origin_repo_status.";
+const TOOLS_LINE = "More with origin_list_issues, origin_get_issue, origin_vault_list, origin_list_assets, origin_feedback, origin_team_chat and origin_repo_status.";
 
 const record = (value: unknown): Args => (value && typeof value === "object" && !Array.isArray(value) ? value as Args : {});
 const list = (value: unknown): Args[] => (Array.isArray(value) ? value.map(record) : []);
@@ -89,18 +82,14 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
   const teamId = text(doc.teamId);
   const repo = repoCoordinates(text(doc.repoUrl));
   const github = repo ? deps.github?.() : undefined;
-  const [board, vault, design, people, canvases, portals, repository, brand, studio, workflows, publish, call] = await Promise.all([
+  const [board, vault, design, people, portals, repository, brand, call] = await Promise.all([
     optional(client.query("tasks:board", base)),
     optional(client.query("credentials:list", base)),
     optional(client.query("design:list", base)),
     optional(client.query("members:people", base)),
-    optional(client.query("draw:canvases", base)),
     teamId ? optional(client.query("feedback:portals", { sessionToken, teamId })) : null,
     github?.repository ? optional(github.repository(projectId)) : null,
     optional(client.query("brand:get", base)),
-    optional(client.query("studio:list", base)),
-    optional(client.query("studioWorkflows:list", base)),
-    optional(client.query("broadcast:list", base)),
     optional(client.query("callNotes:latest", base)),
   ]);
   const columns = list(record(board).columns);
@@ -136,14 +125,6 @@ async function loadSnapshot(client: OriginCloudClient, sessionToken: string, pro
     feedbackOpen: feedback ? openFeedback.length : null,
     feedback: openFeedback.slice(0, FEEDBACK_SHOWN).map((entry) => `[${text(entry.kind)}] ${quoted(text(entry.title), 90)}`),
     chat: chat.map((line) => `${oneLine(line.authorName, 40)}: ${quoted(line.body, 140)}`),
-    canvases: list(canvases).map((canvas) => { const name = oneLine(text(canvas.name), 40); return name && canvas.kind === "board" ? `${name} (board)` : name && canvas.kind === "deck" ? `${name} (presentation)` : name; }).filter(Boolean),
-    studio: list(studio).slice(0, STUDIO_SHOWN).map((item) => `${text(item.kind) || "media"} ${quoted(text(item.prompt), 80)} (${text(item.modelLabel) || text(item.model)}, ${text(item.status)})`),
-    workflows: list(workflows).slice(0, WORKFLOWS_SHOWN).map((flow) => oneLine(text(flow.name), 40)).filter(Boolean),
-    publish: list(record(publish).posts).slice(0, PUBLISH_SHOWN).map((post) => {
-      const variants = list(post.variants);
-      const when = typeof post.scheduledAt === "number" ? `, for ${new Date(post.scheduledAt).toISOString().slice(0, 16).replace("T", " ")} UTC` : "";
-      return `[${text(post.status)}${when}] ${variants.map((variant) => text(variant.channel)).join("/")}: ${quoted(text(variants[0]?.text), 90)}`;
-    }),
     call: call && typeof call === "object" ? (() => {
       const note = record(call);
       const items = list(note.actionItems).map((item) => oneLine(text(item.title), 60)).slice(0, 3);
@@ -183,7 +164,7 @@ export function projectIdentityPrompt(snapshot: Pick<ProjectSnapshot, "projectId
   const { name } = snapshot;
   const repo = repoCoordinates(snapshot.repoUrl);
   const lines = [
-    `Origin project: you work on ${name} (Origin project ${snapshot.projectId})${role === "chief" ? " as its Chief" : chief ? ` on the team ${chief} leads` : ""}. "The project", "the app", "the repo", "the site" and "localhost" mean ${name}'s. You reach only ${name}'s Origin data (issues, vault, assets, feedback, team chat, Draw), even if another project is named. Ask the workspace head to route work for another project.`,
+    `Origin project: you work on ${name} (Origin project ${snapshot.projectId})${role === "chief" ? " as its Chief" : chief ? ` on the team ${chief} leads` : ""}. "The project", "the app", "the repo", "the site" and "localhost" mean ${name}'s. You reach only ${name}'s Origin data (issues, vault, assets, feedback, team chat), even if another project is named. Ask the workspace head to route work for another project.`,
     snapshot.description.trim() ? `About ${name}: ${oneLine(snapshot.description, 300)}` : "",
     repo
       ? `Repository: ${repo.slug} ${repo.web}${snapshot.defaultBranch ? `, default branch ${snapshot.defaultBranch}` : ""}. Clone it with: git clone ${repo.clone}. Origin clones it into an empty project folder and answers git's GitHub sign-in there with the workspace's access, so pull and push work as they are; never put a token in a command or a remote URL`
@@ -206,9 +187,6 @@ export function projectStatusPrompt(snapshot: ProjectSnapshot, folder: OriginPro
     `- Assets: ${snapshot.assetCount}${snapshot.assets.length ? ` (${snapshot.assets.join(", ")}${snapshot.assetCount > snapshot.assets.length ? ", …" : ""})` : ""}; ${snapshot.tokenCount} design token(s)`,
     snapshot.feedbackOpen === null ? "- Feedback: no portal" : `- Feedback: ${snapshot.feedbackOpen} open${snapshot.feedback.length ? `; latest ${snapshot.feedback.join("; ")}` : ""}`,
     snapshot.chat.length ? `- Team chat, latest: ${snapshot.chat.join(" | ")}` : "- Team chat: quiet",
-    `- Design page (design files, boards, presentations): ${snapshot.canvases.length ? snapshot.canvases.join(", ") : "none"}`,
-    `- Studio: ${snapshot.studio.length ? `latest ${snapshot.studio.join("; ")}` : "nothing generated yet"}${snapshot.workflows.length ? `; workflows ${snapshot.workflows.join(", ")}` : ""}`,
-    `- Publish: ${snapshot.publish.length ? snapshot.publish.join("; ") : "no posts yet"}`,
     snapshot.call ? `- Last call: ${snapshot.call}` : "",
     snapshot.brand ? `- Brand: ${snapshot.brand}` : "- Brand: no kit yet (draft one with origin_brand_update)",
     snapshot.members.length ? `- Members: ${snapshot.members.join(", ")}` : "",
@@ -226,7 +204,7 @@ export function workspaceIdentityPrompt(projects: readonly { projectId: string; 
   return `\n\nOrigin workspace: you head this workspace and reach its ${projects.length} project(s), and nothing outside them:\n${shown.join("\n")}${more}\n${HEAD_RULE}`;
 }
 
-type WorkspaceProjectStatus = Pick<ProjectSnapshot, "name" | "openIssues" | "highIssues" | "at"> & Partial<Pick<ProjectSnapshot, "topIssues" | "chat" | "publish" | "studio" | "call">>;
+type WorkspaceProjectStatus = Pick<ProjectSnapshot, "name" | "openIssues" | "highIssues" | "at"> & Partial<Pick<ProjectSnapshot, "topIssues" | "chat" | "call">>;
 
 function workspaceProjectLine(snapshot: WorkspaceProjectStatus, detailed: boolean): string {
   const issues = `- ${snapshot.name}: ${snapshot.openIssues} open issue(s)${snapshot.highIssues ? `, ${snapshot.highIssues} high priority` : ""}`;
@@ -235,8 +213,6 @@ function workspaceProjectLine(snapshot: WorkspaceProjectStatus, detailed: boolea
     issues,
     snapshot.topIssues?.length ? `Top: ${snapshot.topIssues.slice(0, WORKSPACE_TOP_ISSUES).join("; ")}` : "",
     snapshot.chat?.length ? `Team chat, latest: ${snapshot.chat.at(-1)}` : "",
-    snapshot.publish?.[0] ? `Publish: ${snapshot.publish[0]}` : "",
-    snapshot.studio?.[0] ? `Studio: ${snapshot.studio[0]}` : "",
     snapshot.call ? `Last call: ${snapshot.call}` : "",
   ].filter(Boolean).join(". ");
 }

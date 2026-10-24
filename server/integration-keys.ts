@@ -20,13 +20,12 @@ type Field = {
 type Integration = { label: string; help: string; fields: Record<string, Field> };
 
 /**
- * Third-party accounts a member connects for server-side work (Studio generations, Publish posts). Each
+ * Third-party accounts a member connects for server-side work. Each
  * member keeps their own keys in this computer's data folder: they are never put in a backup and never returned to a
  * client (non-secret fields such as a sender address are). An admin may share theirs with the workspace or a project
  * through the backend; a member's own key always wins over a shared one.
  */
 export const INTEGRATIONS = {
-  fal: { label: "fal.ai", help: "https://fal.ai/dashboard/keys", fields: { key: { label: "API key", secret: true, placeholder: "key-id:secret" } } },
   elevenlabs: { label: "ElevenLabs", help: "https://elevenlabs.io/app/settings/api-keys", fields: { apiKey: { label: "API key", secret: true, placeholder: "sk_…" } } },
   openai: { label: "OpenAI", help: "https://platform.openai.com/api-keys", fields: { apiKey: { label: "API key", secret: true, placeholder: "sk-…" } } },
   resend: {
@@ -35,41 +34,6 @@ export const INTEGRATIONS = {
       apiKey: { label: "API key", secret: true, placeholder: "re_…" },
       senderEmail: { label: "Sender email", secret: false, placeholder: "hello@example.com" },
     },
-  },
-  x: {
-    label: "X", help: "https://developer.x.com/en/portal/dashboard",
-    fields: {
-      apiKey: { label: "API key", secret: true },
-      apiSecret: { label: "API secret", secret: true },
-      accessToken: { label: "Access token", secret: true },
-      accessSecret: { label: "Access token secret", secret: true },
-    },
-  },
-  linkedin: {
-    label: "LinkedIn", help: "https://www.linkedin.com/developers/apps",
-    fields: {
-      accessToken: { label: "Access token", secret: true },
-      authorUrn: { label: "Author URN", secret: false, placeholder: "urn:li:person:… or urn:li:organization:…" },
-    },
-  },
-  bluesky: {
-    label: "Bluesky", help: "https://bsky.app/settings/app-passwords",
-    fields: {
-      handle: { label: "Handle", secret: false, placeholder: "name.bsky.social" },
-      appPassword: { label: "App password", secret: true, placeholder: "xxxx-xxxx-xxxx-xxxx" },
-    },
-  },
-  meta: {
-    label: "Instagram & Facebook", help: "https://developers.facebook.com/tools/explorer",
-    fields: {
-      pageAccessToken: { label: "Page access token", secret: true },
-      facebookPageId: { label: "Facebook page ID", secret: false, optional: true },
-      instagramUserId: { label: "Instagram user ID", secret: false, optional: true },
-    },
-  },
-  tiktok: {
-    label: "TikTok", help: "https://developers.tiktok.com/doc/content-posting-api-get-started",
-    fields: { accessToken: { label: "Access token (video.publish)", secret: true, placeholder: "act.…" } },
   },
   vercel: { label: "Vercel", help: "https://vercel.com/account/settings/tokens", fields: { apiToken: { label: "Access token", secret: true } } },
   netlify: { label: "Netlify", help: "https://app.netlify.com/user/applications#personal-access-tokens", fields: { apiToken: { label: "Personal access token", secret: true, placeholder: "nfp_…" } } },
@@ -241,7 +205,7 @@ export function createIntegrationKeyRoutes(file: () => string = defaultIntegrati
       const mine = Object.keys(draft).length > 0 || complete(id, own);
       if (!mine) await sharedKeys().current();
       const values = mine ? { ...own, ...draft } : usableValues(id, sharedFor(keyFile)?.find(id, scope) ?? null) ?? own;
-      const check = await checkIntegration(id, values, { fetch: deps.fetch ?? fetch, now: Date.now, nonce: () => crypto.randomUUID() });
+      const check = await checkIntegration(id, values, { fetch: deps.fetch ?? fetch, now: Date.now });
       return json(res, 200, { check });
     }
     const sharing = /^\/api\/integrations\/([a-z]+)\/share$/.exec(path);

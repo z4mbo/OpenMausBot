@@ -24,14 +24,7 @@ describe("built-in agent tool read policy", () => {
       "origin_repo_status",
       "origin_team_chat",
       "origin_feedback",
-      "origin_canvas",
-      "origin_canvas_screenshot",
       "origin_call_notes",
-      "origin_broadcast_list",
-      "origin_studio_list",
-      "origin_studio_workflow_list",
-      "origin_studio_presets",
-      "origin_campaign_get",
       "origin_brand_get",
     ]);
     for (const name of READ_ONLY_AGENT_TOOL_NAMES) {

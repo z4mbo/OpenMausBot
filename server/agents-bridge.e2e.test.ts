@@ -119,17 +119,17 @@ it("keeps a turn on the whole catalog until the switch is on, then mounts the br
     await withServer({ ...unbridged, env: { ...unbridged.env, OMB_AGENTS_TOOL_DEFER: "0" } }, async (ask) => {
       whole = (await ask("tools/list")).result!.tools!;
     });
-    expect(whole.map((tool) => tool.name)).toEqual(expect.arrayContaining(["coordinate_bots", "propose_routine", "list_routines", "session_search", "origin_studio_generate"]));
+    expect(whole.map((tool) => tool.name)).toEqual(expect.arrayContaining(["coordinate_bots", "propose_routine", "list_routines", "session_search", "origin_call_notes"]));
     expect(whole.map((tool) => tool.name)).not.toEqual(expect.arrayContaining(["find_tool"]));
     expect(whole.length).toBeGreaterThan(25);
     await withServer(unbridged, async (ask) => {
       const short = (await ask("tools/list")).result!.tools!;
       expect(JSON.stringify(short)).toBe(JSON.stringify(createToolDeferral(whole).listed));
       expect(JSON.stringify(short).length).toBeLessThan(JSON.stringify(whole).length);
-      const found = (JSON.parse(textOf(await call(ask, "find_tool", { query: "make an image" }))) as { matches: BridgeTool[] }).matches;
-      expect(found[0]).toEqual((({ name, description, inputSchema }) => ({ name, description, inputSchema }))(whole.find((tool) => tool.name === "origin_studio_generate")!));
+      const found = (JSON.parse(textOf(await call(ask, "find_tool", { query: "call recap action items" }))) as { matches: BridgeTool[] }).matches;
+      expect(found[0]).toEqual((({ name, description, inputSchema }) => ({ name, description, inputSchema }))(whole.find((tool) => tool.name === "origin_call_notes")!));
       // a domain tool listed in short is called by its own name and reaches the harness like any other
-      const direct = await call(ask, "origin_studio_list", {});
+      const direct = await call(ask, "origin_call_notes", {});
       expect(direct.error).toBeUndefined();
       expect(textOf(direct)).not.toContain("Unknown tool");
       // the bridge's two names mean nothing to a turn that does not have it
