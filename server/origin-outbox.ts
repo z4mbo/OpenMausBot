@@ -44,6 +44,7 @@ export function openOutbox(file: string, now: () => number = Date.now) {
     CREATE TABLE IF NOT EXISTS runs (run TEXT PRIMARY KEY, payload TEXT NOT NULL);`);
   let retryAt = 0;
   let flushing: Promise<void> | null = null;
+  let closed = false;
 
   const enqueue = (name: string, args: Record<string, unknown>, options: { key?: string; delayMs?: number } = {}) => {
     const due = now() + (options.delayMs ?? 0);
@@ -62,15 +63,16 @@ export function openOutbox(file: string, now: () => number = Date.now) {
 
   /** Sends due ops in order and stops at the first that is not due or cannot be sent yet, so a later write never overtakes it. */
   const drain = async (send: SendOp, onDrop?: (op: OutboxOp, error: unknown) => void) => {
-    if (now() < retryAt) return;
+    if (closed || now() < retryAt) return;
     for (;;) {
+      if (closed) return;
       const row = db.prepare("SELECT id, name, args, attempts, due FROM ops ORDER BY id LIMIT 1").get() as
         { id: number; name: string; args: string; attempts: number; due: number } | undefined;
       if (!row || row.due > now()) return;
       const op = { id: row.id, name: row.name, args: JSON.parse(row.args) as Record<string, unknown>, attempts: row.attempts };
       try {
         await send(op.name, op.args);
-        db.prepare("DELETE FROM ops WHERE id = ?").run(op.id);
+        db.prepare("DELETE FROM ops WHERE id = ? AND args = ?").run(op.id, row.args);
         retryAt = 0;
       } catch (error) {
         const attempts = op.attempts + 1;
@@ -109,7 +111,10 @@ export function openOutbox(file: string, now: () => number = Date.now) {
       db.prepare("DELETE FROM runs WHERE run = ?").run(runId);
     },
     close(): void {
-      db.close();
+      if (closed) return;
+      closed = true;
+      if (flushing) void flushing.finally(() => db.close());
+      else db.close();
     },
   };
 }

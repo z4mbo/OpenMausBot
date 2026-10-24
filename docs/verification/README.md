@@ -161,6 +161,7 @@ Use only mapped, tested commands:
 - [Hosted workspace sign-in and revocation](hosted-workspaces.md)
 - [Shared-workspace trust: loopback, card answerers, decision log](shared-workspace-trust.md)
 - [Shared-workspace governance: bot visibility and admin activity](shared-workspace-governance.md)
+- [Origin shared agent conversations and two-member cloud sync](origin-shared-chats.md)
 - [Usage ledger](usage-ledger.md)
 - [Provider quota availability without false model sign-in errors](origin-plan-usage.md)
 - [Bounded built-in tool results](tool-results.md)

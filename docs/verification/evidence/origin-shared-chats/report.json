@@ -1,0 +1,44 @@
+{
+  "checks": [
+    "Pre-binding history from A is automatically imported and appears in B's real harness",
+    "Explicit private conversation remains unbound",
+    "A's message and an in-progress streaming answer appear in B before completion",
+    "Repeated sendId produces one user row and no second engine turn; B only watches and reads canonical order",
+    "B's request runs on A's fake engine and returns to B",
+    "B catches up after an actual subscription transport disconnect without duplicate rows",
+    "Workspace main-agent threads are discovered by both members",
+    "Removing B's project membership denies cloud chat reads",
+    "Both temporary harness data directories and the in-memory backend are closed and removed"
+  ],
+  "harnesses": [
+    {
+      "url": "http://127.0.0.1:27027",
+      "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792860669092-29528.log"
+    },
+    {
+      "url": "http://127.0.0.1:27161",
+      "logPath": "C:\\Users\\aless\\AppData\\Local\\Temp\\openmausbot-verification-evidence\\server-1792860673568-29528.log"
+    }
+  ],
+  "backend": "http://127.0.0.1:61093",
+  "baseCommit": "6c82f7b217356ce471195b29fc2cb02d08ba95a5",
+  "backendMode": "convex-test in memory; no deployment",
+  "verification": {
+    "backend": {
+      "files": 46,
+      "passed": 351
+    },
+    "serverAndRenderer": {
+      "files": 11,
+      "passed": 463,
+      "skipped": 1,
+      "skipReason": "Existing POSIX owner-only mode test is skipped on Windows"
+    },
+    "backendTypecheck": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "verificationDocs": {
+      "passed": 7
+    }
+  }
+}

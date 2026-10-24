@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { Outbox, QueuedRun } from "./origin-outbox.ts";
 
 export interface LeaseDeps {
@@ -33,9 +34,9 @@ export interface RunUsage { input: number; output: number; costUsd: number | nul
 /** "hosted": another member's app or server runs it, so this app only shows the thread. `fallback`: why the agent's
  * chosen computer did not take it. */
 export type BeginResult =
-  | { runId: string; status: "running"; messageId: string; fallback?: string }
-  | { runId: string; status: "queued"; messageId: string }
-  | { runId: string; status: "hosted"; messageId: string; runner: { name: string; host: string } };
+  | { runId: string; status: "running"; messageId: string; fallback?: string; seq?: number }
+  | { runId: string; status: "queued"; messageId: string; seq?: number }
+  | { runId: string; status: "hosted"; messageId: string; runner: { name: string; host: string }; seq?: number };
 
 interface ActiveRun {
   runId: string;
@@ -72,6 +73,7 @@ export function spentSince(before: RunUsage | null, after: RunUsage | null): { i
 /** Holds this machine's side of the thread lease: begins runs, heartbeats them, finishes them when the local turn ends,
  * and starts a waiting run of mine once Origin hands it the thread. */
 export function createRunLease(deps: LeaseDeps) {
+  const executorId = randomUUID();
   const now = deps.now ?? Date.now;
   const monotonicNow = deps.monotonicNow ?? (() => performance.now());
   const active = new Map<string, ActiveRun>();
@@ -93,7 +95,7 @@ export function createRunLease(deps: LeaseDeps) {
     });
     try {
       const answer = await Promise.race([
-        deps.mutation("agentRuns:heartbeat", { runId }).catch(() => null),
+        deps.mutation("agentRuns:heartbeat", { runId, executorId }).catch(() => null),
         deadline,
       ]) as { status?: string } | null;
       if (stopped || answer?.status !== "running" || monotonicNow() >= expiresAt) throw leaseError();
@@ -149,7 +151,7 @@ export function createRunLease(deps: LeaseDeps) {
     run.heartbeatInFlight = true;
     const requestedAt = monotonicNow();
     try {
-      const answer = await deps.mutation("agentRuns:heartbeat", { runId: run.runId }).catch(() => null) as { status?: string } | null;
+      const answer = await deps.mutation("agentRuns:heartbeat", { runId: run.runId, executorId }).catch(() => null) as { status?: string } | null;
       if (expire(threadId, run)) return;
       if (answer?.status && answer.status !== "running") {
         withdraw(threadId, run);
@@ -179,11 +181,12 @@ export function createRunLease(deps: LeaseDeps) {
       const requestedAt = monotonicNow();
       const result = await deps.mutation("agentRuns:begin", {
         threadId: input.cloudThreadId, clientId: input.clientId, text: input.text, ...(input.engineLabel ? { engineLabel: input.engineLabel } : {}),
-      }) as { runId: string; status: string; messageId: string; runner?: { name: string; host: string }; fallback?: string };
+      }) as { runId: string; status: string; messageId: string; seq?: number; runner?: { name: string; host: string }; fallback?: string };
+      const sequence = result.seq === undefined ? {} : { seq: result.seq };
       if (stopped) throw leaseError();
       if (result.runner) {
         if (result.status !== "running" && result.status !== "queued") throw Object.assign(new Error(`this message's run already ended (${result.status})`), { status: 409 });
-        return { runId: result.runId, status: "hosted", messageId: result.messageId, runner: result.runner };
+        return { runId: result.runId, status: "hosted", messageId: result.messageId, runner: result.runner, ...sequence };
       }
       if (result.status === "running") {
         let previous = active.get(input.threadId);
@@ -203,10 +206,10 @@ export function createRunLease(deps: LeaseDeps) {
             armExpiry(input.threadId, run);
           }
         } else if (!previous.confirmed) throw leaseError();
-        return { runId: result.runId, status: "running", messageId: result.messageId, ...(result.fallback ? { fallback: result.fallback } : {}) };
+        return { runId: result.runId, status: "running", messageId: result.messageId, ...sequence, ...(result.fallback ? { fallback: result.fallback } : {}) };
       }
       if (result.status !== "queued") throw Object.assign(new Error(`this message's run already ended (${result.status})`), { status: 409 });
-      return { runId: result.runId, status: "queued", messageId: result.messageId };
+      return { runId: result.runId, status: "queued", messageId: result.messageId, ...sequence };
     },
 
     /** Remembers a queued run with the local line that stands for it, so a restart can still start it. */

@@ -111,6 +111,75 @@ describe("shared threads and sender runs", () => {
     await expect(f.t.mutation(api.agentRuns.patchMessage, { sessionToken: f.owner.token, threadId, clientId: "m:reply", text: "late but in grace" })).resolves.toBeTruthy();
   });
 
+  test("imports history idempotently without executing it and pages every change for an offline member", async () => {
+    const f = await fixture();
+    const { threadId } = await thread(f);
+    const rows = Array.from({ length: 45 }, (_, i) => ({ clientId: `history:${i}`, role: i % 2 ? "bot" as const : "user" as const, kind: "text" as const, text: `Row ${i}` }));
+    for (let i = 0; i < rows.length; i += 10) {
+      const args = { sessionToken: f.owner.token, threadId, messages: rows.slice(i, i + 10) };
+      await f.t.mutation(api.agentRuns.importMessages, args);
+      await f.t.mutation(api.agentRuns.importMessages, args);
+    }
+    expect(await f.t.run(ctx => ctx.db.query("workspaceAgentRuns").take(1))).toEqual([]);
+    const all = [];
+    let afterSeq = 0;
+    for (;;) {
+      const page = await f.t.query(api.agentThreads.messagesSince, { sessionToken: f.member.token, threadId, afterSeq, limit: 200 });
+      expect(page.messages.length).toBeLessThanOrEqual(20);
+      all.push(...page.messages);
+      afterSeq = page.messages[page.messages.length - 1]?.updSeq ?? afterSeq;
+      if (!page.more) break;
+    }
+    expect(all.map(row => row.text)).toEqual(rows.map(row => row.text));
+    await f.t.mutation(api.agentRuns.patchMessage, { sessionToken: f.owner.token, threadId, clientId: "history:0", text: "Updated later" });
+    const delta = await f.t.query(api.agentThreads.messagesSince, { sessionToken: f.member.token, threadId, afterSeq });
+    expect(delta.messages).toMatchObject([{ seq: 1, text: "Updated later", authorName: "Owner" }]);
+    await expect(f.t.mutation(api.agentRuns.importMessages, { sessionToken: f.member.token, threadId, messages: rows.slice(0, 1) })).rejects.toThrow(/Only the creator/);
+    await expect(f.t.query(api.agentThreads.messagesSince, { sessionToken: f.outsider.token, threadId, afterSeq: 0 })).rejects.toThrow(/Thread not found/);
+  });
+
+  test("discovers more than 200 threads with stable bounded pages and project authorization", async () => {
+    const f = await fixture();
+    const { agentId } = await thread(f);
+    await f.t.run(async ctx => {
+      for (let i = 0; i < 224; i += 1) await ctx.db.insert("agentThreads", { teamId: f.teamId, projectId: f.projectId, agentId,
+        title: `Thread ${i}`, createdBy: f.owner.id, seq: 0, createdAt: Date.now(), updatedAt: Date.now() });
+    });
+    const found = new Set<string>();
+    let cursor: string | null = null;
+    for (;;) {
+      const page: { page: { _id: string }[]; isDone: boolean; continueCursor: string } = await f.t.query(api.agentThreads.listPage, { sessionToken: f.member.token, agentId, paginationOpts: { cursor, numItems: 1000 } });
+      expect(page.page.length).toBeLessThanOrEqual(50);
+      for (const row of page.page) found.add(row._id);
+      if (page.isDone) break;
+      cursor = page.continueCursor;
+    }
+    expect(found.size).toBe(225);
+    await expect(f.t.query(api.agentThreads.listPage, { sessionToken: f.outsider.token, agentId, paginationOpts: { cursor: null, numItems: 50 } })).rejects.toThrow(/Agent not found/);
+  });
+
+  test("fences two executors of the same member and refuses changed retry text", async () => {
+    const f = await fixture();
+    const { threadId } = await thread(f);
+    const run = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId, clientId: "send:once", text: "One turn" });
+    const claim = (executorId: string) => f.t.mutation(api.agentRuns.heartbeat, { sessionToken: f.owner.token, runId: run.runId, executorId });
+    expect(await claim("machine-a")).toEqual({ status: "running" });
+    expect(await claim("machine-b")).toEqual({ status: "claimed_elsewhere" });
+    expect(await claim("machine-a")).toEqual({ status: "running" });
+    await expect(f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId, clientId: "send:once", text: "Different" })).rejects.toThrow(/another message/);
+  });
+
+  test("an expired executor cannot resurrect a turn before the expiry job runs", async () => {
+    vi.useFakeTimers();
+    try {
+      const f = await fixture();
+      const { threadId } = await thread(f);
+      const run = await f.t.mutation(api.agentRuns.begin, { sessionToken: f.owner.token, threadId, clientId: "send:expired", text: "Run" });
+      vi.advanceTimersByTime(61_000);
+      expect(await f.t.mutation(api.agentRuns.heartbeat, { sessionToken: f.owner.token, runId: run.runId, executorId: "late" })).toEqual({ status: "interrupted" });
+    } finally { vi.useRealTimers(); }
+  });
+
   test("a runner that stops heartbeating is interrupted and its streaming rows marked", async () => {
     vi.useFakeTimers();
     try {

@@ -6859,6 +6859,7 @@ bus.subscribe((event: RuntimeEvent) => {
   }
   const routineRun = privateImageEvent ? null : (routines?.handleRuntimeEvent(event) ?? null);
   const ownerBot = store.botByThread(event.threadId);
+  sharedAgents.delta(event);
   const bot = ownerBot ? botForThread(ownerBot.id, event.threadId) ?? undefined : undefined;
   const group = bot ? undefined : store.groupByThread(event.threadId);
   if (!bot && !group) return;
@@ -6889,7 +6890,7 @@ bus.subscribe((event: RuntimeEvent) => {
       pushStoppedTurn(turnId);
       return;
     }
-    pushMessage({ role: "bot", kind: "text", text: spoken.text, turnId });
+    pushMessage({ role: "bot", kind: "text", text: spoken.text, turnId, cloudClientId: sharedAgents.completeText(event.threadId, event.itemId) });
     lastReply.set(event.threadId, spoken.text);
   };
 

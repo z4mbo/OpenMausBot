@@ -1,8 +1,9 @@
 import type { RuntimeEvent, RuntimeEventListener } from "./contracts.ts";
+import { randomUUID } from "node:crypto";
 import type { HostedTurnInput, HostedTurnOutcome } from "./origin-model-host-types.ts";
 import { quotaWorkEvent } from "./quota-refusal.ts";
 import type { ResolvedSender } from "../shared/wire.ts";
-import { toCloudRow } from "./origin-thread-mirror.ts";
+import { sharedStreamingPreview, toCloudRow } from "./origin-thread-mirror.ts";
 import type { Message, Store } from "./store.ts";
 
 export interface HostedStartOptions {
@@ -43,6 +44,17 @@ export function createHostedSidecar(deps: SidecarDeps) {
         });
       }
       let terminal: Extract<RuntimeEvent, { type: "turn.completed" }> | undefined;
+      let stream: { clientId: string; text: string; published: boolean } | undefined;
+      let streamTimer: ReturnType<typeof setTimeout> | undefined;
+      const streamed = new Map<string, string>();
+      const publishStream = () => {
+        streamTimer = undefined;
+        if (!stream || input.signal.aborted) return;
+        const text = sharedStreamingPreview(stream.text, deps.redact);
+        if (!text) return;
+        input.emit({ clientId: stream.clientId, role: "bot", kind: "text", text, status: "streaming" }, stream.published);
+        stream.published = true;
+      };
       let began = false, activity = false, complete!: () => void;
       let pendingRows: Array<{ message: Message; patch: boolean }> = [];
       const settled = new Promise<void>(resolve => { complete = resolve; });
@@ -58,13 +70,27 @@ export function createHostedSidecar(deps: SidecarDeps) {
         if (event.threadId !== task.threadId || event.providerInstanceId !== input.instanceId) return;
         if (event.type === "turn.started") began = true;
         if (began && quotaWorkEvent(event)) markActivity();
+        if (began && event.type === "content.delta" && event.streamKind === "assistant_text") {
+          stream ??= { clientId: `stream:${randomUUID()}`, text: "", published: false };
+          stream.text = (stream.text + event.delta).slice(0, 60_000);
+          if (!stream.published) publishStream();
+          else streamTimer ??= setTimeout(publishStream, 400);
+        }
         if (event.type === "turn.completed") terminal = event;
       });
       const offRows = deps.store.onChange(change => {
         if ((change.type !== "message" && change.type !== "message.patch") || change.threadId !== task.threadId || change.message.role !== "bot" || change.message.remote) return;
         if (activity) {
           const row = toCloudRow(change.message, deps.redact);
-          if (row?.role === "bot") input.emit(row, change.type === "message.patch");
+          if (row?.role === "bot") {
+            if (row.kind === "text" && change.type === "message" && stream) {
+              clearTimeout(streamTimer); streamTimer = undefined;
+              if (stream.published) streamed.set(change.message.id, stream.clientId);
+              stream = undefined;
+            }
+            const clientId = streamed.get(change.message.id);
+            input.emit(clientId ? { ...row, clientId, status: "final" } : row, Boolean(clientId) || change.type === "message.patch");
+          }
         } else pendingRows.push({ message: structuredClone(change.message), patch: change.type === "message.patch" });
       });
       let interrupted: Promise<void> | undefined;
@@ -82,6 +108,7 @@ export function createHostedSidecar(deps: SidecarDeps) {
         return { ok: !input.signal.aborted && terminal?.ok === true,
           ...(!activity && terminal?.refusal ? { refusal: terminal.refusal } : {}) };
       } finally {
+        clearTimeout(streamTimer);
         if (interrupted) await interrupted;
         pendingRows = []; input.signal.removeEventListener("abort", abort); offEvents(); offRows(); threads.delete(task.threadId);
         deps.store.setTaskClosedBy(botId, task.threadId, { botId, name: "Hosted execution", at: Date.now() });

@@ -110,12 +110,12 @@ export async function settleRun(
   extra: Partial<Pick<Doc<"workspaceAgentRuns">, "usage" | "engineLabel">> = {},
 ): Promise<void> {
   await ctx.db.patch(run._id, { status, endedAt: now, updatedAt: now, ...extra });
-  if (status === "cancelled" || status === "interrupted") {
+  {
     for (const row of await ctx.db.query("agentThreadMessages").withIndex("by_runId", (q) => q.eq("runId", run._id)).take(500)) {
       if (row.status !== "streaming") continue;
       const thread = await ctx.db.get(row.threadId);
       if (!thread) continue;
-      await ctx.db.patch(row._id, { status: "interrupted", updSeq: await nextSeq(ctx, thread, now), updatedAt: now });
+      await ctx.db.patch(row._id, { status: status === "succeeded" ? "final" : "interrupted", updSeq: await nextSeq(ctx, thread, now), updatedAt: now });
     }
   }
   if (!run.threadId) return;

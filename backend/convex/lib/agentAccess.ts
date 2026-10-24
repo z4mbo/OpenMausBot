@@ -90,6 +90,10 @@ export async function canResumeThreadRun(ctx: Ctx, run: Doc<"workspaceAgentRuns"
   if (!thread || thread.archivedAt !== undefined || !canSeeThread(thread, user)) return false;
   const agent = await ctx.db.get(thread.agentId);
   if (!agent || agent.disabled || agent.archivedAt !== undefined || !await sharedAgentsOn(ctx, thread.teamId)) return false;
+  if (run.requesterUserId !== user._id) {
+    const requester = await ctx.db.get(run.requesterUserId);
+    if (!requester || requester.status !== "active" || !(await agentAccess(ctx, agent, requester))?.canSend) return false;
+  }
   return (await agentAccess(ctx, agent, user))?.canSend === true;
 }
 

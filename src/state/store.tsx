@@ -11,6 +11,7 @@ import {
 import { flushSync } from "react-dom";
 import type { BotVisibility, CardAnswerer, CloudBackend, ConnectorToolGrant, EffortLevel, InstalledPackageMetadata, LiveCallState, ServerFrame, GroupThreadUsage, SteerQueueReason, WireGroup, OptionCardData as WireOptionCard } from "../../shared/wire";
 import { movesThreadToTop } from "../../shared/wire";
+import { orderedSharedMessages } from "../../shared/shared-chat-order";
 import { DATA_ROUTES, type DataSheet, type DataTable } from "../../shared/data-surface";
 import type { NotificationLogEntry } from "../../shared/notification";
 import { reduceNotificationFeed, type NotificationFeedAction } from "./notification-feed";
@@ -127,7 +128,7 @@ export interface SecretRequestCardData {
 
 export type ComputerControlState = { held: boolean; helpReason: string | null; help?: import("../../shared/wire").ComputerHelpRef | null };
 
-export interface Message extends Pick<import("../../shared/wire").WireMessage, "widget" | "routedBy" | "quickModel" | "remote" | "originIssues" | "originStudio" | "originPullRequest" | "originDesign" | "originCard"> {
+export interface Message extends Pick<import("../../shared/wire").WireMessage, "widget" | "routedBy" | "quickModel" | "remote" | "sharedMessage" | "cloudClientId" | "originIssues" | "originStudio" | "originPullRequest" | "originDesign" | "originCard"> {
   id: string;
   role: "bot" | "user";
   kind: "text" | "options" | "activity" | "screen" | "connector" | "secret" | "signin" | "routine.run" | "goal.run" | "digest" | "compaction" | "call" | "widget";
@@ -406,6 +407,7 @@ function openedUnreadDivider(state: AppState, threadId: string, unread: boolean,
 }
 
 export function visibleMessages(bot: Pick<Bot, "messages" | "activeLeafId">): Message[] {
+  if (bot.messages.some(message => message.sharedMessage)) return orderedSharedMessages(bot.messages);
   const leafId = bot.activeLeafId;
   if (!leafId) return bot.messages;
   const byId = new Map(bot.messages.map((m) => [m.id, m]));

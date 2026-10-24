@@ -35,10 +35,10 @@ describe("hosted admission Stop boundary", () => {
     });
     const port: CloudConnection = {
       query: async name => name === "auth:me" ? { _id: "user1", name: "Requester" } : null,
-      mutation, subscribe: () => () => undefined, close: vi.fn(),
+      mutation, subscribe: (name, _args, update) => { if (name === "agentThreads:messagesSince") void Promise.resolve().then(() => update({ seq: 0, title: "Thread", archived: false, more: false, messages: [], activeRun: null, queued: [] })); return () => undefined; }, close: vi.fn(),
     };
     const manager = createSharedAgents({
-      store: { bots: [bot], bot: () => bot, projectBotForTask: () => bot, taskByThread: () => task,
+      store: { bots: [bot], bot: () => bot, botByThread: () => bot, projectBotForTask: () => bot, taskByThread: () => task,
         messagesFor: () => messages, patchTask: (_bot: string, _thread: string, patch: object) => Object.assign(task, patch),
         onChange: () => () => undefined, appendMessage: (_thread: string, input: object) => {
           const message = { id: `message${messages.length + 1}`, at: 1, ...input } as Message;

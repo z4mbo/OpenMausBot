@@ -120,7 +120,7 @@ export function createHostedWorker(deps: WorkerDeps) {
           written.add(clientId);
           const { role: _role, kind, clientId: _local, ...content } = row;
           queue(() => call(patch && wasWritten ? "modelHosts:patchReply" : "modelHosts:appendReply",
-            { clientId, ...(patch && wasWritten ? {} : { kind }), ...content, status: "final" }));
+            { clientId, ...(patch && wasWritten ? {} : { kind }), ...content, status: row.status ?? "final" }));
         },
       });
       await output;

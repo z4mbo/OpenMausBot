@@ -589,6 +589,10 @@ export interface WireMessage {
   queueId?: string;
   /** A row another member's machine wrote into a shared thread. Never starts a turn here. */
   remote?: RemoteRow;
+  /** Canonical cloud position, also attached to this machine's own echoed rows. */
+  sharedMessage?: { cloudId: string; seq: number; updSeq: number };
+  /** Stable cloud identity for a reply whose deltas arrived before its completed local row. */
+  cloudClientId?: string;
 }
 
 export interface RemoteRow {

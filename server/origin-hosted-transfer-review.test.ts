@@ -23,11 +23,11 @@ it.each(["validation-refusal", "unknown-offer"] as const)("distinguishes pre-see
     if (name === "modelHosts:offerExisting" && failure === "unknown-offer") throw new Error("The offer acknowledgement was lost");
     return null;
   });
-  const port: CloudConnection = { query: async () => ({ _id: "user1", name: "Requester" }), mutation, subscribe: () => () => undefined, close: vi.fn() };
+  const port: CloudConnection = { query: async () => ({ _id: "user1", name: "Requester" }), mutation, subscribe: (name, _args, update) => { if (name === "agentThreads:messagesSince") void Promise.resolve().then(() => update({ seq: 0, title: "Thread", archived: false, more: false, messages: [], activeRun: null, queued: [] })); return () => undefined; }, close: vi.fn() };
   const validate = vi.fn(async () => ({ provider: "claudeAgent" })).mockResolvedValueOnce({ provider: "claudeAgent" });
   if (failure === "validation-refusal") validate.mockRejectedValueOnce(new Error("Source went offline after the chooser's catalog read"));
   const manager = createSharedAgents({
-    store: { bots: [bot], bot: () => bot, projectBotForTask: () => bot, taskByThread: () => task,
+    store: { bots: [bot], bot: () => bot, botByThread: () => bot, projectBotForTask: () => bot, taskByThread: () => task,
       messagesFor: () => [message], patchTask: (_bot: string, _thread: string, patch: object) => Object.assign(task, patch),
       onChange: () => () => undefined, patchMessage: vi.fn(), setTaskActivity: vi.fn(), switchTaskModel: vi.fn(),
       appendMessage: () => ({ ...message, id: "note1" }),
