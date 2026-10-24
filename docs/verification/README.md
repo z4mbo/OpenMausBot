@@ -77,6 +77,7 @@ Use only mapped, tested commands:
 - [Publish: previews, reels, accounts and the month calendar](origin-broadcast.md)
 - [Campaigns in Publish](origin-campaigns.md)
 - [Workspace integrations every member can use](origin-shared-integrations.md)
+- [Who runs a shared agent, and whose subscription pays](origin-runs-on.md)
 - [Personal Vault, service sign-ins and project roles](origin-vault-roles.md)
 - [Connect your stack: the guided Integrations checklist](origin-integrations-stack.md)
 - [Studio: create, workflows and Assets](origin-studio.md)

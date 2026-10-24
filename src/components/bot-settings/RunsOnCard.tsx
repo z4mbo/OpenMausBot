@@ -82,7 +82,7 @@ export function RunsOnCard({ bot }: { bot: Bot }) {
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[12.5px] font-medium text-ink">{hostLabel(host)}</span>
           <span className="block truncate text-[11.5px] text-ink-secondary">
-            {plan ?? t("runsOn.planUnknown")}{host.mine && !host.shared ? ` · ${t("runsOn.notOfferedYet")}` : ""}
+            {plan ?? t("runsOn.planUnknown")}{host.mine && !host.shared ? ` · ${t(canEdit ? "runsOn.notOfferedYet" : "runsOn.notOffered")}` : ""}
           </span>
         </span>
         <OnlineDot online={host.online} />
@@ -134,15 +134,13 @@ export function RunsOnCard({ bot }: { bot: Bot }) {
       {mine.length > 0 && (
         <div className="mt-3 flex flex-col gap-2 border-t border-hairline/40 pt-3">
           {mine.map((host) => (
-            <div key={host._id} className="flex items-start gap-3">
-              <span className="min-w-0 flex-1">
-                <span className="block text-[12.5px] font-medium text-ink">{t("runsOn.offer", { name: host.name })}</span>
-                <span className="mt-0.5 block text-[11.5px] leading-relaxed text-ink-secondary">{t("runsOn.offerDetail")}</span>
-              </span>
+            <div key={host._id} className="flex items-center gap-3">
+              <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">{t("runsOn.offer", { name: host.name })}</span>
               <Switch checked={host.shared} disabled={busy} aria-label={t("runsOn.offer", { name: host.name })}
                 onClick={() => void run(() => cloudMutation("agentHosts:share", { hostId: host._id, shared: !host.shared }))} />
             </div>
           ))}
+          <p className="text-[11.5px] leading-relaxed text-ink-secondary">{t("runsOn.offerDetail")}</p>
         </div>
       )}
       {error && <p className="mt-2 text-[11.5px] text-danger" role="alert">{error}</p>}
