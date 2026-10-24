@@ -40,6 +40,10 @@ describe("matchWakePhrase", () => {
   it("ignores speech without the wake word or the name", () => {
     expect(matchWakePhrase("origin is a nice name", [origin])).toBeNull();
     expect(matchWakePhrase("hey there", [origin])).toBeNull();
+    expect(matchWakePhrase("ehi", [origin, pepper])).toBeNull();
+    expect(matchWakePhrase("Ehi!", [origin, pepper])).toBeNull();
+    expect(matchWakePhrase("ehi, come stai?", [origin, pepper])).toBeNull();
+    expect(matchWakePhrase("hey", [origin, pepper])).toBeNull();
     expect(matchWakePhrase("hey Marco, are you coming?", [origin, pepper])).toBeNull();
     expect(matchWakePhrase("", [origin])).toBeNull();
     expect(matchWakePhrase("hey origin", [])).toBeNull();
