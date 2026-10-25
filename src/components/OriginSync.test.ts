@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const fixture = vi.hoisted(() => ({
   url: "https://first.convex.cloud", token: "first-session", user: { name: "First" },
-  state: { hydrated: true, bots: [], instances: [] },
-  dispatch: vi.fn(), api: vi.fn(), workspaces: vi.fn(), projects: vi.fn(),
+  state: { hydrated: true, bots: [] as object[], instances: [], groups: [] as object[] },
+  dispatch: vi.fn(), api: vi.fn(), workspaces: vi.fn(), projects: vi.fn(), deleted: vi.fn(),
   shareSession: vi.fn(), refreshLinks: vi.fn(), sharedRound: vi.fn(), accountWorkspaces: vi.fn(), switchWorkspace: vi.fn(),
 }));
 
@@ -17,7 +17,8 @@ vi.mock("@/lib/origin-cloud", () => ({
   cloudAction: vi.fn(), cloudMutation: vi.fn(), setCloudUrl: vi.fn(),
   useCloudSession: () => ({ token: fixture.token, user: fixture.user, ready: true }), useCloudUrl: () => fixture.url,
 }));
-vi.mock("@/lib/origin-cloud/client", () => ({ cloudUrl: () => fixture.url, sessionStore: { get: () => fixture.token }, setSessionToken: vi.fn(), cloudQueryOnce: vi.fn() }));
+vi.mock("@/lib/origin-cloud/client", () => ({ cloudUrl: () => fixture.url, sessionStore: { get: () => fixture.token }, setSessionToken: vi.fn(),
+  cloudQueryOnce: (name: string) => name === "workspaces:deleted" ? fixture.deleted() : Promise.resolve(undefined) }));
 vi.mock("@/lib/origin-cloud-links", () => ({ refreshCloudLinks: fixture.refreshLinks }));
 vi.mock("@/lib/origin-shared-agents", () => ({ sharedAgentsRound: fixture.sharedRound }));
 vi.mock("@/lib/origin-teams", () => ({ PROJECT_LEAD_ROLE: { title: "Lead", description: "", soul: "" } }));
@@ -26,6 +27,7 @@ vi.mock("./OriginConnect", () => ({ shareSession: fixture.shareSession }));
 vi.mock("./OriginLogo", () => ({ OriginLogo: () => null }));
 
 import { OriginSync } from "./OriginGate";
+import { requestOriginSync } from "@/lib/origin-sync";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -46,6 +48,10 @@ beforeEach(() => {
   fixture.refreshLinks.mockResolvedValue(undefined);
   fixture.sharedRound.mockResolvedValue({});
   fixture.workspaces.mockResolvedValue([]);
+  fixture.deleted.mockResolvedValue([]);
+  fixture.state.bots = [];
+  fixture.state.groups = [];
+  localStorage.clear();
   fixture.api.mockImplementation(async (path: string) => {
     if (path === "/api/origin/cloud-links") return { workspaces: {}, projects: {} };
     if (path === "/api/origin/import/workspaces") return { bot: { id: "old-head", name: "Old" } };
@@ -155,5 +161,72 @@ describe("Origin sync account isolation", () => {
     expect(fixture.dispatch).not.toHaveBeenCalled();
     expect(fixture.api.mock.calls.filter(([, init]) => init?.method === "PUT")).toEqual([]);
     expect(fixture.sharedRound).not.toHaveBeenCalled();
+  });
+});
+
+describe("a workspace someone deleted", () => {
+  const studio = { teamId: "team-studio", name: "Studio", deletedBy: "Ada", byYou: false, deletedAt: 1 };
+  const deletions = () => fixture.api.mock.calls.filter(([, init]) => init?.method === "DELETE").map(([path]) => path);
+  const notices = () => host.querySelectorAll("[data-deleted-workspace-notice]");
+
+  beforeEach(() => {
+    fixture.state.bots = [
+      { id: "studio", name: "Studio", chiefOfStaff: true, section: "Workspace: Studio", managedSections: ["Walkies"] },
+      { id: "walkies", name: "Walkies", chiefOfStaff: true, section: "Walkies" },
+      { id: "nova", name: "Nova", section: "Walkies" },
+      { id: "shop", name: "Shop", chiefOfStaff: true, section: "Workspace: Shop", managedSections: [] },
+    ];
+    fixture.state.groups = [{ id: "standup", name: "Standup", section: "Walkies" }];
+    fixture.workspaces.mockResolvedValue([{ _id: "team-shop", name: "Shop" }]);
+    fixture.api.mockImplementation(async (path: string) => path === "/api/origin/cloud-links" ? { workspaces: { studio: "team-studio", shop: "team-shop" }, projects: {} } : {});
+  });
+
+  it("is removed from this computer like the deleting computer does, the member is told once, and another workspace opens", async () => {
+    fixture.deleted.mockResolvedValue([studio]);
+    render();
+    await vi.waitFor(() => expect(fixture.sharedRound).toHaveBeenCalledOnce());
+    expect(deletions()).toEqual(["/api/groups/standup", "/api/bots/nova", "/api/bots/walkies", "/api/sidebar-sections?section=Walkies", "/api/bots/studio"]);
+    expect(fixture.sharedRound.mock.calls[0][0].bots.map((bot: { id: string }) => bot.id)).toEqual(["shop"]);
+    expect(fixture.switchWorkspace).toHaveBeenCalledWith("shop");
+    await vi.waitFor(() => expect(notices()).toHaveLength(1));
+    expect(notices()[0]!.textContent).toContain("Studio was deleted by Ada.");
+
+    requestOriginSync();
+    await vi.waitFor(() => expect(fixture.sharedRound).toHaveBeenCalledTimes(2));
+    expect(notices()).toHaveLength(1);
+  });
+
+  it("leaves the create-or-join screen and the notice when it was the last workspace", async () => {
+    fixture.workspaces.mockResolvedValue([]);
+    fixture.deleted.mockResolvedValue([studio]);
+    render();
+    await vi.waitFor(() => expect(host.textContent).toContain("not in a workspace yet"));
+    expect(host.textContent).toContain("Studio was deleted by Ada.");
+    expect(deletions().at(-1)).toBe("/api/bots/studio");
+  });
+
+  it.each([
+    ["Origin cannot be reached for the list", () => fixture.deleted.mockRejectedValue(new Error("fetch failed"))],
+    ["the account still lists it", () => { fixture.deleted.mockResolvedValue([studio]); fixture.workspaces.mockResolvedValue([{ _id: "team-studio", name: "Studio" }, { _id: "team-shop", name: "Shop" }]); }],
+    ["the member was only removed from it", () => fixture.deleted.mockResolvedValue([])],
+  ])("is kept when %s", async (_case, arrange) => {
+    arrange();
+    render();
+    await vi.waitFor(() => expect(fixture.sharedRound).toHaveBeenCalledOnce());
+    expect(deletions()).toEqual([]);
+    expect(notices()).toHaveLength(0);
+  });
+
+  it("is kept when another account signs in while the list is read", async () => {
+    const list = deferred<typeof studio[]>();
+    fixture.deleted.mockReturnValueOnce(list.promise).mockResolvedValue([]);
+    render();
+    await vi.waitFor(() => expect(fixture.deleted).toHaveBeenCalledOnce());
+    fixture.token = "second-session";
+    render();
+    list.resolve([studio]);
+    await vi.waitFor(() => expect(fixture.deleted).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(fixture.sharedRound).toHaveBeenCalledOnce());
+    expect(deletions()).toEqual([]);
   });
 });
