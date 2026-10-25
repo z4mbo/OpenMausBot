@@ -5,13 +5,16 @@ import { captureCloudSession, cloudQueryOnce, cloudUrl as cloudUrlNow, sessionSt
 import { refreshCloudLinks } from "@/lib/origin-cloud-links";
 import { exclusiveWithSync, onSyncRequest, syncFromOrigin } from "@/lib/origin-sync";
 import { sharedAgentsRound } from "@/lib/origin-shared-agents";
+import { deletedNoticeText, removeDeletedWorkspaces, takeUnnoticed, type DeletedWorkspace } from "@/lib/origin-deleted-workspaces";
 import { PROJECT_LEAD_ROLE } from "@/lib/origin-teams";
 import { activeWorkspaceId, setAccountWorkspaces, switchWorkspace, workspaceHeadsOf } from "@/lib/origin-workspaces";
 import { api, useStore, type Bot } from "@/state/store";
 import type { CloudLinks } from "@/lib/origin-import";
+import type { CloudWorkspace } from "@/lib/origin-cloud/types";
 import { cn } from "@/lib/cn";
 import { shareSession } from "./OriginConnect";
 import { OriginLogo } from "./OriginLogo";
+import { DeletedWorkspaceNotices, type DeletedWorkspaceNotice } from "./DeletedWorkspaceNotices";
 import { defaultOriginServer, originServerFor } from "@/lib/origin-cloud/servers";
 
 const SYNC_EVERY_MS = 60_000;
@@ -169,7 +172,10 @@ export function OriginSync() {
   bots.current = state.bots;
   const instances = useRef(state.instances);
   instances.current = state.instances;
+  const groups = useRef(state.groups);
+  groups.current = state.groups;
   const [empty, setEmpty] = useState(false);
+  const [deletedNotices, setDeletedNotices] = useState<DeletedWorkspaceNotice[]>([]);
   const [syncProblems, setSyncProblems] = useState<{ name: string; error: string }[]>([]);
   const syncRequest = useRef<() => Promise<void>>(async () => {});
   const hydrated = Boolean(state.hydrated);
@@ -189,6 +195,20 @@ export function OriginSync() {
       assertCurrent();
       return answer;
     };
+    const removeDeletedCopies = async (workspaces: readonly CloudWorkspace[]): Promise<ReadonlySet<string>> => {
+      const deleted = await guarded(() => cloudQueryOnce<DeletedWorkspace[]>("workspaces:deleted").catch(() => null));
+      if (!deleted?.length) return new Set();
+      const links = await guarded(() => api<CloudLinks>("/api/origin/cloud-links"));
+      const cleanup = await removeDeletedWorkspaces({
+        deleted, listed: new Set(workspaces.map((workspace) => workspace._id)), workspaceLinks: links.workspaces,
+        bots: bots.current, groups: groups.current, call: (path, init) => api(path, init),
+      });
+      const fresh = takeUnnoticed(cleanup.found, deleted);
+      if (fresh.length) setDeletedNotices((shown) => [...shown, ...fresh.map((workspace) => ({
+        teamId: workspace.teamId, text: deletedNoticeText(workspace, !cleanup.failures.some((failure) => failure.workspace === workspace)),
+      }))]);
+      return cleanup.removedBotIds;
+    };
     const request = async (): Promise<void> => {
       if (!current() || !hydrated || !url || !session.token) return;
       if (running) {
@@ -200,13 +220,15 @@ export function OriginSync() {
         try {
           await guarded(() => shareSession(url, session.token));
           const workspaces = await guarded(() => cloud.workspaces.list());
+          const removed = await removeDeletedCopies(workspaces);
+          const localBots = () => bots.current.filter((bot) => !removed.has(bot.id));
           setEmpty(workspaces.length === 0);
           if (!workspaces.length) return;
           const listed = await guarded(() => Promise.allSettled(workspaces.map((workspace) => cloud.projects.listForUser(workspace._id))));
           const projects = listed.flatMap((outcome) => outcome.status === "fulfilled" ? outcome.value : []);
           const listingProblems = listed.flatMap((outcome, index) => outcome.status === "rejected" ? [{ name: workspaces[index]!.name, error: errorText(outcome.reason) }] : []);
           const links = await guarded(() => api<CloudLinks>("/api/origin/cloud-links"));
-          const roundBots = new Map(bots.current.map(bot => [bot.id, bot]));
+          const roundBots = new Map(localBots().map(bot => [bot.id, bot]));
           const call = async <T,>(path: string, init?: { method?: string; body?: string }): Promise<T> => {
             const answer = await guarded(() => api<T & { bot?: Bot; chief?: Bot; members?: Bot[] }>(path, init));
             for (const bot of [answer.bot, answer.chief, ...(answer.members ?? [])]) if (bot) {
@@ -215,7 +237,7 @@ export function OriginSync() {
             }
             return answer;
           };
-          const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: bots.current, links, call, lead: PROJECT_LEAD_ROLE });
+          const synced = await syncFromOrigin({ cloud: { workspaces, projects }, bots: localBots(), links, call, lead: PROJECT_LEAD_ROLE });
           assertCurrent();
           await sharedAgentsRound({
             call, bots: [...roundBots.values()], instances: instances.current, projects, teams: workspaces.map((workspace) => workspace._id),
@@ -232,7 +254,7 @@ export function OriginSync() {
           setSyncProblems([...listingProblems, ...synced.result.failures]);
           const known = new Set([...linkedHeads, ...created]);
           if (!known.has(activeWorkspaceId() ?? "")) {
-            const first = workspaceHeadsOf(bots.current).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];
+            const first = workspaceHeadsOf(localBots()).find((head) => known.has(head.id))?.id ?? created[0] ?? linkedHeads[0];
             if (first) switchWorkspace(first);
           }
         } catch {
@@ -249,6 +271,7 @@ export function OriginSync() {
     syncRequest.current = request;
     setEmpty(false);
     setSyncProblems([]);
+    setDeletedNotices([]);
     setAccountWorkspaces([]);
     void request();
     const timer = window.setInterval(() => void request(), SYNC_EVERY_MS);
@@ -258,15 +281,16 @@ export function OriginSync() {
     return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", onFocus); stopRequests(); };
   }, [dispatch, hydrated, url, session.token]);
 
-  if (empty) return <NoWorkspace onReady={() => void sync()} />;
-  if (!syncProblems.length) return null;
-  return (
-    <div role="status" className="fixed right-4 bottom-4 z-[60] max-w-[340px] rounded-xl border border-hairline/50 bg-panel px-4 py-3 text-[12.5px] text-ink-secondary">
+  const notices = <DeletedWorkspaceNotices notices={deletedNotices} onDismiss={(teamId) => setDeletedNotices((shown) => shown.filter((notice) => notice.teamId !== teamId))} />;
+  if (empty) return <><NoWorkspace onReady={() => void sync()} />{notices}</>;
+  return <>
+    {notices}
+    {syncProblems.length > 0 && <div role="status" className="fixed right-4 bottom-4 z-[60] max-w-[340px] rounded-xl border border-hairline/50 bg-panel px-4 py-3 text-[12.5px] text-ink-secondary">
       <p className="font-medium text-ink">{syncProblems.length === 1 ? "One project couldn't be loaded" : `${syncProblems.length} projects couldn't be loaded`}</p>
       <ul className="mt-1 space-y-0.5">{syncProblems.slice(0, 4).map((problem) => <li key={problem.name} className="truncate">{problem.name}: {problem.error}</li>)}</ul>
       <p className="mt-1 text-ink-tertiary">Retrying in a minute.</p>
-    </div>
-  );
+    </div>}
+  </>;
 }
 
 /** Origin comes first: the app opens on sign-in, then shows the account's workspaces. */

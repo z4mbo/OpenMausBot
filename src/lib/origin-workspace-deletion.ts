@@ -1,10 +1,11 @@
 import { STANDALONE_SECTION, isWorkspaceSection } from "../../shared/origin-workspaces";
 
-interface LocalBot { id: string; name: string; section?: string; chiefOfStaff?: boolean; managedSections?: string[]; shared?: { teamId: string } }
-interface LocalGroup { id: string; name: string; section?: string }
+export interface LocalBot { id: string; name: string; section?: string; chiefOfStaff?: boolean; managedSections?: string[]; shared?: { teamId: string } }
+export interface LocalGroup { id: string; name: string; section?: string }
 
 export interface LocalWorkspaceContents {
-  headId: string;
+  /** Null when only agents shared through a deleted workspace are left here, without its head. */
+  headId: string | null;
   /** Agents first, then project Chiefs, so a failure never leaves a team without its lead while its agents remain. */
   bots: LocalBot[];
   groups: LocalGroup[];
@@ -35,7 +36,7 @@ export function localWorkspaceContents(headId: string, bots: readonly LocalBot[]
   };
 }
 
-type Call = (path: string, init: { method: string }) => Promise<unknown>;
+export type DeletionCall = (path: string, init: { method: string }) => Promise<unknown>;
 
 const alreadyGone = (cause: unknown) => (cause as { status?: number } | null)?.status === 404;
 
@@ -44,7 +45,7 @@ const alreadyGone = (cause: unknown) => (cause as { status?: number } | null)?.s
  * runs `beforeHead`, then deletes the head. Safe to retry: whatever is already gone is skipped, and the head stays until
  * everything else went.
  */
-export async function deleteLocalWorkspace(contents: LocalWorkspaceContents, call: Call, beforeHead?: () => Promise<void>): Promise<void> {
+export async function deleteLocalWorkspace(contents: LocalWorkspaceContents, call: DeletionCall, beforeHead?: () => Promise<void>): Promise<void> {
   const failures: string[] = [];
   const remove = async (name: string, path: string) => {
     try { await call(path, { method: "DELETE" }); }
@@ -55,6 +56,6 @@ export async function deleteLocalWorkspace(contents: LocalWorkspaceContents, cal
   if (!failures.length) for (const team of contents.teams) await remove(team, `/api/sidebar-sections?section=${encodeURIComponent(team)}`);
   if (failures.length) throw new Error(`Some of this workspace could not be deleted on this computer. ${failures.join("; ")}`);
   await beforeHead?.();
-  await remove("The workspace", `/api/bots/${encodeURIComponent(contents.headId)}`);
+  if (contents.headId) await remove("The workspace", `/api/bots/${encodeURIComponent(contents.headId)}`);
   if (failures.length) throw new Error(failures[0]);
 }

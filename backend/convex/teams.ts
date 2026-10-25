@@ -99,12 +99,12 @@ export const create = mutation({
 export const remove = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    const { member } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    const { member, user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     if (member.role !== "owner") throw new Error("Owner role required");
     const projects = await ctx.db.query("projects").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).collect();
     if (projects.length) throw new Error("Delete projects before deleting team");
     const team = await ctx.db.get(args.teamId);
-    if (team) await startWorkspaceDeletion(ctx, team);
+    if (team) await startWorkspaceDeletion(ctx, team, { userId: user._id, name: user.name });
   },
 });
 

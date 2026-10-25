@@ -130,7 +130,8 @@ describe("deleting a workspace", () => {
     }
 
     await runScheduled(f.t);
-    expect(await rowsNaming(f.t, doomedIds)).toEqual([]);
+    const left = await rowsNaming(f.t, doomedIds);
+    expect(left.map(row => row.split(":")[0])).toEqual(["deletedWorkspaces", "deletedWorkspaces", "deletedWorkspaces"]);
     expect(await rowsNaming(f.t, [f.kept.teamId, ...f.kept.projectIds])).toEqual(keptBefore);
     expect(await f.t.run(async ctx => (await ctx.db.system.query("_storage").collect()).length)).toBe(files - 2);
     expect((await f.t.query(api.tasks.board, { sessionToken: f.member.token, projectId: f.kept.projectIds[0]! }).catch(() => null))).toBeNull();
@@ -169,6 +170,47 @@ describe("deleting a workspace", () => {
     await f.t.mutation(internal.workspaceDeletion.purge, { teamId });
     await f.t.mutation(internal.workspaceDeletion.resume, {});
     expect(await rowsNaming(f.t, [f.kept.teamId]).then(rows => rows.length)).toBeGreaterThan(CHAT_MESSAGES);
+  });
+
+  test("each member who was in it, and nobody else, learns it was deleted and by whom", async () => {
+    vi.useFakeTimers();
+    const f = await fixture();
+    const deleted = (person: { token: string }) => f.t.query(api.workspaces.deleted, { sessionToken: person.token });
+    const pending = await f.t.run(async ctx => {
+      const id = await ctx.db.insert("users", { name: "pending", email: "pending@delete.test", role: "user", status: "active", passwordHash: "unused", salt: "unused", iterations: 1, createdAt: 1, updatedAt: 1 });
+      await ctx.db.insert("teamMembers", { teamId: f.doomed.teamId, email: "pending@delete.test", name: "pending", role: "member", status: "invited", createdAt: 1, updatedAt: 1 });
+      return { token: await createSession(ctx, id) };
+    });
+    const memberOfKept = await f.t.run(ctx => ctx.db.query("teamMembers").withIndex("by_team", q => q.eq("teamId", f.kept.teamId)).collect())
+      .then(rows => rows.find(row => row.email === f.member.email)!._id);
+    await f.t.mutation(api.teams.removeMember, { sessionToken: f.owner.token, teamId: f.kept.teamId, memberId: memberOfKept });
+    expect(await deleted(f.member)).toEqual([]);
+
+    await f.t.mutation(api.workspaces.remove, { sessionToken: f.admin.token, teamId: f.doomed.teamId, confirmName: "Doomed" });
+    for (const person of [f.owner, f.admin, f.member]) {
+      expect(await deleted(person)).toEqual([{ teamId: f.doomed.teamId, name: "Doomed", deletedBy: "admin", byYou: person === f.admin, deletedAt: Date.now() }]);
+    }
+    expect(await deleted(f.outsider)).toEqual([]);
+    expect(await deleted(pending)).toEqual([]);
+    await expect(f.t.query(api.workspaces.deleted, { sessionToken: "not-a-session" })).rejects.toThrow("Login required");
+
+    await runScheduled(f.t);
+    expect((await deleted(f.member)).map(row => row.name)).toEqual(["Doomed"]);
+    vi.setSystemTime(Date.now() + 181 * 24 * 60 * 60_000);
+    await f.t.mutation(internal.workspaceDeletion.expireNotices, {});
+    expect(await f.t.run(ctx => ctx.db.query("deletedWorkspaces").collect())).toEqual([]);
+  });
+
+  test("members the first step could not reach are told when the purge removes their membership", async () => {
+    vi.useFakeTimers();
+    const f = await fixture();
+    const teamId = f.doomed.teamId;
+    await f.t.run(ctx => ctx.db.patch(teamId, { deletingAt: Date.now(), deletedBy: { userId: f.owner.id, name: "owner" } }));
+    await f.t.mutation(internal.workspaceDeletion.purge, { teamId });
+    await runScheduled(f.t);
+    for (const person of [f.owner, f.admin, f.member]) {
+      expect((await f.t.query(api.workspaces.deleted, { sessionToken: person.token })).map(row => [row.name, row.byYou])).toEqual([["Doomed", person === f.owner]]);
+    }
   });
 
   test("an invitation to a workspace being deleted no longer works", async () => {

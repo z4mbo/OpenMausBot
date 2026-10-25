@@ -1,14 +1,18 @@
 {
   "checks": [
+    "Bea, removed from Shop but not deleted from anything, keeps every local copy on her computer: Origin reports no deleted workspace for her",
     "Both imported workspaces stay switchable (Shop's head pinned); after switching to Shop its project is listed and Studio's is not",
     "After switching, Shop's project agent Crumb answers the question: \"Bakery's pre-orders are next.\"",
     "Deleting Studio removed it from the account's workspace list at once",
-    "No Origin row names Studio or Walkies after the scheduled purge; Shop keeps 11 rows",
+    "No Origin row names Studio or Walkies after the scheduled purge except the deletion notices for its two members, Ada and Bea; Shop keeps 12 rows",
     "On this computer Studio's head, the Walkies Chief and Nova, their links and teams are gone; Shop, Bakery, Crumb and the standalone Scout remain",
-    "The temporary harness data directory and the in-memory backend are closed and removed"
+    "After Ada deleted Studio, Bea's computer removed Studio's head, the Walkies Chief, Pip and the Huddle chat with their links and teams; the Shop copy she was only removed from stays",
+    "A second round on Bea's computer finds nothing left to remove, and she is told once: \"Studio was deleted by Ada. Its agents, chats and teams on this computer were removed too.\"",
+    "Both temporary harness data directories and the in-memory backend are closed and removed"
   ],
   "harness": {
     "logPath": "(temporary)"
   },
-  "leftovers": []
+  "leftovers": [],
+  "memberNotice": "Studio was deleted by Ada. Its agents, chats and teams on this computer were removed too."
 }

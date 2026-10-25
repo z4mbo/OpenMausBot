@@ -140,12 +140,28 @@ export const remove = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), confirmName: v.string() },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const team = await ctx.db.get(args.teamId);
     if (!team) throw new Error("Workspace not found");
     if (args.confirmName.trim() !== team.name.trim()) throw new Error("Type the workspace name exactly to delete it");
-    await startWorkspaceDeletion(ctx, team);
+    await startWorkspaceDeletion(ctx, team, { userId: user._id, name: user.name });
     return null;
+  },
+});
+
+const DELETED_LISTED = 100;
+
+/**
+ * Workspaces the signed-in person was an active member of when an owner or admin deleted them, newest first, for
+ * 180 days. Being removed from a workspace never appears here.
+ */
+export const deleted = query({
+  args: { sessionToken: v.string() },
+  returns: v.array(v.object({ teamId: v.id("teams"), name: v.string(), deletedBy: v.string(), byYou: v.boolean(), deletedAt: v.number() })),
+  handler: async (ctx, { sessionToken }) => {
+    const user = await requireUser(ctx, sessionToken);
+    const notices = await ctx.db.query("deletedWorkspaces").withIndex("by_email_and_deletedAt", q => q.eq("email", user.email)).order("desc").take(DELETED_LISTED);
+    return notices.map(notice => ({ teamId: notice.teamId, name: notice.name, deletedBy: notice.deletedBy.name, byYou: notice.deletedBy.userId === user._id, deletedAt: notice.deletedAt }));
   },
 });
 

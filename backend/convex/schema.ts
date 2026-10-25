@@ -108,9 +108,20 @@ export default defineSchema({
     ownerUserId: v.id("users"),
     /** Set when an owner or admin deletes the workspace; its rows are being removed and nobody can open it. */
     deletingAt: v.optional(v.number()),
+    /** Who deleted the workspace, named in the notice each member gets. */
+    deletedBy: v.optional(v.object({ userId: v.id("users"), name: v.string() })),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_ownerUserId", ["ownerUserId"]).index("by_slug", ["slug"]).index("by_deletingAt", ["deletingAt"]),
+
+  /** One per member of a deleted workspace, so each of their computers removes its local copy; outlives the workspace on purpose. */
+  deletedWorkspaces: defineTable({
+    email: v.string(),
+    teamId: v.id("teams"),
+    name: v.string(),
+    deletedBy: v.object({ userId: v.id("users"), name: v.string() }),
+    deletedAt: v.number(),
+  }).index("by_email_and_deletedAt", ["email", "deletedAt"]).index("by_deletedAt", ["deletedAt"]),
 
   workspaceInvites: defineTable({
     teamId: v.id("teams"),
