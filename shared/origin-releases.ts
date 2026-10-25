@@ -3,6 +3,13 @@ export type ReleaseChange = { title: string; body: string };
 export type Release = { version: string; date: string; title: string; changes: ReleaseChange[] };
 
 export const releases: Release[] = [{
+  version: "0.9.1",
+  date: "2026-10-25",
+  title: "Quit works again on macOS",
+  changes: [
+    { title: "Quitting Origin on a Mac no longer fails", body: "Closing the app on macOS showed a JavaScript error and left Origin running. It now quits cleanly." },
+  ],
+}, {
   version: "0.9.0",
   date: "2026-10-25",
   title: "Shared agent chats, voice, and a focused Origin",
