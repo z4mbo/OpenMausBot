@@ -11,5 +11,6 @@ crons.interval("expire GitHub deliveries", { hours: 24 }, internal.taskPRs.clean
 crons.interval("backfill PR repository index", { minutes: 2 }, internal.taskPRs.backfillRepositories, {});
 crons.interval("interrupt agent runs whose runner went quiet", { minutes: 1 }, internal.agentRuns.expireStale, {});
 crons.interval("resume interrupted workspace deletions", { minutes: 15 }, internal.workspaceDeletion.resume, {});
+crons.daily("expire deleted-workspace notices", { hourUTC: 3, minuteUTC: 30 }, internal.workspaceDeletion.expireNotices, {});
 crons.daily("project Chiefs' standup digests", { hourUTC: 7, minuteUTC: 0 }, internal.standup.runAll, { cursor: null });
 export default crons;

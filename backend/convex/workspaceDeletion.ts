@@ -8,14 +8,27 @@ import type { StorageScope } from "./lib/storage";
 const WRITES_PER_STEP = 250;
 const MEMBERS_REVOKED_AT_ONCE = 500;
 const STALLED_AFTER_MS = 15 * 60_000;
+const NOTICES_KEPT_MS = 180 * 24 * 60 * 60_000;
+const NOTICES_EXPIRED_AT_ONCE = 500;
 
 type Row = { _id: Id<TableNames> };
+type Deleter = NonNullable<Doc<"teams">["deletedBy"]>;
+
+/** Tells an active member's computers, through `workspaces:deleted`, that this workspace is gone, before their membership goes. */
+async function noteDeletion(ctx: MutationCtx, team: Doc<"teams">, member: Doc<"teamMembers">) {
+  if (member.status !== "active" || !team.deletedBy || team.deletingAt === undefined) return;
+  await ctx.db.insert("deletedWorkspaces", { email: member.email, teamId: team._id, name: team.name, deletedBy: team.deletedBy, deletedAt: team.deletingAt });
+}
 
 /** Hides the workspace from every member at once, then removes everything in it in bounded, resumable steps. */
-export async function startWorkspaceDeletion(ctx: MutationCtx, team: Doc<"teams">) {
-  if (team.deletingAt === undefined) await ctx.db.patch(team._id, { deletingAt: Date.now() });
+export async function startWorkspaceDeletion(ctx: MutationCtx, team: Doc<"teams">, deletedBy: Deleter) {
+  const deleting = team.deletingAt === undefined ? { ...team, deletingAt: Date.now(), deletedBy } : team;
+  if (team.deletingAt === undefined) await ctx.db.patch(team._id, { deletingAt: deleting.deletingAt, deletedBy });
   const members = await ctx.db.query("teamMembers").withIndex("by_team", q => q.eq("teamId", team._id)).take(MEMBERS_REVOKED_AT_ONCE);
-  for (const member of members) await ctx.db.delete(member._id);
+  for (const member of members) {
+    await noteDeletion(ctx, deleting, member);
+    await ctx.db.delete(member._id);
+  }
   await ctx.scheduler.runAfter(0, internal.workspaceDeletion.purge, { teamId: team._id });
 }
 
@@ -175,7 +188,7 @@ async function purgeWorkspace(ctx: MutationCtx, team: Doc<"teams">) {
   const { drain, releaseFile } = purge;
   const teamId = team._id;
   const done = await all([
-    () => drain(n => ctx.db.query("teamMembers").withIndex("by_team", q => q.eq("teamId", teamId)).take(n)),
+    () => drain(n => ctx.db.query("teamMembers").withIndex("by_team", q => q.eq("teamId", teamId)).take(n), undefined, member => noteDeletion(ctx, team, member)),
     () => drain(n => ctx.db.query("workspaceInvites").withIndex("by_teamId", q => q.eq("teamId", teamId)).take(n)),
     () => drain(n => ctx.db.query("connectorGrants").withIndex("by_teamId", q => q.eq("teamId", teamId)).take(n),
       grant => drain(n => ctx.db.query("connectorOperations").withIndex("by_grantId_and_requestId", q => q.eq("grantId", grant._id)).take(n))),
@@ -255,6 +268,17 @@ export const resume = internalMutation({
   handler: async ctx => {
     const stalled = await ctx.db.query("teams").withIndex("by_deletingAt", q => q.gt("deletingAt", 0).lt("deletingAt", Date.now() - STALLED_AFTER_MS)).take(20);
     for (const team of stalled) await ctx.scheduler.runAfter(0, internal.workspaceDeletion.purge, { teamId: team._id });
+    return null;
+  },
+});
+
+export const expireNotices = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async ctx => {
+    const expired = await ctx.db.query("deletedWorkspaces").withIndex("by_deletedAt", q => q.lt("deletedAt", Date.now() - NOTICES_KEPT_MS)).take(NOTICES_EXPIRED_AT_ONCE);
+    for (const notice of expired) await ctx.db.delete(notice._id);
+    if (expired.length === NOTICES_EXPIRED_AT_ONCE) await ctx.scheduler.runAfter(0, internal.workspaceDeletion.expireNotices, {});
     return null;
   },
 });
