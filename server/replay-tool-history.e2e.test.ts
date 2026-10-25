@@ -7,7 +7,7 @@ import { request } from "../scripts/mcp-server.ts";
 import type { WireMessage } from "../shared/wire.ts";
 import { withoutTurnClock } from "./testing/turn-clock-text.ts";
 
-it("names earlier tool calls in a rebuilt session only when switched on", async () => {
+it("names earlier tool calls in a rebuilt session unless switched off", async () => {
   const fixture = await launchVerificationServer({
     // The launcher keeps only OS launch variables and FAKE_CLAUDE_* knobs.
     ...process.env,
@@ -60,7 +60,9 @@ it("names earlier tool calls in a rebuilt session only when switched on", async 
     // A turn that resumes its session is sent the message, and no replay.
     expect(await send("SECOND_REQUEST anything else?")).toBe("SECOND_REQUEST anything else?");
 
-    // Off (the default): the rewind replays what was said, as it always has.
+    await request("/api/config", { method: "PATCH", body: JSON.stringify({ context: { replayToolHistory: false } }) }, fixture.info.url);
+
+    // Off: the rewind replays only what was said.
     const off = await rewind("SECOND_REQUEST, edited");
     expect(off).toContain("rewound this conversation");
     expect(off).toContain("User: FIRST_REQUEST run the tests");

@@ -33,9 +33,9 @@ describe("replayToolHistoryEnabled", () => {
   const ON = { replayToolHistory: true };
   const NO_ENV: NodeJS.ProcessEnv = {};
 
-  it("is off unless the setting is switched on", () => {
-    expect(replayToolHistoryEnabled(undefined, NO_ENV)).toBe(false);
-    expect(replayToolHistoryEnabled({}, NO_ENV)).toBe(false);
+  it("is on unless the setting is switched off", () => {
+    expect(replayToolHistoryEnabled(undefined, NO_ENV)).toBe(true);
+    expect(replayToolHistoryEnabled({}, NO_ENV)).toBe(true);
     expect(replayToolHistoryEnabled({ replayToolHistory: false }, NO_ENV)).toBe(false);
     expect(replayToolHistoryEnabled(ON, NO_ENV)).toBe(true);
   });
@@ -47,7 +47,7 @@ describe("replayToolHistoryEnabled", () => {
     // anything else is not an answer: the file decides
     for (const value of ["", "true", "yes", "2"]) {
       expect(replayToolHistoryEnabled(ON, { OMB_REPLAY_TOOL_HISTORY: value })).toBe(true);
-      expect(replayToolHistoryEnabled(undefined, { OMB_REPLAY_TOOL_HISTORY: value })).toBe(false);
+      expect(replayToolHistoryEnabled({ replayToolHistory: false }, { OMB_REPLAY_TOOL_HISTORY: value })).toBe(false);
     }
   });
 });

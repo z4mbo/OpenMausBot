@@ -59,6 +59,22 @@ describe("Origin project authority", () => {
     expect(canReachPeer(bots[0]!, { ...bots[1]!, visibility: "admins" })).toBe(false);
   });
 
+  it("lets project agents reach the workspace head and the unowned teams their Chief set up", () => {
+    const fleet = [...bots, { id: "crew", name: "Alpha Crew", section: "Alpha Crew" }];
+    const alpha = { ...bots[1]!, managedSections: ["Beta", "Other", "Alpha Crew"] };
+    const head = { ...bots[0]!, managedSections: ["Alpha", "Beta"] };
+    const roster = [head, alpha, ...fleet.slice(2)];
+    cleanups.push(setPeerProjectTeams((id) => projectPeerTeams(roster, projects, id)));
+    expect(projectPeerTeams(roster, projects, "worker")?.teams.sort()).toEqual(["Alpha", "Alpha Crew", "Workspace: One"]);
+    expect(canReachPeer(roster[2]!, head)).toBe(true);
+    expect(canReachPeer(alpha, head)).toBe(true);
+    expect(canReachPeer(alpha, fleet[6]!)).toBe(true);
+    expect(coordinatorSupervises(alpha, fleet[6]!)).toBe(true);
+    expect(coordinatorSupervises(alpha, roster[3]!)).toBe(false);
+    expect(canReachPeer(roster[3]!, head)).toBe(true);
+    expect(canReachPeer(roster[4]!, head)).toBe(false);
+  });
+
   it("does not let explicit links in a shared section cross project boundaries", () => {
     const fleet = [...bots, { id: "split", name: "Split", section: "Alpha" }];
     cleanups.push(setPeerProjectTeams((id) => projectPeerTeams(fleet, { ...projects, split: "p2" }, id)));

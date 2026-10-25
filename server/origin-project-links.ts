@@ -41,8 +41,22 @@ export function reachableCloudProjects(bots: readonly ProjectBot[], links: Recor
   return [...found.values()];
 }
 
+/** The teams a project's agents reach: the project's own, those its Chiefs manage that no other project owns, and the workspace head's that leads it. */
 export function projectPeerTeams(bots: readonly ProjectBot[], links: Record<string, string>, botId: string): { projectId: string; teams: string[] } | null {
   const projectId = cloudProjectFor(bots, links, botId);
   if (!projectId) return null;
-  return { projectId, teams: [...new Set(bots.filter((bot) => !bot.hidden && cloudProjectFor(bots, links, bot.id) === projectId).map((bot) => sectionKey(bot.section)))] };
+  const members = bots.filter((bot) => !bot.hidden && cloudProjectFor(bots, links, bot.id) === projectId);
+  const teams = new Set(members.map((bot) => sectionKey(bot.section)));
+  const ownedElsewhere = (section: string) => bots.some((bot) => sectionKey(bot.section) === section && cloudProjectFor(bots, links, bot.id) !== null && cloudProjectFor(bots, links, bot.id) !== projectId);
+  for (const chief of members) {
+    if (!chief.chiefOfStaff) continue;
+    for (const managed of chief.managedSections ?? []) {
+      const section = sectionKey(managed);
+      if (section && !isWorkspaceSection(section) && !ownedElsewhere(section)) teams.add(section);
+    }
+  }
+  const heads = bots.filter((bot) => !bot.hidden && bot.chiefOfStaff && isWorkspaceSection(bot.section)
+    && bot.managedSections?.some((managed) => teams.has(sectionKey(managed))));
+  for (const head of heads) teams.add(sectionKey(head.section));
+  return { projectId, teams: [...teams] };
 }

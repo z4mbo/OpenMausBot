@@ -381,7 +381,6 @@ describe("tool history in a rebuilt session", () => {
     ];
 
     it("returns nothing while the setting is off", () => {
-      expect(replayToolCalls(thread, undefined, NO_ENV)).toEqual([]);
       expect(replayToolCalls(thread, { replayToolHistory: false }, NO_ENV)).toEqual([]);
       expect(replayToolCalls(thread, ON, { OMB_REPLAY_TOOL_HISTORY: "0" })).toEqual([]);
     });
@@ -509,14 +508,14 @@ describe("tool history in a rebuilt session", () => {
     });
 
     it("keeps every message of the window however many tool calls sit between them", () => {
-      // ten calls between every pair of 45 messages: 440 lines, far past the cap
-      const history = entries(Array.from({ length: 45 }, (_, i) => `message ${i}`));
+      // ten calls between every pair of 85 messages: 840 lines, far past the cap
+      const history = entries(Array.from({ length: 85 }, (_, i) => `message ${i}`));
       const tools = history.slice(0, -1).flatMap(entry => Array.from({ length: 10 }, (_, i) => line(entry.id, `${entry.id}.${i}`)));
       const result = selectReplay(history, { tools });
       const plain = selectReplay(history);
-      // the same 40 messages (and the same omission notice) as without them
+      // the same 80 messages (and the same omission notice) as without them
       expect(result.transcript).toEqual(plain.transcript);
-      expect(result.transcript.filter(entry => entry.id)).toHaveLength(40);
+      expect(result.transcript.filter(entry => entry.id)).toHaveLength(80);
       expect(result.inline.filter(entry => !toolLine(entry))).toEqual(plain.transcript);
       expect(result.inline.filter(toolLine).map(entry => entry.text))
         .toEqual(tools.slice(-REPLAY_TOOL_LINE_CAP).map(tool => tool.text));

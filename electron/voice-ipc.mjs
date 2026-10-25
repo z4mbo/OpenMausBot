@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain } from "electron";
 import localOriginModule from "./local-origin.cjs";
 import { createLocalVoice, LocalVoiceError } from "./local-voice.mjs";
 import { finishSpeech, startSpeech, stopSpeech } from "./speech.mjs";
+export { stopSpeech };
 
 const { isLocalSender: senderIsLocal, localOnly } = localOriginModule;
 

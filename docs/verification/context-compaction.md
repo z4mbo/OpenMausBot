@@ -214,12 +214,13 @@ temporary home. No live account, computer or user workspace is touched.
 ## Tool history in a rebuilt session
 
 A session rebuilt from the inline replay (an engine switched in mid-thread, a
-rewind, a session the provider lost, a compaction) is sent what was said. With
-`context.replayToolHistory: true` in config.json, or `OMB_REPLAY_TOOL_HISTORY=1`
-in the server's environment (`0` forces it off), that replay also names each
+rewind, a session the provider lost, a compaction) is sent what was said, and
+that replay also names each
 earlier tool call on one line, between the two messages it ran between, as
 `[ran: Bash: pnpm test — failed]` or `[ran: Read: server/config.ts — ok]`. It is
-off by default, and off the replay is byte-for-byte what it was.
+on by default; `context.replayToolHistory: false` in config.json, or
+`OMB_REPLAY_TOOL_HISTORY=0` in the server's environment, turns it off, and off the
+replay is only what was said.
 
 ```sh
 pnpm exec vitest run server/replay-tool-history.e2e.test.ts
