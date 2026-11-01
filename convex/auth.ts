@@ -57,7 +57,7 @@ export const updateProfile = mutation({
     }> = { updatedAt: Date.now() };
     if (args.username !== undefined) {
       const username = args.username.trim().replace(/^@+/, "");
-      if (username.length > 40) throw new ConvexError("Nickname must be 40 characters or fewer");
+      if (username.length > 40) throw new ConvexError("Username must be 40 characters or fewer");
       patch.username = username || undefined;
     }
     if (args.name !== undefined) {

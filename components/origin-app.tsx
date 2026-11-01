@@ -614,6 +614,7 @@ function ProfileSettings({ user, sessionToken }: { user: AuthUser; sessionToken:
     try {
       let avatarStorageId: Id<"_storage"> | undefined;
       if (avatarFile) {
+        if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(avatarFile.type) || avatarFile.size > 5 * 1024 * 1024) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
         const uploadUrl = await generateAvatarUploadUrl({ sessionToken });
         const res = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": avatarFile.type || "application/octet-stream" }, body: avatarFile });
         if (!res.ok) throw new Error("Avatar upload failed");

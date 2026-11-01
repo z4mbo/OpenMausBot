@@ -16,6 +16,8 @@ describe("errorText", () => {
   it("keeps plain messages and maps network failures", () => {
     expect(errorText(new Error("Upload too large"))).toBe("Upload too large");
     expect(errorText(new TypeError("Failed to fetch"))).toBe("Can't reach the server. Check your connection.");
+    expect(errorText(new TypeError("Load failed"))).toBe("Can't reach the server. Check your connection.");
+    expect(errorText(new Error("Avatar upload failed"))).toBe("Avatar upload failed");
     expect(errorText(undefined, "Nope")).toBe("Nope");
   });
 });

@@ -23,7 +23,7 @@ export function WorkspaceSettings({ sessionToken, profile, security, sound, onTo
     {tab === "profile" && <><h3>My profile</h3>{profile}</>}
     {tab === "security" && <><h3>Security</h3>{security}<div className="settings-section"><h4>Active sessions</h4><button className="ghost-button" onClick={async () => { try { await revoke({ sessionToken }); setNotice("Signed out on all other devices"); } catch { setNotice("Could not sign out other devices"); } }}>Sign out other devices</button>{notice && <p className="notice">{notice}</p>}</div></>}
     {tab === "notifications" && <><h3>Notifications</h3><label className="notification-setting"><span>Notification sound</span><input type="checkbox" role="switch" checked={sound} onChange={onToggleSound} /></label><NotificationPreferences sessionToken={sessionToken} /></>}
-    {tab === "workspace" && <><WorkspaceGeneral sessionToken={sessionToken} /><LeaveWorkspace sessionToken={sessionToken} /></>}
+    {tab === "workspace" && <><WorkspaceGeneral sessionToken={sessionToken} /><LeaveWorkspace sessionToken={sessionToken} /><DeleteWorkspace sessionToken={sessionToken} /></>}
     {tab === "members" && <WorkspaceMembers sessionToken={sessionToken} beforeOpenProfile={onClose} />}
     {tab === "integrations" && <IntegrationSettings sessionToken={sessionToken} />}
   </div></div></Dialog>;
@@ -50,6 +50,34 @@ function LeaveWorkspace({ sessionToken }: { sessionToken: string }) {
   return <div className="settings-section leave-workspace"><h4>Membership</h4>
     {confirming ? <><p>Leave {workspace.name}? You will need a new invitation to return.</p><div className="settings-confirm-actions"><button className="ghost-button" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button><button className="ghost-button danger-text" disabled={busy} onClick={async () => { setBusy(true); try { await leave({ sessionToken, teamId: workspace._id }); window.location.assign("/"); } catch (e) { setError(errorText(e, "Could not leave workspace")); setBusy(false); } }}><LogOut size={14} />Leave workspace</button></div></> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><LogOut size={14} />Leave workspace</button>}
     {error && <p className="notice danger" role="alert">{error}</p>}
+  </div>;
+}
+
+const plural = (count: number, one: string) => `${count} ${count === 1 ? one : `${one}s`}`;
+
+function DeleteWorkspace({ sessionToken }: { sessionToken: string }) {
+  const workspace = useWorkspace();
+  const admin = ["owner", "admin"].includes(workspace.role);
+  const [confirming, setConfirming] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const summary = useQuery(api.workspaces.deletionSummary, admin && confirming ? { sessionToken, teamId: workspace._id } : "skip");
+  const remove = useMutation(api.workspaces.remove);
+  if (!admin) return null;
+  const matches = typed.trim() === workspace.name.trim();
+  return <div className="settings-section delete-workspace"><h4>Delete workspace</h4>
+    {confirming ? <form className="stack-form" onSubmit={async event => {
+      event.preventDefault(); if (!matches || busy) return;
+      setBusy(true); setError("");
+      try { await remove({ sessionToken, teamId: workspace._id, confirmName: typed }); window.location.assign("/"); }
+      catch (e) { setError(errorText(e, "Could not delete workspace")); setBusy(false); }
+    }}>
+      <p className="muted">Deletes {summary ? `${plural(summary.projectCount, "project")}, ${plural(summary.openIssueCount, "open issue")}, chat and files` : "all projects, issues, chat and files"} for {summary ? plural(summary.memberCount, "member") : "everyone"}. GitHub repositories are kept. This cannot be undone.</p>
+      <label>Type {workspace.name} to confirm<input value={typed} onChange={event => setTyped(event.target.value)} autoComplete="off" spellCheck={false} disabled={busy} autoFocus /></label>
+      {error && <p className="notice danger" role="alert">{error}</p>}
+      <div className="settings-confirm-actions"><button type="button" className="ghost-button" disabled={busy} onClick={() => { setConfirming(false); setTyped(""); setError(""); }}>Cancel</button><button className="ghost-button danger-text" disabled={!matches || busy}>{busy ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}Delete workspace</button></div>
+    </form> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><Trash2 size={14} />Delete workspace</button>}
   </div>;
 }
 

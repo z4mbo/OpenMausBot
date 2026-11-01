@@ -1,7 +1,7 @@
 // Turns any thrown value into a short message that is safe to show to people.
 // Convex errors arrive as "[CONVEX M(fn)] [Request ID: …] Server Error\nUncaught Error: <message>\n    at …";
 // production deployments redact the message entirely. Both collapse to the useful sentence or the fallback.
-const NETWORK = /failed to fetch|networkerror|load failed|network request failed|connection lost|fetch failed/i;
+const NETWORK = /^(?:failed to fetch|networkerror when attempting to fetch resource\.?|load failed|network request failed|the network connection was lost\.?|fetch failed)$/i;
 
 export function errorText(error: unknown, fallback = "Something went wrong. Try again."): string {
   const data = error && typeof error === "object" && "data" in error ? (error as { data: unknown }).data : undefined;
@@ -9,7 +9,7 @@ export function errorText(error: unknown, fallback = "Something went wrong. Try 
   if (data && typeof data === "object" && typeof (data as { message?: unknown }).message === "string") return clean((data as { message: string }).message) || fallback;
   const raw = error instanceof Error ? error.message : typeof error === "string" ? error : "";
   if (!raw) return fallback;
-  if (NETWORK.test(raw)) return "Can't reach the server. Check your connection.";
+  if (NETWORK.test(raw.trim())) return "Can't reach the server. Check your connection.";
   return clean(raw) || fallback;
 }
 

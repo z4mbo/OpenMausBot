@@ -93,7 +93,8 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
   useEffect(() => {
     if (!canvas || !presence) return;
     const collaborators: AppState["collaborators"] = new Map();
-    for (const member of online ? presence : []) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, pointer: { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
+    for (const member of online ? presence : []) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, // (0, 0) is the placeholder sent before someone moves their pointer; show them without a cursor until then.
+      pointer: member.x === 0 && member.y === 0 ? undefined : { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
     canvas.updateScene({ collaborators });
   }, [canvas, presence, clock, user._id, online]);
   useEffect(() => {
