@@ -4,6 +4,7 @@ import "./project-issues.css";
 
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { useMutation, useQuery } from "convex/react";
+import type { OptimisticLocalStore } from "convex/browser";
 import clsx from "clsx";
 import { ArrowLeft, CalendarDays, Check, CheckCircle2, Circle, CircleDot, Columns2, Columns3, Copy, ExternalLink, Flag, GitBranch, GripVertical, List, Loader2, MessageCircle, MoreHorizontal, Paperclip, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -23,6 +24,8 @@ import { IssueFields } from "./issue-fields";
 import { IssueCommentBody, IssueCommentComposer } from "./issue-comments";
 import { IssueFileUpload } from "./issue-file-upload";
 import { useBoardScroll } from "./use-board-scroll";
+import { useCardFlip, useIssueDrag, type DragSlot } from "./use-issue-drag";
+import { compareTaskOrder, planTaskMove } from "../lib/task-order";
 import { UserAvatar } from "./user-avatar";
 import { ContentSkeleton } from "./content-skeleton";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
@@ -54,6 +57,29 @@ function dueInfo(value?: string) {
   const days = Math.round((due.getTime() - today.getTime()) / 86400000);
   const label = days === 0 ? "Today" : days === 1 ? "Tomorrow" : days === -1 ? "Yesterday" : due.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   return { label, tone: days < 0 ? "overdue" : days <= 1 ? "soon" : "later" };
+}
+
+type MoveTaskArgs = { projectId: Id<"projects">; sessionToken: string; taskId: Id<"tasks">; columnId: Id<"columns">; beforeTaskId?: Id<"tasks"> };
+
+/** Mirrors `tasks.moveTask` on the cached board so a dropped card stays exactly where it was dropped. */
+function moveTaskOnBoard(store: OptimisticLocalStore, args: MoveTaskArgs) {
+  const query = { projectId: args.projectId, sessionToken: args.sessionToken };
+  const board = store.getQuery(api.tasks.board, query);
+  if (!board?.tasks.some(task => task._id === args.taskId)) return;
+  const plan = planTaskMove(board.tasks.filter(task => task.columnId === args.columnId), args.taskId, args.beforeTaskId);
+  if (plan.noop) return;
+  const renumbered = new Map(plan.renumber.map(item => [item._id, item.order]));
+  const tasks = board.tasks.map(task => task._id === args.taskId ? { ...task, columnId: args.columnId, order: plan.order, updatedAt: Date.now() }
+    : renumbered.has(task._id) ? { ...task, order: renumbered.get(task._id)! } : task).sort(compareTaskOrder);
+  store.setQuery(api.tasks.board, query, { ...board, tasks });
+}
+
+/** Active cards of a board lane in display order; cards whose column is hidden show in Todo (or the first lane). */
+function activeLaneTasks(board: { columns: Doc<"columns">[]; tasks: Doc<"tasks">[] }, columnId: string, matches: (task: Doc<"tasks">) => boolean) {
+  const columns = board.columns.filter(column => !(column.isDone ?? column.title.toLowerCase() === "done"));
+  const ids = new Set<string>(columns.map(column => column._id));
+  const fallback = columns.find(column => column.title.toLowerCase() === "todo") || columns[0];
+  return board.tasks.filter(task => !task.done && matches(task) && (ids.has(task.columnId) ? task.columnId : fallback?._id) === columnId);
 }
 
 function BoardProgress({ done, total }: { done: number; total: number }) {
@@ -119,9 +145,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const board = useQuery(api.tasks.board, { projectId, sessionToken });
   const projectMembers = useQuery(api.members.people, { projectId, sessionToken });
   const updateTask = useMutation(api.tasks.updateTask);
-  const moveTask = useMutation(api.tasks.moveTask);
+  const moveTask = useMutation(api.tasks.moveTask).withOptimisticUpdate(moveTaskOnBoard);
   const deleteTask = useMutation(api.tasks.deleteTask);
-  const [dragTaskId, setDragTaskId] = useState<Id<"tasks"> | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(initialTaskId ?? null);
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -140,6 +165,17 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const filterButton = useRef<HTMLButtonElement>(null);
   const [columnEditor, setColumnEditor] = useState<Doc<"columns"> | "new" | null>(null);
   const boardScroll = useBoardScroll(Boolean(board) && !archive && layout === "board");
+  const dnd = useIssueDrag({
+    rootRef: boardScroll,
+    enabled: canEdit,
+    onMove: (taskId, target) => {
+      if (!board?.tasks.some(task => task._id === taskId)) return;
+      const before = activeLaneTasks(board, target.columnId, task => matchesIssue(task, filter, assigneeFilter)).filter(task => task._id !== taskId)[target.index];
+      void moveTask({ projectId, sessionToken, taskId: taskId as Id<"tasks">, columnId: target.columnId as Id<"columns">, beforeTaskId: before?._id }).catch(error => setBoardNotice(error instanceof Error ? error.message : "Could not move issue"));
+    },
+  });
+  useCardFlip(boardScroll);
+  const drag = dnd.drag;
 
   useEffect(() => {
     setBoardNotice("");
@@ -168,9 +204,15 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const columnForTask = (task: Doc<"tasks">) => visibleColumnIds.has(task.columnId) ? task.columnId : fallbackColumn?._id;
   const archivedTasks = board.tasks.filter(task => task.done && matches(task) && (!completedColumnId || columnForTask(task) === completedColumnId)).sort((a, b) => b.updatedAt - a.updatedAt);
   const showCompleted = (columnId: Id<"columns"> | null) => { setCompletedColumnId(columnId); setArchive(true); };
-  const move = (columnId: Id<"columns">, beforeTaskId?: Id<"tasks">) => {
-    if (canEdit && dragTaskId) void moveTask({ projectId, sessionToken, taskId: dragTaskId, columnId, beforeTaskId }).catch(error => setBoardNotice(error.message));
-    setDragTaskId(null);
+  const visibleTasks = (columnId: string) => activeLaneTasks(board, columnId, matches);
+  /** Column cards with the dragged card shown in its target slot. */
+  const displayTasks = (columnId: string, slot: DragSlot | null) => {
+    const tasks = visibleTasks(columnId);
+    if (!drag || !slot) return tasks;
+    const moving = board.tasks.find(task => task._id === drag.taskId);
+    const others = tasks.filter(task => task._id !== drag.taskId);
+    if (moving && slot.columnId === columnId) others.splice(Math.min(slot.index, others.length), 0, moving);
+    return others;
   };
   return (
     <section className="board-section" ref={boardScroll}>
@@ -190,19 +232,20 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
       </div>
       {!canEdit ? <div className="notice">You have view-only access to this project, so issue creation is disabled.</div> : null}
       {boardNotice ? <div className="notice danger">{boardNotice}</div> : null}
-      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(error instanceof Error ? error.message : "Could not restore issue"); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Assignee</th><th scope="col">Priority</th><th scope="col">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(error.message))}><Circle size={17} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small>{task.title}</button></td><td>{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td>{task.assignedToName || task.assignedToEmail || "Unassigned"}</td><td><span className={clsx("priority", task.priority)}>{task.priority}</span></td><td>{task.dueDate || "?"}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className="kanban-scroll">
+      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(error instanceof Error ? error.message : "Could not restore issue"); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Assignee</th><th scope="col">Priority</th><th scope="col">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(error.message))}><Circle size={17} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small>{task.title}</button></td><td>{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td>{task.assignedToName || task.assignedToEmail || "Unassigned"}</td><td><span className={clsx("priority", task.priority)}>{task.priority}</span></td><td>{task.dueDate || "?"}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className={clsx("kanban-scroll", drag?.mode === "pointer" && "is-dragging")}>
         {visualColumns.map((column, index) => {
-          const tasks = board.tasks.filter(task => !task.done && matches(task) && columnForTask(task) === column._id);
+          const tasks = displayTasks(column._id, drag?.target ?? null);
           const completedCount = board.tasks.filter(task => task.done && matches(task) && columnForTask(task) === column._id).length;
           const prev = visualColumns[index - 1];
           const next = visualColumns[index + 1];
           return (
             <div
               data-testid="board-column"
-              className={clsx("kanban-column", laneTone(column.displayTitle), dragTaskId && "drag-target")}
+              className={clsx("kanban-column", laneTone(column.displayTitle))}
               key={column._id}
-              onDragOver={(event) => { if (canEdit) event.preventDefault(); }}
-              onDrop={() => move(column._id)}
+              data-column-id={column._id}
+              data-column-title={column.displayTitle}
+              data-drop={drag?.target.columnId === column._id ? "" : undefined}
             >
               <div className="kanban-title">
                 <div>
@@ -218,25 +261,19 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
                 {tasks.length === 0 ? <div className="empty-lane">{completedCount ? <button className="archive-lane-link" aria-label={`View ${completedCount} completed issues in ${column.title}`} onClick={() => showCompleted(column._id)}><CheckCircle2 size={16} />{completedCount} completed</button> : filter ? "No matching issues" : "No issues"}</div> : null}
                 {tasks.map((task) => (
                   <article
-                    className={clsx("task-card", task.done && "done", dragTaskId === task._id && "dragging")}
+                    className={clsx("task-card", task.done && "done", drag?.taskId === task._id && (drag.mode === "pointer" ? "is-placeholder" : "is-moving"), canEdit && "can-drag")}
                     key={task._id}
                     data-task-id={task._id}
                     data-priority={task.priority}
-                    draggable={canEdit}
-                    onDragStart={() => setDragTaskId(task._id)}
-                    onDragEnd={() => setDragTaskId(null)}
-                    onDragOver={(event) => { if (canEdit) event.preventDefault(); }}
-                    onDrop={(event) => {
-                      event.stopPropagation();
-                      move(column._id, task._id);
-                    }}
+                    onPointerDown={event => dnd.onPointerDown(event, task._id)}
+                    onDragStart={event => event.preventDefault()}
                     onClick={() => setSelectedTaskId(task._id)}
                     tabIndex={0}
                     onKeyDown={event => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedTaskId(task._id); } }}
                   >
                     <div className="task-card-head">
                       <span className="task-code">{taskKey(task._id)}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
-                      <button className="drag-handle" type="button" disabled={!canEdit} aria-label="Drag task">
+                      <button className="drag-handle" type="button" disabled={!canEdit} aria-label={`Move ${task.title}`} aria-pressed={drag?.mode === "keyboard" && drag.taskId === task._id} onKeyDown={event => dnd.onHandleKeyDown(event, task._id)} onClick={event => dnd.onHandleClick(event, task._id)} onBlur={() => dnd.onHandleBlur(task._id)}>
                         <GripVertical size={14} />
                       </button>
                     </div>
@@ -269,6 +306,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
           );
         })}
       </div>}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">{dnd.announcement}</div>
       {columnEditor && <ColumnEditor column={columnEditor === "new" ? null : columnEditor} columns={visualColumns} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnEditor(null)} />}
       {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={onOpenReference} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={() => setSelectedTaskId(null)} /> : null}
     </section>

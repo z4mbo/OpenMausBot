@@ -11,6 +11,7 @@ import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { updateChecklist } from "../lib/comment-checklist";
 import { compareStoredColumns, compareWorkflowColumns, DEFAULT_WORKFLOW_COLUMNS, ensureDraftColumn, isDoneColumn, isDraftColumn, normalizeColumnTitle } from "./lib/columns";
 import { DRAFT_COLUMN_TITLE, isLegacyIdeaColumn } from "../lib/origin-columns";
+import { compareTaskOrder, planTaskMove } from "../lib/task-order";
 import schema from "./schema";
 
 const columnDoc = v.object({ ...schema.tables.columns.validator.fields, _id: v.id("columns"), _creationTime: v.number() });
@@ -67,7 +68,7 @@ export const board = query({
     }));
     return {
       columns: columns.sort(compareWorkflowColumns),
-      tasks: tasks.sort((a, b) => a.order - b.order),
+      tasks: tasks.sort(compareTaskOrder),
       assignees,
     };
   },
@@ -130,7 +131,7 @@ export const assignedToMe = query({
       .query("tasks")
       .withIndex("by_assignee", (q) => q.eq("projectId", args.projectId).eq("assignedToEmail", user.email))
       .collect();
-    return tasks.sort((a, b) => a.order - b.order);
+    return tasks.sort(compareTaskOrder);
   },
 });
 
@@ -444,19 +445,11 @@ export const moveTask = mutation({
     const reopenAsDraft = task.done && isDraftColumn(column);
     const previousColumn = task.githubIssueNumber && !task.done && !isDraftColumn(column) ? await ctx.db.get(task.columnId) : null;
     const reopen = Boolean(previousColumn && isDraftColumn(previousColumn));
-    const tasks = (await ctx.db.query("tasks").withIndex("by_column", (q) => q.eq("columnId", args.columnId)).collect())
-      .filter((item) => item._id !== args.taskId)
-      .sort((a, b) => a.order - b.order);
-    const beforeTask = args.beforeTaskId ? tasks.find((item) => item._id === args.beforeTaskId) : null;
-    const beforeIndex = beforeTask ? tasks.findIndex((item) => item._id === beforeTask._id) : -1;
-    const previous = beforeIndex > 0 ? tasks[beforeIndex - 1] : null;
-    const order = beforeTask
-      ? previous
-        ? (previous.order + beforeTask.order) / 2
-        : beforeTask.order - 1
-      : tasks.length
-        ? Math.max(...tasks.map((item) => item.order)) + 1
-        : 0;
+    const columnTasks = await ctx.db.query("tasks").withIndex("by_column", (q) => q.eq("columnId", args.columnId)).collect();
+    const plan = planTaskMove(columnTasks, args.taskId, args.beforeTaskId);
+    if (plan.noop && !reopen && !reopenAsDraft) return;
+    for (const item of plan.renumber) await ctx.db.patch(item._id, { order: item.order });
+    const order = plan.order;
     await ctx.db.patch(args.taskId, { columnId: args.columnId, order, updatedAt: Date.now(), ...(reopen ? { githubIssueReopenRequested: true } : {}),
       ...(reopenAsDraft ? { done: false, completionPullRequest: undefined } : {}) });
     if (reopenAsDraft) await changeOpenIssueCount(ctx, args.projectId, 1);
