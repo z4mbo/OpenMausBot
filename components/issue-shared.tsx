@@ -1,4 +1,8 @@
-import type { HTMLAttributes, SyntheticEvent } from "react";
+"use client";
+
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { Check } from "lucide-react";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { ContentSkeleton } from "./content-skeleton";
 import { Dialog } from "./dialog";
@@ -28,16 +32,12 @@ export function subscribeCreatedIssue(listener: (taskId: string) => void) {
   return () => { createdListeners.delete(listener); };
 }
 
-const STOP_CANCEL = { onCancel: (event: SyntheticEvent) => event.stopPropagation() } as HTMLAttributes<HTMLDivElement>;
-
 /**
  * The one way to delete an issue (the board's card menu and the issue view's ⋯ menu): a confirm dialog naming the
  * issue, with Cancel and Delete. `onCancel` also runs for Escape and the close button.
  */
 export function IssueDeleteDialog({ taskId, title, disabled, onCancel, onConfirm }: { taskId: string; title: string; disabled?: boolean; onCancel: () => void; onConfirm: () => void }) {
-  // React passes a portaled dialog's cancel (Escape) on to the dialogs around it in the component tree; opened from the
-  // issue view, Escape must close only this one. The hidden wrapper renders nothing; the dialog lives in a portal.
-  return <div hidden {...STOP_CANCEL}><Dialog title="Delete issue" className="confirm-dialog" onClose={onCancel}>
+  return <Dialog title="Delete issue" className="confirm-dialog" onClose={onCancel}>
     <div className="dialog-body">
       <p className="confirm-text"><span className="issue-key">{taskKey(taskId)}</span> {title}</p>
       <div className="dialog-actions">
@@ -45,5 +45,52 @@ export function IssueDeleteDialog({ taskId, title, disabled, onCancel, onConfirm
         <button type="button" className="primary-button danger compact" autoFocus disabled={disabled} onClick={onConfirm}>Delete</button>
       </div>
     </div>
-  </Dialog></div>;
+  </Dialog>;
+}
+
+/**
+ * The one confirmation toast for issue actions (Completed, Moved to, Link copied), on the board and in the issue view.
+ * Any surface calls `showIssueToast`; the first mounted `IssueToastHost` (the board, else an open issue) shows it.
+ */
+export type IssueToast = { id: number; text: string; icon?: ReactNode; undo?: () => void };
+const TOAST_MS = 5000;
+let toastSeq = 0;
+let toastState: { toast: IssueToast | null; hosts: number[] } = { toast: null, hosts: [] };
+const toastListeners = new Set<() => void>();
+const setToastState = (next: Partial<typeof toastState>) => { toastState = { ...toastState, ...next }; toastListeners.forEach(listener => listener()); };
+const subscribeToast = (listener: () => void) => { toastListeners.add(listener); return () => { toastListeners.delete(listener); }; };
+let toastTimer: number | undefined;
+export function showIssueToast(text: string, undo?: () => void, icon?: ReactNode) {
+  const toast = { id: ++toastSeq, text, undo, icon };
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => { if (toastState.toast?.id === toast.id) setToastState({ toast: null }); }, TOAST_MS);
+  setToastState({ toast });
+}
+export function dismissIssueToast() { window.clearTimeout(toastTimer); setToastState({ toast: null }); }
+
+let hostSeq = 0;
+export function IssueToastHost() {
+  const [id] = useState(() => ++hostSeq);
+  useEffect(() => {
+    setToastState({ hosts: [...toastState.hosts, id] });
+    return () => setToastState({ hosts: toastState.hosts.filter(host => host !== id) });
+  }, [id]);
+  const state = useSyncExternalStore(subscribeToast, () => toastState, () => toastState);
+  if (!state.toast || state.hosts[0] !== id) return null;
+  return <ToastView key={state.toast.id} toast={state.toast} />;
+}
+
+/** A top-layer popover, so it shows above an open issue (a modal dialog) as well as on the board. */
+function ToastView({ toast }: { toast: IssueToast }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    try { element?.showPopover(); } catch { /* Already shown or unsupported: it still renders in place. */ }
+    return () => { try { if (element?.matches(":popover-open")) element.hidePopover(); } catch { /* gone */ } };
+  }, []);
+  return createPortal(<div ref={ref} popover="manual" className="board-toast" role="status">
+    <span className="board-toast-icon">{toast.icon ?? <Check size={14} />}</span>
+    <span>{toast.text}</span>
+    {toast.undo && <button type="button" onClick={() => { toast.undo?.(); dismissIssueToast(); }}>Undo</button>}
+  </div>, document.body);
 }

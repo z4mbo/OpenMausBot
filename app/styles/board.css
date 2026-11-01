@@ -13,8 +13,9 @@
 .board-header-actions .member-picker-trigger:hover { color: var(--text-1); }
 .board-header-actions > .issue-layout-switch { margin: 0 var(--space-1); }
 .issue-layout-switch button { width: 28px; padding: 0; justify-content: center; }
-/* Completed has one layout; the switch keeps its place so the controls beside it never move. */
-.issue-layout-switch.is-idle { visibility: hidden; }
+/* Completed has one layout; the switch stays in place, disabled, so the controls beside it never move. */
+.issue-layout-switch.is-idle button:disabled { opacity: 0.4; cursor: default; }
+.issue-layout-switch.is-idle .active { background: transparent; box-shadow: none; }
 .board-header-actions > .project-create-issue { margin-left: var(--space-1); }
 .board-filter-control { position: relative; display: flex; min-width: 0; }
 .board-filter-popover { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; display: flex; align-items: center; gap: var(--space-2); width: 280px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-3); box-shadow: var(--shadow-md); color: var(--text-3); animation: o-pop var(--duration) var(--ease-out); }
@@ -246,6 +247,8 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 
 /* Undo toast. */
 .board-toast { position: fixed; left: 50%; max-width: calc(100vw - 32px); white-space: nowrap; bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); z-index: 95; display: flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-3); border-radius: var(--radius-md); background: var(--surface-4); box-shadow: var(--shadow-lg); color: var(--text-1); font-size: var(--text-base); transform: translateX(-50%); animation: toast-in var(--duration-slow) var(--ease-out); }
+/* The toast is a manual popover (top layer, above an open issue): undo the popover defaults. */
+.board-toast[popover] { top: auto; right: auto; height: auto; margin: 0; overflow: visible; }
 .board-toast-icon { display: grid; flex: none; place-items: center; color: var(--green); }
 .board-toast > span:not(.board-toast-icon) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .board-toast button { min-height: 32px; margin-left: var(--space-1); padding: 0 var(--space-2); border: 0; border-left: 1px solid var(--border-3); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: transparent; color: var(--accent-text); font-weight: var(--weight-medium); }
@@ -258,12 +261,19 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 .confirm-text { margin: 0 0 var(--space-2); color: var(--text-1); line-height: var(--leading); overflow-wrap: anywhere; }
 .confirm-text > span { margin-right: 4px; color: var(--text-3); font-size: var(--text-sm); }
 
+.column-delete-move { display: grid; gap: var(--space-2); color: var(--text-2); }
+.column-delete-move .issue-select-trigger { width: 100%; border: 1px solid var(--border-2); background: var(--surface-2); color: var(--text-1); }
+
 /* Completed archive. */
 .archive-list { display: grid; align-content: start; gap: 1px; padding-top: var(--space-1); overflow-y: auto; }
-.archive-row { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm); cursor: pointer; transition: background var(--duration-fast); }
-.archive-row:hover { background: var(--hover); }
+.archive-row { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm); outline: none; cursor: pointer; transition: background var(--duration-fast); }
+.archive-row.can-press { -webkit-touch-callout: none; }
+@media (hover: hover) { .archive-row:hover { background: var(--hover); } }
+.archive-row:active:not(:has(button:active)) { background: var(--active); }
+.archive-row:focus-visible { box-shadow: inset 0 0 0 2px var(--focus); }
+.archive-row.is-selected, .archive-row.has-menu { background: var(--accent-soft); }
 .archive-check { flex: none; }
-.archive-issue { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; padding: 0; border: 0; background: none; text-align: left; }
+.archive-issue { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; }
 .archive-issue > span { flex: none; color: var(--text-3); font-size: var(--text-xs); }
 .archive-issue > strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-medium); color: var(--text-2); }
 .archive-row > time { flex: none; color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
@@ -331,7 +341,11 @@ button.task-assignee.with-name:hover { box-shadow: none; border-color: var(--bor
   .board-search-chip { max-width: 100%; height: 32px; }
   .project-create-issue > span { display: none; }
   .board-header-actions > .project-create-issue { width: 36px; min-height: 32px; padding: 0; }
-  .board-filter-popover { position: fixed; left: var(--space-3); right: var(--space-3); top: 104px; width: auto; }
+  /* Search covers the whole toolbar row; the ring in the page color hides the controls under its edges. */
+  .board-header { position: relative; }
+  .board-filter-control { position: static; }
+  .board-filter-popover { inset: var(--space-2) 0; top: var(--space-2); width: auto; box-shadow: 0 0 0 var(--space-2) var(--surface-1); }
+  .board-filter-popover input { min-height: 0; height: 100%; }
   /* One lane per screen; the gap equals the gutter, so the previous lane is fully out of view when a lane snaps in. */
   .kanban-scroll { gap: var(--space-4); margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4) var(--space-1); scroll-snap-type: x mandatory; scroll-padding: 0 var(--space-4); scrollbar-width: none; }
   .kanban-scroll[data-fade-end], .kanban-scroll[data-fade-start] { -webkit-mask-image: none; mask-image: none; }

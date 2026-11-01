@@ -68,7 +68,11 @@ export function Dialog({ title, heading, children, onClose, className = "" }: { 
       if (!document.querySelector("dialog[open]")) restoreFocus(opener, taskId);
     };
   }, [opener]);
-  return createPortal(<dialog ref={ref} className={`origin-dialog ${className}`} aria-label={title} onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) { const box = event.currentTarget.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) onClose(); } }}>
+  return createPortal(<dialog ref={ref} className={`origin-dialog ${className}`} aria-label={title} onCancel={event => {
+    // React hands a nested (portaled) dialog's Escape on to the dialogs around it; only the dialog itself closes.
+    if (event.target !== event.currentTarget) return;
+    event.preventDefault(); onClose();
+  }} onClick={event => { if (event.target === event.currentTarget) { const box = event.currentTarget.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) onClose(); } }}>
     <header className="dialog-heading">{heading || <h2>{title}</h2>}<button type="button" className="icon-button" onClick={onClose} aria-label="Close dialog"><X size={18} /></button></header>
     {children}
   </dialog>, document.body);

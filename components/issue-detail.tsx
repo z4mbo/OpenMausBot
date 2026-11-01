@@ -4,7 +4,7 @@ import { ErrorBoundary } from "./error-boundary";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
 import { useMutation, useQuery } from "convex/react";
 import clsx from "clsx";
-import { Check, CheckCircle2, ChevronRight, CircleAlert, CircleDot, ExternalLink, GitPullRequest, LinkIcon, Loader2, MoreHorizontal, RotateCcw, Trash2, X } from "lucide-react";
+import { CheckCircle2, ChevronRight, CircleAlert, CircleDot, ExternalLink, GitPullRequest, LinkIcon, Loader2, MoreHorizontal, RotateCcw, Trash2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { localApi } from "@/lib/client-api";
@@ -23,7 +23,7 @@ import { UserAvatar } from "./user-avatar";
 import { useAnchoredPopover } from "./use-anchored-popover";
 import { SheetHeader } from "./sheet-header";
 import { useWorkspaceOnline } from "./workspace-connection";
-import { IssueDeleteDialog, LoadingState, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { IssueDeleteDialog, IssueToastHost, LoadingState, showIssueToast, type OpenReference, type ProjectWithUi } from "./issue-shared";
 
 type Priority = "low" | "medium" | "high";
 type Fields = { title: string; description: string; priority: Priority; assignedToEmail: string; dueDate: string };
@@ -137,6 +137,7 @@ function TaskModalContent({
   canEdit,
   onClose,
   onOpenReference,
+  onDelete,
 }: {
   project: ProjectWithUi;
   projectId: Id<"projects">;
@@ -145,6 +146,8 @@ function TaskModalContent({
   canEdit: boolean;
   onClose: () => void;
   onOpenReference?: OpenReference;
+  /** Deletes the issue in place of the view (the board: it closes the issue and focuses a neighbouring card). */
+  onDelete?: () => void;
 }) {
   const details = useQuery(api.tasks.details, { projectId, sessionToken, taskId });
   const me = useQuery(api.auth.me, { sessionToken });
@@ -159,7 +162,6 @@ function TaskModalContent({
   const [columnId, setColumnId] = useState<Id<"columns"> | "">("");
   const [errors, setErrors] = useState<Partial<Record<keyof Fields | "status", string>>>({});
   const [saving, setSaving] = useState(0);
-  const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [titleTouched, setTitleTouched] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -264,7 +266,7 @@ function TaskModalContent({
   const copyLink = async () => {
     const url = new URL(`/${workspace.slug}`, window.location.origin);
     url.searchParams.set("project", projectId); url.searchParams.set("issue", taskId);
-    try { await navigator.clipboard.writeText(url.href); setCopied(true); window.setTimeout(() => setCopied(false), 1600); }
+    try { await navigator.clipboard.writeText(url.href); showIssueToast("Link copied"); }
     catch { setNotice({ text: "Clipboard unavailable. Copy the link from the address bar.", tone: "danger" }); }
   };
 
@@ -307,7 +309,7 @@ function TaskModalContent({
   return <Dialog title={details ? `${key} ${details.task.title}` : "Issue"} className="issue-detail-dialog" onClose={closeIssue} heading={<div className="issue-detail-heading">
       <h2 tabIndex={-1} data-initial-focus><ProjectIcon project={project} /><span>{project.name}</span>{details && <><ChevronRight size={13} aria-hidden="true" /><span className="issue-detail-key issue-key">{key}</span></>}</h2>
       {saving > 0 && <span className="issue-save-state" role="status" aria-label="Saving"><Loader2 size={13} className="spin" /></span>}
-      {details && <button type="button" className="icon-button" aria-label={copied ? "Link copied" : "Copy link"} title={copied ? "Copied" : "Copy link"} onClick={() => void copyLink()}>{copied ? <Check size={15} /> : <LinkIcon size={15} />}</button>}
+      {details && <button type="button" className="icon-button" aria-label="Copy link" title="Copy link" onClick={() => void copyLink()}><LinkIcon size={15} /></button>}
       {!!actions.length && <IssueActionsMenu trigger={actionsTrigger} actions={actions} onError={message => setNotice({ text: message, tone: "danger" })} />}
     </div>}>
     {details && fields ? <IssueFileUpload className="issue-detail-layout" projectId={projectId} taskId={taskId} sessionToken={sessionToken} disabled={!canEdit} onError={message => setNotice({ text: message, tone: "danger" })} onLink={url => { void addAsset({ projectId, taskId, sessionToken, type: "link", name: url, url }).catch(error => setNotice({ text: errorText(error, "Could not attach link"), tone: "danger" })); }}>
@@ -330,7 +332,7 @@ function TaskModalContent({
             columnId={columnId} onColumnChange={value => void changeColumn(value)}
             priority={fields.priority} onPriorityChange={value => setField("priority", value)}
             assignee={fields.assignedToEmail} onAssigneeChange={value => setField("assignedToEmail", value)}
-            dueDate={fields.dueDate} onDueDateChange={value => setField("dueDate", value)}
+            dueDate={fields.dueDate} onDueDateChange={value => setField("dueDate", value)} done={details.task.done}
             errors={{ status: errors.status, ...Object.fromEntries(Object.entries(FIELD_ERROR_KEY).map(([field, key]) => [key, errors[field as keyof Fields]])) }}
             disabled={!canEdit}>
             <div className="issue-property" data-field="labels"><span>Labels</span><IssueLabels sessionToken={sessionToken} taskId={taskId} canEdit={canEdit} /></div>
@@ -369,11 +371,13 @@ function TaskModalContent({
       requestAnimationFrame(() => actionsTrigger.current?.focus({ preventScroll: true }));
     }} onConfirm={() => {
       setDeleting(false);
+      if (onDelete) { releaseHistory(); onDelete(); return; }
       deleteTask({ projectId, sessionToken, taskId }).then(() => { releaseHistory(); onClose(); }, error => {
         setNotice({ text: errorText(error, "Could not delete issue"), tone: "danger" });
         requestAnimationFrame(() => actionsTrigger.current?.focus({ preventScroll: true }));
       });
     }} />}
+    <IssueToastHost />
   </Dialog>;
 }
 

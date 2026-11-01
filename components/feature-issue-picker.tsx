@@ -1,13 +1,14 @@
 "use client";
 import { useDeferredValue, useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
 import { useQuery } from "convex/react";
-import { Check, CheckCircle2, Circle, Search } from "lucide-react";
+import { Check, Search } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { taskKey } from "@/lib/project-issues";
 import { useWorkspace } from "./workspace-context";
 import { ContentSkeleton } from "./content-skeleton";
 import { SheetHeader } from "./sheet-header";
+import { StatusIcon } from "./issue-icons";
 import { shouldFocusSearch, useAnchoredPopover } from "./use-anchored-popover";
 
 export type RelationKind = "blocks" | "blocked" | "parent" | "child";
@@ -88,7 +89,7 @@ export function LinkIssuePicker({ sessionToken, anchor, projectId, exclude, link
         const project = row.projectId !== projectId ? projectName.get(row.projectId) : undefined;
         const isLinked = linked.includes(row._id);
         return <button id={`${id}-${index}`} key={row._id} type="button" tabIndex={-1} role="option" aria-selected={isLinked} data-highlighted={active === index} onMouseEnter={() => setActive(index)} onClick={() => choose(row._id)}>
-          {row.done ? <CheckCircle2 size={14} className="done" /> : <Circle size={14} />}<span>{row.title}</span><small>{project ? `${project} · ${taskKey(row._id)}` : taskKey(row._id)}</small>{isLinked && <Check size={14} />}
+          <StatusIcon title={row.done ? "Done" : row.status ?? ""} /><span>{row.title}</span><small>{project ? `${project} · ${taskKey(row._id)}` : taskKey(row._id)}</small>{isLinked && <Check size={14} />}
         </button>;
       })}
       {rows?.length === 0 && <p>No matching issues</p>}
