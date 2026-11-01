@@ -23,6 +23,10 @@ type Session = {
   startX: number; startY: number; x: number; y: number;
   grabX: number; grabY: number; width: number; height: number;
   active: boolean;
+  /** Touch only: the finger moved after the long-press lifted the card (a drag, not a press-and-release). */
+  moved: boolean;
+  /** The pointer went up; later pointer events (a click while the card settles) belong to someone else. */
+  released: boolean;
   timer: number; frame: number; settleTimer: number;
   layer?: HTMLDivElement; ghost?: HTMLElement;
   pageScroller: HTMLElement | null;
@@ -95,25 +99,42 @@ function insertionIndex(lane: HTMLElement, session: Session) {
   return best;
 }
 
-/** Swallows the click the browser sends after a drag ends, so dropping a card does not open it. */
-function swallowNextClick() {
-  const block = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); };
-  window.addEventListener("click", block, { capture: true, once: true });
-  window.setTimeout(() => window.removeEventListener("click", block, { capture: true }), 400);
+/**
+ * Swallows the click the browser sends right after a drag ends, so dropping a card does not open it. Only that click
+ * is eaten: it follows the pointerup within the same input event, while a real click needs a fresh pointerdown first.
+ */
+function swallowNextClick(upTime: number) {
+  const block = (event: MouseEvent) => {
+    remove();
+    if (event.timeStamp - upTime > 120) return;
+    event.preventDefault(); event.stopPropagation();
+  };
+  const remove = () => {
+    window.removeEventListener("click", block, { capture: true });
+    window.removeEventListener("pointerdown", remove, { capture: true });
+  };
+  window.addEventListener("click", block, { capture: true });
+  window.addEventListener("pointerdown", remove, { capture: true });
+  window.setTimeout(remove, 400);
 }
 
 /**
  * Pointer (mouse, pen, touch long-press) and keyboard dragging of board cards.
  * The board renders `drag.target` as a placeholder slot; `onMove` persists the final slot.
  */
-export function useIssueDrag({ rootRef, enabled, onMove }: { rootRef: RefObject<HTMLElement | null>; enabled: boolean; onMove: (taskId: string, target: DragSlot) => void }) {
+export function useIssueDrag({ rootRef, enabled, onMove, onPressMenu }: {
+  rootRef: RefObject<HTMLElement | null>; enabled: boolean; onMove: (taskId: string, target: DragSlot) => void;
+  /** Touch long-press released without moving: the card's menu opens instead of a drag. */
+  onPressMenu?: (taskId: string, card: HTMLElement) => void;
+}) {
   const [drag, setDrag] = useState<IssueDrag | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const dragRef = useRef<IssueDrag | null>(null);
   const session = useRef<Session | null>(null);
   const onMoveRef = useRef(onMove);
+  const onPressMenuRef = useRef(onPressMenu);
   const keyHandledAt = useRef(0);
-  useLayoutEffect(() => { onMoveRef.current = onMove; });
+  useLayoutEffect(() => { onMoveRef.current = onMove; onPressMenuRef.current = onPressMenu; });
 
   const board = useCallback(() => rootRef.current?.querySelector<HTMLElement>(".kanban-scroll") ?? null, [rootRef]);
   const update = useCallback((next: IssueDrag | null) => { dragRef.current = next; setDrag(next); }, []);
@@ -248,28 +269,39 @@ export function useIssueDrag({ rootRef, enabled, onMove }: { rootRef: RefObject<
     const active: Session = {
       taskId, pointerId: event.pointerId, touch, card: event.currentTarget,
       startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY,
-      grabX: 0, grabY: 0, width: 0, height: 0, active: false, timer: 0, frame: 0, settleTimer: 0, pageScroller: null, cleanup: [],
+      grabX: 0, grabY: 0, width: 0, height: 0, active: false, moved: false, released: false, timer: 0, frame: 0, settleTimer: 0, pageScroller: null, cleanup: [],
     };
     session.current = active;
     const move = (pointer: PointerEvent) => {
-      if (pointer.pointerId !== active.pointerId) return;
+      if (pointer.pointerId !== active.pointerId || active.released) return;
       active.x = pointer.clientX;
       active.y = pointer.clientY;
-      if (active.active) return;
+      if (active.active) {
+        if (touch && !active.moved && Math.hypot(active.x - active.startX, active.y - active.startY) > TOUCH_SLOP * 1.5) active.moved = true;
+        return;
+      }
       const distance = Math.hypot(active.x - active.startX, active.y - active.startY);
       // Touch lifts only after a still long-press; moving first means the finger is scrolling.
       if (touch) { if (distance > TOUCH_SLOP) end(active); return; }
       if (distance >= MOUSE_THRESHOLD) activate(active);
     };
     const up = (pointer: PointerEvent) => {
-      if (pointer.pointerId !== active.pointerId) return;
+      if (pointer.pointerId !== active.pointerId || active.released) return;
+      active.released = true;
       if (!active.active) { end(active); return; }
-      swallowNextClick();
+      swallowNextClick(pointer.timeStamp);
+      if (touch && !active.moved && onPressMenuRef.current) {
+        // Long-press and release in place: put the card back and open its menu.
+        const card = active.card;
+        settle(true);
+        onPressMenuRef.current(active.taskId, card);
+        return;
+      }
       hitTest(active);
       settle(false);
     };
     const cancel = (pointer: PointerEvent) => {
-      if (pointer.pointerId !== active.pointerId) return;
+      if (pointer.pointerId !== active.pointerId || active.released) return;
       if (active.active) settle(true); else end(active);
     };
     window.addEventListener("pointermove", move);
@@ -335,12 +367,18 @@ export function useIssueDrag({ rootRef, enabled, onMove }: { rootRef: RefObject<
     setAnnouncement(`Picked up. ${describe(root, slot, taskId)}. Use arrow keys to move, Space to drop, Escape to cancel.`);
   }, [board, describe, update]);
 
-  const stopKeyboard = useCallback((commit: boolean) => {
+  const stopKeyboard = useCallback((commit: boolean, refocus = true) => {
     const current = dragRef.current;
     const root = board();
     if (!current || current.mode !== "keyboard" || !root) return;
     if (commit && !sameSlot(current.target, current.origin)) onMoveRef.current(current.taskId, current.target);
+    const handle = root.querySelector<HTMLElement>(`${cardSelector(current.taskId)} .drag-handle`);
+    const hadFocus = refocus && document.activeElement === handle;
     update(null);
+    // The handle is only a keyboard target while moving; hand focus back to the card itself.
+    if (hadFocus) requestAnimationFrame(() => {
+      if (document.activeElement === handle || document.activeElement === document.body) root.querySelector<HTMLElement>(cardSelector(current.taskId))?.focus({ preventScroll: true });
+    });
     setAnnouncement(commit ? `Dropped. ${describe(root, current.target, current.taskId)}.` : "Move cancelled.");
   }, [board, describe, update]);
 
@@ -357,7 +395,7 @@ export function useIssueDrag({ rootRef, enabled, onMove }: { rootRef: RefObject<
       return;
     }
     if (current.mode !== "keyboard" || current.taskId !== taskId) return;
-    if (event.key === "Tab") { stopKeyboard(false); return; }
+    if (event.key === "Tab") { stopKeyboard(false, false); return; }
     const columns = columnsOf(root).map(column => column.dataset.columnId!);
     let target = current.target;
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
@@ -396,13 +434,20 @@ export function useIssueDrag({ rootRef, enabled, onMove }: { rootRef: RefObject<
       const current = dragRef.current;
       if (current?.mode !== "keyboard" || current.taskId !== taskId) return;
       const handle = board()?.querySelector(`${cardSelector(taskId)} .drag-handle`);
-      if (document.activeElement !== handle) stopKeyboard(false);
+      if (document.activeElement !== handle) stopKeyboard(false, false);
     }, 0);
   }, [board, stopKeyboard]);
 
   useLayoutEffect(() => () => end(session.current), [end]);
 
-  return { drag, announcement, onPointerDown, onHandleKeyDown, onHandleClick, onHandleBlur };
+  /** Starts a keyboard move of a card (Space on a focused card); focus moves to its handle while moving. */
+  const pickUp = useCallback((taskId: string) => {
+    if (!enabled) return;
+    keyHandledAt.current = Date.now();
+    startKeyboard(taskId);
+  }, [enabled, startKeyboard]);
+
+  return { drag, announcement, onPointerDown, onHandleKeyDown, onHandleClick, onHandleBlur, pickUp };
 }
 
 /**
@@ -426,7 +471,8 @@ export function useCardFlip(rootRef: RefObject<HTMLElement | null>) {
       const id = card.dataset.taskId!;
       next.set(id, { x, y, column });
       const previous = positions.current.get(id);
-      if (!previous || reduced) return;
+      // A lane whose card is collapsing away (completed) already moves its other cards; never animate that twice.
+      if (!previous || reduced || card.parentElement?.hasAttribute("data-collapsing")) return;
       const dx = previous.x - x;
       const dy = previous.y - y;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;

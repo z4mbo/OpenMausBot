@@ -1,57 +1,126 @@
 "use client";
-import { errorText } from "@/lib/error-text";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ArrowRight, MoreHorizontal, Trash2 } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Link2, Search, Trash2, UserRound } from "lucide-react";
+import { displayName, formatDue } from "@/lib/format";
+import { PriorityIcon, StatusIcon } from "./issue-icons";
+import { UserAvatar } from "./user-avatar";
 
-export function TaskActionsMenu({ title, canEdit, canMoveLeft, canMoveRight, onMoveLeft, onMoveRight, onDelete, onError }: {
-  title: string; canEdit: boolean; canMoveLeft: boolean; canMoveRight: boolean;
-  onMoveLeft: () => Promise<unknown>; onMoveRight: () => Promise<unknown>;
-  onDelete: () => Promise<unknown>; onError: (message: string) => void;
+export type TaskMenuView = "root" | "status" | "priority" | "assignee";
+/** Viewport box the menu opens from: a card, a chip, or the pointer (a zero-size box). */
+export type TaskMenuAnchor = { left: number; top: number; right: number; bottom: number };
+export type TaskMenuPerson = { email: string; name?: string; username?: string; avatarUrl?: string | null };
+type Priority = "low" | "medium" | "high";
+
+const PRIORITIES: { value: Priority; label: string }[] = [{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }];
+const SUBMENUS: { view: Exclude<TaskMenuView, "root">; label: string }[] = [{ view: "status", label: "Status" }, { view: "priority", label: "Priority" }, { view: "assignee", label: "Assignee" }];
+const items = (menu: HTMLElement | null) => Array.from(menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not(:disabled)') ?? []);
+const sheetLayout = () => typeof matchMedia === "function" && matchMedia("(max-width: 760px)").matches;
+const coarsePointer = () => typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
+
+/**
+ * The issue card menu: right-click / long-press / ⋯ open it at the root; the card's priority and assignee chips open a
+ * submenu directly. On phones it is a bottom sheet.
+ */
+export function TaskMenu({ title, view: initialView, anchor, status, statuses, priority, assignee, members, currentEmail, dueDate, onStatus, onPriority, onAssignee, onDueDate, onCopyLink, onDelete, onClose }: {
+  title: string; view: TaskMenuView; anchor: TaskMenuAnchor;
+  status: string; statuses: { id: string; title: string }[];
+  priority: string; assignee?: string; members: TaskMenuPerson[]; currentEmail?: string; dueDate?: string;
+  onStatus: (columnId: string) => void; onPriority: (priority: Priority) => void; onAssignee: (email: string) => void;
+  onDueDate: () => void; onCopyLink: () => void; onDelete: () => void;
+  /** `restoreFocus` is false when the menu closes because the pointer went elsewhere. */
+  onClose: (restoreFocus: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
+  const [view, setView] = useState<TaskMenuView>(initialView);
+  const [query, setQuery] = useState("");
+  const [sheet] = useState(sheetLayout);
   const menu = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ left: 0, top: 0 });
+  const search = useRef<HTMLInputElement>(null);
+  const nested = initialView === "root";
+  const statusTitle = statuses.find(item => item.id === status)?.title ?? "";
+  const person = members.find(member => member.email === assignee);
+  const due = formatDue(dueDate);
+  const people = members.filter(member => `${displayName(member)} ${member.email}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const showSearch = view === "assignee" && members.length > 6;
+
   useLayoutEffect(() => {
-    if (!open || !root.current) return;
-    const bounds = root.current.getBoundingClientRect();
-    const height = menu.current?.offsetHeight || 110;
-    setPosition({ left: Math.max(8, Math.min(bounds.right - 170, window.innerWidth - 178)), top: bounds.bottom + height + 8 < window.innerHeight ? bounds.bottom + 4 : Math.max(8, bounds.top - height - 4) });
-    menu.current?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
-  }, [open]);
-  useEffect(() => {
-    if (!open) return;
-    const dismiss = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node) && !menu.current?.contains(event.target as Node)) setOpen(false); };
-    const close = () => setOpen(false);
-    document.addEventListener("pointerdown", dismiss);
-    window.addEventListener("resize", close);
-    document.addEventListener("scroll", close, true);
-    return () => { document.removeEventListener("pointerdown", dismiss); window.removeEventListener("resize", close); document.removeEventListener("scroll", close, true); };
-  }, [open]);
-  const run = async (action: () => Promise<unknown>) => {
-    setBusy(true);
-    try { await action(); setOpen(false); }
-    catch (error) { onError(errorText(error, "Could not update issue")); }
-    finally { setBusy(false); }
-  };
-  if (!canEdit) return null;
-  return <div ref={root} className={`task-actions task-menu ${open ? "is-open" : ""}`} onClick={event => event.stopPropagation()} onKeyDown={event => {
+    const element = menu.current;
+    if (!element) return;
+    if (!sheet) {
+      const width = element.offsetWidth, height = element.offsetHeight;
+      const below = anchor.bottom + 4 + height <= window.innerHeight - 8;
+      const left = Math.max(8, Math.min(anchor.left, window.innerWidth - width - 8));
+      const top = below ? anchor.bottom + 4 : Math.max(8, anchor.top - height - 4);
+      Object.assign(element.style, { left: `${left}px`, top: `${top}px` });
+    }
+    if (showSearch && !coarsePointer()) { search.current?.focus({ preventScroll: true }); return; }
+    const all = items(element);
+    (all.find(item => item.getAttribute("aria-checked") === "true") ?? all[0])?.focus({ preventScroll: true });
+    // Only the view decides what gets focus; re-running on every keystroke in the search would steal it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, sheet]);
+
+  const close = (restoreFocus = true) => onClose(restoreFocus);
+  const pick = (run: () => void) => { run(); close(); };
+  const open = (next: TaskMenuView) => { setQuery(""); setView(next); };
+
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     event.stopPropagation();
-    if (event.key === "Escape" || event.key === "Tab") { setOpen(false); root.current?.querySelector("button")?.focus({ preventScroll: true }); return; }
-    if (!open || !["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-    const items = Array.from(menu.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') || []);
-    const index = items.indexOf(document.activeElement as HTMLButtonElement);
-    const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
-    event.preventDefault(); items[next]?.focus({ preventScroll: true });
-  }}>
-    <button type="button" className="icon-button" aria-label={`Issue options for ${title}`} title="Issue options" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen(!open)}><MoreHorizontal size={14} /></button>
-    {open && createPortal(<div className="origin-project-portal"><div ref={menu} role="menu" aria-label={`Options for ${title}`} className="origin-dropdown task-options" style={position}>
-      <button role="menuitem" disabled={busy || !canMoveLeft} onClick={() => void run(onMoveLeft)}><ArrowLeft size={14} />Move left</button>
-      <button role="menuitem" disabled={busy || !canMoveRight} onClick={() => void run(onMoveRight)}><ArrowRight size={14} />Move right</button>
-      <button role="menuitem" className="danger-text" disabled={busy} onClick={() => { if (window.confirm(`Delete "${title}"?`)) void run(onDelete); }}><Trash2 size={14} />Delete issue</button>
-    </div></div>, document.body)}
-  </div>;
+    const all = items(menu.current);
+    const index = all.indexOf(document.activeElement as HTMLElement);
+    const move = (next: number) => { event.preventDefault(); all[(next + all.length) % all.length]?.focus({ preventScroll: true }); };
+    if (event.key === "Escape") { event.preventDefault(); if (view !== "root" && nested) open("root"); else close(); }
+    else if (event.key === "Tab") { event.preventDefault(); close(); }
+    else if (event.key === "ArrowDown") move(index + 1);
+    else if (event.key === "ArrowUp") move(index < 0 ? all.length - 1 : index - 1);
+    else if (event.key === "Home" && document.activeElement !== search.current) move(0);
+    else if (event.key === "End" && document.activeElement !== search.current) move(all.length - 1);
+    else if (event.key === "ArrowRight" && document.activeElement instanceof HTMLElement && document.activeElement.dataset.view) { event.preventDefault(); open(document.activeElement.dataset.view as TaskMenuView); }
+    else if (event.key === "ArrowLeft" && view !== "root" && nested && document.activeElement !== search.current) { event.preventDefault(); open("root"); }
+  };
+
+  const option = (key: string, checked: boolean, icon: ReactNode, label: ReactNode, run: () => void, extra?: ReactNode) =>
+    <button key={key} type="button" role="menuitemradio" aria-checked={checked} onClick={() => pick(run)}>{icon}<span>{label}</span>{extra}{checked && <Check size={14} className="task-menu-check" />}</button>;
+
+  let body: ReactNode;
+  if (view === "root") {
+    const values: Record<Exclude<TaskMenuView, "root">, { icon: ReactNode; value: string }> = {
+      status: { icon: <StatusIcon title={statusTitle} />, value: statusTitle },
+      priority: { icon: <PriorityIcon priority={priority} />, value: PRIORITIES.find(item => item.value === priority)?.label ?? "" },
+      assignee: { icon: person ? <UserAvatar user={person} size="small" /> : <UserRound size={14} />, value: person ? displayName(person) : "Unassigned" },
+    };
+    body = <>
+      {SUBMENUS.map(item => <button key={item.view} type="button" role="menuitem" aria-haspopup="menu" data-view={item.view} onClick={() => open(item.view)}>
+        {values[item.view].icon}<span>{item.label}</span><small>{values[item.view].value}</small><ChevronRight size={14} className="task-menu-chevron" />
+      </button>)}
+      <button type="button" role="menuitem" onClick={() => pick(onDueDate)}><CalendarDays size={14} /><span>Due date</span><small className={due?.tone === "overdue" ? "overdue" : undefined}>{due?.label ?? ""}</small></button>
+      <hr />
+      <button type="button" role="menuitem" onClick={() => pick(onCopyLink)}><Link2 size={14} /><span>Copy link</span></button>
+      <hr />
+      <button type="button" role="menuitem" className="danger-text" onClick={() => pick(onDelete)}><Trash2 size={14} /><span>Delete</span></button>
+    </>;
+  } else {
+    const label = SUBMENUS.find(item => item.view === view)!.label;
+    body = <>
+      {nested
+        ? <button type="button" className="task-menu-back" aria-label={`Back from ${label.toLowerCase()}`} onClick={() => open("root")}><ChevronLeft size={14} /><span>{label}</span></button>
+        : <span className="dropdown-caption">{label}</span>}
+      {showSearch && <div className="task-menu-search"><Search size={14} /><input ref={search} value={query} onChange={event => setQuery(event.target.value)} placeholder="Search" aria-label="Search members" onKeyDown={event => {
+        if (event.key === "Enter") { event.preventDefault(); const first = people[0]; if (first) pick(() => onAssignee(first.email)); }
+      }} /></div>}
+      {view === "status" && statuses.map(item => option(item.id, item.id === status, <StatusIcon title={item.title} />, item.title, () => onStatus(item.id)))}
+      {view === "priority" && PRIORITIES.map(item => option(item.value, item.value === priority, <PriorityIcon priority={item.value} />, item.label, () => onPriority(item.value)))}
+      {view === "assignee" && people.map(member => option(member.email, member.email === assignee, <UserAvatar user={member} size="small" />, displayName(member), () => onAssignee(member.email), member.email === currentEmail ? <small>You</small> : null))}
+      {view === "assignee" && !people.length && <p className="task-menu-empty">No members found</p>}
+    </>;
+  }
+
+  return createPortal(<div className={`task-menu-layer ${sheet ? "is-sheet" : ""}`} onContextMenu={event => { event.preventDefault(); close(false); }}>
+    <div className="task-menu-scrim" onPointerDown={event => { event.preventDefault(); close(false); }} />
+    <div ref={menu} role="menu" aria-label={`Options for ${title}`} className="origin-dropdown task-menu" onKeyDown={onKeyDown}>
+      {sheet && <div className="task-menu-title">{title}</div>}
+      {body}
+    </div>
+  </div>, document.body);
 }

@@ -228,7 +228,8 @@ export function MotionLayer() {
       lists.forEach(([list, selector]) => enterList(list, selector));
 
       // Cards removed while their list stays on screen: completed issues fly to the Completed control.
-      const exits = removed.filter(({ element, parent }) => !addedTracked.has(`t:${element.dataset.taskId}`) && canAnimateTaskExit(parent as HTMLElement));
+      // Board cards that complete collapse in place first (project-issues.tsx), so they need no exit ghost.
+      const exits = removed.filter(({ element, parent }) => !addedTracked.has(`t:${element.dataset.taskId}`) && !element.classList.contains("is-completing") && canAnimateTaskExit(parent as HTMLElement));
       if (exits.length && exits.length <= 3) {
         exits.forEach(({ element }) => {
           const id = element.dataset.taskId!;

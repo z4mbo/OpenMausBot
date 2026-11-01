@@ -7,6 +7,7 @@ export function PriorityIcon({ priority }: { priority?: string }) {
 /** Workflow lane tone from a column title; drives lane and status colors. */
 export function laneTone(title: string) {
   const normalized = title.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  if (normalized === "draft" || normalized === "backlog") return "draft";
   if (normalized === "idea") return "idea";
   if (normalized === "todo") return "todo";
   if (normalized === "done") return "done";
@@ -15,7 +16,28 @@ export function laneTone(title: string) {
   return "custom";
 }
 
-/** Status ring tinted with the lane color. */
+/** How far along the workflow a lane tone is, drawn as the filled part of the status ring. */
+const PROGRESS: Record<string, number> = { progress: 0.5, review: 0.75 };
+
+/** Status ring tinted with the lane color: dashed for drafts, filling up as work progresses, a check when done. */
 export function StatusIcon({ title }: { title: string }) {
-  return <svg className={`status-icon ${laneTone(title)}`} width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.25" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>;
+  const tone = laneTone(title);
+  const progress = PROGRESS[tone];
+  return <svg className={`status-icon ${tone}`} width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+    {tone === "done"
+      ? <><circle cx="7" cy="7" r="6" fill="currentColor" /><path d="M4.4 7.2 6.2 9l3.4-3.6" fill="none" stroke="var(--surface-1, #0e0f11)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></>
+      : <>
+        <circle cx="7" cy="7" r="5.25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray={tone === "draft" ? "2.2 2" : undefined} />
+        {progress ? <path d={arc(progress)} fill="currentColor" /> : null}
+      </>}
+  </svg>;
+}
+
+/** Pie slice from 12 o'clock, clockwise, inside the ring. */
+function arc(fraction: number) {
+  const radius = 2.75;
+  const angle = fraction * Math.PI * 2;
+  const x = 7 + radius * Math.sin(angle);
+  const y = 7 - radius * Math.cos(angle);
+  return `M7 7 L7 ${7 - radius} A${radius} ${radius} 0 ${fraction > 0.5 ? 1 : 0} 1 ${x.toFixed(3)} ${y.toFixed(3)} Z`;
 }

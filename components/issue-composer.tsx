@@ -21,6 +21,7 @@ export function IssueComposer({
   onClose,
   onCreated,
   initialDraft,
+  initialColumnId,
 }: {
   sessionToken: string;
   projects: { _id: Id<"projects">; name: string; memberRole: string; iconType?: string; iconValue?: string; iconUrl?: string | null }[];
@@ -28,6 +29,8 @@ export function IssueComposer({
   onClose: () => void;
   onCreated: (id: Id<"projects">, taskId: Id<"tasks">) => void;
   initialDraft?: { title: string; description: string };
+  /** Lane the issue starts in (a board lane's + button). */
+  initialColumnId?: string;
 }) {
   const online = useWorkspaceOnline();
   const editable = projects.filter((p) => p.memberRole !== "viewer");
@@ -35,7 +38,7 @@ export function IssueComposer({
     editable.find((p) => p._id === activeProjectId)?._id ||
       null,
   );
-  const [columnId, setColumnId] = useState("");
+  const [columnId, setColumnId] = useState(initialColumnId ?? "");
   const [title, setTitle] = useState(initialDraft?.title || "");
   const [description, setDescription] = useState(
     initialDraft?.description || "",
