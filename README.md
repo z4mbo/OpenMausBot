@@ -17,8 +17,11 @@ In a second terminal:
 SECRET=$(openssl rand -hex 32)
 npx convex env set ORIGIN_INTEGRATION_SECRET "$SECRET"
 npx convex env set ORIGIN_SEALING_KEY "$(openssl rand -base64 32)"
+npx convex env set ORIGIN_PUBLIC_URL http://localhost:3000
 ORIGIN_INTEGRATION_SECRET="$SECRET" ORIGIN_PUBLIC_URL=http://localhost:3000 npm run dev
 ```
+
+`ORIGIN_PUBLIC_URL` in the Convex env lets its 2-minute tick reach the app; without it repository creation, GitHub sync, chat-mention retries and MCP consent cleanup never run.
 
 Open http://localhost:3000 and create an account.
 
@@ -44,7 +47,7 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm r
    docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
    ```
 
-   The app listens on `127.0.0.1:3000`; put an HTTPS reverse proxy in front that overwrites `X-Real-IP`, set `ORIGIN_TRUSTED_PROXY=1`, and persist the `origin-data` volume. Deploy the Convex backend before a new web image. Details, email and TURN: [deploy/README.md](deploy/README.md).
+   The app listens on `127.0.0.1:3000`; put an HTTPS reverse proxy in front that overwrites `X-Real-IP`, set `ORIGIN_TRUSTED_PROXY=1`, and persist the `origin-data` volume. Deploy the Convex backend before a new web image. Details, email, TURN and the pre-deploy checklist: [deploy/README.md](deploy/README.md).
 
 ## Connect AI agents (MCP)
 

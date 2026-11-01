@@ -60,7 +60,20 @@ Persist `/data/origin`. It contains chat history, attachment files, call state, 
 
 ## 3. Connect GitHub
 
-One GitHub App serves every workspace on the instance, so only the instance operator may register it. Set `ORIGIN_ADMIN_EMAILS` in `.env` to the operators' account emails (comma-separated; `ORIGIN_LEGACY_OWNER_EMAIL` also counts). When neither is set, the operator is the owner of the first workspace created on the instance, recorded the first time it is looked up (the `instance_operator` row in `integrations.sqlite`), so deleting or handing over that workspace later does not change it. Origin does not verify email addresses, so create the operator accounts before you open sign-up. While no App is configured, the operator registers it from **Settings > Integrations** using the GitHub manifest flow; everyone else sees GitHub as not available yet. The App is stored encrypted in `/data/origin` and takes precedence over the `GITHUB_CLIENT_*` variables; to replace a registered App, stop the app, delete the `github_app` row from `integrations.sqlite` in the persisted `/data/origin` volume (`sqlite3 <path>/integrations.sqlite "DELETE FROM github_app"`), start it again and reconnect each workspace. To use an existing App instead, set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `GITHUB_WEBHOOK_SECRET`, plus `GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY` for issues as pull requests; `deploy/docker-compose.yml` passes them through from `.env`. Review GitHub's requested permissions before approving it. Configure the callback and webhook against your own public origin. Then install the app and finish account authorization for each workspace.
+One GitHub App serves every workspace on the instance, so only the instance operator may register it. Set `ORIGIN_ADMIN_EMAILS` in `.env` to the operators' account emails (comma-separated; `ORIGIN_LEGACY_OWNER_EMAIL` also counts). When neither is set, the operator is the owner of the first workspace created on the instance, recorded the first time it is looked up (the `instance_operator` row in `integrations.sqlite`), so deleting or handing over that workspace later does not change it. Origin does not verify email addresses, so create the operator accounts before you open sign-up. While no App is configured, the operator registers it from **Settings > Integrations** using the GitHub manifest flow; everyone else sees GitHub as not available yet. The App is stored encrypted in `/data/origin` and takes precedence over the `GITHUB_CLIENT_*` variables; to replace a registered App, stop the app, delete the `github_app` row from `integrations.sqlite` in the persisted `/data/origin` volume (`sqlite3 <path>/integrations.sqlite "DELETE FROM github_app"`), start it again and reconnect each workspace. To use an existing App instead, set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `GITHUB_WEBHOOK_SECRET`, plus `GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY` (PEM, `\n` for newlines) for issues as pull requests; `deploy/docker-compose.yml` passes them through from `.env`. Configure the App on GitHub (`https://origin.example.com` stands for your `ORIGIN_PUBLIC_URL`) exactly as the manifest flow would:
+
+| App setting | Value |
+| --- | --- |
+| Homepage URL | `https://origin.example.com` |
+| Callback URL | `https://origin.example.com/api/github/oauth/callback` |
+| Request user authorization (OAuth) during installation | off |
+| Setup URL | `https://origin.example.com/api/github/oauth/install` |
+| Webhook | active, URL `https://origin.example.com/api/github/webhook`, secret = `GITHUB_WEBHOOK_SECRET` |
+| Repository permissions | Administration, Contents, Issues, Pull requests: read and write; Checks, Metadata: read |
+| Events | Issues, Pull request, Pull request review, Check suite, Check run |
+| Where can it be installed | Any account (members connect their own personal accounts) |
+
+Then install the App on the accounts that own the repositories and finish account authorization for each workspace from **Settings > Integrations**.
 
 Repository creation uses the connected administrator's personal account and creates private repositories. For an existing repository, an admin must approve workspace access. A fine-grained project token is an optional alternative; never ask ordinary members for a server-wide token.
 
@@ -90,7 +103,20 @@ Allow TCP/UDP 3478 and UDP 49160-49260. Keep the TURN secret identical in the ap
 
 `ORIGIN_LEGACY_OWNER_EMAIL` and `GITHUB_TOKEN` exist only for an operator-controlled migration of an older Origin installation; leave them unset for a new installation. The legacy owner also counts as an instance operator (see section 3).
 
-## 6. Upgrade an Existing Installation
+## 6. Pre-deploy Checklist
+
+Run through this before every production deploy:
+
+- [ ] **Convex first.** `npx convex deploy` with the production deploy key (kept in your secret store, never in the repo or a shell profile), then build and start the web image.
+- [ ] **Scheduled jobs.** In the Convex dashboard (Schedules), every pending job targets a function the new release still has. Jobs for the stubbed `agentRuns.promoteQueued`, `standup.runAll` and `standup.runProject` finish as no-ops (section 7).
+- [ ] **Convex env** (`npx convex env list`): `ORIGIN_INTEGRATION_SECRET` equal to the server's, `ORIGIN_SEALING_KEY` unchanged, `ORIGIN_PUBLIC_URL` is the HTTPS origin without a trailing slash, `ORIGIN_SIGNUP_MODE` as intended.
+- [ ] **Server `.env`:** `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` point at the production deployment (they are baked in at build time), same `ORIGIN_PUBLIC_URL` and `ORIGIN_INTEGRATION_SECRET`, GitHub variables when you use an existing App.
+- [ ] **`ORIGIN_TRUSTED_PROXY=1`** only when the proxy overwrites `X-Real-IP`; otherwise leave it unset.
+- [ ] **`ORIGIN_ADMIN_EMAILS`** lists the operator accounts, and those accounts exist.
+- [ ] **`/data/origin`** is the persisted volume and has a current backup.
+- [ ] **Smoke after deploy:** sign in, open a project board and an issue, send a chat message, check that `https://origin.example.com/api/mcp` answers 401 without a token, and read the app and Convex logs for errors. The full list is in section 5.
+
+## 7. Upgrade an Existing Installation
 
 Do not replace or import production data merely to publish code.
 
