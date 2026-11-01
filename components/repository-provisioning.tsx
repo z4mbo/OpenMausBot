@@ -9,15 +9,15 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import { localApi, navigateLocalApp } from "@/lib/client-api";
 import { useWorkspace } from "./workspace-context";
 
-export function RepositoryProvisioning({ project, sessionToken }: { project: Doc<"projects"> & { memberRole: string }; sessionToken: string }) {
+/** Create a private GitHub repository for the project, or connect GitHub first. Renders nothing when GitHub is not set up on the server. */
+export function RepositoryProvisioning({ project, sessionToken, onStarted }: { project: Doc<"projects"> & { memberRole: string }; sessionToken: string; onStarted?: () => void }) {
   const workspace = useWorkspace();
   const github = useQuery(api.integrations.status, { sessionToken, teamId: workspace._id });
   const [connection, setConnection] = useState<{ configured: boolean; login: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const admin = ["owner", "admin"].includes(project.memberRole);
-  useEffect(() => { let disposed = false; localApi<{ configured: boolean; login: string | null }>(`/api/github/workspace?teamId=${workspace._id}`, sessionToken).then(value => { if (!disposed) setConnection(value); }).catch(() => { if (!disposed) setError("Could not check GitHub connection. Reload and try again."); }); return () => { disposed = true; }; }, [sessionToken, workspace._id]);
+  useEffect(() => { let disposed = false; localApi<{ configured: boolean; login: string | null }>(`/api/github/workspace?teamId=${workspace._id}`, sessionToken).then(value => { if (!disposed) setConnection(value); }).catch(() => { if (!disposed) setError("Could not check the GitHub connection"); }); return () => { disposed = true; }; }, [sessionToken, workspace._id]);
   const connected = Boolean(connection?.login && github?.login && connection.login === github.login);
   const connect = async () => {
     setBusy(true); setError("");
@@ -27,13 +27,19 @@ export function RepositoryProvisioning({ project, sessionToken }: { project: Doc
     } catch (error) { setError(errorText(error, "Could not connect GitHub")); setBusy(false); }
   };
   const create = async () => {
-    setBusy(true); setError(""); setNotice("");
+    setBusy(true); setError("");
     try {
       const result = await localApi<{ state: string; error?: string }>(`/api/github/repo?teamId=${workspace._id}&projectId=${project._id}`, sessionToken, { method: "POST" });
-      if (result.state === "awaiting_connection") throw new Error("Reconnect GitHub to this workspace before creating a repository.");
-      setNotice(result.state === "working" ? "Repository creation is already running. This view updates automatically." : "Private repository created.");
+      if (result.state === "awaiting_connection") throw new Error("Reconnect GitHub to this workspace first");
+      onStarted?.();
     } catch (error) { setError(errorText(error, "Could not create repository")); }
     finally { setBusy(false); }
   };
-  return <div className="repo-connection-state"><p>{connected ? project.githubRepoState === "pending" ? "Creating the repository" : `Create a private repository on @${github?.login}.` : connection?.configured ? "Connect GitHub to create one." : connection ? "GitHub is not configured on this server." : ""}</p>{admin && <div className="integration-actions">{connected ? <button className="primary-button compact" disabled={busy} onClick={create}>{busy ? <Loader2 className="spin" size={14} /> : <Plus size={14} />}Create private repository</button> : connection?.configured && <button className="primary-button compact" disabled={busy} onClick={connect}>{busy ? <Loader2 className="spin" size={14} /> : <GitBranch size={14} />}Connect GitHub</button>}{connected && <button className="ghost-button compact" disabled={busy} onClick={connect}>Reconnect GitHub</button>}</div>}{!admin && <p className="muted">Ask a workspace admin to connect GitHub.</p>}{(error || project.githubRepoError) && <p className="notice danger" role="alert">{error || project.githubRepoError}</p>}{notice && <p className="notice" role="status">{notice}</p>}</div>;
+  if (!admin || (!error && !connection?.configured)) return null;
+  return <div className="repo-provisioning">
+    {connected
+      ? <button type="button" className="ghost-button compact" disabled={busy || project.githubRepoState === "pending"} onClick={create}>{busy ? <Loader2 className="spin" size={14} /> : <Plus size={14} />}Create private repository on @{github?.login}</button>
+      : connection?.configured && <button type="button" className="ghost-button compact" disabled={busy} onClick={connect}>{busy ? <Loader2 className="spin" size={14} /> : <GitBranch size={14} />}Connect GitHub</button>}
+    {error && <p className="notice danger" role="alert">{error}</p>}
+  </div>;
 }

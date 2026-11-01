@@ -1,15 +1,24 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { localAppOrigin } from "@/lib/client-api";
+import { displayName } from "@/lib/format";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Check, Copy, Link, Trash2, UserPlus } from "lucide-react";
+import { Check, Copy, Link, Loader2, UserPlus, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { UserAvatar } from "./user-avatar";
 import { useWorkspace } from "./workspace-context";
-import { ContentSkeleton } from "./content-skeleton";
+import { DelayedSkeleton } from "./delayed-skeleton";
+import { ConfirmButton } from "./confirm-button";
+
+const accessLabel = (role: string) => role === "viewer" ? "Can view" : "Can edit";
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return <button type="button" className="icon-button" aria-label={copied ? "Copied" : label} title={label} onClick={async () => { try { await navigator.clipboard.writeText(value); setCopied(true); window.setTimeout(() => setCopied(false), 1600); } catch { /* Clipboard blocked: the link stays selectable in the field. */ } }}>{copied ? <Check size={15} className="copied-icon" /> : <Copy size={15} />}</button>;
+}
 
 export function ProjectMembers({ projectId, sessionToken }: { projectId: Id<"projects">; sessionToken: string }) {
   const workspace = useWorkspace();
@@ -25,21 +34,40 @@ export function ProjectMembers({ projectId, sessionToken }: { projectId: Id<"pro
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"member" | "viewer">("member");
   const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [link, setLink] = useState("");
-  const [copied, setCopied] = useState(false);
-  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(errorText(error, "Could not update members")); } finally { setBusy(false); } };
+  const [busy, setBusy] = useState<"" | "add" | "invite" | "other">("");
+  const attempt = async (kind: "add" | "invite" | "other", fn: () => Promise<unknown>) => { setBusy(kind); setNotice(""); try { await fn(); } catch (error) { setNotice(errorText(error, "Could not update members")); } finally { setBusy(""); } };
   const available = workspacePeople?.filter(person => !people?.some(member => member.email === person.email)) || [];
-  return <section className="project-members"><h3>Members</h3>{admin && <>
-    <form className="project-members-form" onSubmit={event => { event.preventDefault(); void attempt(async () => { await add({ sessionToken, projectId, email, role }); setEmail(""); }); }}><label>Workspace member<select value={email} required onChange={event => setEmail(event.target.value)}><option value="">Select member</option>{available.map(person => <option key={person.email} value={person.email}>{person.username || person.name}</option>)}</select></label><label>Access<select value={role} onChange={event => setRole(event.target.value as typeof role)}><option value="member">Can edit</option><option value="viewer">Can view</option></select></label><button className="primary-button compact" disabled={busy || !email}><UserPlus size={15} />Add member</button></form>
-    <button type="button" className="ghost-button compact" disabled={busy} onClick={() => attempt(async () => { const result = await createInvite({ sessionToken, teamId: workspace._id, projectId, role }); setLink(`${localAppOrigin()}/join/${result.token}`); })}><Link size={14} />Create project invite link</button>
-    {link && <div className="invite-link"><input aria-label="Project invitation link" readOnly value={link} /><button type="button" className="icon-button" title="Copy invitation" aria-label="Copy invitation" onClick={() => attempt(async () => { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000); })}>{copied ? <Check size={15} /> : <Copy size={15} />}</button></div>}
-  </>}{notice && <p className="notice danger" role="alert">{notice}</p>}
-    {!people ? <ContentSkeleton rows={3} /> : <div className="workspace-member-list">{people.map(person => {
+  const projectInvites = invites?.filter(invite => invite.projectId === projectId) || [];
+  return <div className="project-members-panel">
+    {admin && available.length > 0 && <form className="project-member-add" onSubmit={event => { event.preventDefault(); void attempt("add", async () => { await add({ sessionToken, projectId, email, role }); setEmail(""); }); }}>
+      <select aria-label="Workspace member" value={email} required onChange={event => setEmail(event.target.value)}><option value="">Add a workspace member</option>{available.map(person => <option key={person.email} value={person.email}>{displayName(person)}</option>)}</select>
+      <select aria-label="Access" value={role} onChange={event => setRole(event.target.value as typeof role)}><option value="member">Can edit</option><option value="viewer">Can view</option></select>
+      <button className="primary-button compact" disabled={Boolean(busy) || !email}>{busy === "add" ? <Loader2 className="spin" size={14} /> : <UserPlus size={14} />}Add</button>
+    </form>}
+    {notice && <p className="notice danger" role="alert">{notice}</p>}
+    {!people ? <DelayedSkeleton rows={3} label="Loading members" /> : <ul className="project-member-list">{people.map(person => {
       const explicit = memberships?.find(member => member.email === person.email && member.status === "active");
       const inherited = workspacePeople?.some(member => member.email === person.email && ["owner", "admin"].includes(member.role));
-      return <div className="workspace-member" key={person.email}><UserAvatar user={person} /><span className="project-member-name">{person.username || person.name}</span><small>{inherited ? "Workspace admin" : person.role === "viewer" ? "Can view" : "Can edit"}</small>{admin && explicit && !inherited && explicit.role !== "owner" && <button type="button" className="icon-button" disabled={busy} title="Remove from project" aria-label={`Remove ${person.name} from project`} onClick={() => { if (confirm(`Remove ${person.name} from this project?`)) void attempt(() => remove({ sessionToken, projectId, memberId: explicit._id })); }}><Trash2 size={14} /></button>}</div>;
-    })}</div>}
-    {invites?.filter(invite => invite.projectId === projectId).map(invite => <div className="pending-invitation" key={invite._id}><Link size={14} /><span>Invite link · {invite.role}</span><button type="button" className="icon-button" title="Copy invitation" aria-label="Copy project invitation" onClick={() => attempt(() => navigator.clipboard.writeText(`${localAppOrigin()}/join/${invite.token}`))}><Copy size={14} /></button><button type="button" className="icon-button" title="Revoke invitation" aria-label="Revoke project invitation" disabled={busy} onClick={() => attempt(() => revoke({ sessionToken, inviteId: invite._id }))}><Trash2 size={14} /></button></div>)}
-  </section>;
+      const name = displayName(person);
+      return <li className="project-member" key={person.email}>
+        <UserAvatar user={person} />
+        <span className="project-member-name"><strong>{name}</strong><small>{person.email}</small></span>
+        <span className="project-member-role">{inherited ? "Admin" : accessLabel(person.role)}</span>
+        {admin && explicit && !inherited && explicit.role !== "owner" ? <ConfirmButton className="icon-button" label={`Remove ${name}`} confirmLabel="Remove" icon={<X size={14} />} disabled={Boolean(busy)} onConfirm={() => attempt("other", () => remove({ sessionToken, projectId, memberId: explicit._id }))} /> : admin ? <span className="project-member-spacer" aria-hidden="true" /> : null}
+      </li>;
+    })}</ul>}
+    {admin && <div className="project-invites">
+      {projectInvites.map(invite => {
+        const link = `${localAppOrigin()}/join/${invite.token}`;
+        return <div className="project-invite" key={invite._id}>
+          <Link size={14} />
+          <input aria-label="Invite link" readOnly value={link} onFocus={event => event.currentTarget.select()} />
+          <span className="project-member-role">{accessLabel(invite.role)}</span>
+          <CopyButton value={link} label="Copy invite link" />
+          <ConfirmButton className="icon-button" label="Revoke invite link" confirmLabel="Revoke" icon={<X size={14} />} disabled={Boolean(busy)} onConfirm={() => attempt("other", () => revoke({ sessionToken, inviteId: invite._id }))} />
+        </div>;
+      })}
+      <button type="button" className="ghost-button compact" disabled={Boolean(busy)} onClick={() => attempt("invite", () => createInvite({ sessionToken, teamId: workspace._id, projectId, role }))}>{busy === "invite" ? <Loader2 className="spin" size={14} /> : <Link size={14} />}Create invite link</button>
+    </div>}
+  </div>;
 }
