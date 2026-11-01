@@ -50,6 +50,7 @@ import type * as lib_storageValidators from "../lib/storageValidators.js";
 import type * as lib_taskBranches from "../lib/taskBranches.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as lib_vaultService from "../lib/vaultService.js";
+import type * as mcp from "../mcp.js";
 import type * as memberProfiles from "../memberProfiles.js";
 import type * as members from "../members.js";
 import type * as meta from "../meta.js";
@@ -125,6 +126,7 @@ declare const fullApi: ApiFromModules<{
   "lib/taskBranches": typeof lib_taskBranches;
   "lib/validators": typeof lib_validators;
   "lib/vaultService": typeof lib_vaultService;
+  mcp: typeof mcp;
   memberProfiles: typeof memberProfiles;
   members: typeof members;
   meta: typeof meta;

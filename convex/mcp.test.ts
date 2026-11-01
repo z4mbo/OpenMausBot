@@ -1,0 +1,108 @@
+/// <reference types="vite/client" />
+import { convexTest } from "convex-test";
+import { describe, expect, test } from "vitest";
+import schema from "./schema";
+import { api } from "./_generated/api";
+import { createSession } from "./lib/auth";
+
+const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
+
+async function fixture() {
+  const t = convexTest(schema, modules);
+  const people = await t.run(async ctx => {
+    const rows = [];
+    for (const name of ["Owner", "Member", "Viewer"]) {
+      const email = `${name.toLowerCase()}@mcp.test`;
+      const id = await ctx.db.insert("users", { name, username: name.toLowerCase(), email, role: "user", status: "active", passwordHash: "unused", salt: "unused", iterations: 1, createdAt: 1, updatedAt: 1 });
+      rows.push({ id, email, session: await createSession(ctx, id) });
+    }
+    return { owner: rows[0]!, member: rows[1]!, viewer: rows[2]! };
+  });
+  const { teamId } = await t.mutation(api.workspaces.create, { sessionToken: people.owner.session, name: "MCP" });
+  await t.run(async ctx => {
+    for (const [person, role] of [[people.member, "member"], [people.viewer, "viewer"]] as const) await ctx.db.insert("teamMembers", { teamId, userId: person.id, email: person.email, name: role, role, status: "active", createdAt: 1, updatedAt: 1 });
+  });
+  const shared = await t.mutation(api.projects.create, { sessionToken: people.owner.session, teamId, name: "Shared" });
+  const secret = await t.mutation(api.projects.create, { sessionToken: people.owner.session, teamId, name: "Secret" });
+  for (const person of [people.member, people.viewer]) await t.mutation(api.members.addWorkspaceMember, { sessionToken: people.owner.session, projectId: shared, email: person.email, role: "member" });
+  const token = async (person: { session: string }, write = true) => (await t.mutation(api.mcp.createToken, { sessionToken: person.session, teamId, name: "test", write })).token;
+  const ownerToken = await token(people.owner);
+  const secretIssue = JSON.parse(await t.mutation(api.mcp.createIssue, { token: ownerToken, project: "Secret", title: "Hidden", dueDate: "2030-01-01" })).id as string;
+  return { t, ...people, teamId, shared, secret, token, ownerToken, secretIssue };
+}
+
+describe("MCP tools", () => {
+  test("tokens act with the user's project access", async () => {
+    const f = await fixture();
+    const member = await f.token(f.member);
+    expect(member.startsWith("origin_pat_")).toBe(true);
+    const workspace = JSON.parse(await f.t.query(api.mcp.workspace, { token: member }));
+    expect(workspace.projects.map((p: { name: string }) => p.name)).toEqual(["Shared"]);
+    expect(workspace.access).toBe("read_write");
+    await expect(f.t.query(api.mcp.issue, { token: member, issueId: f.secretIssue })).rejects.toThrow("Issue not found");
+    await expect(f.t.mutation(api.mcp.createIssue, { token: member, project: f.secret, title: "x", dueDate: "2030-01-01" })).rejects.toThrow("Project not found");
+    await expect(f.t.mutation(api.mcp.addComment, { token: member, issueId: f.secretIssue, body: "hi" })).rejects.toThrow("Issue not found");
+  });
+
+  test("viewers and read-only tokens cannot write", async () => {
+    const f = await fixture();
+    await expect(f.token(f.viewer)).rejects.toThrow("Read-only");
+    const viewer = await f.token(f.viewer, false);
+    expect(JSON.parse(await f.t.query(api.mcp.workspace, { token: viewer })).access).toBe("read");
+    await expect(f.t.mutation(api.mcp.createIssue, { token: viewer, project: "Shared", title: "x", dueDate: "2030-01-01" })).rejects.toThrow();
+    const readOnly = await f.token(f.member, false);
+    await expect(f.t.mutation(api.mcp.createIssue, { token: readOnly, project: "Shared", title: "x", dueDate: "2030-01-01" })).rejects.toThrow();
+  });
+
+  test("list_issues filters before paging, in board order", async () => {
+    const f = await fixture();
+    const create = (title: string, column: string, assignee: string) => f.t.mutation(api.mcp.createIssue, { token: f.ownerToken, project: "Shared", title, column, assignee, dueDate: "2030-01-01" });
+    await create("todo owner", "Todo", "me");
+    for (let i = 0; i < 5; i++) await create(`progress member ${i}`, "In progress", f.member.email);
+    await create("draft member", "Draft", "@member");
+    const first = JSON.parse(await f.t.query(api.mcp.issues, { token: f.ownerToken, assignee: "member", limit: 4 }));
+    expect(first.issues.map((i: { title: string }) => i.title)).toEqual(["draft member", "progress member 0", "progress member 1", "progress member 2"]);
+    const second = JSON.parse(await f.t.query(api.mcp.issues, { token: f.ownerToken, assignee: "member", limit: 4, cursor: first.nextCursor }));
+    expect(second.issues.map((i: { title: string }) => i.title)).toEqual(["progress member 3", "progress member 4"]);
+    expect(second.nextCursor).toBeNull();
+    const text = JSON.parse(await f.t.query(api.mcp.issues, { token: f.ownerToken, text: "TODO OWNER", column: "todo" }));
+    expect(text.issues).toHaveLength(1);
+    await expect(f.t.query(api.mcp.issues, { token: f.ownerToken, column: "Nope" })).rejects.toThrow("Column not found");
+  });
+
+  test("move_issue orders like the board and completes/reopens", async () => {
+    const f = await fixture();
+    const ids: string[] = [];
+    for (const title of ["a", "b", "c"]) ids.push(JSON.parse(await f.t.mutation(api.mcp.createIssue, { token: f.ownerToken, project: "Shared", title, column: "Todo", dueDate: "2030-01-01" })).id);
+    await f.t.mutation(api.mcp.moveIssue, { token: f.ownerToken, issueId: ids[2]!, before: ids[0]! });
+    await f.t.mutation(api.mcp.moveIssue, { token: f.ownerToken, issueId: ids[1]!, position: "top" });
+    const order = async () => JSON.parse(await f.t.query(api.mcp.issues, { token: f.ownerToken, column: "Todo" })).issues.map((i: { title: string }) => i.title);
+    expect(await order()).toEqual(["b", "c", "a"]);
+    const board = await f.t.query(api.tasks.board, { sessionToken: f.owner.session, projectId: f.shared });
+    expect(board.tasks.filter(t => !t.done).map(t => t.title)).toEqual(["b", "c", "a"]);
+    expect(JSON.parse(await f.t.mutation(api.mcp.moveIssue, { token: f.ownerToken, issueId: ids[0]!, completed: true })).status).toBe("completed");
+    const reopened = JSON.parse(await f.t.mutation(api.mcp.moveIssue, { token: f.ownerToken, issueId: ids[0]!, column: "In progress" }));
+    expect([reopened.status, reopened.column]).toEqual(["open", "In progress"]);
+  });
+
+  test("comments resolve @mentions and notify like the UI", async () => {
+    const f = await fixture();
+    const issueId = JSON.parse(await f.t.mutation(api.mcp.createIssue, { token: f.ownerToken, project: "Shared", title: "Review", dueDate: "2030-01-01" })).id;
+    const result = JSON.parse(await f.t.mutation(api.mcp.addComment, { token: f.ownerToken, issueId, body: "Ready for @member, not @nobody" }));
+    expect(result.mentioned).toEqual(["@member"]);
+    const member = await f.token(f.member, false);
+    const inbox = JSON.parse(await f.t.query(api.mcp.inbox, { token: member }));
+    expect(inbox.unread).toEqual([expect.objectContaining({ kind: "mention", issueId, issue: "Review", from: "Owner" })]);
+    const issue = JSON.parse(await f.t.query(api.mcp.issue, { token: member, issueId }));
+    expect(issue.comments.map((c: { body: string }) => c.body)).toEqual(["Ready for @member, not @nobody"]);
+  });
+
+  test("revoked and self-revoked tokens stop working", async () => {
+    const f = await fixture();
+    const member = await f.token(f.member);
+    await f.t.mutation(api.mcp.revokeOwnToken, { token: member });
+    await expect(f.t.query(api.mcp.workspace, { token: member })).rejects.toThrow();
+    const grants = await f.t.query(api.connectors.listGrants, { sessionToken: f.member.session, teamId: f.teamId });
+    expect(grants.every(g => g.revoked)).toBe(true);
+  });
+});

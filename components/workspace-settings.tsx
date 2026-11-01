@@ -3,12 +3,13 @@ import { localAppOrigin } from "@/lib/client-api";
 
 import { useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Bell, Check, Copy, Link, Loader2, LogOut, Plug, Settings2, Shield, Trash2, User, UserPlus, Users } from "lucide-react";
+import { Bell, Bot, Check, Copy, Link, Loader2, LogOut, Plug, Settings2, Shield, Trash2, User, UserPlus, Users } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Dialog } from "./dialog";
 import { useMemberProfile, useWorkspace } from "./workspace-context";
 import { IntegrationSettings } from "./integration-settings";
+import { AgentSettings } from "./agent-settings";
 import { UserAvatar } from "./user-avatar";
 import { ContentSkeleton } from "./content-skeleton";
 import { NotificationPreferences } from "./notification-preferences";
@@ -18,13 +19,14 @@ export function WorkspaceSettings({ sessionToken, profile, security, sound, onTo
   const [tab, setTab] = useState("profile");
   const [notice, setNotice] = useState("");
   const revoke = useMutation(api.auth.revokeOtherSessions);
-  return <Dialog title="Settings" className="settings-dialog" onClose={onClose}><div className="settings-layout"><nav className="settings-nav"><span>ACCOUNT</span><button className={tab === "profile" ? "active" : ""} onClick={() => setTab("profile")}><User size={15} />My profile</button><button className={tab === "security" ? "active" : ""} onClick={() => setTab("security")}><Shield size={15} />Security</button><button className={tab === "notifications" ? "active" : ""} onClick={() => setTab("notifications")}><Bell size={15} />Notifications</button><span>{workspace.name}</span><button className={tab === "workspace" ? "active" : ""} onClick={() => setTab("workspace")}><Settings2 size={15} />Workspace</button><button className={tab === "members" ? "active" : ""} onClick={() => setTab("members")}><Users size={15} />Members & invites</button><button className={tab === "integrations" ? "active" : ""} onClick={() => setTab("integrations")}><Plug size={15} />Integrations</button><button className="settings-logout" onClick={onLogout}><LogOut size={15} />Sign out</button></nav><div className="settings-body">
+  return <Dialog title="Settings" className="settings-dialog" onClose={onClose}><div className="settings-layout"><nav className="settings-nav"><span>ACCOUNT</span><button className={tab === "profile" ? "active" : ""} onClick={() => setTab("profile")}><User size={15} />My profile</button><button className={tab === "security" ? "active" : ""} onClick={() => setTab("security")}><Shield size={15} />Security</button><button className={tab === "notifications" ? "active" : ""} onClick={() => setTab("notifications")}><Bell size={15} />Notifications</button><span>{workspace.name}</span><button className={tab === "workspace" ? "active" : ""} onClick={() => setTab("workspace")}><Settings2 size={15} />Workspace</button><button className={tab === "members" ? "active" : ""} onClick={() => setTab("members")}><Users size={15} />Members & invites</button><button className={tab === "integrations" ? "active" : ""} onClick={() => setTab("integrations")}><Plug size={15} />Integrations</button><button className={tab === "agents" ? "active" : ""} onClick={() => setTab("agents")}><Bot size={15} />Agents</button><button className="settings-logout" onClick={onLogout}><LogOut size={15} />Sign out</button></nav><div className="settings-body">
     {tab === "profile" && <><h3>My profile</h3>{profile}</>}
     {tab === "security" && <><h3>Security</h3>{security}<div className="settings-section"><h4>Active sessions</h4><button className="ghost-button" onClick={async () => { try { await revoke({ sessionToken }); setNotice("Signed out on all other devices"); } catch { setNotice("Could not sign out other devices"); } }}>Sign out other devices</button>{notice && <p className="notice">{notice}</p>}</div></>}
     {tab === "notifications" && <><h3>Notifications</h3><label className="notification-setting"><span>Notification sound</span><input type="checkbox" role="switch" checked={sound} onChange={onToggleSound} /></label><NotificationPreferences sessionToken={sessionToken} /></>}
     {tab === "workspace" && <><WorkspaceGeneral sessionToken={sessionToken} /><LeaveWorkspace sessionToken={sessionToken} /></>}
     {tab === "members" && <WorkspaceMembers sessionToken={sessionToken} beforeOpenProfile={onClose} />}
     {tab === "integrations" && <IntegrationSettings sessionToken={sessionToken} />}
+    {tab === "agents" && <AgentSettings sessionToken={sessionToken} />}
   </div></div></Dialog>;
 }
 

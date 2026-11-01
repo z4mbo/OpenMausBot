@@ -437,6 +437,11 @@ export const moveTask = mutation({
   },
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
+    await moveTaskRecord(ctx, args);
+  },
+});
+
+export async function moveTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; columnId: Id<"columns">; beforeTaskId?: Id<"tasks"> }) {
     const [task, column] = await Promise.all([ctx.db.get(args.taskId), ctx.db.get(args.columnId)]);
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
     if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
@@ -461,8 +466,7 @@ export const moveTask = mutation({
       ...(reopenAsDraft ? { done: false, completionPullRequest: undefined } : {}) });
     if (reopenAsDraft) await changeOpenIssueCount(ctx, args.projectId, 1);
     await touchProject(ctx, args.projectId);
-  },
-});
+}
 
 export const addComment = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string(), taskId: v.id("tasks"), body: v.string(), mentions: v.optional(v.array(v.object({ userId: v.id("users"), token: v.string() }))),
@@ -472,6 +476,12 @@ export const addComment = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { user, project } = await requireEditor(ctx, args.projectId, args.sessionToken);
+    await addCommentRecord(ctx, args, user, project);
+    return null;
+  },
+});
+
+export async function addCommentRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; body: string; mentions?: { userId: Id<"users">; token: string }[]; references?: { type: "project" | "issue"; id: string; projectId: Id<"projects">; label: string }[]; attachments?: { id: string; name: string; size: number; contentType: string }[] }, user: Doc<"users">, project: Doc<"projects">) {
     const task = await ctx.db.get(args.taskId);
     if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
     if ((!args.body.trim() && !args.attachments?.length) || args.body.length > 8000) throw new Error("Enter a comment under 8,000 characters or attach a file");
@@ -521,9 +531,8 @@ export const addComment = mutation({
       for (const email of recipients) await notify(ctx, { teamId: project.teamId, email, actorId: user._id, kind: mentioned.has(email) ? "mention" : "comment", eventId: `comment:${commentId}`, projectId: project._id, taskId: task._id, preview: args.body.trim().slice(0, 180) });
     }
     await touchProject(ctx, args.projectId);
-    return null;
-  },
-});
+    return commentId;
+}
 
 export const checkCommentItem = mutation({
   args: { sessionToken: v.string(), projectId: v.id("projects"), commentId: v.id("taskComments"), line: v.number(), text: v.string(), checked: v.boolean() },
