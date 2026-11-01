@@ -25,7 +25,8 @@ import { UserAvatar } from "./user-avatar";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 import { TaskModal } from "./issue-detail";
 import { IssueComposer } from "./issue-composer";
-import { LoadingState, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { DelayedSkeleton } from "./delayed-skeleton";
 
 type Task = Doc<"tasks">;
 type Column = Doc<"columns">;
@@ -272,7 +273,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     requestAnimationFrame(() => cardElement(boardScroll.current, taskId)?.focus({ preventScroll: true }));
   };
 
-  if (!board) return <LoadingState label="Loading board" />;
+  if (!board) return <DelayedSkeleton kind="board" label="Loading board" />;
 
   const people = new Map<string, CardPerson>();
   for (const person of [...(board.assignees || []), ...(projectMembers || [])]) people.set(person.email, { email: person.email, name: person.name, username: person.username, avatarUrl: person.avatarUrl });

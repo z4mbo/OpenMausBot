@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { localApi } from "@/lib/client-api";
 import { formatRelative } from "@/lib/format";
+import { focusQuietly } from "@/lib/initial-focus";
 import { normalizeProjectEmoji } from "@/lib/project-emoji";
 import { BoardTab } from "./project-issues";
 import { TaskModal } from "./issue-detail";
@@ -67,6 +68,35 @@ function parseGitHubRepo(repoUrl?: string) {
 function githubRepoHref(repoUrl?: string) {
   const parsed = parseGitHubRepo(repoUrl);
   return parsed ? `https://github.com/${parsed.owner}/${parsed.repo}` : null;
+}
+
+/**
+ * Hands focus to a newly created issue (its card, or the row's first control in the list view) and scrolls it into
+ * view, instead of the heading a closing composer falls back to. Called from a composer's onCreated: it waits until
+ * the composer is gone and has restored focus (or a few frames went by), and until the board shows the issue.
+ */
+export function focusCreatedIssue(taskId: string) {
+  const until = performance.now() + 5000;
+  let settledFrames = 0;
+  const attempt = () => {
+    // The dialog leaves the DOM before its cleanup restores focus; while focus sits on <body> that has not run yet.
+    const composerGone = !document.querySelector("dialog.origin-dialog");
+    settledFrames = composerGone ? settledFrames + 1 : 0;
+    const item = document.querySelector<HTMLElement>(`#project-panel [data-task-id="${CSS.escape(taskId)}"]`);
+    // Cards are a roving tab stop (tabindex 0 or -1); list rows without one hand focus to their title (else first control).
+    const target = item?.hasAttribute("tabindex") ? item : item?.querySelector<HTMLElement>(".issue-table-title") ?? item?.querySelector<HTMLElement>("button, a[href], [tabindex]");
+    if (composerGone && (document.activeElement !== document.body || settledFrames > 6) && item && target?.getClientRects().length) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reveal = () => item.isConnected && item.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
+      reveal();
+      focusQuietly(target);
+      // Once the card's entry animation has settled at full size, make sure all of it is in view.
+      window.setTimeout(reveal, 360);
+      return;
+    }
+    if (performance.now() < until) requestAnimationFrame(attempt);
+  };
+  requestAnimationFrame(attempt);
 }
 
 // Last result per project and repository, shown at once when the Repo tab opens again while it refreshes.
@@ -178,7 +208,7 @@ export function ProjectWorkspace({ projectId, sessionToken, user, initialTaskId,
         {tab === "settings" && <SettingsTab project={project} sessionToken={sessionToken} />}
       </div>
       {feedbackTask && <TaskModal project={project} projectId={projectId} sessionToken={sessionToken} taskId={feedbackTask} canEdit={canEdit} onClose={() => setFeedbackTask(null)} />}
-      {issueOpen && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} onClose={() => setIssueOpen(false)} onCreated={() => openTab("issues")} />}
+      {issueOpen && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} onClose={() => setIssueOpen(false)} onCreated={(_, taskId) => { openTab("issues"); focusCreatedIssue(taskId); }} />}
     </div>
   );
 }
