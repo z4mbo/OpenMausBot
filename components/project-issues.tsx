@@ -1,6 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { isDraftColumn } from "@/lib/origin-columns";
+import { ErrorBoundary } from "./error-boundary";
 
 import "./project-issues.css";
 
@@ -290,7 +291,11 @@ function ColumnEditor({ column, columns, projectId, sessionToken, onClose }: { c
   return <Dialog title={column ? "Edit column" : "New column"} onClose={onClose}><form className="dialog-body stack-form" onSubmit={async e => { e.preventDefault(); if (!online) return; setBusy(true); try { if (column) await update({ projectId, sessionToken, columnId: column._id, title, isDone: false }); else await create({ projectId, sessionToken, title, isDone: false }); onClose(); } catch (error) { setError(errorText(error, "Could not save column")); } finally { setBusy(false); } }}><label>Name<input autoFocus value={title} onChange={e => setTitle(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<div className="dialog-actions"><button className="primary-button compact" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={busy || !online}>Save column</button>{column && columns.length > 1 && !isDraftColumn(column) && <button className="ghost-button danger compact" type="button" onClick={() => setDeleting(!deleting)}><Trash2 size={14} />Delete column</button>}</div>{deleting && column && <div className="column-delete-form"><label>Move its issues to<select value={destination} onChange={e => setDestination(e.target.value as Id<"columns">)}>{columns.filter(c => c._id !== column._id).map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label><button type="button" className="ghost-button danger" disabled={busy} onClick={async () => { setBusy(true); try { await remove({ projectId, sessionToken, columnId: column._id, moveToColumnId: destination as Id<"columns"> }); onClose(); } catch (error) { setError(errorText(error, "Could not delete column")); } finally { setBusy(false); } }}>Delete and move issues</button></div>}</form></Dialog>;
 }
 
-export function TaskModal({
+export function TaskModal(props: Parameters<typeof TaskModalContent>[0]) {
+  return <ErrorBoundary resetKey={props.taskId} fallback={<Dialog title="Issue unavailable" onClose={props.onClose}><div className="dialog-body muted">This issue was deleted or you no longer have access to it.</div></Dialog>}><TaskModalContent {...props} /></ErrorBoundary>;
+}
+
+function TaskModalContent({
   project,
   projectId,
   sessionToken,
@@ -415,7 +420,7 @@ export function TaskModal({
   return <Dialog title={details ? `${taskKey(details.task._id)} / ${project.name}` : "Issue details"} className="issue-detail-dialog" onClose={closeIssue}>
     {details ? <div className="issue-detail-layout">
       <section className="issue-description-section">
-        <button type="button" className="ghost-button compact" aria-label={copied ? "Issue link copied" : "Copy issue link"} onClick={async () => { const url = new URL(window.location.href); url.searchParams.set("workspace", workspace.slug); url.searchParams.set("project", projectId); url.searchParams.set("issue", taskId); url.searchParams.set("tab", "issues"); try { await navigator.clipboard.writeText(url.href); setCopied(true); } catch { setActivityError("Clipboard unavailable. Copy the issue URL from the address bar."); } }}>{copied ? <Check size={14} /> : <Copy size={14} />}{copied ? "Issue link copied" : "Copy issue link"}</button>
+        <button type="button" className="ghost-button compact" aria-label={copied ? "Issue link copied" : "Copy issue link"} onClick={async () => { const url = new URL(`/${workspace.slug}`, window.location.origin); url.searchParams.set("project", projectId); url.searchParams.set("issue", taskId); try { await navigator.clipboard.writeText(url.href); setCopied(true); } catch { setActivityError("Clipboard unavailable. Copy the issue URL from the address bar."); } }}>{copied ? <Check size={14} /> : <Copy size={14} />}{copied ? "Issue link copied" : "Copy issue link"}</button>
         <div className="issue-detail-status" aria-live="polite">
           {details.task.done && <span className="issue-completed-badge"><CheckCircle2 size={14} />Completed</span>}
           <span className={saveState === "error" ? "danger" : ""}>{saveState === "saving" ? "Saving..." : saveState === "saved" ? "Saved" : saveState === "error" ? "Not saved. Check required fields." : "All changes saved"}</span>

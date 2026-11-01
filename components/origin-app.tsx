@@ -16,6 +16,7 @@ import {
   CircleDot,
   Power,
   RotateCcw,
+  CircleAlert,
   Copy,
   ExternalLink,
   FileText,
@@ -76,6 +77,7 @@ import { useProjectPresence } from "./use-project-presence";
 import { Dialog } from "./dialog";
 import { MotionLayer } from "./motion-layer";
 import { WhatsNew } from "./whats-new";
+import { ErrorBoundary } from "./error-boundary";
 import { IssueComposer } from "./issue-composer";
 import { InboxView } from "./inbox-view";
 import { CallDevices } from "./call-devices";
@@ -513,6 +515,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
         {sidebarCollapsed && <button className="icon-button sidebar-restore" aria-label="Keep sidebar open" title="Keep sidebar open" aria-controls="workspace-sidebar" aria-expanded="false" onClick={() => { setSidebarCollapsed(false); setSidebarHover(false); }}><PanelLeftOpen size={18} /></button>}
         {viewLoading && <div className="view-loading-overlay"><ContentSkeleton kind={mainView === "chat" ? "chat" : mainView === "draw" ? "canvas" : mainView === "project" || mainView === "voice" ? "board" : "list"} label="Loading view" rows={6} /></div>}
         {shellNotice && <div className="notice danger">{shellNotice}<button className="icon-button" aria-label="Dismiss" onClick={() => setShellNotice("")}><X size={14} /></button></div>}
+        <ErrorBoundary resetKey={`${mainView}:${activeProjectId}`} fallback={<EmptyBlock icon={CircleAlert} title="This view could not load" body="It may have been deleted or your access changed." />}>
         {mainView === "chat" ? (
           <ChatView sessionToken={sessionToken} user={user} focusMessageId={chatFocus} onOpenReference={openReference} />
         ) : mainView === "draw" || mainView === "voice" ? null
@@ -523,6 +526,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
         ) : (
           <EmptyProjects sessionToken={sessionToken} onCreated={openProject} />
         )}
+        </ErrorBoundary>
         {visitedTools.draw && <div className="persistent-tool draw-tool" hidden={mainView !== "draw"}><DrawView sessionToken={sessionToken} user={user} /></div>}
         {visitedTools.voice && <div className="persistent-tool voice-tool" hidden={mainView !== "voice"}><VoiceChatView sessionToken={sessionToken} user={user} /></div>}
       </main>
