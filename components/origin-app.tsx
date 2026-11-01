@@ -188,7 +188,6 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const [initialIssue, setInitialIssue] = useState<{ projectId: Id<"projects">; taskId: Id<"tasks"> } | null>(null);
   const reorder = useMutation(api.projects.reorder);
   const projects = useQuery(api.projects.listForUser, { sessionToken, teamId: workspace._id });
-  useEffect(() => { if (projects) preloadViews(); }, [projects]);
   const workspaceRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const root = workspaceRef.current;
@@ -209,6 +208,8 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
     viewersByProject.set(viewer.projectId, viewers);
   }
 
+  // Once the projects are in, fetch the views the board left out.
+  useEffect(() => { if (projects) preloadViews(); }, [projects]);
   useEffect(() => { if (mainView === "draw" || mainView === "voice") setVisitedTools(current => ({ ...current, [mainView]: true })); }, [mainView]);
 
   useEffect(() => {
