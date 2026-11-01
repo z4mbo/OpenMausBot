@@ -30,9 +30,9 @@ export function IssueFields({ columns, members, columnId, onColumnChange, priori
   errors?: Partial<Record<IssueFieldKey, string>>;
   children?: ReactNode;
 }) {
-  const status = <IssueSelect label="Status" icon={<Circle size={14} />} value={columnId} onChange={onColumnChange} options={columns.map(column => ({ value: column._id, label: column.title, icon: <StatusIcon title={column.title} /> }))} disabled={disabled} />;
-  const priorityField = <IssueSelect label="Priority" icon={<PriorityIcon priority={priority} />} value={priority} onChange={value => onPriorityChange(value as Priority)} options={PRIORITY_OPTIONS} disabled={disabled} />;
-  const assigneeField = <MemberPicker label="Assignee" placeholder={labeled ? "Unassigned" : "Assignee"} noneLabel="No assignee" members={members} value={assignee} onChange={onAssigneeChange} currentEmail={currentEmail} disabled={disabled} />;
+  const status = <IssueSelect label="Status" icon={<Circle size={14} />} value={columnId} onChange={onColumnChange} options={columns.map(column => ({ value: column._id, label: column.title, icon: <StatusIcon title={column.title} /> }))} disabled={disabled} caption="Status" />;
+  const priorityField = <IssueSelect label="Priority" icon={<PriorityIcon priority={priority} />} value={priority} onChange={value => onPriorityChange(value as Priority)} options={PRIORITY_OPTIONS} disabled={disabled} caption="Priority" />;
+  const assigneeField = <MemberPicker label="Assignee" placeholder={labeled ? "Unassigned" : "Assignee"} noneLabel="Unassigned" members={members} value={assignee} onChange={onAssigneeChange} currentEmail={currentEmail} disabled={disabled} caption="Assignee" />;
   const due = <DatePicker label="Due date" placeholder={labeled ? "No due date" : "Due date"} value={dueDate} onChange={onDueDateChange} disabled={disabled} />;
   const error = (key: IssueFieldKey) => errors?.[key] ? <small className="issue-field-error" role="alert">{errors[key]}</small> : null;
   if (labeled) return <div className="issue-properties">

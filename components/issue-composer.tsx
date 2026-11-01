@@ -132,7 +132,7 @@ export function IssueComposer({
   return (
     <Dialog
       title="New issue"
-      heading={<div className="issue-breadcrumb"><IssueSelect label="Project" icon={<Circle size={14} />} value={projectId || ""} disabled={busy} onChange={value => chooseProject(value as Id<"projects">)} options={editable.map(project => ({ value: project._id, label: project.name, icon: <ProjectIcon project={project} size={14} /> }))} placeholder="Project" /><ChevronRight size={14} aria-hidden="true" /><h2>New issue</h2></div>}
+      heading={<div className="issue-breadcrumb"><IssueSelect label="Project" icon={<Circle size={14} />} value={projectId || ""} disabled={busy} onChange={value => chooseProject(value as Id<"projects">)} options={editable.map(project => ({ value: project._id, label: project.name, icon: <ProjectIcon project={project} size={14} /> }))} placeholder="Project" caption="Project" /><ChevronRight size={14} aria-hidden="true" /><h2>New issue</h2></div>}
       className="issue-composer-dialog"
       onClose={close}
     >
@@ -166,7 +166,7 @@ export function IssueComposer({
               onKeyDown={event => { if (event.key === "Enter" && !event.metaKey && !event.ctrlKey && !event.nativeEvent.isComposing) { event.preventDefault(); descriptionInput.current?.focus(); } }}
               placeholder="Issue title"
               maxLength={250}
-              disabled={busy}
+              readOnly={busy}
             />
             {titleError && <small id="issue-composer-title-error" className="issue-field-error" role="alert">Add a title</small>}
             <textarea
@@ -176,7 +176,7 @@ export function IssueComposer({
               onChange={(e) => update({ description: e.target.value })}
               placeholder="Add a description..."
               rows={3}
-              disabled={busy}
+              readOnly={busy}
               maxLength={60000}
             />
             <IssueFields
@@ -195,7 +195,7 @@ export function IssueComposer({
             />
             <footer className="issue-composer-footer">
               {error ? <div role="alert" className="issue-field-error">{error}</div> : <span />}
-              <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !selectedColumn}>
+              <button type="submit" className="primary-button compact issue-create-submit" aria-keyshortcuts="Control+Enter Meta+Enter" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !selectedColumn}>
                 {busy && <Loader2 size={14} className="spin" />}
                 Create issue
                 <kbd aria-hidden="true">{typeof navigator !== "undefined" && /Mac|iP(hone|ad)/.test(navigator.platform) ? "⌘↵" : "Ctrl ↵"}</kbd>

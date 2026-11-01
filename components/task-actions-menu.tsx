@@ -6,6 +6,7 @@ import { CalendarDays, Check, ChevronLeft, ChevronRight, Link2, Search, Trash2, 
 import { displayName, formatDue } from "@/lib/format";
 import { PriorityIcon, StatusIcon } from "./issue-icons";
 import { UserAvatar } from "./user-avatar";
+import { SHEET_CLASS, isSheetLayout } from "./use-anchored-popover";
 
 export type TaskMenuView = "root" | "status" | "priority" | "assignee";
 /** Viewport box the menu opens from: a card, a chip, or the pointer (a zero-size box). */
@@ -17,7 +18,7 @@ const PRIORITIES: { value: Priority; label: string }[] = [{ value: "high", label
 const SUBMENUS: { view: Exclude<TaskMenuView, "root">; label: string }[] = [{ view: "status", label: "Status" }, { view: "priority", label: "Priority" }, { view: "assignee", label: "Assignee" }];
 const noAssignee = <span className="task-menu-no-assignee" aria-hidden="true"><UserRound size={12} /></span>;
 const items = (menu: HTMLElement | null) => Array.from(menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not(:disabled)') ?? []);
-const sheetLayout = () => typeof matchMedia === "function" && matchMedia("(max-width: 760px)").matches;
+const sheetLayout = isSheetLayout;
 const coarsePointer = () => typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 
 /**
@@ -112,7 +113,7 @@ export function TaskMenu({ title, view: initialView, anchor, status, statuses, p
       <hr />
       <button type="button" role="menuitem" onClick={() => pick(onCopyLink)}><Link2 size={14} /><span>Copy link</span></button>
       <hr />
-      <button type="button" role="menuitem" className="danger-text" onClick={() => pick(onDelete)}><Trash2 size={14} /><span>Delete</span></button>
+      <button type="button" role="menuitem" className="danger-text" onClick={() => pick(onDelete)}><Trash2 size={14} /><span>Delete issue</span></button>
     </>;
   } else {
     const label = SUBMENUS.find(item => item.view === view)!.label;
@@ -133,7 +134,7 @@ export function TaskMenu({ title, view: initialView, anchor, status, statuses, p
 
   return createPortal(<div className={`task-menu-layer ${sheet ? "is-sheet" : ""}`} onContextMenu={event => { event.preventDefault(); close(false); }}>
     <MenuScrim onClose={() => close(false)} />
-    <div ref={menu} role="menu" aria-label={`Options for ${title}`} className="origin-dropdown task-menu" onKeyDown={onKeyDown}>
+    <div ref={menu} role="menu" aria-label={`Options for ${title}`} className={`origin-dropdown task-menu ${sheet ? SHEET_CLASS : ""}`} onKeyDown={onKeyDown}>
       {sheet && <div className="task-menu-title">{title}</div>}
       {body}
     </div>

@@ -104,7 +104,7 @@ function ConvertFeedback({ sessionToken, projectId, entry, onClose, onCreated }:
     <p className="library-form-subject">{entry.kind === "bug" ? <Bug size={14} /> : <Lightbulb size={14} />}<span>{entry.title}</span></p>
     <div className="issue-property-chips">
       <IssueSelect label="Status" value={column || defaultColumn} onChange={setColumn} options={columns.map(c => ({ value: c._id, label: c.title, icon: <StatusIcon title={c.title} /> }))} />
-      <MemberPicker label="Assignee" placeholder="Assignee" noneLabel="No assignee" members={members ?? []} value={assignee} onChange={setAssignee} currentEmail={me?.email} />
+      <MemberPicker label="Assignee" placeholder="Assignee" noneLabel="Unassigned" members={members ?? []} value={assignee} onChange={setAssignee} currentEmail={me?.email} />
       <DatePicker value={dueDate} onChange={setDueDate} />
     </div>
     {error && <p className="notice danger" role="alert">{error}</p>}
