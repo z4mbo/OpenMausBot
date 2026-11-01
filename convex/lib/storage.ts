@@ -7,6 +7,7 @@ export type StorageScope = Doc<"storageAdmissions">["scope"];
 export type UploadTarget = Doc<"storageUploadIntents">["target"];
 type Ctx = QueryCtx | MutationCtx;
 const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+const DRAWING_TYPES = new Set([...IMAGE_TYPES, "image/svg+xml"]);
 
 export function scopeKey(scope: StorageScope) {
   return scope.kind === "user" ? `user:${scope.userId}` : scope.kind === "project" ? `project:${scope.projectId}` : `workspace:${scope.teamId}`;
@@ -33,7 +34,18 @@ export async function writableUploadScope(ctx: Ctx, user: Doc<"users">, target: 
     if (!agent || agent.archivedAt !== undefined || !(await agentAccess(ctx, agent, user))?.canEdit) throw new Error("No upload access");
     return agent.projectId ? { kind: "project", projectId: agent.projectId } : { kind: "workspace", teamId: agent.teamId };
   }
-  if (target.kind === "drawing") throw new Error("No upload access");
+  if (target.kind === "drawing") {
+    if (target.canvasId) {
+      const canvas = await ctx.db.get(target.canvasId);
+      const project = canvas && canvas.teamId === target.teamId && canvas.kind === undefined && !canvas.archived ? await ctx.db.get(canvas.projectId) : null;
+      const member = project ? await projectMember(ctx, project, user) : null;
+      if (!canvas || !member || !canEdit(member)) throw new Error("No upload access");
+      return { kind: "project", projectId: canvas.projectId };
+    }
+    const member = await getActiveTeamMember(ctx, target.teamId, user.email);
+    if (!member || (member.userId && member.userId !== user._id) || !canEdit(member)) throw new Error("No upload access");
+    return { kind: "workspace", teamId: target.teamId };
+  }
   const project = await ctx.db.get(target.projectId);
   const member = project ? await projectMember(ctx, project, user) : null;
   if (!member || !canEdit(member) || (target.kind === "icon" && member.role !== "owner" && member.role !== "admin")) throw new Error("No upload access");
@@ -48,6 +60,7 @@ export function validateUpload(target: UploadTarget, size: number, contentType: 
   if (size > uploadLimit(target)) throw new Error("Upload too large");
   if (target.kind === "profile" && !IMAGE_TYPES.has(contentType ?? "")) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
   if ((target.kind === "icon" || target.kind === "agent") && !contentType?.startsWith("image/")) throw new Error("Choose an image under 5 MB");
+  if (target.kind === "drawing" && !DRAWING_TYPES.has(contentType ?? "")) throw new Error("Choose an image under 15 MB");
 }
 
 export async function storageMetadata(ctx: Ctx, storageId: Id<"_storage">) {

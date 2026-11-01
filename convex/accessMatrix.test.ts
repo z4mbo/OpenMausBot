@@ -70,6 +70,7 @@ describe("backend resource access matrix", () => {
       ["github.listPullRequests", () => f.t.query(api.github.listPullRequests, scope)],
       ["taskPRs.list", () => f.t.query(api.taskPRs.list, { sessionToken, taskId: f.private.taskId })],
       ["issueRelations.list", () => f.t.query(api.issueRelations.list, { sessionToken, taskId: f.private.taskId })],
+      ["draw.canvases", () => f.t.query(api.draw.canvases, scope)],
       ["workspaceSearch.issues", () => f.t.query(api.workspaceSearch.issues, { ...scope, teamId: f.teamId, text: "Sensitive" })],
       ["inbox.list", () => f.t.query(api.inbox.list, { ...scope, teamId: f.teamId, done: false, mine: false, paginationOpts })],
     ];
