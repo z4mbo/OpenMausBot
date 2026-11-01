@@ -2,36 +2,43 @@
 
 import { memo, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import clsx from "clsx";
-import { CalendarDays, Check, Circle, MoreHorizontal, UserRound } from "lucide-react";
+import { CalendarDays, Check, MoreHorizontal, UserRound } from "lucide-react";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { displayName, formatDue } from "@/lib/format";
 import { taskKey } from "@/lib/project-issues";
 import { GitHubIssueIndicator } from "./github-issue-indicator";
-import { PriorityIcon } from "./issue-icons";
+import { PriorityIcon, StatusIcon } from "./issue-icons";
 import { UserAvatar } from "./user-avatar";
 import type { TaskMenuAnchor, TaskMenuView } from "./task-actions-menu";
 
+type Task = Doc<"tasks">;
 export type CardPerson = { email: string; name?: string; username?: string; avatarUrl?: string | null };
 const PRIORITY_LABEL: Record<string, string> = { high: "High", medium: "Medium", low: "Low" };
+type OnMenu = (task: Task, view: TaskMenuView, anchor: TaskMenuAnchor, from: HTMLElement) => void;
+type OnDueDate = (task: Task, from: HTMLElement) => void;
 
-export type IssueCardProps = {
-  task: Doc<"tasks">;
+/** What a board card and a list row share: the same issue, the same quick edits, the same menu. */
+type IssueItemProps = {
+  task: Task;
   assignee: CardPerson | null;
   canEdit: boolean;
   tabStop: boolean;
   selected: boolean;
   completing?: "checked";
-  dragState?: "placeholder" | "moving";
-  keyboardMoving: boolean;
   menuOpen: boolean;
-  onOpen: (taskId: Doc<"tasks">["_id"]) => void;
-  onComplete: (task: Doc<"tasks">) => void;
-  onMenu: (task: Doc<"tasks">, view: TaskMenuView, anchor: TaskMenuAnchor, from: HTMLElement) => void;
+  onOpen: (taskId: Task["_id"]) => void;
+  onComplete: (task: Task) => void;
+  onMenu: OnMenu;
   /** Opens the due date popover anchored to the clicked chip. */
-  onDueDate: (task: Doc<"tasks">, from: HTMLElement) => void;
-  onKeyDown: (event: ReactKeyboardEvent<HTMLElement>, task: Doc<"tasks">) => void;
+  onDueDate: OnDueDate;
+  onKeyDown: (event: ReactKeyboardEvent<HTMLElement>, task: Task) => void;
   onFocus: (taskId: string) => void;
   onPointerDown: (event: ReactPointerEvent<HTMLElement>, taskId: string) => void;
+};
+
+export type IssueCardProps = IssueItemProps & {
+  dragState?: "placeholder" | "moving";
+  keyboardMoving: boolean;
   onHandleKeyDown: (event: ReactKeyboardEvent<HTMLElement>, taskId: string) => void;
   onHandleClick: (event: ReactMouseEvent<HTMLElement>, taskId: string) => void;
   onHandleBlur: (taskId: string) => void;
@@ -48,6 +55,48 @@ const tapTarget = (element: HTMLElement | null) => {
 };
 
 const box = (element: Element): TaskMenuAnchor => { const rect = element.getBoundingClientRect(); return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }; };
+const openChip = (task: Task, view: TaskMenuView, onMenu: OnMenu) => (event: ReactMouseEvent<HTMLButtonElement>) => { event.stopPropagation(); onMenu(task, view, box(event.currentTarget), event.currentTarget); };
+const pointAt = (event: ReactMouseEvent): TaskMenuAnchor => ({ left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY });
+
+/** The complete control: a rounded square (status icons are rings), a green tick once done. */
+export function CompleteCheck({ task, done, canEdit, onComplete }: { task: Task; done: boolean; canEdit: boolean; onComplete: (task: Task) => void }) {
+  return <button className="check-button" type="button" tabIndex={-1} aria-label={done ? `Completed ${task.title}` : `Complete ${task.title}`} disabled={!canEdit || done} onClick={event => { event.stopPropagation(); onComplete(task); }}>
+    {done ? <span className="check-done"><Check size={10} strokeWidth={3} /></span> : <span className="check-box" />}
+  </button>;
+}
+
+export function StatusChip({ task, title, label, canEdit, onMenu }: { task: Task; title: string; label: string; canEdit: boolean; onMenu: OnMenu }) {
+  const content = <><StatusIcon title={title} /><span>{label}</span></>;
+  return canEdit
+    ? <button type="button" tabIndex={-1} className="task-chip status-chip" aria-label={`Status: ${label}`} aria-haspopup="menu" onClick={openChip(task, "status", onMenu)}>{content}</button>
+    : <span className="task-chip status-chip">{content}</span>;
+}
+
+export function PriorityChip({ task, canEdit, onMenu }: { task: Task; canEdit: boolean; onMenu: OnMenu }) {
+  const label = PRIORITY_LABEL[task.priority] ?? task.priority;
+  return canEdit
+    ? <button type="button" tabIndex={-1} className={clsx("task-chip priority", task.priority)} aria-label={`Priority: ${label}`} aria-haspopup="menu" onClick={openChip(task, "priority", onMenu)}><PriorityIcon priority={task.priority} /><span>{label}</span></button>
+    : <span className={clsx("task-chip priority", task.priority)}><PriorityIcon priority={task.priority} /><span>{label}</span></span>;
+}
+
+/** Due date chip; `empty` shows a quiet date button when there is no due date (list rows). */
+export function DueChip({ task, canEdit, onDueDate, empty = false }: { task: Task; canEdit: boolean; onDueDate: OnDueDate; empty?: boolean }) {
+  const due = formatDue(task.dueDate);
+  if (!due && !(empty && canEdit)) return null;
+  if (!canEdit) return <span className={clsx("task-chip due-chip", due!.tone)}><CalendarDays size={12} /><span>{due!.label}</span></span>;
+  return <button type="button" tabIndex={-1} className={clsx("task-chip due-chip", due ? due.tone : "is-empty")} aria-label={due ? `Due ${due.label}` : "Set due date"} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); onDueDate(task, event.currentTarget); }}>
+    <CalendarDays size={12} />{due && <span>{due.label}</span>}
+  </button>;
+}
+
+/** Assignee avatar (with the name in list rows) that opens the assignee menu. */
+export function AssigneeChip({ task, assignee, canEdit, onMenu, withName = false }: { task: Task; assignee: CardPerson | null; canEdit: boolean; onMenu: OnMenu; withName?: boolean }) {
+  const name = assignee ? displayName(assignee) : "";
+  const face = assignee ? <UserAvatar user={assignee} /> : <span className="task-assignee-empty"><UserRound size={12} /></span>;
+  const label = withName && assignee ? <span className="task-assignee-name">{name}</span> : null;
+  if (canEdit) return <button type="button" tabIndex={-1} className={clsx("task-assignee", !assignee && "is-empty", withName && "with-name")} aria-label={assignee ? `Assignee: ${name}` : "Assign"} title={!withName && name ? name : undefined} aria-haspopup="menu" onClick={openChip(task, "assignee", onMenu)}>{face}{label}</button>;
+  return assignee ? <span className={clsx("task-assignee", withName && "with-name")} title={!withName ? name : undefined}>{face}{label}</span> : null;
+}
 
 /**
  * One board card. The card is a single Tab stop that opens the issue; its chips edit priority, due date and assignee in
@@ -56,10 +105,7 @@ const box = (element: Element): TaskMenuAnchor => { const rect = element.getBoun
  */
 export const IssueCard = memo(function IssueCard({ task, assignee, canEdit, tabStop, selected, completing, dragState, keyboardMoving, menuOpen, onOpen, onComplete, onMenu, onDueDate, onKeyDown, onFocus, onPointerDown, onHandleKeyDown, onHandleClick, onHandleBlur }: IssueCardProps) {
   const key = taskKey(task._id);
-  const due = formatDue(task.dueDate);
   const done = task.done || Boolean(completing);
-  const chip = (view: TaskMenuView) => (event: ReactMouseEvent<HTMLButtonElement>) => { event.stopPropagation(); onMenu(task, view, box(event.currentTarget), event.currentTarget); };
-  const name = assignee ? displayName(assignee) : "";
   return (
     <article
       className={clsx("task-card", canEdit && "can-drag", done && "done", selected && "is-selected", menuOpen && "has-menu",
@@ -78,33 +124,58 @@ export const IssueCard = memo(function IssueCard({ task, assignee, canEdit, tabS
       onContextMenu={event => {
         if (!canEdit || (event.target as Element).closest("input")) return;
         event.preventDefault();
-        onMenu(task, "root", { left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY }, event.currentTarget);
+        onMenu(task, "root", pointAt(event), event.currentTarget);
       }}
     >
       <div className="task-card-head">
-        <span className="task-code" ref={tapTarget}>{key}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
+        <span className="task-code issue-key" ref={tapTarget}>{key}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
         {canEdit && <button className="drag-handle" type="button" tabIndex={-1} aria-label={`Move ${task.title}`} aria-pressed={keyboardMoving} onKeyDown={event => onHandleKeyDown(event, task._id)} onClick={event => onHandleClick(event, task._id)} onBlur={() => onHandleBlur(task._id)} />}
-        {canEdit
-          ? <button type="button" tabIndex={-1} className={clsx("task-assignee", !assignee && "is-empty")} aria-label={assignee ? `Assignee: ${name}` : "Assign"} title={name || undefined} aria-haspopup="menu" onClick={chip("assignee")}>
-            {assignee ? <UserAvatar user={assignee} /> : <UserRound size={12} />}
-          </button>
-          : assignee && <span className="task-assignee" title={name}><UserAvatar user={assignee} /></span>}
+        <AssigneeChip task={task} assignee={assignee} canEdit={canEdit} onMenu={onMenu} />
       </div>
       <div className="task-top">
-        <button className="check-button" type="button" tabIndex={-1} aria-label={done ? `Completed ${task.title}` : `Complete ${task.title}`} disabled={!canEdit || done} onClick={event => { event.stopPropagation(); onComplete(task); }}>
-          {done ? <span className="check-done"><Check size={10} strokeWidth={3} /></span> : <Circle size={15} />}
-        </button>
+        <CompleteCheck task={task} done={done} canEdit={canEdit} onComplete={onComplete} />
         <strong ref={tapTarget}>{task.title}</strong>
       </div>
       <div className="task-meta">
-        {canEdit
-          ? <button type="button" tabIndex={-1} className={clsx("task-chip priority", task.priority)} aria-label={`Priority: ${PRIORITY_LABEL[task.priority] ?? task.priority}`} aria-haspopup="menu" onClick={chip("priority")}><PriorityIcon priority={task.priority} />{PRIORITY_LABEL[task.priority] ?? task.priority}</button>
-          : <span className={clsx("task-chip priority", task.priority)}><PriorityIcon priority={task.priority} />{PRIORITY_LABEL[task.priority] ?? task.priority}</span>}
-        {due && (canEdit
-          ? <button type="button" tabIndex={-1} className={clsx("task-chip due-chip", due.tone)} aria-label={`Due ${due.label}`} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); onDueDate(task, event.currentTarget); }}><CalendarDays size={12} />{due.label}</button>
-          : <span className={clsx("task-chip due-chip", due.tone)}><CalendarDays size={12} />{due.label}</span>)}
+        <PriorityChip task={task} canEdit={canEdit} onMenu={onMenu} />
+        <DueChip task={task} canEdit={canEdit} onDueDate={onDueDate} />
         {canEdit && <button type="button" tabIndex={-1} className="icon-button task-menu-button task-actions" aria-label={`Issue options for ${task.title}`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={event => { event.stopPropagation(); onMenu(task, "root", box(event.currentTarget), event.currentTarget); }}><MoreHorizontal size={14} /></button>}
       </div>
     </article>
+  );
+});
+
+/**
+ * One list row: the same Tab stop, keys, menu (right-click, Shift+F10, long-press) and quick-edit chips as a card.
+ */
+export const IssueRow = memo(function IssueRow({ task, assignee, status, canEdit, tabStop, selected, completing, menuOpen, onOpen, onComplete, onMenu, onDueDate, onKeyDown, onFocus, onPointerDown }: IssueItemProps & { status?: { title: string; label: string } }) {
+  const key = taskKey(task._id);
+  const done = task.done || Boolean(completing);
+  return (
+    <tr
+      data-task-id={task._id}
+      className={clsx(canEdit && "can-press", selected && "is-selected", menuOpen && "has-menu", completing && "is-completing")}
+      tabIndex={tabStop ? 0 : -1}
+      aria-label={`${key} ${task.title}`}
+      aria-current={selected ? "true" : undefined}
+      onPointerDown={event => onPointerDown(event, task._id)}
+      onClick={() => onOpen(task._id)}
+      onFocus={event => { if (event.target === event.currentTarget) onFocus(task._id); }}
+      onKeyDown={event => onKeyDown(event, task)}
+      onContextMenu={event => {
+        if (!canEdit) return;
+        event.preventDefault();
+        onMenu(task, "root", pointAt(event), event.currentTarget);
+      }}
+    >
+      <td className="col-issue">
+        <CompleteCheck task={task} done={done} canEdit={canEdit} onComplete={onComplete} />
+        <span className="issue-table-title" ref={tapTarget}><small className="issue-key">{key}</small><span>{task.title}</span></span>
+      </td>
+      <td className="col-status">{status && <StatusChip task={task} title={status.title} label={status.label} canEdit={canEdit} onMenu={onMenu} />}</td>
+      <td className="col-priority"><PriorityChip task={task} canEdit={canEdit} onMenu={onMenu} /></td>
+      <td className="col-assignee"><AssigneeChip task={task} assignee={assignee} canEdit={canEdit} onMenu={onMenu} withName /></td>
+      <td className="col-due"><DueChip task={task} canEdit={canEdit} onDueDate={onDueDate} empty /></td>
+    </tr>
   );
 });

@@ -99,11 +99,46 @@ function insertionIndex(lane: HTMLElement, session: Session) {
   return best;
 }
 
+/** `EASE` as a function of time (0..1), for movement driven from script. */
+function ease(t: number) {
+  const [x1, y1, x2, y2] = [0.2, 0.8, 0.2, 1];
+  const at = (a: number, b: number, s: number) => 3 * a * s * (1 - s) ** 2 + 3 * b * s * s * (1 - s) + s ** 3;
+  let s = t;
+  for (let step = 0; step < 8; step += 1) {
+    const dx = 3 * x1 * (1 - s) ** 2 + 6 * (x2 - x1) * s * (1 - s) + 3 * (1 - x2) * s * s;
+    if (Math.abs(dx) < 1e-6) break;
+    s = Math.min(1, Math.max(0, s - (at(x1, x2, s) - t) / dx));
+  }
+  return at(y1, y2, s);
+}
+
+/** How far the board must scroll so the lane holding `card` sits on its snap position (0 where lanes do not snap). */
+function snapShift(root: HTMLElement | null, card: HTMLElement) {
+  const column = card.closest<HTMLElement>("[data-column-id]");
+  if (!root || !column || !getComputedStyle(column).scrollSnapAlign.includes("start")) return 0;
+  const padding = parseFloat(getComputedStyle(root).scrollPaddingLeft) || 0;
+  const wanted = root.scrollLeft + column.getBoundingClientRect().left - root.getBoundingClientRect().left - padding;
+  const shift = Math.round(Math.max(0, Math.min(root.scrollWidth - root.clientWidth, wanted)) - root.scrollLeft);
+  return Math.abs(shift) >= 1 ? shift : 0;
+}
+
+/** Scrolls the board by `shift` over the settle glide, on the ghost's curve. */
+function glideScroll(root: HTMLElement, shift: number, active: Session) {
+  const from = root.scrollLeft;
+  const start = performance.now();
+  const step = (now: number) => {
+    const t = Math.min(1, (now - start) / SETTLE_MS);
+    root.scrollLeft = from + shift * ease(t);
+    if (t < 1) active.frame = requestAnimationFrame(step);
+  };
+  active.frame = requestAnimationFrame(step);
+}
+
 /**
  * Swallows the click the browser sends right after a drag ends, so dropping a card does not open it. Only that click
  * is eaten: it follows the pointerup within the same input event, while a real click needs a fresh pointerdown first.
  */
-function swallowNextClick(upTime: number) {
+export function swallowNextClick(upTime: number) {
   const block = (event: MouseEvent) => {
     remove();
     if (event.timeStamp - upTime > 120) return;
@@ -158,9 +193,20 @@ export function useIssueDrag({ rootRef, enabled, onMove, onPressMenu }: {
         if (!sameSlot(current.target, current.origin)) onMoveRef.current(current.taskId, current.target);
         update(null);
       });
+      // The landed card stays exactly where the ghost put it: no hover lift under the pointer until it leaves.
+      const card = board()?.querySelector<HTMLElement>(cardSelector(current.taskId));
+      if (card && session.current && !session.current.touch) {
+        card.setAttribute("data-landed", "");
+        const leave = (event: PointerEvent) => {
+          if (card.isConnected && card.contains(event.target as Node)) return;
+          card.removeAttribute("data-landed");
+          window.removeEventListener("pointermove", leave, true);
+        };
+        window.addEventListener("pointermove", leave, true);
+      }
     }
     end(session.current);
-  }, [end, update]);
+  }, [board, end, update]);
 
   const settle = useCallback((cancel: boolean) => {
     const current = dragRef.current;
@@ -341,8 +387,12 @@ export function useIssueDrag({ rootRef, enabled, onMove, onPressMenu }: {
     if (!placeholder || reducedMotion()) { active.settleTimer = window.setTimeout(finish, 0); return; }
     placeholder.getAnimations().forEach(animation => animation.finish());
     const box = placeholder.getBoundingClientRect();
+    // Where lanes snap (phones), bring the lane to its snap position together with the glide, so the board does not
+    // snap on its own after the card has landed.
+    const shift = snapShift(board(), placeholder);
+    if (shift) glideScroll(board()!, shift, active);
     active.layer.style.transition = `transform ${SETTLE_MS}ms ${EASE}`;
-    active.layer.style.transform = `translate3d(${box.left}px, ${box.top}px, 0)`;
+    active.layer.style.transform = `translate3d(${box.left - shift}px, ${box.top}px, 0)`;
     active.ghost?.classList.add("is-settling");
     active.settleTimer = window.setTimeout(finish, SETTLE_MS + 20);
   }, [board, drag, finish]);

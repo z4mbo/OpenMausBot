@@ -13,6 +13,8 @@
 .board-header-actions .member-picker-trigger:hover { color: var(--text-1); }
 .board-header-actions > .issue-layout-switch { margin: 0 var(--space-1); }
 .issue-layout-switch button { width: 28px; padding: 0; justify-content: center; }
+/* Completed has one layout; the switch keeps its place so the controls beside it never move. */
+.issue-layout-switch.is-idle { visibility: hidden; }
 .board-header-actions > .project-create-issue { margin-left: var(--space-1); }
 .board-filter-control { position: relative; display: flex; min-width: 0; }
 .board-filter-popover { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; display: flex; align-items: center; gap: var(--space-2); width: 280px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-3); box-shadow: var(--shadow-md); color: var(--text-3); animation: o-pop var(--duration) var(--ease-out); }
@@ -119,6 +121,8 @@
 .task-card.can-drag { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 @media (hover: hover) {
   .task-card:hover { transform: translateY(-1px); border-color: var(--border-2); background: var(--surface-3); }
+  /* A card just dropped under the pointer stays where the ghost set it down. */
+  .task-card[data-landed]:hover { transform: none; }
 }
 .task-card:active:not(:has(button:active, input:active)) { transform: scale(0.99); background: var(--surface-3); transition-duration: 0.12s; }
 .task-card:focus-visible { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus), var(--shadow-sm); }
@@ -127,7 +131,7 @@
 .task-card.is-completing .task-top strong { text-decoration: line-through; text-decoration-color: var(--text-3); }
 .task-card.is-collapsing { overflow: hidden; pointer-events: none; }
 .task-card-head { display: flex; align-items: center; gap: var(--space-2); min-height: 18px; }
-.task-code { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
+.task-code { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); letter-spacing: 0.01em; }
 .github-issue-indicator { display: inline-grid; color: var(--text-3); }
 .github-issue-indicator svg { width: 12px; height: 12px; }
 .task-top { display: flex; align-items: flex-start; gap: var(--space-2); }
@@ -137,12 +141,14 @@
 /* Keyboard move target: focusable while a card is moved with the keyboard, never shown. */
 .drag-handle { position: absolute; top: 0; left: 0; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none; }
 
-/* Check: animates to a filled green tick when the issue is completed. */
-.check-button { position: relative; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin-top: 1px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-3); transition: color var(--duration-fast), transform var(--duration) var(--ease-spring); }
+/* Complete: a rounded square (status icons are rings) that fills with a green tick when the issue is completed. */
+.check-button { position: relative; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin-top: 1px; padding: 0; border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--text-3); transition: color var(--duration-fast), transform var(--duration) var(--ease-spring); }
+.check-box { width: 14px; height: 14px; border: 1.5px solid currentColor; border-radius: 4px; transition: background var(--duration-fast); }
 .check-button:hover:not(:disabled) { color: var(--green); transform: scale(1.1); }
+.check-button:hover:not(:disabled) .check-box { background: color-mix(in srgb, var(--green) 14%, transparent); }
 .check-button:active:not(:disabled) { transform: scale(0.9); }
 .check-button:disabled { opacity: 1; cursor: inherit; }
-.check-done, .archive-check { display: grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--green); color: var(--text-inverse); }
+.check-done { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 4px; background: var(--green); color: var(--text-inverse); }
 .is-completing .check-done { animation: check-pop 0.42s var(--ease-spring); }
 .is-completing .check-done svg { stroke-dasharray: 20; animation: check-draw 0.32s 0.08s var(--ease-out) backwards; }
 @keyframes check-pop { 0% { transform: scale(0.4); opacity: 0.4; } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
@@ -165,10 +171,12 @@ button.due-chip.overdue:hover { border-color: rgba(242, 113, 107, 0.55); backgro
 .task-assignee { position: relative; display: grid; flex: none; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text-3); }
 .task-assignee .origin-user-avatar { --avatar-size: 20px; }
 /* Two initials like everywhere else; the tiny circles get a slightly larger, tighter face so they stay legible. */
-:is(.task-assignee, .task-menu, .issue-table-assignee) .origin-user-avatar[data-initials="2"] { font-size: 8px; letter-spacing: -0.04em; }
+:is(.task-assignee, .task-menu) .origin-user-avatar[data-initials="2"] { font-size: 8px; letter-spacing: -0.04em; }
 button.task-assignee { cursor: pointer; transition: box-shadow var(--duration-fast), color var(--duration-fast); }
 button.task-assignee:hover { box-shadow: 0 0 0 2px var(--border-3); color: var(--text-1); }
-.task-assignee.is-empty { border: 1px dashed var(--border-3); }
+.task-assignee.is-empty, .task-assignee-empty { border: 1px dashed var(--border-3); }
+.task-assignee-empty { display: grid; flex: none; place-items: center; width: 20px; height: 20px; border-radius: 50%; }
+.task-assignee.is-empty:not(.with-name) > .task-assignee-empty { border: 0; }
 .task-menu-button.icon-button { width: 24px; min-width: 24px; height: 22px; margin-left: auto; opacity: 0; transition: opacity var(--duration-fast), background var(--duration-fast); }
 .task-card:hover .task-menu-button, .task-card.has-menu .task-menu-button { opacity: 1; }
 .task-card.is-moving .task-menu-button { opacity: 0; }
@@ -237,8 +245,9 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 @keyframes task-sheet-in { from { transform: translateY(24px); opacity: 0; } }
 
 /* Undo toast. */
-.board-toast { position: fixed; left: 50%; bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); z-index: 95; display: flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-3); border-radius: var(--radius-md); background: var(--surface-4); box-shadow: var(--shadow-lg); color: var(--text-1); font-size: var(--text-base); transform: translateX(-50%); animation: toast-in var(--duration-slow) var(--ease-out); }
-.board-toast-icon { color: var(--green); }
+.board-toast { position: fixed; left: 50%; max-width: calc(100vw - 32px); white-space: nowrap; bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); z-index: 95; display: flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-3); border-radius: var(--radius-md); background: var(--surface-4); box-shadow: var(--shadow-lg); color: var(--text-1); font-size: var(--text-base); transform: translateX(-50%); animation: toast-in var(--duration-slow) var(--ease-out); }
+.board-toast-icon { display: grid; flex: none; place-items: center; color: var(--green); }
+.board-toast > span:not(.board-toast-icon) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .board-toast button { min-height: 32px; margin-left: var(--space-1); padding: 0 var(--space-2); border: 0; border-left: 1px solid var(--border-3); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: transparent; color: var(--accent-text); font-weight: var(--weight-medium); }
 .board-toast button:hover { background: var(--hover); color: var(--text-1); }
 .board-toast:not(:has(button)) { padding-right: var(--space-3); }
@@ -247,7 +256,7 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 /* Delete confirmations. */
 .confirm-dialog { width: min(420px, calc(100vw - 32px)); }
 .confirm-text { margin: 0 0 var(--space-2); color: var(--text-1); line-height: var(--leading); overflow-wrap: anywhere; }
-.confirm-text > span { margin-right: 4px; color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.confirm-text > span { margin-right: 4px; color: var(--text-3); font-size: var(--text-sm); }
 
 /* Completed archive. */
 .archive-list { display: grid; align-content: start; gap: 1px; padding-top: var(--space-1); overflow-y: auto; }
@@ -255,46 +264,49 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 .archive-row:hover { background: var(--hover); }
 .archive-check { flex: none; }
 .archive-issue { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; padding: 0; border: 0; background: none; text-align: left; }
-.archive-issue > span { flex: none; color: var(--text-3); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.archive-issue > span { flex: none; color: var(--text-3); font-size: var(--text-xs); }
 .archive-issue > strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-medium); color: var(--text-2); }
 .archive-row > time { flex: none; color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .archive-restore { flex: none; }
 
-/* List view: the same issue data as the cards, one row each. */
+/* List view: the same issue, Tab stop, menu and quick-edit chips as the cards (components/issue-card.tsx), one row each. */
 .issue-table-scroll { flex: 1; min-height: 0; overflow: auto; }
 .issue-table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: left; }
 .issue-table th { position: sticky; top: 0; z-index: 1; height: 32px; padding: 0 var(--space-3); border-bottom: 1px solid var(--border-1); background: var(--surface-1); color: var(--text-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
 .issue-table th.col-status { width: 160px; }
 .issue-table th.col-priority { width: 112px; }
 .issue-table th.col-assignee { width: 180px; }
-.issue-table th.col-due { width: 96px; }
+.issue-table th.col-due { width: 120px; }
 .issue-table td { height: 42px; padding: 6px var(--space-3); border-bottom: 1px solid var(--border-1); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.issue-table tbody tr { cursor: pointer; transition: background var(--duration-fast); }
-.issue-table tbody tr:hover { background: var(--hover); }
-.issue-table tbody tr:active { background: var(--active); }
-.issue-table tbody tr.is-selected { background: var(--accent-soft); }
+.issue-table td:not(.col-issue) { padding-left: calc(var(--space-3) - 7px); }
+.issue-table tbody tr { cursor: pointer; outline: none; transition: background var(--duration-fast); }
+.issue-table tbody tr.can-press { -webkit-touch-callout: none; }
+@media (hover: hover) { .issue-table tbody tr:hover { background: var(--hover); } }
+.issue-table tbody tr:active:not(:has(button:active)) { background: var(--active); }
+.issue-table tbody tr:focus-visible { box-shadow: inset 0 0 0 2px var(--focus); }
+.issue-table tbody tr.is-selected, .issue-table tbody tr.has-menu { background: var(--accent-soft); }
 .issue-table td.col-issue { display: flex; align-items: center; gap: var(--space-3); }
-.issue-table-title { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; padding: 0; border: 0; background: none; color: var(--text-1); text-align: left; font-weight: var(--weight-medium); }
-.issue-table-title:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
-.issue-table-title small { flex: none; width: 64px; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; }
+.issue-table-title { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; color: var(--text-1); font-weight: var(--weight-medium); }
+.issue-table-title small { flex: none; width: 64px; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); }
 .issue-table-title > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .issue-table tr.is-completing .issue-table-title > span { color: var(--text-3); text-decoration: line-through; }
 .issue-table .check-button { margin: 0; }
-.status-pill { --lane: var(--text-2); display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 22px; padding: 0 8px 0 6px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--lane) 12%, transparent); color: var(--text-1); font-size: var(--text-sm); }
-.status-pill > span { overflow: hidden; text-overflow: ellipsis; }
-.status-pill .status-icon { color: var(--lane); }
-.status-pill.draft { --lane: var(--text-3); }
-.status-pill.idea { --lane: var(--blue); }
-.status-pill.todo { --lane: var(--cyan); }
-.status-pill.progress { --lane: var(--amber); }
-.status-pill.review { --lane: var(--violet); }
-.status-pill.done { --lane: var(--green); }
-.issue-table-priority, .issue-table-assignee { display: inline-flex; align-items: center; gap: var(--space-2); max-width: 100%; }
-.issue-table-assignee > span:last-child { overflow: hidden; text-overflow: ellipsis; }
-.issue-table-assignee .origin-user-avatar { --avatar-size: 20px; }
-.due-text { font-variant-numeric: tabular-nums; }
-.due-text.soon { color: var(--amber); }
-.due-text.overdue { color: var(--red); }
+/* Chips sit quietly in the cells and show their edge on hover, like the cells of a spreadsheet. */
+.issue-table .task-chip { max-width: 100%; border-color: transparent; font-size: var(--text-sm); text-transform: none; }
+.issue-table .task-chip > span { overflow: hidden; text-overflow: ellipsis; }
+.issue-table .due-chip.overdue { border-color: transparent; background: transparent; }
+.issue-table .status-chip { color: var(--text-1); }
+/* Empty cells stay blank until the row is hovered (pointer) and then offer to set a value. */
+@media (hover: hover) {
+  .issue-table :is(.due-chip, .task-assignee).is-empty { opacity: 0; transition: opacity var(--duration-fast); }
+  .issue-table tbody tr:is(:hover, .has-menu) :is(.due-chip, .task-assignee).is-empty { opacity: 1; }
+}
+@media (hover: none) { .issue-table .due-chip.is-empty { display: none; } }
+.task-assignee.with-name { display: inline-flex; gap: var(--space-2); width: auto; max-width: 100%; height: 26px; padding: 0 7px 0 3px; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-sm); }
+.task-assignee.with-name.is-empty { border-style: solid; border-color: transparent; }
+.task-assignee-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.task-assignee.with-name:hover { box-shadow: none; border-color: var(--border-3); background: var(--hover); color: var(--text-1); }
+.issue-table .origin-user-avatar { --avatar-size: 20px; }
 
 /* Mobile. */
 @media (max-width: 760px) {
@@ -333,19 +345,24 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
   .task-chip { height: 24px; font-size: var(--text-sm); }
   .issue-table thead { display: none; }
   .issue-table, .issue-table tbody { display: block; }
-  .issue-table tr { display: grid; grid-template-columns: minmax(0, 1fr) 16px 14px 64px 20px; align-items: center; column-gap: var(--space-2); padding: 0 var(--space-2) 0 0; border-bottom: 1px solid var(--border-1); }
-  .issue-table td { display: flex; align-items: center; height: auto; min-height: 52px; padding: 0; border: 0; }
-  .issue-table td.col-issue { gap: var(--space-2); padding-left: var(--space-1); }
+  /* Phone rows: complete, key + title, then the status, priority, due and assignee chips as icons. */
+  .issue-table tr { display: grid; grid-template-columns: minmax(0, 1fr) 30px 30px 88px 32px; align-items: center; padding: 0 var(--space-1) 0 0; border-bottom: 1px solid var(--border-1); }
+  .issue-table td, .issue-table td:not(.col-issue) { display: flex; align-items: center; justify-content: center; height: auto; min-height: 56px; padding: 0; border: 0; }
+  .issue-table td.col-issue { justify-content: flex-start; gap: var(--space-2); padding-left: var(--space-1); }
   .issue-table .check-button { width: 36px; height: 44px; }
   .issue-table-title { flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--space-2) 0; }
   .issue-table-title small { width: auto; }
   .issue-table-title > span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .issue-table td.col-status { order: 1; }
   .issue-table td.col-priority { order: 2; }
-  .issue-table td.col-due { order: 3; justify-content: flex-end; font-size: var(--text-sm); }
+  .issue-table td.col-due { order: 3; justify-content: flex-start; padding-left: var(--space-1); }
   .issue-table td.col-assignee { order: 4; }
-  .status-pill, .issue-table-priority { gap: 0; height: auto; padding: 0; background: none; }
-  .status-pill > span, .issue-table-priority > span, .issue-table-assignee > span:last-child { display: none; }
+  .issue-table .status-chip, .issue-table .priority { gap: 0; width: 28px; padding: 0; justify-content: center; }
+  .issue-table .status-chip > span, .issue-table .priority > span, .issue-table .task-assignee-name { display: none; }
+  .issue-table .due-chip { padding: 0 4px; }
+  .issue-table .due-chip:not(.is-empty) > svg { display: none; }
+  .issue-table .task-assignee.with-name { padding: 0; width: 28px; justify-content: center; }
+  .issue-table .task-chip::before, .issue-table .task-assignee::before { inset: -14px -1px; }
   .archive-list { overflow-x: hidden; }
   .archive-row { gap: var(--space-2); min-height: 48px; padding-right: 0; }
   .archive-row > time { display: none; }
@@ -362,4 +379,3 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 .status-icon.review { color: var(--violet); }
 .status-icon.done { color: var(--green); }
 .status-icon.custom { color: var(--text-2); }
-.issue-table-status { display: inline-flex; align-items: center; gap: var(--space-2); }

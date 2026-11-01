@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { isDraftColumn } from "@/lib/origin-columns";
 import { Dialog } from "./dialog";
+import { announceCreatedIssue } from "./issue-shared";
 import { IssueFields } from "./issue-fields";
 import { IssueSelect } from "./issue-select";
 import { ProjectIcon } from "./project-icon";
@@ -118,6 +119,7 @@ export function IssueComposer({
       dirty.current = false;
       writeDraft(projectId, null);
       onCreated(projectId, taskId);
+      announceCreatedIssue(taskId);
       onClose();
     } catch (error) {
       setError(errorText(error, "Could not create issue"));
