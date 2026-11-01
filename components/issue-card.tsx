@@ -37,6 +37,16 @@ export type IssueCardProps = {
   onHandleBlur: (taskId: string) => void;
 };
 
+/**
+ * Chrome on phones moves a tap to the nearest element that listens for clicks. React listens at the root, so without
+ * a listener of their own the title and key lose taps near them to the chips; this makes them count as tap targets.
+ */
+const noop = () => {};
+const tapTarget = (element: HTMLElement | null) => {
+  element?.addEventListener("click", noop);
+  return () => element?.removeEventListener("click", noop);
+};
+
 const box = (element: Element): TaskMenuAnchor => { const rect = element.getBoundingClientRect(); return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }; };
 
 /**
@@ -72,19 +82,19 @@ export const IssueCard = memo(function IssueCard({ task, assignee, canEdit, tabS
       }}
     >
       <div className="task-card-head">
-        <span className="task-code">{key}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
+        <span className="task-code" ref={tapTarget}>{key}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
         {canEdit && <button className="drag-handle" type="button" tabIndex={-1} aria-label={`Move ${task.title}`} aria-pressed={keyboardMoving} onKeyDown={event => onHandleKeyDown(event, task._id)} onClick={event => onHandleClick(event, task._id)} onBlur={() => onHandleBlur(task._id)} />}
         {canEdit
           ? <button type="button" tabIndex={-1} className={clsx("task-assignee", !assignee && "is-empty")} aria-label={assignee ? `Assignee: ${name}` : "Assign"} title={name || undefined} aria-haspopup="menu" onClick={chip("assignee")}>
-            {assignee ? <UserAvatar user={assignee} size="small" /> : <UserRound size={12} />}
+            {assignee ? <UserAvatar user={assignee} /> : <UserRound size={12} />}
           </button>
-          : assignee && <span className="task-assignee" title={name}><UserAvatar user={assignee} size="small" /></span>}
+          : assignee && <span className="task-assignee" title={name}><UserAvatar user={assignee} /></span>}
       </div>
       <div className="task-top">
         <button className="check-button" type="button" tabIndex={-1} aria-label={done ? `Completed ${task.title}` : `Complete ${task.title}`} disabled={!canEdit || done} onClick={event => { event.stopPropagation(); onComplete(task); }}>
           {done ? <span className="check-done"><Check size={10} strokeWidth={3} /></span> : <Circle size={15} />}
         </button>
-        <strong>{task.title}</strong>
+        <strong ref={tapTarget}>{task.title}</strong>
       </div>
       <div className="task-meta">
         {canEdit
