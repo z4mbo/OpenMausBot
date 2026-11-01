@@ -1,15 +1,14 @@
 import { createHash } from "node:crypto";
-import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { api } from "@/convex/_generated/api";
 import { getConvexClient, limitLocalAction } from "@/lib/localRealtime";
 import { BodyTooLarge, readBoundedJson } from "@/lib/http-body";
 import { mcpResourceMetadata, mcpScopes, resolveMcpToken } from "@/lib/mcp-oauth";
 import { isPatFormat, PAT_PREFIX } from "@/lib/mcp-tokens";
 import { mcpAuthBlocked, recordMcpAuthFailure } from "@/lib/mcp-rate-limit";
-import { originMcpServer } from "@/lib/mcp-server";
+import { serveMcp } from "@/lib/mcp-server";
 
-// Remote MCP server, Streamable HTTP in stateless JSON mode: each POST carries one JSON-RPC message or batch and
-// gets a JSON response. Auth is a Bearer token: an OAuth access token from /oauth/token or a personal access token.
+// Remote MCP server, Streamable HTTP without sessions: protocol revision 2026-07-28 (server/discover, per-request
+// _meta envelope) and the 2025 revisions (initialize handshake, JSON-RPC batches) on the same POST endpoint. Auth is a Bearer token: an OAuth access token from /oauth/token or a personal access token.
 // Requests never rely on cookies, so a cross-origin page cannot use the user's credentials.
 
 export const runtime = "nodejs";
@@ -68,16 +67,11 @@ export async function POST(request: Request) {
   let parsedBody: unknown;
   try { parsedBody = await readBoundedJson(request, 200000); }
   catch (error) { return Response.json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: error instanceof BodyTooLarge ? "Request too large" : "Parse error" } }, { status: error instanceof BodyTooLarge ? 413 : 400, headers: cors }); }
-  const server = originMcpServer(auth.token, auth.write);
-  const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
-  try {
-    await server.connect(transport);
-    const response = await transport.handleRequest(request, { parsedBody });
-    const headers = new Headers(response.headers);
-    headers.set("Cache-Control", "no-store");
-    for (const [key, value] of Object.entries(cors)) headers.set(key, value);
-    return new Response(response.body ? await response.text() : null, { status: response.status, headers });
-  } finally { await server.close(); }
+  const response = await serveMcp(request, auth, parsedBody);
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "no-store");
+  for (const [key, value] of Object.entries(cors)) headers.set(key, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 // No server-initiated stream: GET and DELETE are not offered (Streamable HTTP allows 405).
@@ -88,5 +82,5 @@ export async function GET(request: Request) {
 }
 export async function DELETE() { return new Response(null, { status: 405, headers: { ...cors, Allow: "POST" } }); }
 export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: { ...cors, "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS", "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id, Last-Event-ID", "Access-Control-Max-Age": "86400" } });
+  return new Response(null, { status: 204, headers: { ...cors, "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS", "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Method, Mcp-Name, Mcp-Session-Id, Last-Event-ID", "Access-Control-Max-Age": "86400" } });
 }

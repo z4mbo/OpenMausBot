@@ -131,7 +131,7 @@ export async function createGitHubTask(projectId: string, taskId: string) {
   }
 }
 
-export async function syncTarget(target: Target) {
+async function syncTarget(target: Target) {
   const { token, repo } = await contextWithToken(target.projectId, target.taskId);
   if (!repo || !token) throw new Error("Repository sync needs an authorized GitHub connection");
   const issue = await githubRequest<GitHubIssue>(`/repos/${repo.owner}/${repo.repo}/issues/${target.number}`, token);

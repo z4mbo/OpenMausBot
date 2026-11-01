@@ -13,7 +13,7 @@ const CLIENTS = ["Claude Code", "Codex", "OpenCode", "omp", "T3 Code", "ChatGPT"
 type Client = typeof CLIENTS[number];
 
 /** Copy-paste setup per client. With a token the snippet sends it as a header; without one the client signs in with OAuth. */
-export function clientSetup(client: Client, url: string, token?: string): { file?: string; code?: string; note?: string } {
+function clientSetup(client: Client, url: string, token?: string): { file?: string; code?: string; note?: string } {
   const bearer = `Bearer ${token}`;
   const json = (value: unknown) => JSON.stringify(value, null, 2);
   switch (client) {

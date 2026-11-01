@@ -8,11 +8,6 @@ import { taskKey } from "@/lib/project-issues";
 export type ProjectWithUi = Doc<"projects"> & { memberRole: string; iconUrl?: string | null };
 export type OpenReference = (projectId: Id<"projects">, taskId?: Id<"tasks">) => void;
 
-export function fmtDate(timestamp?: number) {
-  if (!timestamp) return "—";
-  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(timestamp);
-}
-
 export function LoadingState({ label = "Loading" }: { label?: string }) {
   return <ContentSkeleton label={label} kind={label.includes("board") || label.includes("project") ? "board" : "list"} rows={4} />;
 }

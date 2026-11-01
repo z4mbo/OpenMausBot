@@ -111,17 +111,6 @@ export function MotionLayer() {
       });
     };
 
-    const reveal = (scope: Element) => {
-      if (reduced.matches) return;
-      const view = [...scope.children].find(child => !child.matches(".view-loading-overlay, .project-navigation, .notice, [hidden], .persistent-tool")) as HTMLElement | undefined;
-      const board = scope.querySelector<HTMLElement>(".kanban-scroll");
-      if (view && !board) view.animate([{ opacity: 0, transform: "translateY(4px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: OUT });
-      if (board) enterBoard(board);
-      const list = scope.querySelector<HTMLElement>(".work-issue-list, .archive-list");
-      if (list) enterList(list, ":scope > *");
-      requestAnimationFrame(() => { snapshot(); updateGliders(); });
-    };
-
     const bump = (element: Element) => {
       if (reduced.matches || !(element instanceof HTMLElement)) return;
       element.animate([{ transform: "scale(1)" }, { transform: "scale(1.2)", color: "#ffffff" }, { transform: "scale(1)" }], { duration: 460, easing: SPRING });
@@ -183,7 +172,6 @@ export function MotionLayer() {
       const removed: { element: HTMLElement; parent: Node }[] = [];
       let boardEntered: HTMLElement | null = null;
       const lists: [HTMLElement, string][] = [];
-      const reveals: Element[] = [];
       let classChanged = false;
 
       for (const record of records) {
@@ -205,7 +193,6 @@ export function MotionLayer() {
         });
         record.removedNodes.forEach(node => {
           if (!(node instanceof HTMLElement)) return;
-          if (node.matches(".view-loading-overlay") && (record.target as Element).isConnected) reveals.push(record.target as Element);
           const cards = node.matches("[data-task-id]") ? [node] : [...node.querySelectorAll<HTMLElement>("[data-task-id]")];
           cards.forEach(element => removed.push({ element, parent: record.target }));
         });
@@ -213,13 +200,8 @@ export function MotionLayer() {
 
       if (reduced.matches) { snapshot(); scheduleGliders(); return; }
 
-      if (reveals.length) {
-        cache.clear();
-        reveals.forEach(reveal);
-        return;
-      }
       if (boardEntered) {
-        if (!root.querySelector(".view-loading-overlay")) enterBoard(boardEntered);
+        enterBoard(boardEntered);
         cache.clear();
         requestAnimationFrame(snapshot);
         scheduleGliders();

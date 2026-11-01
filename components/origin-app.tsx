@@ -289,7 +289,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
       {sidebarCollapsed ? <div className="sidebar-hover-zone" onMouseEnter={() => setSidebarHover(true)} /> : null}
       <aside ref={sidebarRef} id="workspace-sidebar" className="sidebar" aria-label="Workspace" onMouseLeave={() => { if (sidebarCollapsed) setSidebarHover(false); }}>
         <div className="sidebar-topbar">
-          <ProfileMenu user={user} sessionToken={sessionToken} onLogout={onLogout} sound={notifications.sound} onToggleSound={notifications.toggleSound} workspaces={workspaces} onCreateWorkspace={() => setCreateWorkspaceOpen(true)} onCollapse={() => { setSidebarCollapsed(!sidebarCollapsed); setSidebarHover(false); }} />
+          <ProfileMenu user={user} sessionToken={sessionToken} onLogout={onLogout} sound={notifications.sound} onToggleSound={notifications.toggleSound} workspaces={workspaces} onCreateWorkspace={() => { setMobileOpen(false); setCreateWorkspaceOpen(true); }} onOpenSettings={() => setMobileOpen(false)} onCollapse={() => { setSidebarCollapsed(!sidebarCollapsed); setSidebarHover(false); }} />
           <button className="icon-button" type="button" onClick={() => setSearchOpen(true)} aria-label="Search" title="Search (F or ⌘K)" aria-keyshortcuts="f Meta+K Control+K /">
             <Search size={17} />
           </button>
@@ -407,6 +407,7 @@ function ProfileMenu({
   workspaces,
   onCreateWorkspace,
   onCollapse,
+  onOpenSettings,
 }: {
   user: AuthUser;
   sessionToken: string;
@@ -416,6 +417,8 @@ function ProfileMenu({
   workspaces: Workspace[];
   onCreateWorkspace: () => void;
   onCollapse: () => void;
+  /** Settings opens over everything, so the phone drawer closes first. */
+  onOpenSettings: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<false | "first" | "last">(false);
@@ -468,7 +471,7 @@ function ProfileMenu({
         </div>
         <button role="menuitem" tabIndex={-1} onClick={() => choose(onCreateWorkspace)}><Plus size={15} /><span>Create workspace</span></button>
         <hr />
-        <button role="menuitem" tabIndex={-1} onClick={() => choose(() => setOpen(true))}><Settings2 size={15} /><span>Settings</span></button>
+        <button role="menuitem" tabIndex={-1} onClick={() => choose(() => { onOpenSettings(); setOpen(true); })}><Settings2 size={15} /><span>Settings</span></button>
         <button role="menuitem" tabIndex={-1} className="menu-desktop-only" onClick={() => choose(onCollapse)}><PanelLeftClose size={15} /><span>Collapse sidebar</span></button>
         <hr />
         <button role="menuitem" tabIndex={-1} onClick={() => choose(onLogout)}><LogOut size={15} /><span>Sign out</span></button>

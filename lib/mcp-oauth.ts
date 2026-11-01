@@ -1,5 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { OAuthClientMetadataSchema } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { OAuthClientMetadataSchema } from "@modelcontextprotocol/core";
 import { api } from "@/convex/_generated/api";
 import { integrationDb, openIntegration, sealIntegration } from "./githubConnection";
 import { originUrl } from "./integration-bridge";

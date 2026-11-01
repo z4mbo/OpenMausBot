@@ -1,4 +1,4 @@
-export function searchScore(label: string, query: string) {
+function searchScore(label: string, query: string) {
   const text = label.trim().toLocaleLowerCase();
   const value = query.trim().toLocaleLowerCase();
   if (!value) return 0;

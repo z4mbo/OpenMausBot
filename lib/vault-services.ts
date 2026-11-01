@@ -5,7 +5,7 @@
  * variables, so `vercel deploy` or `npx convex deploy` run signed in without the token ever being typed into chat.
  */
 
-export interface VaultServiceField {
+interface VaultServiceField {
   env: string;
   label: string;
   /** Identifiers such as an account id are not secrets and may be short. */
@@ -22,9 +22,9 @@ export interface VaultService {
   fields: readonly VaultServiceField[];
 }
 
-export const CUSTOM_SERVICE = "custom";
+const CUSTOM_SERVICE = "custom";
 
-export const VAULT_SERVICES: readonly VaultService[] = [
+const VAULT_SERVICES: readonly VaultService[] = [
   { id: "convex", label: "Convex", tokenUrl: "https://dashboard.convex.dev", fields: [{ env: "CONVEX_DEPLOY_KEY", label: "Deploy key", secret: true }] },
   { id: "vercel", label: "Vercel", tokenUrl: "https://vercel.com/account/tokens", fields: [
     { env: "VERCEL_TOKEN", label: "Access token", secret: true },
@@ -47,55 +47,6 @@ export const VAULT_SERVICES: readonly VaultService[] = [
   { id: CUSTOM_SERVICE, label: "Other service", tokenUrl: "", fields: [] },
 ];
 
-/** Security: names an agent's shell, its engine's billing or Origin's own operator secrets depend on are never set from the Vault. */
-const RESERVED_ENV = /^(PATH|PATHEXT|HOME|USERPROFILE|APPDATA|LOCALAPPDATA|TEMP|TMP|SHELL|COMSPEC|SYSTEMROOT|NODE_OPTIONS|LD_PRELOAD|LD_LIBRARY_PATH|DYLD_[A-Z_]+|OMB_[A-Z0-9_]*|ORIGIN_[A-Z0-9_]*|CONVEX_SELF_HOSTED_ADMIN_KEY|ANTHROPIC_[A-Z0-9_]*|OPENAI_[A-Z0-9_]*|GEMINI_API_KEY|GOOGLE_API_KEY|GITHUB_TOKEN|GH_TOKEN)$/u;
-const ENV_NAME = /^[A-Z][A-Z0-9_]{1,63}$/u;
-export const SERVICE_SECRET_MIN = 8;
-
 export function vaultService(id: string | undefined): VaultService | undefined {
   return VAULT_SERVICES.find((service) => service.id === id);
-}
-
-export function usableEnvName(name: string): boolean {
-  return ENV_NAME.test(name) && !RESERVED_ENV.test(name);
-}
-
-export type ServiceEnv = Record<string, string>;
-
-/** Why these values cannot be saved for this service, or null. */
-export function serviceEnvProblem(serviceId: string, env: ServiceEnv): string | null {
-  const service = vaultService(serviceId);
-  if (!service) return "Choose a service";
-  const names = Object.keys(env);
-  if (!names.length) return "Enter the token";
-  for (const name of names) if (!usableEnvName(name)) return `${name} can't be set from the Vault`;
-  if (service.id === CUSTOM_SERVICE) {
-    return names.some((name) => env[name]!.length < SERVICE_SECRET_MIN) ? `Use values of ${SERVICE_SECRET_MIN} characters or more, which Origin can keep out of logs` : null;
-  }
-  for (const field of service.fields) {
-    const value = env[field.env] ?? "";
-    if (!value && !field.optional) return `Enter the ${field.label}`;
-    if (value && field.secret && value.length < SERVICE_SECRET_MIN) return `The ${field.label} looks too short`;
-  }
-  return names.some((name) => !service.fields.some((field) => field.env === name)) ? `${service.label} doesn't use other variables` : null;
-}
-
-/** The values to keep out of logs: every secret field, and every value of a custom service. */
-export function serviceSecretValues(serviceId: string, env: ServiceEnv): string[] {
-  const service = vaultService(serviceId);
-  if (!service) return [];
-  if (service.id === CUSTOM_SERVICE) return Object.values(env);
-  return service.fields.filter((field) => field.secret && env[field.env]).map((field) => env[field.env]!);
-}
-
-export function parseServiceEnv(serviceId: string, text: string): ServiceEnv | null {
-  let parsed: unknown;
-  try { parsed = JSON.parse(text); } catch { return null; }
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-  const env: ServiceEnv = {};
-  for (const [name, value] of Object.entries(parsed)) {
-    if (typeof value !== "string") return null;
-    if (value) env[name] = value;
-  }
-  return serviceEnvProblem(serviceId, env) ? null : env;
 }
