@@ -251,6 +251,8 @@ export function MotionLayer() {
         if (!next.w) return;
         fresh.set(key, next);
         const previous = cache.get(key);
+        // Board cards are animated by the board itself (useCardFlip), which also follows drags.
+        if (previous && element.dataset.taskId && element.closest(".kanban-scroll")) return;
         if (previous) {
           const dx = previous.x - next.x;
           const dy = previous.y - next.y;
@@ -279,22 +281,10 @@ export function MotionLayer() {
       burst(rect.left + rect.width / 2, rect.top + rect.height / 2);
       if (!reduced.matches) check.animate([{ transform: "scale(.7)" }, { transform: "scale(1.18)" }, { transform: "scale(1)" }], { duration: 420, easing: SPRING });
     };
-    let dropColumn: HTMLElement | null = null;
-    const clearDrop = () => { dropColumn?.removeAttribute("data-drop"); dropColumn = null; };
-    const onDragOver = (event: DragEvent) => {
-      const column = (event.target as Element | null)?.closest<HTMLElement>(".kanban-column") ?? null;
-      if (column === dropColumn) return;
-      clearDrop();
-      dropColumn = column;
-      column?.setAttribute("data-drop", "");
-    };
     let scrollFrame = 0;
     const onScroll = () => { cancelAnimationFrame(scrollFrame); scrollFrame = requestAnimationFrame(() => { snapshot(); updateGliders(); }); };
 
     root.addEventListener("click", onClick, true);
-    root.addEventListener("dragover", onDragOver);
-    root.addEventListener("drop", clearDrop);
-    root.addEventListener("dragend", clearDrop);
     root.addEventListener("scroll", onScroll, { capture: true, passive: true });
     window.addEventListener("resize", onScroll);
     void document.fonts?.ready.then(() => { snapshot(); updateGliders(); });
@@ -307,9 +297,6 @@ export function MotionLayer() {
     return () => {
       observer.disconnect();
       root.removeEventListener("click", onClick, true);
-      root.removeEventListener("dragover", onDragOver);
-      root.removeEventListener("drop", clearDrop);
-      root.removeEventListener("dragend", clearDrop);
       root.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(glideFrame);
