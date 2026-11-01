@@ -35,9 +35,10 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const hasUnread = unread > 0;
   useEffect(() => { setNotificationsOpen(hasUnread); }, [hasUnread]);
   const phone = usePhoneLayout();
-  // Until the person picks a section, unread notifications come first.
-  const [chosenPane, setPane] = useState<"notifications" | "issues" | null>(null);
-  const pane = chosenPane ?? (hasUnread ? "notifications" : "issues");
+  // Unread notifications come first; once shown, reading the last one does not switch the section away.
+  const [chosenPane, setPane] = useState<"notifications" | "issues" | null>(hasUnread ? "notifications" : null);
+  useEffect(() => { if (hasUnread) setPane(current => current ?? "notifications"); }, [hasUnread]);
+  const pane = chosenPane ?? "issues";
   const [mine, setMine] = useState(true);
   const [done, setDone] = useState(false);
   const [project, setProject] = useState("");

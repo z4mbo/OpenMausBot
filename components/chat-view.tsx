@@ -65,6 +65,8 @@ import { activeChatTags, chatMessageParts, chatTextParts } from "@/lib/chat-text
 import { useChatTypingFocus } from "./use-chat-typing-focus";
 import { hasOpenKeyboardOverlay } from "@/lib/keyboard-navigation";
 const drafts = new Map<string, string>();
+// The last messages seen per conversation, so coming back to Chat shows them at once while they refresh.
+const recentMessages = new Map<string, LocalChatMessage[]>();
 
 type User = {
   _id: Id<"users">;
@@ -111,15 +113,16 @@ export function ChatThread({
   const workspace = useWorkspace();
   const openMember = useMemberProfile();
   const draftKey = `${user._id}:${workspace._id}:${conversation}`;
-  const [messages, setMessages] = useState<LocalChatMessage[]>([]);
+  const [messages, setMessages] = useState<LocalChatMessage[]>(() => recentMessages.get(draftKey) || []);
   const [issueMessage, setIssueMessage] = useState<LocalChatMessage | null>(null);
   const projects = useQuery(api.projects.listForUser, issueMessage ? { sessionToken, teamId: workspace._id } : "skip");
   const [searchResults, setSearchResults] = useState<LocalChatMessage[]>([]);
   const [searching, setSearching] = useState(false);
   const [moreResults, setMoreResults] = useState(false);
   const searchText = query.trim();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !recentMessages.has(draftKey));
   const [hasMore, setHasMore] = useState(false);
+  useEffect(() => { if (!loading) recentMessages.set(draftKey, messages.slice(-200)); }, [draftKey, loading, messages]);
   const [body, setBody] = useState(() => drafts.get(draftKey) || "");
   const [copied, setCopied] = useState("");
   const [loadingOlder, setLoadingOlder] = useState(false);
