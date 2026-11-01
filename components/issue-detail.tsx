@@ -21,7 +21,9 @@ import { IssueCommentBody, IssueCommentComposer } from "./issue-comments";
 import { IssueFileUpload } from "./issue-file-upload";
 import { UserAvatar } from "./user-avatar";
 import { useAnchoredPopover } from "./use-anchored-popover";
-import { LoadingState, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { SheetHeader } from "./sheet-header";
+import { useWorkspaceOnline } from "./workspace-connection";
+import { IssueDeleteDialog, LoadingState, type OpenReference, type ProjectWithUi } from "./issue-shared";
 
 type Priority = "low" | "medium" | "high";
 type Fields = { title: string; description: string; priority: Priority; assignedToEmail: string; dueDate: string };
@@ -160,6 +162,9 @@ function TaskModalContent({
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [titleTouched, setTitleTouched] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const online = useWorkspaceOnline();
+  const actionsTrigger = useRef<HTMLButtonElement>(null);
   const queue = useRef<Promise<void>>(Promise.resolve());
   const layout = useRef<HTMLDivElement>(null), titleInput = useRef<HTMLTextAreaElement>(null), descriptionInput = useRef<HTMLTextAreaElement>(null);
   useAutosize(titleInput, fields?.title || "");
@@ -285,7 +290,7 @@ function TaskModalContent({
       flush(); await queue.current;
       setNotice({ text: await createTaskPullRequest(projectId, taskId, sessionToken) });
     } }] : []),
-    { key: "delete", label: "Delete issue", icon: <Trash2 size={14} />, danger: true, confirm: "Confirm delete", run: async () => { await deleteTask({ projectId, sessionToken, taskId }); releaseHistory(); onClose(); } },
+    { key: "delete", label: "Delete issue", icon: <Trash2 size={14} />, danger: true, run: async () => { setDeleting(true); } },
   ] : [];
 
   // Escape in a text field leaves the field first; the next Escape closes the issue.
@@ -300,10 +305,10 @@ function TaskModalContent({
   const key = details ? taskKey(details.task._id) : "";
   const titleEmpty = Boolean(fields && !singleLine(fields.title).trim());
   return <Dialog title={details ? `${key} ${details.task.title}` : "Issue"} className="issue-detail-dialog" onClose={closeIssue} heading={<div className="issue-detail-heading">
-      <h2 tabIndex={-1} data-initial-focus><ProjectIcon project={project} /><span>{project.name}</span>{details && <><ChevronRight size={13} aria-hidden="true" /><span className="issue-detail-key">{key}</span></>}</h2>
+      <h2 tabIndex={-1} data-initial-focus><ProjectIcon project={project} /><span>{project.name}</span>{details && <><ChevronRight size={13} aria-hidden="true" /><span className="issue-detail-key issue-key">{key}</span></>}</h2>
       {saving > 0 && <span className="issue-save-state" role="status" aria-label="Saving"><Loader2 size={13} className="spin" /></span>}
       {details && <button type="button" className="icon-button" aria-label={copied ? "Link copied" : "Copy link"} title={copied ? "Copied" : "Copy link"} onClick={() => void copyLink()}>{copied ? <Check size={15} /> : <LinkIcon size={15} />}</button>}
-      {!!actions.length && <IssueActionsMenu actions={actions} onError={message => setNotice({ text: message, tone: "danger" })} />}
+      {!!actions.length && <IssueActionsMenu trigger={actionsTrigger} actions={actions} onError={message => setNotice({ text: message, tone: "danger" })} />}
     </div>}>
     {details && fields ? <IssueFileUpload className="issue-detail-layout" projectId={projectId} taskId={taskId} sessionToken={sessionToken} disabled={!canEdit} onError={message => setNotice({ text: message, tone: "danger" })} onLink={url => { void addAsset({ projectId, taskId, sessionToken, type: "link", name: url, url }).catch(error => setNotice({ text: errorText(error, "Could not attach link"), tone: "danger" })); }}>
       <div className="issue-detail-main" ref={layout} onKeyDown={onKeyDown}>
@@ -339,13 +344,13 @@ function TaskModalContent({
             <div><dt>Updated</dt><dd title={formatDateTime(details.task.updatedAt)}>{formatDate(details.task.updatedAt)}</dd></div>
           </dl>
         </aside>
-        <IssueRelations sessionToken={sessionToken} taskId={taskId} canEdit={canEdit} onOpen={openReference} />
+        <IssueRelations sessionToken={sessionToken} projectId={projectId} taskId={taskId} canEdit={canEdit} onOpen={openReference} />
         {!!attachments.length && <div className="issue-attachments" aria-label="Attachments">{attachments.map(asset => asset.localFileId
           ? <LocalAttachment key={asset._id} file={{ id: asset.localFileId, name: asset.name, size: asset.size || 0, contentType: asset.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} />
           : <a key={asset._id} className="activity-attachment" href={asset.url} target="_blank" rel="noreferrer"><LinkIcon size={13} /><span>{asset.name}</span><ExternalLink size={12} /></a>)}</div>}
-        <section className="issue-activity" aria-label="Activity">
+        {!!comments.length && <section className="issue-activity" aria-label="Activity">
           <h3>Activity</h3>
-          {!!comments.length && <div className="issue-timeline">{comments.map(comment => {
+          <div className="issue-timeline">{comments.map(comment => {
             const author = memberById.get(comment.authorUserId);
             return <article className="issue-timeline-entry" key={comment._id}>
               <UserAvatar user={author || { name: comment.authorName, email: comment.authorEmail }} size="small" />
@@ -354,32 +359,41 @@ function TaskModalContent({
                 <div className="comment-media">{details.assets.filter(asset => asset.commentId === comment._id && asset.localFileId).map(asset => <LocalAttachment key={asset._id} file={{ id: asset.localFileId!, name: asset.name, size: asset.size || 0, contentType: asset.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} />)}</div>
               </div>
             </article>;
-          })}</div>}
-        </section>
+          })}</div>
+        </section>}
       </div>
       {canEdit && <div className="issue-detail-composer" onKeyDown={onKeyDown}><IssueCommentComposer key={taskId} projectId={projectId} taskId={taskId} sessionToken={sessionToken} members={details.members} /></div>}
     </IssueFileUpload> : <div className="issue-detail-loading" ref={layout}><LoadingState label="Opening issue" /></div>}
+    {deleting && details && <IssueDeleteDialog taskId={taskId} title={details.task.title} disabled={!online} onCancel={() => {
+      setDeleting(false);
+      requestAnimationFrame(() => actionsTrigger.current?.focus({ preventScroll: true }));
+    }} onConfirm={() => {
+      setDeleting(false);
+      deleteTask({ projectId, sessionToken, taskId }).then(() => { releaseHistory(); onClose(); }, error => {
+        setNotice({ text: errorText(error, "Could not delete issue"), tone: "danger" });
+        requestAnimationFrame(() => actionsTrigger.current?.focus({ preventScroll: true }));
+      });
+    }} />}
   </Dialog>;
 }
 
-type IssueAction = { key: string; label: string; icon: ReactNode; danger?: boolean; confirm?: string; run: () => Promise<unknown> };
+type IssueAction = { key: string; label: string; icon: ReactNode; danger?: boolean; run: () => Promise<unknown> };
 
-function IssueActionsMenu({ actions, onError }: { actions: IssueAction[]; onError: (message: string) => void }) {
-  const [open, setOpen] = useState(false), [busy, setBusy] = useState(""), [confirming, setConfirming] = useState("");
-  const trigger = useRef<HTMLButtonElement>(null), menu = useRef<HTMLDivElement>(null), first = useRef<HTMLButtonElement>(null);
-  useAnchoredPopover(open, trigger, menu, first, { width: 210, onDismiss: restore => { setOpen(false); setConfirming(""); if (restore) trigger.current?.focus({ preventScroll: true }); } });
-  const close = () => { setOpen(false); setConfirming(""); trigger.current?.focus({ preventScroll: true }); };
+function IssueActionsMenu({ actions, trigger, onError }: { actions: IssueAction[]; trigger: RefObject<HTMLButtonElement | null>; onError: (message: string) => void }) {
+  const [open, setOpen] = useState(false), [busy, setBusy] = useState("");
+  const menu = useRef<HTMLDivElement>(null), first = useRef<HTMLButtonElement>(null);
+  useAnchoredPopover(open, trigger, menu, first, { width: 210, onDismiss: restore => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); } });
+  const close = () => { setOpen(false); trigger.current?.focus({ preventScroll: true }); };
   const run = async (action: IssueAction) => {
-    if (action.confirm && confirming !== action.key) { setConfirming(action.key); return; }
     setBusy(action.key);
-    try { await action.run(); setOpen(false); setConfirming(""); trigger.current?.focus({ preventScroll: true }); }
+    try { await action.run(); close(); }
     catch (error) { onError(errorText(error, `Could not ${action.label.toLowerCase()}`)); setOpen(false); }
     finally { setBusy(""); }
   };
   return <div className="issue-actions" onKeyDown={event => {
     if (!open) return;
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
-    if (event.key === "Tab") { setOpen(false); setConfirming(""); return; }
+    if (event.key === "Tab") { setOpen(false); return; }
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const items = Array.from(menu.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") || []);
     const index = items.indexOf(document.activeElement as HTMLButtonElement);
@@ -388,8 +402,9 @@ function IssueActionsMenu({ actions, onError }: { actions: IssueAction[]; onErro
   }}>
     <button ref={trigger} type="button" className="icon-button" aria-label="Issue actions" title="Issue actions" aria-haspopup="menu" aria-expanded={open} onClick={() => { if (open) close(); else setOpen(true); }}><MoreHorizontal size={16} /></button>
     {open && <div ref={menu} popover="manual" role="menu" aria-label="Issue actions" className="origin-dropdown issue-actions-menu">
-      {actions.map((action, index) => <button key={action.key} ref={index === 0 ? first : undefined} type="button" role="menuitem" className={clsx(action.danger && "danger-text", confirming === action.key && "confirming")} disabled={Boolean(busy)} onClick={() => void run(action)}>
-        {busy === action.key ? <Loader2 size={14} className="spin" /> : action.icon}<span>{confirming === action.key ? action.confirm : action.label}</span>
+      <SheetHeader caption="Actions" />
+      {actions.map((action, index) => <button key={action.key} ref={index === 0 ? first : undefined} type="button" role="menuitem" className={clsx(action.danger && "danger-text")} disabled={Boolean(busy)} onClick={() => void run(action)}>
+        {busy === action.key ? <Loader2 size={14} className="spin" /> : action.icon}<span>{action.label}</span>
       </button>)}
     </div>}
   </div>;

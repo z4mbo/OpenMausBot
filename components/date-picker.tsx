@@ -5,6 +5,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 import clsx from "clsx";
 import { LOCALE, formatDate, formatDue, parseDueDate, toDueDate } from "@/lib/format";
 import { useAnchoredPopover } from "./use-anchored-popover";
+import { SheetHeader } from "./sheet-header";
 
 type WeekInfoLocale = Intl.Locale & { getWeekInfo?: () => { firstDay: number }; weekInfo?: { firstDay: number } };
 
@@ -62,9 +63,10 @@ export function DatePicker({ value, onChange, disabled, label = "Due date", plac
 /**
  * The due date popover on its own, anchored to any element (a board card's due chip or the card itself).
  * Calls `onChange` only when the date changes, then `onClose(true)`; outside presses and Tab call `onClose(false)`.
+ * `title` names the issue above the caption on phones, like the card menu, when the issue is not already on screen.
  */
-export function DatePopover({ id, anchor, value, label = "Due date", onChange, onClose }: {
-  id?: string; anchor: RefObject<HTMLElement | null>; value: string; label?: string; onChange: (value: string) => void; onClose: (restoreFocus: boolean) => void;
+export function DatePopover({ id, anchor, value, label = "Due date", title, onChange, onClose }: {
+  id?: string; anchor: RefObject<HTMLElement | null>; value: string; label?: string; title?: string; onChange: (value: string) => void; onClose: (restoreFocus: boolean) => void;
 }) {
   const menu = useRef<HTMLDivElement>(null), grid = useRef<HTMLDivElement>(null);
   const selected = parseDueDate(value);
@@ -112,7 +114,7 @@ export function DatePopover({ id, anchor, value, label = "Due date", onChange, o
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(true); }
     else if (event.key === "Tab") onClose(false);
   }}>
-      <div className="picker-sheet-caption" aria-hidden="true">{label}</div>
+      <SheetHeader title={title} caption={label} />
       <div className="date-picker-quick">
         {quick.map(item => <button key={item.key} type="button" aria-pressed={sameDay(selected, item.date)} onClick={() => choose(item.date)}><span>{item.label}</span><small>{formatDate(item.date)}</small></button>)}
         {selected && <button type="button" className="date-picker-clear" onClick={() => choose(null)}><X size={13} /><span>Clear</span></button>}

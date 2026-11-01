@@ -83,7 +83,7 @@
 /* Bottom sheet: one presentation for every picker and menu on phones and touch screens (issue view, composer, the
    date picker, the board's card menu). Popovers get it from `useAnchoredPopover`, which also adds the scrim that
    swallows the tap closing the sheet. */
-.picker-sheet-caption { display: none; }
+.picker-sheet-caption, .picker-sheet-title { display: none; }
 .picker-sheet, [popover].picker-sheet {
   position: fixed;
   inset: auto var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
@@ -98,7 +98,10 @@
   animation: picker-sheet-in var(--duration-slow) var(--ease-out);
 }
 .picker-sheet-scrim { position: fixed; inset: 0; width: auto; height: auto; margin: 0; padding: 0; border: 0; background: var(--scrim); animation: o-fade var(--duration) var(--ease-out); -webkit-tap-highlight-color: transparent; }
-.picker-sheet > .picker-sheet-caption { display: block; overflow: hidden; padding: var(--space-1) var(--space-2) var(--space-2); color: var(--text-2); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
+/* Same header as the board's card menu sheet: the issue title (when given) in text-2, the caption under it in the
+   dropdown-caption style; a caption alone takes the title's place. */
+.picker-sheet > :is(.picker-sheet-caption, .picker-sheet-title) { display: block; overflow: hidden; padding: var(--space-1) var(--space-2) var(--space-2); color: var(--text-2); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
+.picker-sheet > .picker-sheet-title + .picker-sheet-caption { padding: 6px var(--space-2) 2px; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); }
 .picker-sheet :is(button, [role="option"]) { min-height: 44px; font-size: var(--text-md); }
 .picker-sheet [role="listbox"] { max-height: none; }
 .picker-sheet :is(.member-picker-search, .issue-select-search) input { min-height: 44px; font-size: 16px; }

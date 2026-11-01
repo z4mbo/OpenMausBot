@@ -5,6 +5,7 @@ import { Check, ChevronDown, Search, Users, UserRound } from "lucide-react";
 import { displayName } from "@/lib/format";
 import { UserAvatar, type AvatarIdentity } from "./user-avatar";
 import { shouldFocusSearch, useAnchoredPopover } from "./use-anchored-popover";
+import { SheetHeader } from "./sheet-header";
 
 type Person = AvatarIdentity & { email: string };
 type Option = { value: string; label: string; detail?: string; person?: Person; kind: "all" | "none" | "person" };
@@ -61,7 +62,7 @@ export function MemberPicker({ members, value, onChange, label, disabled, allLab
       <span>{selectedLabel}</span><ChevronDown size={12} />
     </button>
     {open && <div ref={menu} popover="manual" className="member-picker-popover">
-      {caption && <div className="picker-sheet-caption" aria-hidden="true">{caption}</div>}
+      <SheetHeader caption={caption} />
       {searchable && <div className="member-picker-search"><Search size={14} /><input ref={search} aria-label={`Search ${label.toLowerCase()}`} placeholder="Search..." role="combobox" aria-expanded="true" aria-controls={id} aria-activedescendant={options[active] ? `${id}-${active}` : undefined} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} /></div>}
       <div ref={list} tabIndex={-1} role="listbox" id={id} aria-label={label} aria-activedescendant={options[active] ? `${id}-${active}` : undefined}>{options.map((option, index) => <button id={`${id}-${index}`} key={`${option.kind}:${option.value}`} type="button" tabIndex={-1} role="option" aria-selected={value === option.value} data-highlighted={active === index} onMouseEnter={() => setActive(index)} onClick={() => choose(option)}>
         {option.person ? <UserAvatar user={option.person} size="small" /> : option.kind === "all" ? <Users size={16} /> : <span className="avatar-empty" aria-hidden="true"><UserRound size={12} /></span>}<span>{option.label}</span>{option.detail && <small>{option.detail}</small>}{value === option.value && <Check size={14} />}

@@ -1,33 +1,19 @@
 "use client";
 import { errorText } from "@/lib/error-text";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { CheckCircle2, Circle, Link2, Plus, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { FeatureIssuePicker } from "./feature-issue-picker";
-import { IssueSelect } from "./issue-select";
+import { LinkIssuePicker, type RelationKind } from "./feature-issue-picker";
 
-const RELATION_KINDS = [
-  { value: "blocks", label: "Blocks" },
-  { value: "blocked", label: "Blocked by" },
-  { value: "parent", label: "Sub-issue" },
-  { value: "child", label: "Parent issue" },
-];
-
-/** Related issues, listed only when there are some, plus one quiet "Link issue" entry. */
-export function IssueRelations({ sessionToken, taskId, canEdit, onOpen }: { sessionToken: string; taskId: Id<"tasks">; canEdit: boolean; onOpen: (projectId: Id<"projects">, taskId: Id<"tasks">) => void }) {
+/** Related issues, listed only when there are some, plus one quiet "Link issue" entry that opens the picker. */
+export function IssueRelations({ sessionToken, projectId, taskId, canEdit, onOpen }: { sessionToken: string; projectId: Id<"projects">; taskId: Id<"tasks">; canEdit: boolean; onOpen: (projectId: Id<"projects">, taskId: Id<"tasks">) => void }) {
   const data = useQuery(api.issueRelations.list, { sessionToken, taskId });
   const connect = useMutation(api.issueRelations.connect), disconnect = useMutation(api.issueRelations.disconnect);
-  const [linking, setLinking] = useState(false); const [kind, setKind] = useState("blocks"); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
-  const linkButton = useRef<HTMLButtonElement>(null), returnFocus = useRef(false), pending = useRef(false);
-  // Leaving the picker (Escape, Cancel or a new link) puts focus back on "Link issue".
-  const stopLinking = () => { returnFocus.current = true; setLinking(false); };
-  useEffect(() => {
-    if (linking || !returnFocus.current) return;
-    returnFocus.current = false;
-    linkButton.current?.focus({ preventScroll: true });
-  }, [linking]);
+  const [linking, setLinking] = useState(false); const [kind, setKind] = useState<RelationKind>("blocks"); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
+  const linkButton = useRef<HTMLButtonElement>(null), pending = useRef(false);
+  const stopLinking = (restoreFocus = true) => { setLinking(false); if (restoreFocus) linkButton.current?.focus({ preventScroll: true }); };
   const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setError(""); try { await fn(); } catch (error) { setError(errorText(error, "Could not update issue")); } finally { setBusy(false); } };
   const relations = data?.relations || [];
   if (!canEdit && !relations.length) return null;
@@ -40,15 +26,13 @@ export function IssueRelations({ sessionToken, taskId, canEdit, onOpen }: { sess
         void attempt(async () => { await disconnect({ sessionToken, id: row._id }); if (hadFocus) linkButton.current?.focus({ preventScroll: true }); });
       }}><X size={13} /></button>}
     </div>)}</div>}
-    {canEdit && !linking && <button ref={linkButton} type="button" className="issue-add-row" onClick={() => setLinking(true)}><Link2 size={14} />Link issue</button>}
-    {linking && <div className="relation-picker" onKeyDown={event => { if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); stopLinking(); } }}>
-      <div className="relation-picker-head"><IssueSelect label="Relationship" caption="Relationship" value={kind} onChange={setKind} options={RELATION_KINDS} /><button type="button" className="icon-button" aria-label="Cancel linking" onClick={stopLinking}><X size={14} /></button></div>
-      <FeatureIssuePicker autoFocus sessionToken={sessionToken} exclude={taskId} selected={relations.map(row => row.taskId)} onSelect={other => {
-        if (pending.current) return;
-        pending.current = true;
-        void attempt(async () => { const reverse = kind === "blocked" || kind === "child"; await connect({ sessionToken, fromTaskId: reverse ? other : taskId, toTaskId: reverse ? taskId : other, kind: kind === "parent" || kind === "child" ? "parent" : "blocks" }); stopLinking(); }).finally(() => { pending.current = false; });
-      }} />
-    </div>}
+    {canEdit && <button ref={linkButton} type="button" className="issue-add-row" aria-haspopup="dialog" aria-expanded={linking} onClick={() => { if (linking) stopLinking(false); else setLinking(true); }}><Link2 size={14} />Link issue</button>}
+    {linking && <LinkIssuePicker sessionToken={sessionToken} anchor={linkButton} projectId={projectId} exclude={taskId} linked={relations.map(row => row.taskId)} kind={kind} onKind={setKind} onClose={stopLinking} onSelect={other => {
+      if (pending.current) return;
+      pending.current = true;
+      stopLinking();
+      void attempt(async () => { const reverse = kind === "blocked" || kind === "child"; await connect({ sessionToken, fromTaskId: reverse ? other : taskId, toTaskId: reverse ? taskId : other, kind: kind === "parent" || kind === "child" ? "parent" : "blocks" }); }).finally(() => { pending.current = false; });
+    }} />}
     {error && <p className="issue-field-error" role="alert">{error}</p>}
   </section>;
 }

@@ -690,6 +690,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         key={datePick.taskId}
         anchor={datePick.anchor}
         value={datePickTask.dueDate ?? ""}
+        title={datePickTask.title}
         onChange={dueDate => void update(datePickTask._id, { dueDate })}
         onClose={restore => { const id = datePick.taskId; setDatePick(null); if (restore) focusCard(id); }}
       />}
