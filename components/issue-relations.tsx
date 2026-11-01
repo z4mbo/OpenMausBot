@@ -35,7 +35,10 @@ export function IssueRelations({ sessionToken, taskId, canEdit, onOpen }: { sess
     {!!relations.length && <div className="related-issue-list">{relations.map(row => <div key={row._id}>
       <small>{row.kind === "parent" ? row.outgoing ? "Sub-issue" : "Parent" : row.outgoing ? "Blocks" : "Blocked by"}</small>
       <button type="button" onClick={() => onOpen(row.projectId, row.taskId)}>{row.done ? <CheckCircle2 size={14} className="done" /> : <Circle size={14} />}<span>{row.title}</span></button>
-      {canEdit && <button type="button" className="icon-button" aria-label={`Unlink ${row.title}`} title="Unlink" disabled={busy} onClick={() => attempt(() => disconnect({ sessionToken, id: row._id }))}><X size={13} /></button>}
+      {canEdit && <button type="button" className="icon-button" aria-label={`Unlink ${row.title}`} title="Unlink" disabled={busy} onClick={event => {
+        const hadFocus = document.activeElement === event.currentTarget;
+        void attempt(async () => { await disconnect({ sessionToken, id: row._id }); if (hadFocus) linkButton.current?.focus({ preventScroll: true }); });
+      }}><X size={13} /></button>}
     </div>)}</div>}
     {canEdit && !linking && <button ref={linkButton} type="button" className="issue-add-row" onClick={() => setLinking(true)}><Link2 size={14} />Link issue</button>}
     {linking && <div className="relation-picker" onKeyDown={event => { if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); stopLinking(); } }}>

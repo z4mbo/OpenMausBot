@@ -59,7 +59,8 @@ export function IssueCommentBody({ comment, sessionToken, canEdit, members, onOp
   });
   return <div className="issue-comment-text">{comment.body.split("\n").map((line, index) => {
     const item = checklistItem(line);
-    return item ? <div className="comment-checklist-item" key={index}><input type="checkbox" aria-label={item.text} checked={item.checked} disabled={!canEdit || busy} onChange={async event => {
+    return item ? <div className="comment-checklist-item" key={index}><input type="checkbox" aria-label={item.text} checked={item.checked} disabled={!canEdit} aria-busy={busy || undefined} onChange={async event => {
+      if (busy) return;
       setBusy(true); setError("");
       try { await check({ sessionToken, projectId: comment.projectId, commentId: comment._id, line: index, text: item.text, checked: event.target.checked }); }
       catch (error) { setError(errorText(error, "Could not update checklist")); }

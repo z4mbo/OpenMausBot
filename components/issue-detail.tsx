@@ -372,7 +372,7 @@ function IssueActionsMenu({ actions, onError }: { actions: IssueAction[]; onErro
   const run = async (action: IssueAction) => {
     if (action.confirm && confirming !== action.key) { setConfirming(action.key); return; }
     setBusy(action.key);
-    try { await action.run(); setOpen(false); setConfirming(""); }
+    try { await action.run(); setOpen(false); setConfirming(""); trigger.current?.focus({ preventScroll: true }); }
     catch (error) { onError(errorText(error, `Could not ${action.label.toLowerCase()}`)); setOpen(false); }
     finally { setBusy(""); }
   };

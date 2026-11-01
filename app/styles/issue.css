@@ -259,6 +259,6 @@
   :is(.issue-detail-dialog, .issue-composer-dialog) :is(.member-picker-trigger, .issue-select-trigger, .date-picker-trigger, .icon-button, .issue-add-row, .send-message)::after,
   .issue-labels > span > button::after, .issue-label-add::after { content: ""; position: absolute; inset: -4px; }
   .issue-labels > span > button::after { inset: -8px; }
-  .related-issue-list > div > button:not(.icon-button), .relation-picker .feature-picker-results > button { min-height: 44px; }
+  .related-issue-list > div > button:not(.icon-button), .relation-picker .feature-picker-results > button, .issue-mention-menu button { min-height: 44px; }
 }
 @media (hover: none) { .relation-picker .feature-picker-results > button:hover { background: none; } }
