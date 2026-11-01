@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as agentRuns from "../agentRuns.js";
 import type * as agentsTables from "../agentsTables.js";
 import type * as auth from "../auth.js";
 import type * as brandTables from "../brandTables.js";
@@ -63,8 +64,10 @@ import type * as preferences from "../preferences.js";
 import type * as projectPresence from "../projectPresence.js";
 import type * as projects from "../projects.js";
 import type * as pulseTables from "../pulseTables.js";
+import type * as realtime from "../realtime.js";
 import type * as realtimeTables from "../realtimeTables.js";
 import type * as shipTables from "../shipTables.js";
+import type * as standup from "../standup.js";
 import type * as standupTables from "../standupTables.js";
 import type * as storage from "../storage.js";
 import type * as studioTables from "../studioTables.js";
@@ -84,6 +87,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentRuns: typeof agentRuns;
   agentsTables: typeof agentsTables;
   auth: typeof auth;
   brandTables: typeof brandTables;
@@ -139,8 +143,10 @@ declare const fullApi: ApiFromModules<{
   projectPresence: typeof projectPresence;
   projects: typeof projects;
   pulseTables: typeof pulseTables;
+  realtime: typeof realtime;
   realtimeTables: typeof realtimeTables;
   shipTables: typeof shipTables;
+  standup: typeof standup;
   standupTables: typeof standupTables;
   storage: typeof storage;
   studioTables: typeof studioTables;
