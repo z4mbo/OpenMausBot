@@ -60,6 +60,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { IssueComposer } from "./issue-composer";
 import { LocalAttachment } from "./local-attachment";
+import { LOCALE, displayName, formatDate, formatDateTime, formatTime } from "@/lib/format";
 import { activeChatTags, chatMessageParts, chatTextParts } from "@/lib/chat-text";
 import { useChatTypingFocus } from "./use-chat-typing-focus";
 import { hasOpenKeyboardOverlay } from "@/lib/keyboard-navigation";
@@ -73,24 +74,13 @@ type User = {
   avatarUrl?: string | null;
 };
 
-const clock = (time: number) =>
-  new Intl.DateTimeFormat(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(time);
 function dayLabel(time: number) {
   const date = new Date(time);
   const today = new Date();
   if (date.toDateString() === today.toDateString()) return "Today";
   today.setDate(today.getDate() - 1);
   if (date.toDateString() === today.toDateString()) return "Yesterday";
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year:
-      date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
-  }).format(time);
+  return `${date.toLocaleDateString(LOCALE, { weekday: "long" })}, ${formatDate(date)}`;
 }
 
 export function ChatThread({
@@ -137,6 +127,20 @@ export function ChatThread({
   const [reply, setReply] = useState<LocalChatMessage | null>(null);
   const [editing, setEditing] = useState<LocalChatMessage | null>(null);
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+  // Local thumbnails for images waiting in the composer, keyed by attachment id.
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const previewsRef = useRef(previews);
+  previewsRef.current = previews;
+  useEffect(() => {
+    const ids = new Set(attachments.map(file => file.id));
+    setPreviews(current => {
+      const stale = Object.keys(current).filter(id => !ids.has(id));
+      if (!stale.length) return current;
+      stale.forEach(id => URL.revokeObjectURL(current[id]));
+      return Object.fromEntries(Object.entries(current).filter(([id]) => ids.has(id)));
+    });
+  }, [attachments]);
+  useEffect(() => () => Object.values(previewsRef.current).forEach(url => URL.revokeObjectURL(url)), []);
   const [references, setReferences] = useState<ChatReference[]>([]);
   const [mentions, setMentions] = useState<ChatMention[]>([]);
   const [trigger, setTrigger] = useState<ChatTrigger | null>(null);
@@ -188,6 +192,11 @@ export function ChatThread({
       (document.activeElement === document.body || input.closest("form")?.contains(document.activeElement))) input.focus({ preventScroll: true });
     wasSending.current = sending;
   }, [sending, canWrite]);
+  // Messages store the author's name at send time; prefer the member's current full name.
+  const nameOf = (message: LocalChatMessage) => {
+    const member = members?.find(m => m.userId === message.authorUserId || m.email.toLowerCase() === message.authorEmail.toLowerCase());
+    return member ? displayName(member) : message.authorUserId === user._id ? displayName(user) : message.authorName;
+  };
   const suggestions = useChatSuggestions(
     trigger,
     members,
@@ -480,6 +489,10 @@ export function ChatThread({
           sessionToken,
           { method: "POST", body: form },
         );
+        if (/^image\/(png|jpeg|gif|webp)$/.test(file.type)) {
+          const url = URL.createObjectURL(file);
+          setPreviews(current => ({ ...current, [result.file.id]: url }));
+        }
         setAttachments((current) => [...current, result.file]);
       }
     } catch (error) {
@@ -619,9 +632,9 @@ export function ChatThread({
                     </button>
                     <time
                       dateTime={new Date(message.createdAt).toISOString()}
-                      title={new Date(message.createdAt).toLocaleString()}
+                      title={formatDateTime(message.createdAt)}
                     >
-                      {clock(message.createdAt)}
+                      {formatTime(message.createdAt)}
                     </time>
                     {message.editedAt && <small>edited</small>}
                     {message.pinned && <Pin size={12} />}
@@ -639,7 +652,7 @@ export function ChatThread({
                       }
                     >
                       <Reply size={12} />
-                      <strong>{replyMessage.authorName}</strong>
+                      <strong>{nameOf(replyMessage)}</strong>
                       <span>{replyMessage.body || "Attachment"}</span>
                     </button>
                   )}
@@ -832,7 +845,7 @@ export function ChatThread({
                     <Circle size={17} />
                   )}
                   <span className="suggestion-copy">
-                    <strong>{option.label}</strong>
+                    <strong>{option.name || option.label}</strong>
                     <small>{option.detail}</small>
                   </span>
                 </button>
@@ -858,7 +871,7 @@ export function ChatThread({
             <span>
               {editing
                 ? "Editing your message"
-                : `Replying to ${reply?.authorName}`}
+                : `Replying to ${reply ? nameOf(reply) : ""}`}
             </span>
             <button
               type="button"
@@ -876,9 +889,8 @@ export function ChatThread({
         {attachments.length > 0 && (
           <div className="composer-attachments">
             {attachments.map((file) => (
-              <span key={file.id}>
-                <File size={13} />
-                {file.name}
+              <span key={file.id} className={previews[file.id] ? "composer-image" : undefined} title={previews[file.id] ? file.name : undefined}>
+                {previews[file.id] ? <img src={previews[file.id]} alt={file.name} /> : <><File size={13} />{file.name}</>}
                 <button
                   type="button"
                   aria-label={`Remove ${file.name}`}
@@ -1049,7 +1061,7 @@ export function ChatThread({
           </button>
         </footer>
       </form>
-      {issueMessage && projects && <IssueComposer sessionToken={sessionToken} projects={projects} activeProjectId={null} initialDraft={{ title: issueMessage.body.split("\n")[0].slice(0, 250) || "Follow up on chat", description: `${issueMessage.body}\n\nFrom ${issueMessage.authorName}, ${new Date(issueMessage.createdAt).toLocaleString()}` }} onClose={() => setIssueMessage(null)} onCreated={onOpenReference} />}
+      {issueMessage && projects && <IssueComposer sessionToken={sessionToken} projects={projects} activeProjectId={null} initialDraft={{ title: issueMessage.body.split("\n")[0].slice(0, 250) || "Follow up on chat", description: `${issueMessage.body}\n\nFrom ${nameOf(issueMessage)}, ${formatDateTime(issueMessage.createdAt)}` }} onClose={() => setIssueMessage(null)} onCreated={onOpenReference} />}
     </section>
   );
 }

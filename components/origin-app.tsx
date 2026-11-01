@@ -6,7 +6,7 @@ import { TaskModal } from "./issue-detail";
 import { ProjectWorkspace } from "./project-workspace";
 import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
-import { FolderPlus, ChevronDown, ChevronRight, CheckCircle2, CircleDot, CircleAlert, Inbox, KeyRound, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
+import { FolderPlus, Check, ChevronDown, ChevronRight, CircleDot, CircleAlert, ImageUp, Inbox, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
@@ -28,9 +28,10 @@ import { IssueComposer } from "./issue-composer";
 import { InboxView } from "./inbox-view";
 import { CallDevices } from "./call-devices";
 import { CallAudio } from "./call-audio";
-import { WorkspaceSettings, WorkspaceMembers } from "./workspace-settings";
+import { WorkspaceSettings } from "./workspace-settings";
+import { FormStatus, type FormNotice } from "./settings-controls";
 import { ChatView } from "./chat-shell";
-import { UserAvatar } from "./user-avatar";
+import { UserAvatar, memberName } from "./user-avatar";
 import { ContentSkeleton } from "./content-skeleton";
 import { useContentTransition } from "./use-content-transition";
 import { DrawView } from "./draw-view";
@@ -108,12 +109,6 @@ const assetTypes: AssetType[] = ["figma", "image", "icon", "font", "document", "
 function projectInitial(name: string) {
   return (name.trim()[0] || "P").toUpperCase();
 }
-function displayUsername(user: Pick<AvatarUser, "username" | "name" | "email">) {
-  return user.username ? `@${user.username}` : `@${user.email.split("@")[0] || user.name}`;
-}
-function sidebarUsername(user: Pick<AvatarUser, "username" | "name" | "email">) {
-  return user.username || user.email.split("@")[0] || user.name;
-}
 function orderSidebarProjects(projects: ProjectWithUi[]) {
   return [...projects].sort((a, b) => {
     if (a.order !== undefined || b.order !== undefined) return (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER);
@@ -189,6 +184,15 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const [searchOpen, setSearchOpen] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navButtonRef = useRef<HTMLButtonElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const drawerWasOpen = useRef(false);
+  useEffect(() => {
+    // The phone drawer takes focus when it opens and gives it back to the menu button when it closes.
+    if (mobileOpen) sidebarRef.current?.querySelector<HTMLElement>('.nav-item[aria-current="page"], .project-button[aria-current="page"], .nav-item')?.focus({ preventScroll: true });
+    else if (drawerWasOpen.current && navButtonRef.current?.getClientRects().length && !document.querySelector("dialog[open]")) navButtonRef.current.focus({ preventScroll: true });
+    drawerWasOpen.current = mobileOpen;
+  }, [mobileOpen]);
   const [dragProject, setDragProject] = useState<Id<"projects"> | null>(null);
   const [projectOrder, setProjectOrder] = useState<Id<"projects">[] | null>(null);
   const [projectSort, setProjectSort] = useState<ProjectSort>("manual");
@@ -300,10 +304,10 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   return (
     <MemberProfileContext.Provider value={setMemberEmail}><div style={{ "--sidebar-width": `${sidebarLayout.width}px` } as CSSProperties} className={clsx("app-shell", "workspace-app", mobileOpen && "mobile-nav-open", sidebarCollapsed && "sidebar-collapsed", sidebarCollapsed && !sidebarHover && "sidebar-hidden", sidebarCollapsed && sidebarHover && "sidebar-floating")}>
       <MotionLayer />
-      <header className="mobile-topbar"><button className="icon-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button><strong className="mobile-project-name">{mainView === "project" ? projects?.find(project => project._id === activeProjectId)?.name : { inbox: "Inbox", chat: "Chat", voice: "Call", draw: "Draw" }[mainView]}</strong>{workspace.role !== "viewer" && mainView !== "project" && <button className="icon-button" aria-label="Create issue" onClick={() => setIssueOpen(true)}><SquarePen size={18} /></button>}</header>
-      {mobileOpen && <button className="mobile-nav-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
+      <header className="mobile-topbar" inert={mobileOpen || undefined}><button ref={navButtonRef} className="icon-button" aria-label="Open navigation" aria-expanded={mobileOpen} aria-controls="workspace-sidebar" onClick={() => setMobileOpen(true)}><Menu size={20} /></button><strong className="mobile-project-name">{mainView === "project" ? projects?.find(project => project._id === activeProjectId)?.name : { inbox: "Inbox", chat: "Chat", voice: "Call", draw: "Draw" }[mainView]}</strong>{workspace.role !== "viewer" && mainView !== "project" && <button className="icon-button" aria-label="Create issue" onClick={() => setIssueOpen(true)}><SquarePen size={18} /></button>}</header>
+      {mobileOpen && <button className="mobile-nav-scrim" aria-label="Close navigation" tabIndex={-1} onClick={() => setMobileOpen(false)} />}
       {sidebarCollapsed ? <div className="sidebar-hover-zone" onMouseEnter={() => setSidebarHover(true)} /> : null}
-      <aside id="workspace-sidebar" className="sidebar" onMouseLeave={() => { if (sidebarCollapsed) setSidebarHover(false); }}>
+      <aside ref={sidebarRef} id="workspace-sidebar" className="sidebar" aria-label="Workspace" onMouseLeave={() => { if (sidebarCollapsed) setSidebarHover(false); }}>
         <div className="sidebar-topbar">
           <ProfileMenu user={user} sessionToken={sessionToken} onLogout={onLogout} sound={notifications.sound} onToggleSound={notifications.toggleSound} workspaces={workspaces} onCreateWorkspace={() => setCreateWorkspaceOpen(true)} onCollapse={() => { setSidebarCollapsed(!sidebarCollapsed); setSidebarHover(false); }} />
           <button className="icon-button" type="button" onClick={() => setSearchOpen(true)} aria-label="Search" title="Search (F or ⌘K)" aria-keyshortcuts="f Meta+K Control+K /">
@@ -322,7 +326,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
             <Inbox size={16} />
             <span>Inbox</span>
             {(notifications.summary?.unread || 0) > 0 && <span className="inbox-unread-dot" aria-label={`${notifications.summary!.unread}${notifications.summary!.more ? "+" : ""} unread notifications`} />}
-            <small>{inbox?.length ?? 0}</small>
+            {(inbox?.length || 0) > 0 && <small aria-label={`${inbox!.length} open issues assigned to you`}>{inbox!.length}</small>}
           </button>
           <button aria-current={mainView === "chat" ? "page" : undefined} className={clsx("nav-item", mainView === "chat" && "active")} type="button" onClick={() => openView("chat")}>
             <MessageCircle size={16} />
@@ -331,7 +335,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
           <button aria-current={mainView === "voice" ? "page" : undefined} className={clsx("nav-item", mainView === "voice" && "active")} type="button" onClick={() => openView("voice")}>
             <Video size={16} />
             <span>Call</span>
-            <small>{voiceParticipants?.length ?? 0}</small>
+            {(voiceParticipants?.length || 0) > 0 && <small className="nav-live" aria-label={`${voiceParticipants!.length} in call`}>{voiceParticipants!.length}</small>}
           </button>
           <button aria-current={mainView === "draw" ? "page" : undefined} className={clsx("nav-item", mainView === "draw" && "active")} type="button" onClick={() => openView("draw")}><PenTool size={16} /><span>Draw</span></button>
           </nav>
@@ -369,7 +373,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
                     <span className="project-trailing"><span className="project-viewers" title={viewers.length ? `${viewers.map(member => member.self ? "You" : member.name).join(", ")} viewing this project` : undefined}>
                       {viewers.slice(0, 2).map(member => <span key={member.userId} className="project-viewer" data-self-viewer={member.self || undefined} aria-label={member.self ? "You are viewing this project" : `${member.name} is viewing this project`}><UserAvatar user={member} size="small" /></span>)}
                       {viewers.length > 2 && <span className="project-viewer viewer-overflow">+{viewers.length - 2}</span>}
-                    </span><small className="project-issue-count" aria-label={`${project.openIssueCount ?? 0} open issues`}>{project.openIssueCount ?? 0}</small></span>
+                    </span>{(project.openIssueCount ?? 0) > 0 && <small className="project-issue-count" aria-label={`${project.openIssueCount} open issues`}>{project.openIssueCount}</small>}</span>
                   </button>
                 ); })}</div>)}
               </div>}
@@ -377,7 +381,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
         </div>
       </aside>
       {!sidebarCollapsed && <SidebarResizeHandle width={sidebarLayout.width} onResize={width => setSidebarLayout(current => ({ ...current, width }))} onCollapse={width => { setSidebarLayout({ width, collapsed: true }); setSidebarHover(false); }} />}
-      <main ref={workspaceRef} className={clsx("workspace", mainView === "draw" && "draw-workspace", viewLoading && "view-loading")} aria-busy={viewLoading}>
+      <main ref={workspaceRef} inert={mobileOpen || undefined} className={clsx("workspace", mainView === "draw" && "draw-workspace", viewLoading && "view-loading")} aria-busy={viewLoading}>
         {sidebarCollapsed && <button className="icon-button sidebar-restore" aria-label="Keep sidebar open" title="Keep sidebar open" aria-controls="workspace-sidebar" aria-expanded="false" onClick={() => { setSidebarCollapsed(false); setSidebarHover(false); }}><PanelLeftOpen size={18} /></button>}
         {viewLoading && <div className="view-loading-overlay"><ContentSkeleton kind={mainView === "chat" ? "chat" : mainView === "draw" ? "canvas" : mainView === "project" || mainView === "voice" ? "board" : "list"} label="Loading view" rows={6} /></div>}
         {shellNotice && <div className="notice danger">{shellNotice}<button className="icon-button" aria-label="Dismiss" onClick={() => setShellNotice("")}><X size={14} /></button></div>}
@@ -420,7 +424,6 @@ function ProfileMenu({
   user,
   sessionToken,
   onLogout,
-  collapsed = false,
   sound,
   onToggleSound,
   workspaces,
@@ -430,7 +433,6 @@ function ProfileMenu({
   user: AuthUser;
   sessionToken: string;
   onLogout: () => void;
-  collapsed?: boolean;
   sound: boolean;
   onToggleSound: () => void;
   workspaces: Workspace[];
@@ -438,33 +440,60 @@ function ProfileMenu({
   onCollapse: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [menu, setMenu] = useState(false);
+  const [menu, setMenu] = useState<false | "first" | "last">(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const workspace = useWorkspace();
+  const items = () => [...(listRef.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not(:disabled)') || [])];
+  const closeMenu = (refocus = true) => { setMenu(false); if (refocus) triggerRef.current?.focus(); };
   useEffect(() => {
     if (!menu) return;
+    const list = items();
+    (menu === "last" ? list.at(-1) : list[0])?.focus();
     const close = (event: PointerEvent) => { if (!menuRef.current?.contains(event.target as Node)) setMenu(false); };
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [menu]);
+  const choose = (action: () => void) => { closeMenu(); action(); };
   return (
-    <div className="profile-menu-wrap" ref={menuRef} onKeyDown={event => { if (event.key === "Escape") { setMenu(false); menuRef.current?.querySelector("button")?.focus(); } }}>
+    <div className="profile-menu-wrap" ref={menuRef}>
       {open ? <WorkspaceSettings sessionToken={sessionToken} sound={sound} onToggleSound={onToggleSound} profile={<ProfileSettings user={user} sessionToken={sessionToken} />} security={<PasswordChanger sessionToken={sessionToken} />} onClose={() => setOpen(false)} onLogout={onLogout} /> : null}
-      <button className="profile-chip bottom" type="button" aria-label="Open account menu" aria-expanded={menu} aria-haspopup="menu" onClick={() => setMenu(!menu)}>
+      <button ref={triggerRef} className="profile-chip bottom" type="button" aria-label={`${workspace.name}, account menu`} aria-expanded={Boolean(menu)} aria-haspopup="menu" aria-controls={menu ? "account-menu" : undefined} onClick={() => setMenu(menu ? false : "first")} onKeyDown={event => {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); setMenu(event.key === "ArrowUp" ? "last" : "first"); }
+      }}>
         <span className="workspace-initial" aria-hidden="true">{workspace.name.slice(0, 1).toUpperCase()}</span>
-        {!collapsed ? <div><strong>{workspace.name}</strong></div> : null}
+        <strong>{workspace.name}</strong>
         <ChevronDown className="profile-chevron" size={13} />
       </button>
-      {menu && <div className="origin-dropdown account-dropdown" role="menu" aria-label="Account and workspaces">
-        <div className="account-identity"><UserAvatar user={user} size="small" /><span>{user.email}</span></div>
+      {menu && <div ref={listRef} id="account-menu" className="origin-dropdown account-dropdown" role="menu" aria-label="Account and workspaces" onKeyDown={event => {
+        const list = items();
+        const index = list.indexOf(document.activeElement as HTMLElement);
+        const move = (next: number) => { event.preventDefault(); list[(next + list.length) % list.length]?.focus(); };
+        if (event.key === "ArrowDown") move(index + 1);
+        else if (event.key === "ArrowUp") move(index < 0 ? -1 : index - 1);
+        else if (event.key === "Home") move(0);
+        else if (event.key === "End") move(list.length - 1);
+        else if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); closeMenu(); }
+        else if (event.key === "Tab") setMenu(false);
+        else if (event.key.length === 1 && /\S/.test(event.key)) {
+          const start = index + 1;
+          const match = [...list.slice(start), ...list.slice(0, start)].find(item => item.textContent?.trim().toLowerCase().startsWith(event.key.toLowerCase()));
+          if (match) { event.preventDefault(); match.focus(); }
+        }
+      }}>
+        <div className="account-identity"><UserAvatar user={user} size="small" /><span><strong>{memberName(user)}</strong><small>{user.email}</small></span></div>
         <hr />
-        <span className="dropdown-caption">Workspaces</span>
-        {workspaces.map(item => <button role="menuitem" key={item._id} onClick={() => { setMenu(false); if (item._id !== workspace._id) window.location.assign(`/${item.slug}`); }}><span className="workspace-initial">{item.name.slice(0, 1)}</span><span>{item.name}</span>{item._id === workspace._id && <CheckCircle2 size={14} />}</button>)}
-        <button role="menuitem" onClick={() => { setMenu(false); onCreateWorkspace(); }}><Plus size={15} />Create workspace</button>
+        <span className="dropdown-caption" id="account-menu-workspaces">Workspaces</span>
+        <div role="group" aria-labelledby="account-menu-workspaces">
+          {workspaces.map(item => <button role="menuitemradio" aria-checked={item._id === workspace._id} tabIndex={-1} key={item._id} onClick={() => choose(() => { if (item._id !== workspace._id) window.location.assign(`/${item.slug}`); })}><span className="workspace-initial" aria-hidden="true">{item.name.slice(0, 1).toUpperCase()}</span><span>{item.name}</span>{item._id === workspace._id && <Check size={14} className="menu-check" />}</button>)}
+        </div>
+        <button role="menuitem" tabIndex={-1} onClick={() => choose(onCreateWorkspace)}><Plus size={15} /><span>Create workspace</span></button>
         <hr />
-        <button role="menuitem" onClick={() => { setMenu(false); setOpen(true); }}><Settings2 size={15} />Settings</button>
-        <button role="menuitem" onClick={() => { setMenu(false); onCollapse(); }}><PanelLeftClose size={15} />Collapse sidebar</button>
-        <button role="menuitem" onClick={onLogout}><LogOut size={15} />Sign out</button>
+        <button role="menuitem" tabIndex={-1} onClick={() => choose(() => setOpen(true))}><Settings2 size={15} /><span>Settings</span></button>
+        <button role="menuitem" tabIndex={-1} className="menu-desktop-only" onClick={() => choose(onCollapse)}><PanelLeftClose size={15} /><span>Collapse sidebar</span></button>
+        <hr />
+        <button role="menuitem" tabIndex={-1} onClick={() => choose(onLogout)}><LogOut size={15} /><span>Sign out</span></button>
       </div>}
     </div>
   );
@@ -473,65 +502,90 @@ function ProfileMenu({
 function ProfileSettings({ user, sessionToken }: { user: AuthUser; sessionToken: string }) {
   const updateProfile = useMutation(api.auth.updateProfile);
   const generateAvatarUploadUrl = useMutation(api.auth.generateAvatarUploadUrl);
-  const [username, setUsername] = useState(user.username || user.email.split("@")[0] || "");
+  const savedUsername = user.username || user.email.split("@")[0] || "";
+  const [username, setUsername] = useState(savedUsername);
   const [name, setName] = useState(user.name || "");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [notice, setNotice] = useState("");
+  const [preview, setPreview] = useState("");
+  const [notice, setNotice] = useState<FormNotice>(null);
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
     setUsername(user.username || user.email.split("@")[0] || "");
     setName(user.name || "");
   }, [user.email, user.name, user.username]);
+  useEffect(() => {
+    if (!avatarFile) { setPreview(""); return; }
+    const url = URL.createObjectURL(avatarFile);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [avatarFile]);
+  const dirty = name.trim() !== (user.name || "") || username.trim() !== savedUsername || Boolean(avatarFile);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
+    setBusy(true); setNotice(null);
     try {
       let avatarStorageId: Id<"_storage"> | undefined;
       if (avatarFile) {
-        if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(avatarFile.type) || avatarFile.size > 5 * 1024 * 1024) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
         const uploadUrl = await generateAvatarUploadUrl({ sessionToken });
         const res = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": avatarFile.type || "application/octet-stream" }, body: avatarFile });
-        if (!res.ok) throw new Error("Avatar upload failed");
+        if (!res.ok) throw new Error("Photo upload failed");
         const payload = (await res.json()) as { storageId: Id<"_storage"> };
         avatarStorageId = payload.storageId;
       }
-      await updateProfile({
-        sessionToken,
-        username,
-        name,
-        ...(avatarStorageId ? { avatarStorageId } : {}),
-      });
+      await updateProfile({ sessionToken, username, name, ...(avatarStorageId ? { avatarStorageId } : {}) });
       setAvatarFile(null);
-      setNotice("Profile updated");
+      setNotice({ tone: "success", text: "Profile updated" });
     } catch (error) {
-      setNotice(errorText(error, "Profile update failed"));
-    }
+      setNotice({ tone: "danger", text: errorText(error, "Profile update failed") });
+    } finally { setBusy(false); }
   };
   return (
-    <form className="mini-form profile-settings" onSubmit={submit}>
-      <div className="profile-avatar-preview"><UserAvatar user={user} /><span>{user.email}</span></div>
-      <label>Username<input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Username" /></label>
-      <label>Display name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Display name" /></label>
-      <label>Profile picture<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => setAvatarFile(event.target.files?.[0] ?? null)} /></label>
-      {notice ? <div className="notice">{notice}</div> : null}
-      <button className="primary-button compact" type="submit">Save account</button>
+    <form className="settings-form" onSubmit={submit}>
+      <div className="settings-avatar-row">
+        <UserAvatar user={{ ...user, avatarUrl: preview || user.avatarUrl }} className="settings-avatar" />
+        <span className="settings-identity"><strong>{memberName({ ...user, name })}</strong><small>{user.email}</small></span>
+        <label className="ghost-button compact file-button">
+          <input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp,image/gif" onChange={event => {
+            const file = event.target.files?.[0] ?? null;
+            event.target.value = "";
+            if (file && (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type) || file.size > 5 * 1024 * 1024)) { setNotice({ tone: "danger", text: "Choose a PNG, JPEG, WebP or GIF under 5 MB" }); return; }
+            setNotice(null); setAvatarFile(file);
+          }} />
+          <ImageUp size={14} />{user.avatarUrl || preview ? "Change photo" : "Upload photo"}
+        </label>
+      </div>
+      <label>Name<input value={name} onChange={event => setName(event.target.value)} autoComplete="name" maxLength={100} /></label>
+      <label>Username<span className="prefixed-input"><span aria-hidden="true">@</span><input value={username} onChange={event => setUsername(event.target.value)} autoComplete="username" spellCheck={false} /></span></label>
+      <FormStatus notice={notice} />
+      <div className="settings-actions"><button className="primary-button compact" type="submit" disabled={busy || !dirty}>{busy && <Loader2 className="spin" size={14} />}Save</button></div>
     </form>
   );
 }
 
 function PasswordChanger({ sessionToken }: { sessionToken: string }) {
   const changePassword = useMutation(api.auth.changePassword);
-  const [open, setOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<FormNotice>(null);
+  const [busy, setBusy] = useState(false);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
+    setBusy(true); setNotice(null);
     try {
       await changePassword({ sessionToken, currentPassword, newPassword });
-      setCurrentPassword(""); setNewPassword(""); setNotice("Password changed");
-    } catch (error) { setNotice(errorText(error, "Password change failed")); }
+      setCurrentPassword(""); setNewPassword(""); setNotice({ tone: "success", text: "Password changed" });
+    } catch (error) { setNotice({ tone: "danger", text: errorText(error, "Password change failed") }); }
+    finally { setBusy(false); }
   };
-  if (!open) return <button className="ghost-button full" type="button" onClick={() => setOpen(true)}><KeyRound size={16} /> Change password</button>;
-  return <form className="mini-form" onSubmit={submit}><input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" placeholder="Current password" aria-label="Current password" autoComplete="current-password" required maxLength={128} autoFocus /><input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="New password (10+ characters)" aria-label="New password" autoComplete="new-password" required minLength={10} maxLength={128} />{notice ? <div className="notice">{notice}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit">Save</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form>;
+  return <form className="settings-form" onSubmit={submit}>
+    <h4>Password</h4>
+    <label>Current password<input value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} type="password" autoComplete="current-password" required maxLength={128} /></label>
+    <label>New password<input value={newPassword} onChange={e => setNewPassword(e.target.value)} type="password" autoComplete="new-password" required minLength={10} maxLength={128} placeholder="At least 10 characters" /></label>
+    <FormStatus notice={notice} />
+    <div className="settings-actions"><button className="primary-button compact" type="submit" disabled={busy || !currentPassword || newPassword.length < 10}>{busy && <Loader2 className="spin" size={14} />}Change password</button></div>
+  </form>;
 }
 
 function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { sessionToken: string; onCreated: (id: Id<"projects">) => void; iconOnly?: boolean }) {
@@ -616,7 +670,7 @@ function SearchDialog({
   const results = rankSearchResults([
     ...projectResults.map(project => ({ id: `project-${project._id}`, label: project.name, kind: "Project", icon: <ProjectIcon project={project} />, open: () => { onOpenProject(project._id); onClose(); } })),
     ...(issueResults || []).slice(0, 10).map(task => ({ id: `issue-${task._id}`, label: task.title, kind: taskKey(task._id), icon: <CircleDot size={16} />, open: () => { onOpenTask(task.projectId, task._id); onClose(); } })),
-    ...(memberResults || []).map(member => ({ id: `member-${member._id}`, label: member.username || member.name || member.email, kind: "Teammate", icon: <UserAvatar user={member} size="small" />, open: () => { onClose(); openMember(member.email); } })),
+    ...(memberResults || []).map(member => ({ id: `member-${member._id}`, label: memberName(member), kind: member.username ? `@${member.username}` : "Teammate", icon: <UserAvatar user={member} size="small" />, open: () => { onClose(); openMember(member.email); } })),
     ...messages.map(message => ({ id: `chat-${message.id}`, label: message.body.slice(0, 180), kind: "Chat", icon: <MessageCircle size={16} />, open: () => { onOpenChat(message.id); onClose(); } })),
   ], query);
   const activeResult = results.find(result => result.id === selectedResult) || results[0];
@@ -1008,8 +1062,8 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
     ...remoteParticipants.flatMap(participant => {
       const remote = remoteStreams[participant.userId];
       return [
-        ...(participant.screenSharing && remote?.screen ? [{ id: `${participant.userId}:screen`, stream: remote.screen, participant, label: `${sidebarUsername(participant)}'s screen`, audioEnabled: false, videoEnabled: true, screenSharing: true }] : []),
-        { id: `${participant.userId}:camera`, stream: remote?.stream, participant, label: sidebarUsername(participant), audioEnabled: participant.audioEnabled, videoEnabled: participant.videoEnabled },
+        ...(participant.screenSharing && remote?.screen ? [{ id: `${participant.userId}:screen`, stream: remote.screen, participant, label: `${memberName(participant)}'s screen`, audioEnabled: false, videoEnabled: true, screenSharing: true }] : []),
+        { id: `${participant.userId}:camera`, stream: remote?.stream, participant, label: memberName(participant), audioEnabled: participant.audioEnabled, videoEnabled: participant.videoEnabled },
       ];
     }),
   ] : [];
@@ -1039,31 +1093,25 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
   };
   return (
     <section className="voice-workspace">
-      <div className="call-utility-bar"><div className="call-participant-strip" aria-label="Call participants">{participants === undefined ? <ContentSkeleton label="Loading participants" rows={1} /> : activeParticipants.map(participant => <button key={participant.userId} className="call-participant-chip" title={participant.name} onClick={() => setFocusedTile(participant.userId === user._id ? "self:camera" : `${participant.userId}:camera`)}><UserAvatar user={participant.userId === user._id ? user : participant} size="small" /><span>{participant.userId === user._id ? "You" : sidebarUsername(participant)}</span></button>)}</div><div className="call-header-actions">{localStream ? <time className="call-elapsed">{Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}</time> : <button className="primary-button compact" onClick={startCall} disabled={joining || workspace.role === "viewer"}>{joining ? <Loader2 className="spin" size={15} /> : <Video size={15} />}Join call</button>}<button className="icon-button" title="Call devices" aria-label="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={16} /></button></div></div>
+      <div className={clsx("call-utility-bar", !localStream && !activeParticipants.length && "idle")}><h1 className="call-title">Call</h1><div className="call-participant-strip" aria-label="Call participants">{participants === undefined ? <ContentSkeleton label="Loading participants" rows={1} /> : activeParticipants.map(participant => <button key={participant.userId} className="call-participant-chip" onClick={() => setFocusedTile(participant.userId === user._id ? "self:camera" : `${participant.userId}:camera`)}><UserAvatar user={participant.userId === user._id ? user : participant} size="small" /><span>{participant.userId === user._id ? "You" : memberName(participant)}</span></button>)}</div><div className="call-header-actions">{localStream && <time className="call-elapsed" aria-label="Call duration">{Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}</time>}<button className="icon-button" title="Call devices" aria-label="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={16} /></button></div></div>
       {devicesOpen && <CallDevices audioId={audioDevice} videoId={videoDevice} inCall={!!localStream} onChange={changeDevice} onClose={() => setDevicesOpen(false)} />}
       <div className="call-dock" hidden={!localStream}>
         <div className="call-filmstrip" aria-label="Other cameras and shared screens">
           {callTiles.filter(tile => tile.id !== selectedTileId).map(tile => <CallVideoTile key={tile.id} {...tile} thumbnail onFocus={() => setFocusedTile(tile.id)} />)}
         </div>
-        <div className="call-controls">
-          {localStream ? (
-            <>
-              <button type="button" aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"} title={audioEnabled ? "Mute microphone" : "Unmute microphone"} onClick={toggleAudio}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button>
-              <button type="button" aria-label={videoEnabled ? "Turn camera off" : "Turn camera on"} title={videoEnabled ? "Turn camera off" : "Turn camera on"} onClick={toggleVideo}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button>
-              <button type="button" className={screenStream ? "sharing" : ""} aria-label={screenStream ? "Stop sharing" : "Share screen"} title={screenStream ? "Stop sharing" : "Share screen"} onClick={shareScreen}>{screenStream ? <MonitorOff size={18} /> : <MonitorUp size={18} />}</button>
-              <button type="button" className="leave-call" aria-label="Leave call" title="Leave call" onClick={leaveCall}><PhoneOff size={18} /></button>
-            </>
-          ) : (
-            <button type="button" onClick={startCall} disabled={joining || workspace.role === "viewer"}>{joining ? <Loader2 className="spin" size={15} /> : <Video size={15} />} Join call</button>
-          )}
-        </div>
+        {localStream && <div className="call-controls">
+          <button type="button" aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"} title={audioEnabled ? "Mute microphone" : "Unmute microphone"} onClick={toggleAudio}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button>
+          <button type="button" aria-label={videoEnabled ? "Turn camera off" : "Turn camera on"} title={videoEnabled ? "Turn camera off" : "Turn camera on"} onClick={toggleVideo}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button>
+          <button type="button" className={screenStream ? "sharing" : ""} aria-label={screenStream ? "Stop sharing" : "Share screen"} title={screenStream ? "Stop sharing" : "Share screen"} onClick={shareScreen}>{screenStream ? <MonitorOff size={18} /> : <MonitorUp size={18} />}</button>
+          <button type="button" className="leave-call" aria-label="Leave call" title="Leave call" onClick={leaveCall}><PhoneOff size={18} /></button>
+        </div>}
       </div>
       <div className="voice-workspace-grid">
         <div className={clsx("voice-room stage", localStream && "in-call call-main-stage")}>
           {mainTile ? (
             <CallVideoTile key={mainTile.id} {...mainTile} />
           ) : (
-            <div className="call-lobby"><div className="lobby-avatar"><UserAvatar user={user} /></div>{activeParticipants.length > 0 && <h2>{activeParticipants.length} in call</h2>}<div className="lobby-devices"><button title={audioEnabled ? "Microphone on" : "Microphone off"} aria-label={audioEnabled ? "Disable microphone before joining" : "Enable microphone before joining"} aria-pressed={audioEnabled} onClick={() => setAudioEnabled(!audioEnabled)}>{audioEnabled ? <Mic size={20} /> : <MicOff size={20} />}</button><button title={videoEnabled ? "Camera on" : "Camera off"} aria-label={videoEnabled ? "Disable camera before joining" : "Enable camera before joining"} aria-pressed={videoEnabled} onClick={() => setVideoEnabled(!videoEnabled)}>{videoEnabled ? <Video size={20} /> : <VideoOff size={20} />}</button></div><button className="ghost-button compact" onClick={() => setDevicesOpen(true)}><Settings2 size={14} />Check devices</button></div>
+            <div className="call-lobby"><div className="lobby-avatar"><UserAvatar user={user} /></div>{remoteParticipants.length > 0 && <h2>{remoteParticipants.map(participant => memberName(participant).split(" ")[0]).slice(0, 3).join(", ")}{remoteParticipants.length > 3 ? ` +${remoteParticipants.length - 3}` : ""} in call</h2>}<div className="lobby-devices"><button title={audioEnabled ? "Microphone on" : "Microphone off"} aria-label="Microphone" aria-pressed={audioEnabled} onClick={() => setAudioEnabled(!audioEnabled)}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button><button title={videoEnabled ? "Camera on" : "Camera off"} aria-label="Camera" aria-pressed={videoEnabled} onClick={() => setVideoEnabled(!videoEnabled)}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button><button className="lobby-settings" aria-label="Call devices" title="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={18} /></button><button className="primary-button lobby-join" onClick={startCall} disabled={joining || workspace.role === "viewer"}>{joining ? <Loader2 className="spin" size={16} /> : <Video size={16} />}Join call</button></div></div>
           )}
         </div>
       </div>
@@ -1104,7 +1152,7 @@ function CallVideoTile({
       {thumbnail && <button type="button" className="call-tile-focus" title={`Enlarge ${label || participant.name}`} aria-label={`Enlarge ${label || participant.name}`} onClick={onFocus} />}
       <video ref={videoRef} autoPlay muted playsInline style={!videoEnabled || !stream ? { position: "absolute", width: 1, height: 1, opacity: 0 } : undefined} />{(!videoEnabled || !stream) && <div className="video-avatar"><UserAvatar user={participant} />{!stream && <small>Connecting</small>}</div>}
       <div className="call-tile-meta">
-        {thumbnail ? <span className="call-thumbnail-name">{label ?? displayUsername(participant)}</span> : <button className="call-member-profile" onClick={() => openMember(participant.email)} aria-label={`View ${participant.name} profile`}>{label ?? displayUsername(participant)}</button>}
+        {thumbnail ? <span className="call-thumbnail-name">{label ?? memberName(participant)}</span> : <button className="call-member-profile" onClick={() => openMember(participant.email)} aria-label={`View ${participant.name} profile`}>{label ?? memberName(participant)}</button>}
         {screenSharing ? <MonitorUp size={13} /> : audioEnabled ? <Mic size={13} /> : <MicOff size={13} />}
         {!thumbnail && videoEnabled && stream && <button className="icon-button call-fullscreen" title="Full screen" aria-label={`Full screen ${label || participant.name}`} onClick={() => { if (!tileRef.current?.requestFullscreen) { setFullscreenError("Full screen is unavailable in this browser"); return; } void tileRef.current.requestFullscreen().catch(() => setFullscreenError("Could not enter full screen")); }}><Maximize2 size={14} /></button>}
       </div>

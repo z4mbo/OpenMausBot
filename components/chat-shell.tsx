@@ -23,6 +23,7 @@ import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection"
 
 import { ContentSkeleton } from "./content-skeleton";
 import { UserAvatar, memberName, type AvatarIdentity } from "./user-avatar";
+import { formatDateTime, formatRelative } from "@/lib/format";
 import { ChatThread } from "./chat-view";
 
 export type ChatMember = AvatarIdentity & {
@@ -356,11 +357,8 @@ export function ChatView(props: Props) {
                     </span>
                     <span className="dm-row-meta">
                       {conversation.lastMessage && (
-                        <time>
-                          {new Intl.DateTimeFormat(undefined, {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }).format(conversation.lastMessage.createdAt)}
+                        <time dateTime={new Date(conversation.lastMessage.createdAt).toISOString()} title={formatDateTime(conversation.lastMessage.createdAt)}>
+                          {formatRelative(conversation.lastMessage.createdAt)}
                         </time>
                       )}
                       {conversation.unread > 0 && (
@@ -422,7 +420,7 @@ export function ChatView(props: Props) {
                       <UserAvatar user={member} />
                       <span>
                         <strong>{memberName(member)}</strong>
-                        <small>{member.name}</small>
+                        {member.username && <small>@{member.username}</small>}
                       </span>
                       {opening === member.userId ? (
                         <Loader2 className="spin" size={16} />

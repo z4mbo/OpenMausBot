@@ -44,6 +44,12 @@
 .consent-write input { width: 16px; height: 16px; min-height: 0; accent-color: var(--accent); }
 .connector-consent .consent-expiry { margin-top: var(--space-4); }
 
+/* 404 and crash pages. */
+.status-page .auth-content { justify-items: center; gap: var(--space-4); text-align: center; }
+.status-page h1 { font-size: var(--text-xl); }
+.status-page .primary-button { width: auto; margin-top: var(--space-2); }
+.status-code { color: var(--text-3); font-size: var(--text-sm); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; letter-spacing: 0.08em; }
+
 /* Convex not configured. */
 .setup-screen { min-height: 100dvh; display: grid; place-items: center; padding: var(--space-6); background: var(--bg); }
 .setup-card { width: min(480px, 100%); background: var(--surface-1); border: 1px solid var(--border-2); border-radius: var(--radius-lg); padding: var(--space-6); }

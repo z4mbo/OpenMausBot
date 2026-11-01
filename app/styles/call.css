@@ -1,6 +1,7 @@
 /* Call: lobby, participant strip, stage, filmstrip, controls and device settings. */
 .voice-workspace { position: relative; display: flex; flex-direction: column; gap: var(--space-3); height: 100%; min-height: 0; }
 .call-utility-bar { display: flex; flex: none; align-items: center; gap: var(--space-3); min-height: 52px; margin: 0 calc(var(--space-6) * -1); padding: 0 var(--space-4) 0 var(--space-6); border-bottom: 1px solid var(--border-1); }
+.call-title { margin: 0; flex: none; font-size: var(--text-md); font-weight: var(--weight-semibold); }
 .call-participant-strip { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
 .call-participant-chip { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 160px; height: 28px; padding: 0 var(--space-2) 0 4px; border: 0; border-radius: var(--radius-full); background: var(--surface-3); color: var(--text-2); font-size: var(--text-sm); }
 .call-participant-chip:hover { color: var(--text-1); background: var(--surface-4); }
@@ -15,10 +16,13 @@
 .call-lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); height: 100%; min-height: 300px; padding: var(--space-10) var(--space-5); }
 .lobby-avatar .origin-user-avatar { --avatar-size: 72px; }
 .call-lobby h2 { margin: 0; color: var(--text-2); font-size: var(--text-md); font-weight: var(--weight-medium); text-align: center; }
-.lobby-devices { display: flex; gap: var(--space-2); }
-.lobby-devices button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border-2); border-radius: 50%; background: var(--surface-3); color: var(--text-1); transition: background var(--duration-fast), border-color var(--duration-fast); }
-.lobby-devices button:hover { background: var(--surface-4); border-color: var(--border-3); }
+.lobby-devices { display: flex; align-items: center; gap: var(--space-2); }
+.lobby-devices :is(button[aria-pressed], .lobby-settings) { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--border-2); border-radius: 50%; background: var(--surface-3); color: var(--text-1); transition: background var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast), transform var(--duration) var(--ease-spring); }
+.lobby-devices :is(button[aria-pressed], .lobby-settings):hover { background: var(--surface-4); border-color: var(--border-3); }
+.lobby-devices :is(button[aria-pressed], .lobby-settings):active { transform: scale(0.94); }
 .lobby-devices button[aria-pressed="false"] { border-color: rgba(242, 113, 107, 0.35); background: var(--red-soft); color: var(--red); }
+.lobby-devices button.lobby-settings { display: none; color: var(--text-2); }
+.lobby-devices .lobby-join { min-height: 40px; margin-left: var(--space-2); padding: 0 var(--space-4); border-radius: var(--radius-full); font-size: var(--text-md); }
 
 /* Tiles. */
 .call-tile { position: relative; display: grid; place-items: center; width: 100%; min-width: 0; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-3); }
@@ -63,11 +67,18 @@
 /* Devices. */
 .call-device-panel { position: absolute; top: 56px; right: 0; z-index: 5; width: min(340px, 100%); padding: var(--space-4); border: 1px solid var(--border-2); border-radius: var(--radius-lg); background: var(--surface-3); box-shadow: var(--shadow-md); animation: o-pop var(--duration) var(--ease-out); }
 .call-device-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); font-weight: var(--weight-semibold); }
-.call-device-panel label { display: grid; grid-template-columns: 16px 1fr; align-items: center; gap: var(--space-2); margin: var(--space-3) 0; }
+.call-device-panel label { display: grid; grid-template-columns: 16px 1fr; align-items: center; gap: 6px var(--space-2); margin: 0 0 var(--space-3); }
+.call-device-panel label > svg { color: var(--text-3); }
 .call-device-panel select { grid-column: 1 / -1; min-width: 0; }
+.call-device-panel > .ghost-button { width: 100%; }
 .call-device-panel video { width: 100%; aspect-ratio: 16 / 9; margin-top: var(--space-3); border-radius: var(--radius-md); object-fit: cover; }
 
 @media (max-width: 760px) {
+  .call-title { display: none; }
+  .call-utility-bar.idle { display: none; }
+  .lobby-devices { flex-wrap: wrap; justify-content: center; }
+  .lobby-devices button.lobby-settings { display: grid; }
+  .lobby-devices .lobby-join { flex-basis: 100%; margin: var(--space-2) 0 0; }
   .call-utility-bar { min-height: 44px; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-2) 0 var(--space-3); }
   .call-participant-chip { max-width: 96px; }
   .call-dock { flex-direction: column-reverse; gap: var(--space-2); }

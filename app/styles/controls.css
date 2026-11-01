@@ -56,6 +56,25 @@
 .segmented-control button.active, .segmented-control button[aria-pressed="true"] { background: var(--surface-4); color: var(--text-1); }
 .segmented-control:has(> .segment-glider[data-visible="true"]) button.active { background: transparent; }
 .segmented-control button > span { color: var(--text-3); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.segmented-control button > :is(.label-long, .label-short) { color: inherit; font-size: inherit; }
+
+/* Switch: every role="switch" checkbox looks and moves the same. */
+input[type="checkbox"][role="switch"] { position: relative; flex: none; width: 32px; min-width: 32px; height: 18px; min-height: 18px; padding: 0; border: 0; border-radius: var(--radius-full); background: var(--surface-5); appearance: none; cursor: pointer; transition: background var(--duration-fast) var(--ease-out); }
+input[type="checkbox"][role="switch"]::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-1); box-shadow: var(--shadow-sm); transition: transform var(--duration) var(--ease-spring); }
+input[type="checkbox"][role="switch"]:checked { background: var(--accent); }
+input[type="checkbox"][role="switch"]:checked::after { transform: translateX(14px); }
+input[type="checkbox"][role="switch"]:hover:not(:disabled) { box-shadow: 0 0 0 3px var(--hover); }
+input[type="checkbox"][role="switch"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; box-shadow: none; }
+input[type="checkbox"][role="switch"]:disabled { cursor: not-allowed; opacity: 0.45; }
+
+/* Responsive labels: long on wide screens, short on phones. */
+.label-short { display: none; }
+
+/* A removable filter value shown in a toolbar. */
+.filter-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 200px; height: 24px; padding: 0 6px 0 8px; border: 1px solid var(--border-2); border-radius: var(--radius-full); background: var(--surface-3); color: var(--text-2); font-size: var(--text-sm); animation: o-pop var(--duration) var(--ease-out); }
+.filter-chip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filter-chip > svg { flex: none; color: var(--text-3); }
+.filter-chip:hover { border-color: var(--border-3); color: var(--text-1); }
 
 /* Forms. */
 .stack-form { display: grid; gap: var(--space-3); }
@@ -66,6 +85,8 @@
 /* Notices. */
 .notice { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0; padding: var(--space-2) var(--space-3); border: 1px solid rgba(232, 183, 90, 0.3); border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber); font-size: var(--text-sm); line-height: 1.4; animation: o-drop var(--duration-slow) var(--ease-out); }
 .notice.danger { border-color: rgba(242, 113, 107, 0.32); background: var(--red-soft); color: var(--red); }
+.notice.success { border-color: rgba(92, 197, 143, 0.3); background: var(--green-soft); color: var(--green); }
+.notice > svg { flex: none; }
 .notice > .icon-button { margin-left: auto; color: inherit; }
 
 /* Empty states. */
@@ -99,6 +120,7 @@
   object-fit: cover;
 }
 .origin-user-avatar.small { --avatar-size: 20px; }
+.origin-user-avatar[data-initials="2"] { font-size: calc(var(--avatar-size) * 0.36); letter-spacing: -0.02em; }
 .project-icon { width: 16px; height: 16px; flex: none; color: currentColor; }
 .project-icon.image { border-radius: var(--radius-xs); object-fit: cover; }
 .project-icon.emoji { display: inline-grid; place-items: center; font-size: 15px; line-height: 1; font-family: var(--font-sans); font-variant-emoji: emoji; }
@@ -134,7 +156,9 @@
 .origin-dropdown button svg { color: var(--text-3); }
 .origin-dropdown button:hover:not(:disabled), .origin-dropdown button:focus-visible, .member-picker-popover [role="option"][data-highlighted="true"], .issue-select-popover [role="option"][data-highlighted="true"] { background: var(--surface-5); outline: none; }
 .origin-dropdown button:disabled { opacity: 0.4; }
-.origin-dropdown button > span:nth-child(2) { flex: 1; }
+.origin-dropdown button > span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.origin-dropdown button:active:not(:disabled) { background: var(--active); }
+.origin-dropdown .menu-check { color: var(--text-2); }
 .origin-dropdown button.danger-text, .origin-dropdown button.danger-text svg { color: var(--red); }
 .origin-dropdown hr { margin: var(--space-1) 0; border: 0; border-top: 1px solid var(--border-2); }
 .dropdown-caption { display: block; padding: 6px var(--space-2) 2px; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); }
@@ -167,6 +191,8 @@
   .dialog-body { padding: var(--space-2) var(--space-4) var(--space-6); }
   .icon-button { width: 36px; min-width: 36px; height: 36px; }
   .primary-button, .ghost-button { min-height: 36px; }
+  .label-long { display: none; }
+  .label-short { display: inline; }
 }
 .origin-dialog > form.stack-form, .origin-dialog > .stack-form { padding: var(--space-2) var(--space-5) var(--space-5); }
 .origin-dialog > form.stack-form > .primary-button:last-child { justify-self: end; }
