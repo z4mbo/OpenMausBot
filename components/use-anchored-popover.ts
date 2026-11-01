@@ -2,7 +2,13 @@
 
 import { useLayoutEffect, type RefObject } from "react";
 
-export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonElement | null>, menu: RefObject<HTMLDivElement | null>, input: RefObject<HTMLInputElement | null>, options?: { width?: number; maxHeight?: number }) {
+/** Search only pays off on long lists, and focusing it on a phone raises the keyboard over the list. */
+export function shouldFocusSearch(optionCount: number) {
+  return optionCount > 7 && typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches;
+}
+
+/** Shows `menu` in the top layer next to `trigger` and focuses `focus` (a search field or the list itself). */
+export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonElement | null>, menu: RefObject<HTMLDivElement | null>, focus: RefObject<HTMLElement | null>, options?: { width?: number; maxHeight?: number }) {
   const preferredWidth = options?.width ?? 280;
   const preferredHeight = options?.maxHeight ?? 330;
   useLayoutEffect(() => {
@@ -28,7 +34,7 @@ export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonE
     };
     position();
     popover.showPopover();
-    input.current?.focus({ preventScroll: true });
+    focus.current?.focus({ preventScroll: true });
     const onScroll = (event: Event) => { if (!popover.contains(event.target as Node)) position(); };
     window.addEventListener("resize", position);
     document.addEventListener("scroll", onScroll, true);
@@ -41,5 +47,5 @@ export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonE
       window.visualViewport?.removeEventListener("scroll", position);
       if (popover.matches(":popover-open")) popover.hidePopover();
     };
-  }, [open, trigger, menu, input, preferredWidth, preferredHeight]);
+  }, [open, trigger, menu, focus, preferredWidth, preferredHeight]);
 }
