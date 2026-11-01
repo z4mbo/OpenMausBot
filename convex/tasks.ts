@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { canEdit, changeOpenIssueCount, getActiveTeamMember, projectMember, projectPeople, requireMember, requireTeamMember, touchProject } from "./lib/permissions";
@@ -44,10 +44,15 @@ async function findAssignee(ctx: QueryCtx | MutationCtx, projectId: Id<"projects
   return member?.status === "active" ? member : null;
 }
 
+/** A due date is optional; an empty value means none. Anything else must be a real "YYYY-MM-DD" date. */
+function optionalDueDate(value?: string) {
+  return value?.trim() ? requireDueDate(value.trim()) : undefined;
+}
+
 function requireDueDate(value?: string) {
-  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error("Choose a valid due date");
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new ConvexError("Choose a valid due date");
   const date = new Date(`${value}T00:00:00.000Z`);
-  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) throw new Error("Choose a valid due date");
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) throw new ConvexError("Choose a valid due date");
   return value;
 }
 
@@ -144,7 +149,7 @@ export const details = query({
   handler: async (ctx, args) => {
     const { project } = await requireMember(ctx, args.projectId, args.sessionToken);
     const task = await ctx.db.get(args.taskId);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
     const [comments, assets, members, columns] = await Promise.all([
       ctx.db.query("taskComments").withIndex("by_task", (q) => q.eq("taskId", args.taskId)).collect(),
       ctx.db.query("taskAssets").withIndex("by_task", (q) => q.eq("taskId", args.taskId)).collect(),
@@ -264,17 +269,18 @@ export const createTask = mutation({
   },
 });
 
-export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; columnId?: Id<"columns">; title: string; description?: string; priority: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; }, actorId: Id<"users">, actorAgentId?: Id<"workspaceAgents">) {
+export async function createTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; columnId?: Id<"columns">; title: string; description?: string; priority: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; }, actorId: Id<"users">) {
   const [column, assignee] = await Promise.all([
       args.columnId ? ctx.db.get(args.columnId) : ensureDraftColumn(ctx, args.projectId).then(result => result.column),
       findAssignee(ctx, args.projectId, args.assignedToEmail),
     ]);
-    if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
-    if (!args.title.trim() || args.title.length > 250) throw new Error("Enter an issue title under 250 characters");
-    if (!assignee && (!actorAgentId || args.assignedToEmail)) throw new Error("Choose an active workspace member as assignee");
-    const dueDate = actorAgentId && !args.dueDate ? undefined : requireDueDate(args.dueDate);
+    if (!column || column.projectId !== args.projectId) throw new ConvexError("Column not found");
+    if (!args.title.trim() || args.title.length > 250) throw new ConvexError("Enter an issue title under 250 characters");
+    // Assignee and due date are optional; a value that is given must still be valid.
+    if (!assignee && args.assignedToEmail?.trim()) throw new ConvexError("Choose an active workspace member as assignee");
+    const dueDate = optionalDueDate(args.dueDate);
     const now = Date.now();
-    if ((args.description?.length || 0) > 60000) throw new Error("Description must be under 60,000 characters");
+    if ((args.description?.length || 0) > 60000) throw new ConvexError("Description must be under 60,000 characters");
     if (args.columnId) await ensureDraftColumn(ctx, args.projectId);
     const last = await ctx.db.query("tasks").withIndex("by_column_order", q => q.eq("columnId", column._id)).order("desc").first();
     const order = last ? last.order + 1 : 0;
@@ -383,7 +389,7 @@ export const updateTask = mutation({
 
 export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; title?: string; description?: string; priority?: "low" | "medium" | "high"; assignedToEmail?: string; dueDate?: string; done?: boolean; }, actorId: Id<"users">) {
   const task = await ctx.db.get(args.taskId);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
     const patch: Partial<{
       title: string;
       description: string | undefined;
@@ -397,21 +403,22 @@ export async function updateTaskRecord(ctx: MutationCtx, args: { projectId: Id<"
       updatedAt: number;
     }> = { updatedAt: Date.now() };
     if (args.title !== undefined) {
-      if (!args.title.trim() || args.title.length > 250) throw new Error("Enter an issue title under 250 characters");
+      if (!args.title.trim() || args.title.length > 250) throw new ConvexError("Enter an issue title under 250 characters");
       patch.title = args.title.trim();
     }
     if (args.description !== undefined) {
-      if (args.description.length > 60000) throw new Error("Description must be under 60,000 characters");
+      if (args.description.length > 60000) throw new ConvexError("Description must be under 60,000 characters");
       patch.description = args.description.trim() || undefined;
     }
     if (args.priority !== undefined) patch.priority = args.priority;
+    // An empty assignee or due date clears it.
     if (args.assignedToEmail !== undefined) {
-      const assignee = await findAssignee(ctx, args.projectId, args.assignedToEmail);
-      if (!assignee) throw new Error("Choose an active workspace member as assignee");
+      const assignee = args.assignedToEmail.trim() ? await findAssignee(ctx, args.projectId, args.assignedToEmail) : null;
+      if (!assignee && args.assignedToEmail.trim()) throw new ConvexError("Choose an active workspace member as assignee");
       patch.assignedToEmail = assignee?.email;
       patch.assignedToName = assignee?.name;
     }
-    if (args.dueDate !== undefined) patch.dueDate = requireDueDate(args.dueDate);
+    if (args.dueDate !== undefined) patch.dueDate = optionalDueDate(args.dueDate);
     if (args.done !== undefined) patch.done = args.done;
     if (patch.done === false && task.done) {
       patch.completionPullRequest = undefined;
@@ -476,30 +483,30 @@ export const addComment = mutation({
 
 export async function addCommentRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; body: string; mentions?: { userId: Id<"users">; token: string }[]; references?: { type: "project" | "issue"; id: string; projectId: Id<"projects">; label: string }[]; attachments?: { id: string; name: string; size: number; contentType: string }[] }, user: Doc<"users">, project: Doc<"projects">) {
     const task = await ctx.db.get(args.taskId);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
-    if ((!args.body.trim() && !args.attachments?.length) || args.body.length > 8000) throw new Error("Enter a comment under 8,000 characters or attach a file");
-    if ((args.references?.length || 0) > 12 || (args.attachments?.length || 0) > 8) throw new Error("Add up to 12 references and 8 files per comment");
-    if ((args.mentions?.length || 0) > 20) throw new Error("Mention up to 20 people per comment");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
+    if ((!args.body.trim() && !args.attachments?.length) || args.body.length > 8000) throw new ConvexError("Enter a comment under 8,000 characters or attach a file");
+    if ((args.references?.length || 0) > 12 || (args.attachments?.length || 0) > 8) throw new ConvexError("Add up to 12 references and 8 files per comment");
+    if ((args.mentions?.length || 0) > 20) throw new ConvexError("Mention up to 20 people per comment");
     const mentions = [];
     for (const candidate of new Map((args.mentions || []).map(item => [item.userId, item])).values()) {
       if (!containsMention(args.body, candidate.token)) continue;
       const person = await ctx.db.get(candidate.userId);
-      if (person?.status !== "active" || !await projectMember(ctx, project, person) || mentionToken(person) !== candidate.token) throw new Error("Mention someone with access to this project");
+      if (person?.status !== "active" || !await projectMember(ctx, project, person) || mentionToken(person) !== candidate.token) throw new ConvexError("Mention someone with access to this project");
       mentions.push({ userId: person._id, name: person.name, email: person.email, token: candidate.token });
     }
     const references = [];
     for (const reference of new Map((args.references || []).map(item => [item.id, item])).values()) {
       if (!containsMention(args.body, `#${reference.label}`)) continue;
       const target = await ctx.db.get(reference.projectId);
-      if (!target || target.teamId !== project.teamId || !await projectMember(ctx, target, user)) throw new Error("Reference a project you can access in this workspace");
+      if (!target || target.teamId !== project.teamId || !await projectMember(ctx, target, user)) throw new ConvexError("Reference a project you can access in this workspace");
       const issueId = reference.type === "issue" ? ctx.db.normalizeId("tasks", reference.id) : null;
       const issue = issueId ? await ctx.db.get(issueId) : null;
-      if (reference.type === "issue" ? !issue || issue.projectId !== target._id : reference.id !== target._id) throw new Error("Reference not found");
-      if (!reference.label.trim() || reference.label.length > 250) throw new Error("Invalid reference label");
+      if (reference.type === "issue" ? !issue || issue.projectId !== target._id : reference.id !== target._id) throw new ConvexError("Reference not found");
+      if (!reference.label.trim() || reference.label.length > 250) throw new ConvexError("Invalid reference label");
       references.push(reference);
     }
     for (const file of args.attachments || []) {
-      if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(file.id) || !file.name.trim() || file.name.length > 200 || !Number.isInteger(file.size) || file.size <= 0 || file.size > 15 * 1024 * 1024 || file.contentType.length > 150) throw new Error("Invalid attachment");
+      if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(file.id) || !file.name.trim() || file.name.length > 200 || !Number.isInteger(file.size) || file.size <= 0 || file.size > 15 * 1024 * 1024 || file.contentType.length > 150) throw new ConvexError("Invalid attachment");
     }
     const commentId = await ctx.db.insert("taskComments", {
       projectId: args.projectId,
@@ -533,7 +540,7 @@ export const checkCommentItem = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const comment = await ctx.db.get(args.commentId);
-    if (!comment || comment.projectId !== args.projectId) throw new Error("Comment not found");
+    if (!comment || comment.projectId !== args.projectId) throw new ConvexError("Comment not found");
     await ctx.db.patch(comment._id, { body: updateChecklist(comment.body, args.line, args.text, args.checked) });
     await touchProject(ctx, args.projectId);
     return null;
@@ -557,14 +564,14 @@ export const addAsset = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireEditor(ctx, args.projectId, args.sessionToken);
     const task = await ctx.db.get(args.taskId);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
-    if (!args.name.trim() || args.name.length > 200) throw new Error("Enter an attachment name under 200 characters");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
+    if (!args.name.trim() || args.name.length > 200) throw new ConvexError("Enter an attachment name under 200 characters");
     if (args.localFileId) {
-      if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(args.localFileId) || args.size === undefined || !Number.isInteger(args.size) || args.size <= 0 || args.size > 15 * 1024 * 1024) throw new Error("Invalid attachment");
+      if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(args.localFileId) || args.size === undefined || !Number.isInteger(args.size) || args.size <= 0 || args.size > 15 * 1024 * 1024) throw new ConvexError("Invalid attachment");
     } else {
       let link: URL;
-      try { link = new URL(args.url?.trim() || ""); } catch { throw new Error("Use an http or https link"); }
-      if (!["http:", "https:"].includes(link.protocol) || link.username || link.password) throw new Error("Use an http or https link without credentials");
+      try { link = new URL(args.url?.trim() || ""); } catch { throw new ConvexError("Use an http or https link"); }
+      if (!["http:", "https:"].includes(link.protocol) || link.username || link.password) throw new ConvexError("Use an http or https link without credentials");
     }
     await ctx.db.insert("taskAssets", {
       projectId: args.projectId,
