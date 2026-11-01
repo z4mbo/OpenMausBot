@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { callJson, callOptions } from "./call-http";
 
-describe("desktop call transport", () => {
+describe("call transport", () => {
   it("allows bearer preflight without cookie credentials", () => {
     const response = callOptions();
     expect(response.status).toBe(204);

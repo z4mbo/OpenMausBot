@@ -1,3 +1,5 @@
+Read AGENTS.md.
+
 <!-- convex-ai-start -->
 
 This project uses [Convex](https://convex.dev) as its backend.

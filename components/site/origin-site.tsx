@@ -397,7 +397,7 @@ function SiteFooter() {
           <p>A place to make things together.</p>
         </div>
         <nav aria-label="Product"><strong>Product</strong><a href="#workflow">How it works</a><a href="#everything">Workspace</a><a href="#questions">FAQ</a></nav>
-        <nav aria-label="Resources"><strong>Resources</strong><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={githubDoc("deploy/README.md")} target="_blank" rel="noreferrer">Self-hosting</a><a href={githubDoc("docs/claude-origin.md")} target="_blank" rel="noreferrer">Connect an AI client</a><a href={githubDoc("CONTRIBUTING.md")} target="_blank" rel="noreferrer">Contributing</a><a href={githubDoc("SECURITY.md")} target="_blank" rel="noreferrer">Security</a></nav>
+        <nav aria-label="Resources"><strong>Resources</strong><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={githubDoc("deploy/README.md")} target="_blank" rel="noreferrer">Self-hosting</a><a href={githubDoc("README.md#connect-ai-agents-mcp")} target="_blank" rel="noreferrer">Connect an AI client</a><a href={githubDoc("CONTRIBUTING.md")} target="_blank" rel="noreferrer">Contributing</a><a href={githubDoc("SECURITY.md")} target="_blank" rel="noreferrer">Security</a></nav>
         <nav aria-label="Account"><strong>Account</strong><Link href="/login">Sign in</Link></nav>
       </div>
       <div className={st.footBottom}><span>© 2026 Origin contributors · MIT License</span><span>Demo content on this page is synthetic.</span></div>

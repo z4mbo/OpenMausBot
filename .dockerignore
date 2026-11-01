@@ -3,7 +3,9 @@
 .npm-cache
 node_modules
 out
-.origin-data
+.origin-data*
+.convex
+e2e
 .env
 .env.*
 npm-debug.log*

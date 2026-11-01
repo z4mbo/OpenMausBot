@@ -16,6 +16,12 @@ openssl rand -hex 32
 
 Set the same value as `ORIGIN_INTEGRATION_SECRET` in the Node server and the selected Convex deployment's environment. Set `ORIGIN_PUBLIC_URL` in both to your HTTPS application origin, without a trailing slash. The secret authenticates the server-to-server integration bridge. Do not rotate it without coordinating both services.
 
+Set a stable key that encrypts stored GitHub credentials in Convex (keep it; changing it makes stored credentials unreadable):
+
+```sh
+npx convex env set ORIGIN_SEALING_KEY "$(openssl rand -base64 32)"
+```
+
 Origin allows open sign-up by default. For a private instance, make it invite-only so new accounts can only be created from an invitation link:
 
 ```sh
@@ -64,8 +70,8 @@ Allow TCP/UDP 3478 and UDP 49160-49260. Keep the TURN secret identical in the ap
 - Test member and viewer permissions, invitation revocation, and session revocation.
 - Send a chat attachment and test a call from a second browser/network.
 - Connect GitHub, create a private repository, and close a linked test issue.
-- Create a document, edit from two sessions, and confirm both edits persist.
+- Draw on the canvas from two sessions and confirm both edits persist.
 - Enable a test feedback portal and check that no internal data is public.
-- Verify desktop and mobile navigation, HTTPS, health, disk capacity, and logs.
+- Check navigation on desktop and mobile browsers, HTTPS, health, disk capacity, and logs.
 
 Existing installations should deploy additive Convex schema changes before the matching web image. Do not replace or import production data merely to publish code. `ORIGIN_LEGACY_*` settings exist only for an operator-controlled migration of an older Origin installation; leave them unset for a new installation.

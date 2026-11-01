@@ -26,4 +26,3 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: node --test scripts/desktop-release.test.mjs
