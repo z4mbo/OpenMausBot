@@ -44,7 +44,7 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm r
    docker compose --env-file .env -f deploy/docker-compose.yml up -d --build
    ```
 
-   The app listens on `127.0.0.1:3000`; put an HTTPS reverse proxy in front and persist the `origin-data` volume. Deploy the Convex backend before a new web image. Details, email and TURN: [deploy/README.md](deploy/README.md).
+   The app listens on `127.0.0.1:3000`; put an HTTPS reverse proxy in front that overwrites `X-Real-IP`, set `ORIGIN_TRUSTED_PROXY=1`, and persist the `origin-data` volume. Deploy the Convex backend before a new web image. Details, email and TURN: [deploy/README.md](deploy/README.md).
 
 ## Connect AI agents (MCP)
 

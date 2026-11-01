@@ -53,10 +53,20 @@ function db() {
   } catch (error) { database.exec("ROLLBACK"); database.close(); database = null; throw error; }
   return database;
 }
+export class TooManyRequests extends Error {
+  constructor() { super("Too many requests. Please try again shortly."); }
+}
+let limitsSwept = 0;
 export function limitLocalAction(key: string, maximum: number, durationMs: number) {
   const now = Date.now();
+  if (now - limitsSwept > 600000) { limitsSwept = now; db().prepare("DELETE FROM request_limits WHERE expires<?").run(now); }
   const row = db().prepare("INSERT INTO request_limits(key,count,expires) VALUES(?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN expires<? THEN 1 ELSE count+1 END, expires=CASE WHEN expires<? THEN ? ELSE expires END RETURNING count").get(key, now + durationMs, now, now, now + durationMs) as { count: number };
-  if (row.count > maximum) throw new Error("Too many requests. Please try again shortly.");
+  if (row.count > maximum) throw new TooManyRequests();
+}
+/** True when `key` already used up `maximum` in its current window; does not count a request. */
+export function localLimitReached(key: string, maximum: number) {
+  const row = db().prepare("SELECT count FROM request_limits WHERE key=? AND expires>=?").get(key, Date.now()) as { count: number } | undefined;
+  return (row?.count ?? 0) >= maximum;
 }
 export function getConvexClient() {
   const url = process.env.NEXT_PUBLIC_CONVEX_URL;

@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { canEdit, requireMember, requireTeamMember, visibleProjectRows } from "./lib/permissions";
@@ -50,7 +50,7 @@ export const create = mutation({
   args: { ...scope, projectId: v.id("projects"), title: v.string(), type: wikiTypeValidator, content: v.optional(v.string()) }, returns: v.id("wikiPages"),
   handler: async (ctx, args) => {
     const { member } = await requireMember(ctx, args.projectId, args.sessionToken);
-    if (!canEdit(member)) throw new Error("Edit role required");
+    if (!canEdit(member)) throw new ConvexError("Edit role required");
     await workspaceProject(ctx, args.teamId, args.projectId);
     const doc = new Y.Doc();
     try {
@@ -65,7 +65,7 @@ export const open = mutation({
   args: { sessionToken: v.string(), pageId: v.id("wikiPages") }, returns: v.null(),
   handler: async (ctx, args) => {
     const page = await ctx.db.get(args.pageId);
-    if (!page) throw new Error("Document not found");
+    if (!page) throw new ConvexError("Document not found");
     const { member, project } = await requireMember(ctx, page.projectId, args.sessionToken);
     if (!canEdit(member)) return null;
     if (!page.collaborationState) {
@@ -81,17 +81,17 @@ export const applyUpdate = mutation({
   args: { sessionToken: v.string(), pageId: v.id("wikiPages"), update: v.bytes() }, returns: v.null(),
   handler: async (ctx, args) => {
     const page = await ctx.db.get(args.pageId);
-    if (!page) throw new Error("Document not found");
+    if (!page) throw new ConvexError("Document not found");
     const { member, project } = await requireMember(ctx, page.projectId, args.sessionToken);
-    if (!canEdit(member)) throw new Error("Edit role required");
-    if (!page.collaborationState || args.update.byteLength > 150000) throw new Error("Reload this document before editing");
+    if (!canEdit(member)) throw new ConvexError("Edit role required");
+    if (!page.collaborationState || args.update.byteLength > 150000) throw new ConvexError("Reload this document before editing");
     const doc = new Y.Doc();
     try {
       Y.applyUpdate(doc, new Uint8Array(page.collaborationState));
       Y.applyUpdate(doc, new Uint8Array(args.update));
       const content = doc.getText("content").toString();
       const collaborationState = state(doc);
-      if (content.length > 60000 || collaborationState.byteLength > 700000) throw new Error("Document size limit reached. Split it into smaller documents.");
+      if (content.length > 60000 || collaborationState.byteLength > 700000) throw new ConvexError("Document size limit reached. Split it into smaller documents.");
       await ctx.db.patch(page._id, { content, collaborationState, teamId: project.teamId, updatedAt: Date.now() });
       return null;
     } finally { doc.destroy(); }
@@ -102,8 +102,8 @@ export const rename = mutation({
   args: { sessionToken: v.string(), pageId: v.id("wikiPages"), title: v.string() }, returns: v.null(),
   handler: async (ctx, args) => {
     const page = await ctx.db.get(args.pageId);
-    if (!page) throw new Error("Document not found");
-    if (!canEdit((await requireMember(ctx, page.projectId, args.sessionToken)).member)) throw new Error("Edit role required");
+    if (!page) throw new ConvexError("Document not found");
+    if (!canEdit((await requireMember(ctx, page.projectId, args.sessionToken)).member)) throw new ConvexError("Edit role required");
     await ctx.db.patch(page._id, { title: cleanText(args.title, 160, "Title"), updatedAt: Date.now() });
     return null;
   },

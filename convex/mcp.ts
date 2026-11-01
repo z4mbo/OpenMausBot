@@ -2,14 +2,14 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { authorize } from "./connectors";
+import { authorize, insertConnectorGrant } from "./connectors";
 import { hashToken } from "./lib/auth";
 import { canEdit, projectMember, projectPeople, requireTeamMember } from "./lib/permissions";
 import { compareWorkflowColumns, isDoneColumn, isDraftColumn, normalizeColumnTitle } from "./lib/columns";
 import { priorityValidator } from "./lib/validators";
 import { addCommentRecord, createTaskRecord, moveTaskRecord, updateTaskRecord } from "./tasks";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
-import { PAT_PREFIX } from "../lib/mcp-tokens";
+import { OAUTH_GRANT_PREFIX, PAT_PREFIX } from "../lib/mcp-tokens";
 import { compareTaskOrder } from "../lib/task-order";
 
 // Tools for the remote MCP server (app/api/mcp). Every call carries a connector token (OAuth grant or personal
@@ -57,7 +57,7 @@ async function resolveProject(ctx: Ctx, access: Access, ref: string) {
     project = matches.find(p => p.status === "active") ?? matches[0] ?? null;
   }
   const member = project?.teamId === access.grant.teamId ? await projectMember(ctx, project, access.user) : null;
-  if (!project || !member) throw new Error(`Project not found: ${ref}`);
+  if (!project || !member) throw new ConvexError(`Project not found: ${ref}`);
   return { project, member };
 }
 
@@ -66,14 +66,14 @@ async function resolveIssue(ctx: Ctx, access: Access, ref: string, write = false
   const task = id ? await ctx.db.get(id) : null;
   const project = task ? await ctx.db.get(task.projectId) : null;
   const member = project?.teamId === access.grant.teamId ? await projectMember(ctx, project, access.user) : null;
-  if (!task || !project || !member) throw new Error(`Issue not found: ${ref}. Use the issue id from list_issues.`);
-  if (write && !canEdit(member)) throw new Error("You have read-only access to this project");
+  if (!task || !project || !member) throw new ConvexError(`Issue not found: ${ref}. Use the issue id from list_issues.`);
+  if (write && !canEdit(member)) throw new ConvexError("You have read-only access to this project");
   return { task, project, member };
 }
 
 function findColumn(columns: Doc<"columns">[], ref: string) {
   const column = columns.find(c => c._id === ref.trim()) ?? columns.find(c => normalizeColumnTitle(c.title) === normalizeColumnTitle(ref));
-  if (!column) throw new Error(`Column not found: ${ref}. Columns: ${columns.map(c => c.title).join(", ")}`);
+  if (!column) throw new ConvexError(`Column not found: ${ref}. Columns: ${columns.map(c => c.title).join(", ")}`);
   return column;
 }
 
@@ -182,7 +182,7 @@ export const issues = query({
         results.push(issueSummary(slug, project, task, byId.get(columnFor(task)!)));
       }
     }
-    if (!columnMatched) throw new Error(`Column not found: ${a.column}`);
+    if (!columnMatched) throw new ConvexError(`Column not found: ${a.column}`);
     return json({ issues: results, nextCursor: matched === -1 ? String(skip + limit) : null });
   }),
 });
@@ -259,21 +259,23 @@ async function assigneeEmail(ctx: MutationCtx, access: Access, project: Doc<"pro
   if (value === "me") return access.user.email;
   const people = await projectPeople(ctx, project);
   const person = people.find(p => p.email.toLowerCase() === value) ?? people.find(p => p.username?.toLowerCase() === value) ?? people.find(p => fold(p.name) === value);
-  if (!person) throw new Error(`No project member matches "${ref}". Use list_members.`);
+  if (!person) throw new ConvexError(`No project member matches "${ref}". Use list_members.`);
   return person.email;
 }
 
+const UNASSIGNED = new Set(["none", "unassigned"]);
+
 export const createIssue = mutation({
-  args: { ...token, project: v.string(), title: v.string(), description: v.optional(v.string()), column: v.optional(v.string()), priority: v.optional(priorityValidator), assignee: v.optional(v.string()), dueDate: v.string() },
+  args: { ...token, project: v.string(), title: v.string(), description: v.optional(v.string()), column: v.optional(v.string()), priority: v.optional(priorityValidator), assignee: v.optional(v.string()), dueDate: v.optional(v.string()) },
   returns: v.string(),
   handler: (ctx, a) => guard(async () => {
     const access = await writer(ctx, a.token);
     const { project, member } = await resolveProject(ctx, access, a.project);
-    if (!canEdit(member)) throw new Error("You have read-only access to this project");
+    if (!canEdit(member)) throw new ConvexError("You have read-only access to this project");
     const { visible } = await boardColumns(ctx, project._id);
     const column = a.column ? findColumn(visible, a.column) : undefined;
-    const email = await assigneeEmail(ctx, access, project, a.assignee ?? "me");
-    const taskId = await createTaskRecord(ctx, { projectId: project._id, columnId: column?._id, title: a.title, description: a.description, priority: a.priority ?? "medium", assignedToEmail: email, dueDate: a.dueDate }, access.user._id);
+    const email = UNASSIGNED.has(fold(a.assignee ?? "me")) ? undefined : await assigneeEmail(ctx, access, project, a.assignee ?? "me");
+    const taskId = await createTaskRecord(ctx, { projectId: project._id, columnId: column?._id, title: a.title, description: a.description, priority: a.priority ?? "medium", assignedToEmail: email, dueDate: a.dueDate || undefined }, access.user._id);
     const task = (await ctx.db.get(taskId))!;
     const placed = await ctx.db.get(task.columnId);
     return json(issueSummary(await workspaceSlug(ctx, access.grant.teamId), project, task, placed ?? undefined));
@@ -298,15 +300,15 @@ export const moveIssue = mutation({
   handler: (ctx, a) => guard(async () => {
     const access = await writer(ctx, a.token);
     const { task, project } = await resolveIssue(ctx, access, a.issueId, true);
-    if (!a.column && a.completed === undefined && !a.before && !a.position) throw new Error("Give a column, a position or completed");
+    if (!a.column && a.completed === undefined && !a.before && !a.position) throw new ConvexError("Give a column, a position or completed");
     const { visible, columnFor } = await boardColumns(ctx, project._id);
     const column = a.column ? findColumn(visible, a.column) : visible.find(c => c._id === columnFor(task));
     if (column && (a.column || a.before || a.position)) {
       let beforeTaskId: Id<"tasks"> | undefined;
       if (a.before) {
         const before = await resolveIssue(ctx, access, a.before);
-        if (before.task.projectId !== project._id || columnFor(before.task) !== column._id) throw new Error("`before` must be an issue in the target column");
-        if (before.task._id === task._id) throw new Error("`before` must be another issue");
+        if (before.task.projectId !== project._id || columnFor(before.task) !== column._id) throw new ConvexError("`before` must be an issue in the target column");
+        if (before.task._id === task._id) throw new ConvexError("`before` must be another issue");
         beforeTaskId = before.task._id;
       } else if (a.position === "top") {
         const first = (await ctx.db.query("tasks").withIndex("by_column_order", q => q.eq("columnId", column._id)).take(200)).find(t => t._id !== task._id && !t.done);
@@ -347,17 +349,24 @@ export const createToken = mutation({
   returns: v.object({ token: v.string(), grantId: v.id("connectorGrants"), expiresAt: v.number() }),
   handler: (ctx, a) => guard(async () => {
     const { user, member } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
-    if (a.write && !canEdit(member)) throw new Error("Read-only workspace access");
+    if (a.write && !canEdit(member)) throw new ConvexError("Read-only workspace access");
     const name = a.name.trim().slice(0, 120);
-    if (!name) throw new Error("Name the token");
+    if (!name) throw new ConvexError("Name the token");
     const days = [30, 90, 365].includes(a.days ?? 90) ? a.days ?? 90 : 90;
     const active = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_runId_and_hostId_and_revoked", q => q.eq("userId", user._id).eq("teamId", a.teamId).eq("runId", undefined).eq("hostId", undefined).eq("revoked", false)).take(51);
-    if (active.filter(g => g.expiresAt > Date.now()).length >= 50) throw new Error("Revoke an unused connection first");
+    if (active.filter(g => g.expiresAt > Date.now()).length >= 50) throw new ConvexError("Revoke an unused connection first");
     const token = PAT_PREFIX + Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, "0")).join("");
     const expiresAt = Date.now() + days * 86400000;
     const grantId = await ctx.db.insert("connectorGrants", { teamId: a.teamId, userId: user._id, name, tokenHash: await hashToken(token), write: a.write, expiresAt, createdAt: Date.now(), revoked: false });
     return { token, grantId, expiresAt };
   }),
+});
+
+/** Grant behind an OAuth consent (app/api/oauth/consent). Its token is held only by the Next server. */
+export const createOAuthGrant = mutation({
+  args: { sessionToken: v.string(), teamId: v.id("teams"), name: v.string(), write: v.boolean() },
+  returns: v.object({ token: v.string(), grantId: v.id("connectorGrants"), expiresAt: v.number() }),
+  handler: (ctx, a) => guard(() => insertConnectorGrant(ctx, a, OAUTH_GRANT_PREFIX)),
 });
 
 /** OAuth token revocation (RFC 7009) also ends the underlying grant so it disappears from Settings. */

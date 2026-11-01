@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { agentAccess } from "./agentAccess";
@@ -26,12 +27,12 @@ export async function canReadStorageScope(ctx: Ctx, user: Doc<"users">, scope: S
 
 export async function writableUploadScope(ctx: Ctx, user: Doc<"users">, target: UploadTarget): Promise<StorageScope> {
   if (target.kind === "profile") {
-    if (target.userId !== user._id) throw new Error("No upload access");
+    if (target.userId !== user._id) throw new ConvexError("No upload access");
     return { kind: "user", userId: user._id };
   }
   if (target.kind === "agent") {
     const agent = await ctx.db.get(target.agentId);
-    if (!agent || agent.archivedAt !== undefined || !(await agentAccess(ctx, agent, user))?.canEdit) throw new Error("No upload access");
+    if (!agent || agent.archivedAt !== undefined || !(await agentAccess(ctx, agent, user))?.canEdit) throw new ConvexError("No upload access");
     return agent.projectId ? { kind: "project", projectId: agent.projectId } : { kind: "workspace", teamId: agent.teamId };
   }
   if (target.kind === "drawing") {
@@ -39,16 +40,16 @@ export async function writableUploadScope(ctx: Ctx, user: Doc<"users">, target: 
       const canvas = await ctx.db.get(target.canvasId);
       const project = canvas && canvas.teamId === target.teamId && canvas.kind === undefined && !canvas.archived ? await ctx.db.get(canvas.projectId) : null;
       const member = project ? await projectMember(ctx, project, user) : null;
-      if (!canvas || !member || !canEdit(member)) throw new Error("No upload access");
+      if (!canvas || !member || !canEdit(member)) throw new ConvexError("No upload access");
       return { kind: "project", projectId: canvas.projectId };
     }
     const member = await getActiveTeamMember(ctx, target.teamId, user.email);
-    if (!member || (member.userId && member.userId !== user._id) || !canEdit(member)) throw new Error("No upload access");
+    if (!member || (member.userId && member.userId !== user._id) || !canEdit(member)) throw new ConvexError("No upload access");
     return { kind: "workspace", teamId: target.teamId };
   }
   const project = await ctx.db.get(target.projectId);
   const member = project ? await projectMember(ctx, project, user) : null;
-  if (!member || !canEdit(member) || (target.kind === "icon" && member.role !== "owner" && member.role !== "admin")) throw new Error("No upload access");
+  if (!member || !canEdit(member) || (target.kind === "icon" && member.role !== "owner" && member.role !== "admin")) throw new ConvexError("No upload access");
   return { kind: "project", projectId: target.projectId };
 }
 
@@ -57,10 +58,10 @@ export function uploadLimit(target: UploadTarget) {
 }
 
 export function validateUpload(target: UploadTarget, size: number, contentType: string | undefined) {
-  if (size > uploadLimit(target)) throw new Error("Upload too large");
-  if (target.kind === "profile" && !IMAGE_TYPES.has(contentType ?? "")) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
-  if ((target.kind === "icon" || target.kind === "agent") && !contentType?.startsWith("image/")) throw new Error("Choose an image under 5 MB");
-  if (target.kind === "drawing" && !DRAWING_TYPES.has(contentType ?? "")) throw new Error("Choose an image under 15 MB");
+  if (size > uploadLimit(target)) throw new ConvexError("Upload too large");
+  if (target.kind === "profile" && !IMAGE_TYPES.has(contentType ?? "")) throw new ConvexError("Choose a PNG, JPEG, WebP or GIF under 5 MB");
+  if ((target.kind === "icon" || target.kind === "agent") && !contentType?.startsWith("image/")) throw new ConvexError("Choose an image under 5 MB");
+  if (target.kind === "drawing" && !DRAWING_TYPES.has(contentType ?? "")) throw new ConvexError("Choose an image under 15 MB");
 }
 
 export async function storageMetadata(ctx: Ctx, storageId: Id<"_storage">) {
@@ -90,24 +91,24 @@ async function canReadLegacyReference(ctx: Ctx, storageId: Id<"_storage">, user:
 }
 
 export async function admitStorageReference(ctx: MutationCtx, storageId: Id<"_storage">, user: Doc<"users">, destination: StorageScope) {
-  if (!await ctx.db.system.get(storageId)) throw new Error("File not found");
+  if (!await ctx.db.system.get(storageId)) throw new ConvexError("File not found");
   const existing = await ctx.db.query("storageAdmissions").withIndex("by_storageId_and_scopeKey", q => q.eq("storageId", storageId).eq("scopeKey", scopeKey(destination))).unique();
   if (existing && await canReadStorageScope(ctx, user, destination)) return;
   const scopes = await ctx.db.query("storageAdmissions").withIndex("by_storageId_and_scopeKey", q => q.eq("storageId", storageId)).take(100);
   let allowed = false;
   for (const admission of scopes) if (await canReadStorageScope(ctx, user, admission.scope)) { allowed = true; break; }
   if (!allowed) allowed = await canReadLegacyReference(ctx, storageId, user);
-  if (!allowed) throw new Error("No access to this file. Upload it again from an updated Origin app");
+  if (!allowed) throw new ConvexError("No access to this file. Upload it again from an updated Origin app");
   await addStorageScope(ctx, storageId, destination, (await storageMetadata(ctx, storageId))?.contentType);
 }
 
 export async function issueUpload(ctx: MutationCtx, sessionToken: string, target: UploadTarget) {
   const session = await getSessionUser(ctx, sessionToken);
-  if (!session) throw new Error("Login required");
+  if (!session) throw new ConvexError("Login required");
   await writableUploadScope(ctx, session.user, target);
-  if ((await ctx.db.query("storageUploadIntents").withIndex("by_userId_and_expiresAt", q => q.eq("userId", session.user._id).gte("expiresAt", Date.now())).take(100)).length >= 100) throw new Error("Too many uploads. Try again in ten minutes");
+  if ((await ctx.db.query("storageUploadIntents").withIndex("by_userId_and_expiresAt", q => q.eq("userId", session.user._id).gte("expiresAt", Date.now())).take(100)).length >= 100) throw new ConvexError("Too many uploads. Try again in ten minutes");
   const siteUrl = process.env.CONVEX_SITE_URL;
-  if (!siteUrl || !/^https?:\/\//.test(siteUrl)) throw new Error("Upload service is unavailable");
+  if (!siteUrl || !/^https?:\/\//.test(siteUrl)) throw new ConvexError("Upload service is unavailable");
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const token = [...bytes].map(byte => byte.toString(16).padStart(2, "0")).join("");
   await ctx.db.insert("storageUploadIntents", { tokenHash: await hashToken(token), sessionId: session.session._id, userId: session.user._id, target, state: "issued", expiresAt: Date.now() + 10 * 60 * 1000 });

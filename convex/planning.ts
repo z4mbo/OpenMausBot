@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator, paginationResultValidator } from "convex/server";
 import { mutation, query } from "./_generated/server";
 import { canEdit, requireMember, requireTeamAdmin, requireTeamMember, visibleProjectRows } from "./lib/permissions";
@@ -31,12 +31,12 @@ export const saveMilestone = mutation({
     const fields = { title: cleanText(args.title, 120, "Title"), description: args.description.trim().slice(0, 12000), targetDate: validDay(args.targetDate), status: args.status, updatedAt: Date.now() };
     if (args.milestoneId) {
       const row = await ctx.db.get(args.milestoneId);
-      if (row?.teamId !== args.teamId) throw new Error("Milestone not found");
+      if (row?.teamId !== args.teamId) throw new ConvexError("Milestone not found");
       await ctx.db.patch(row._id, fields);
       return row._id;
     }
     const existing = await ctx.db.query("milestones").withIndex("by_teamId_and_targetDate", q => q.eq("teamId", args.teamId)).take(100);
-    if (existing.length >= 100) throw new Error("A workspace can have up to 100 milestones");
+    if (existing.length >= 100) throw new ConvexError("A workspace can have up to 100 milestones");
     return ctx.db.insert("milestones", { teamId: args.teamId, ...fields, createdAt: Date.now() });
   },
 });
@@ -46,12 +46,12 @@ export const assignMilestone = mutation({
   handler: async (ctx, args) => {
     await requireWorkspaceEditor(ctx, args.teamId, args.sessionToken);
     const task = await ctx.db.get(args.taskId);
-    if (!task) throw new Error("Issue not found");
+    if (!task) throw new ConvexError("Issue not found");
     await workspaceProject(ctx, args.teamId, task.projectId);
-    if (!canEdit((await requireMember(ctx, task.projectId, args.sessionToken)).member)) throw new Error("Edit role required");
+    if (!canEdit((await requireMember(ctx, task.projectId, args.sessionToken)).member)) throw new ConvexError("Edit role required");
     if (args.milestoneId) {
-      if ((await ctx.db.get(args.milestoneId))?.teamId !== args.teamId) throw new Error("Milestone not found");
-      if (task.milestoneId !== args.milestoneId && (await ctx.db.query("tasks").withIndex("by_milestoneId", q => q.eq("milestoneId", args.milestoneId!)).take(200)).length >= 200) throw new Error("Split milestones with more than 200 issues");
+      if ((await ctx.db.get(args.milestoneId))?.teamId !== args.teamId) throw new ConvexError("Milestone not found");
+      if (task.milestoneId !== args.milestoneId && (await ctx.db.query("tasks").withIndex("by_milestoneId", q => q.eq("milestoneId", args.milestoneId!)).take(200)).length >= 200) throw new ConvexError("Split milestones with more than 200 issues");
     }
     await ctx.db.patch(task._id, { milestoneId: args.milestoneId || undefined, updatedAt: Date.now() });
     return null;
@@ -62,9 +62,9 @@ export const removeMilestone = mutation({
   args: { ...scope, milestoneId: v.id("milestones") }, returns: v.null(),
   handler: async (ctx, args) => {
     await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
-    if ((await ctx.db.get(args.milestoneId))?.teamId !== args.teamId) throw new Error("Milestone not found");
+    if ((await ctx.db.get(args.milestoneId))?.teamId !== args.teamId) throw new ConvexError("Milestone not found");
     const tasks = await ctx.db.query("tasks").withIndex("by_milestoneId", q => q.eq("milestoneId", args.milestoneId)).take(201);
-    if (tasks.length > 200) throw new Error("Unlink issues before deleting this milestone");
+    if (tasks.length > 200) throw new ConvexError("Unlink issues before deleting this milestone");
     for (const task of tasks) await ctx.db.patch(task._id, { milestoneId: undefined });
     await ctx.db.delete(args.milestoneId);
     return null;
@@ -93,20 +93,20 @@ export const saveRelease = mutation({
   handler: async (ctx, args) => {
     await requireWorkspaceEditor(ctx, args.teamId, args.sessionToken);
     await workspaceProject(ctx, args.teamId, args.projectId);
-    if (!canEdit((await requireMember(ctx, args.projectId, args.sessionToken)).member)) throw new Error("Edit role required");
+    if (!canEdit((await requireMember(ctx, args.projectId, args.sessionToken)).member)) throw new ConvexError("Edit role required");
     const taskIds = [...new Set(args.taskIds)];
-    if (taskIds.length > 200 || args.body.length > 60000) throw new Error("Release is too large");
+    if (taskIds.length > 200 || args.body.length > 60000) throw new ConvexError("Release is too large");
     for (const id of taskIds) {
       const task = await ctx.db.get(id);
-      if (task?.projectId !== args.projectId || !task.done) throw new Error("Releases include completed issues from this project only");
+      if (task?.projectId !== args.projectId || !task.done) throw new ConvexError("Releases include completed issues from this project only");
     }
     const existing = args.releaseId ? await ctx.db.get(args.releaseId) : null;
-    if (args.releaseId && (!existing || existing.teamId !== args.teamId || existing.projectId !== args.projectId)) throw new Error("Release not found");
+    if (args.releaseId && (!existing || existing.teamId !== args.teamId || existing.projectId !== args.projectId)) throw new ConvexError("Release not found");
     const fields = { version: cleanText(args.version, 80, "Version"), body: args.body.trim(), publishedAt: args.publish ? existing?.publishedAt || Date.now() : undefined, updatedAt: Date.now() };
     const releaseId = existing?._id || await ctx.db.insert("releases", { teamId: args.teamId, projectId: args.projectId, ...fields, createdAt: Date.now() });
     if (existing) await ctx.db.patch(releaseId, fields);
     const previous = await ctx.db.query("releaseIssues").withIndex("by_releaseId", q => q.eq("releaseId", releaseId)).take(201);
-    if (previous.length > 200) throw new Error("Release is too large");
+    if (previous.length > 200) throw new ConvexError("Release is too large");
     for (const row of previous) await ctx.db.delete(row._id);
     for (const taskId of taskIds) await ctx.db.insert("releaseIssues", { releaseId, taskId });
     return releaseId;
@@ -118,10 +118,10 @@ export const removeRelease = mutation({
   handler: async (ctx, args) => {
     await requireWorkspaceEditor(ctx, args.teamId, args.sessionToken);
     const release = await ctx.db.get(args.releaseId);
-    if (release?.teamId !== args.teamId) throw new Error("Release not found");
-    if (!canEdit((await requireMember(ctx, release.projectId, args.sessionToken)).member)) throw new Error("Edit role required");
+    if (release?.teamId !== args.teamId) throw new ConvexError("Release not found");
+    if (!canEdit((await requireMember(ctx, release.projectId, args.sessionToken)).member)) throw new ConvexError("Edit role required");
     const links = await ctx.db.query("releaseIssues").withIndex("by_releaseId", q => q.eq("releaseId", args.releaseId)).take(201);
-    if (links.length > 200) throw new Error("Release is too large");
+    if (links.length > 200) throw new ConvexError("Release is too large");
     for (const row of links) await ctx.db.delete(row._id);
     await ctx.db.delete(args.releaseId);
     return null;

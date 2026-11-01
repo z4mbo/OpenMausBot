@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { canEdit, getActiveTeamMember, requireMember, requireTeamAdmin, requireTeamMember, changeOpenIssueCount, touchProject } from "./lib/permissions";
@@ -12,11 +12,11 @@ import { repositoryUrl } from "./lib/repository";
 
 async function inDraft(ctx: QueryCtx, task: Doc<"tasks">) {
   const column = await ctx.db.get(task.columnId);
-  if (!column || column.projectId !== task.projectId) throw new Error("Issue workflow column not found");
+  if (!column || column.projectId !== task.projectId) throw new ConvexError("Issue workflow column not found");
   if (isDraftColumn(column)) return true;
   if (!isLegacyIdeaColumn(column)) return false;
   const status = await projectDraftStatus(ctx, task.projectId);
-  if (status === "unresolved") throw new Error("Workflow repair required before publishing legacy Idea issues");
+  if (status === "unresolved") throw new ConvexError("Workflow repair required before publishing legacy Idea issues");
   return status === "absent";
 }
 
@@ -67,9 +67,9 @@ export const approveRepository = mutation({
   args: { sessionToken: v.string(), projectId: v.id("projects"), repoUrl: v.optional(v.string()) }, returns: v.null(),
   handler: async (ctx, a) => {
     const project = await ctx.db.get(a.projectId);
-    if (!project?.teamId || !project.repoUrl) throw new Error("Repository required");
+    if (!project?.teamId || !project.repoUrl) throw new ConvexError("Repository required");
     await requireTeamAdmin(ctx, project.teamId, a.sessionToken);
-    if (a.repoUrl !== undefined && project.repoUrl !== a.repoUrl) throw new Error("Repository changed. Reload the project and try again.");
+    if (a.repoUrl !== undefined && project.repoUrl !== a.repoUrl) throw new ConvexError("Repository changed. Reload the project and try again.");
     await ctx.db.patch(project._id, { githubWorkspaceAccess: true }); return null;
   },
 });
@@ -77,9 +77,9 @@ export const approveRepository = mutation({
 export const context = internalQuery({
   args: { projectId: v.id("projects"), taskId: v.optional(v.id("tasks")), credentialOwner: v.optional(v.id("users")) }, returns: v.string(),
   handler: async (ctx, a) => {
-    const p = await ctx.db.get(a.projectId); if (!p) throw new Error("Project not found");
+    const p = await ctx.db.get(a.projectId); if (!p) throw new ConvexError("Project not found");
     const task = a.taskId ? await ctx.db.get(a.taskId) : null;
-    if (task && task.projectId !== p._id) throw new Error("Issue not found");
+    if (task && task.projectId !== p._id) throw new ConvexError("Issue not found");
     const credentialOwner = a.credentialOwner ? await ctx.db.get(a.credentialOwner) : null;
     const membership = credentialOwner?.status === "active" && p.teamId ? await getActiveTeamMember(ctx, p.teamId, credentialOwner.email) : null;
     const credentialAllowed = Boolean(membership && ["owner", "admin"].includes(membership.role));
@@ -96,7 +96,7 @@ export const repoResult = internalMutation({
   handler: async (ctx, a) => {
     const p = await ctx.db.get(a.projectId); if (!p) return null;
     if (p.repoUrl && p.repoUrl !== a.repoUrl) return null;
-    if (a.repoUrl && !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(a.repoUrl)) throw new Error("Invalid repository");
+    if (a.repoUrl && !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(a.repoUrl)) throw new ConvexError("Invalid repository");
     await ctx.db.patch(p._id, { githubRepoState: a.state, githubRepoError: a.error?.slice(0, 300),
       ...(a.repoUrl ? { repoUrl: a.repoUrl, githubRepoId: a.repoId, githubWorkspaceAccess: true } : {}) });
     return null;
@@ -107,12 +107,12 @@ export const linkIssue = internalMutation({
   args: { projectId: v.id("projects"), taskId: v.id("tasks"), repoUrl: v.string(), number: v.number(), issueUrl: v.string(), state: v.union(v.literal("open"), v.literal("closed")), updatedAt: v.number() }, returns: v.null(),
   handler: async (ctx, a) => {
     const project = await ctx.db.get(a.projectId); const task = await ctx.db.get(a.taskId);
-    if (!project || !task || task.projectId !== project._id) throw new Error("Issue not found");
+    if (!project || !task || task.projectId !== project._id) throw new ConvexError("Issue not found");
     const normalized = (value?: string) => value?.replace(/\.git\/?$/, "").replace(/\/$/, "").replace(/^https?:\/\/github.com\//, "").toLowerCase();
-    if (normalized(project.repoUrl) !== normalized(a.repoUrl)) throw new Error("Repository changed; sync cancelled");
-    if (task.githubIssueUrl && normalized(task.githubIssueUrl.split("/issues/")[0]) !== normalized(a.repoUrl)) throw new Error("Issue belongs to the previous repository");
-    if (task.githubIssueNumber && task.githubIssueNumber !== a.number) throw new Error("Issue already linked");
-    if (a.issueUrl !== `${a.repoUrl}/issues/${a.number}`) throw new Error("Invalid issue URL");
+    if (normalized(project.repoUrl) !== normalized(a.repoUrl)) throw new ConvexError("Repository changed; sync cancelled");
+    if (task.githubIssueUrl && normalized(task.githubIssueUrl.split("/issues/")[0]) !== normalized(a.repoUrl)) throw new ConvexError("Issue belongs to the previous repository");
+    if (task.githubIssueNumber && task.githubIssueNumber !== a.number) throw new ConvexError("Issue already linked");
+    if (a.issueUrl !== `${a.repoUrl}/issues/${a.number}`) throw new ConvexError("Invalid issue URL");
     if ((task.githubIssueUpdatedAt || 0) > a.updatedAt) return null;
     const prDriven = task.githubTaskMode === "pull_request" || Boolean(await ctx.db.query("taskPullRequests").withIndex("by_taskId", q => q.eq("taskId", task._id)).first());
     const reopenedOnGitHub = !prDriven && a.state === "open" && task.githubIssueState === "closed" && task.done;
@@ -161,14 +161,14 @@ export const completeMergedIssue = internalMutation({
     if (![args.issueNumber, pullRequest.number].every(number => Number.isSafeInteger(number) && number > 0)
       || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(pullRequest.headSha)
       || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(pullRequest.mergeSha)
-      || !Number.isFinite(pullRequest.mergedAt) || pullRequest.mergedAt <= 0 || pullRequest.mergedAt > Date.now() + 60000) throw new Error("Invalid pull request merge receipt");
+      || !Number.isFinite(pullRequest.mergedAt) || pullRequest.mergedAt <= 0 || pullRequest.mergedAt > Date.now() + 60000) throw new ConvexError("Invalid pull request merge receipt");
     const project = await ctx.db.get(args.projectId);
     const repoUrl = repositoryUrl(args.repoUrl);
     if (!project || project.status !== "active" || !project.githubWorkspaceAccess || !repoUrl
-      || repositoryUrl(project.repoUrl)?.toLowerCase() !== repoUrl.toLowerCase()) throw new Error("Repository changed or is not authorized");
+      || repositoryUrl(project.repoUrl)?.toLowerCase() !== repoUrl.toLowerCase()) throw new ConvexError("Repository changed or is not authorized");
     const task = await ctx.db.get(args.taskId);
     if (!task || task.projectId !== project._id || task.githubIssueNumber !== args.issueNumber
-      || task.githubIssueUrl?.toLowerCase() !== `${repoUrl}/issues/${args.issueNumber}`.toLowerCase()) throw new Error("Issue linkage changed");
+      || task.githubIssueUrl?.toLowerCase() !== `${repoUrl}/issues/${args.issueNumber}`.toLowerCase()) throw new ConvexError("Issue linkage changed");
     if (await inDraft(ctx, task)) return false;
     const completionPullRequest = { repoUrl, issueNumber: args.issueNumber, ...pullRequest };
     if (JSON.stringify(task.completionPullRequest) !== JSON.stringify(completionPullRequest)) {
@@ -253,9 +253,9 @@ export const backfillIssueLinks = internalMutation({
 export const retryRepo = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() }, returns: v.null(),
   handler: async (ctx, a) => {
-    const p = await ctx.db.get(a.projectId); if (!p?.teamId || p.repoUrl) throw new Error("No repository to create");
+    const p = await ctx.db.get(a.projectId); if (!p?.teamId || p.repoUrl) throw new ConvexError("No repository to create");
     const { member } = await requireMember(ctx, p._id, a.sessionToken);
-    if (!canEdit(member)) throw new Error("Edit role required");
+    if (!canEdit(member)) throw new ConvexError("Edit role required");
     await ctx.db.patch(p._id, { githubRepoState: "pending", githubRepoError: undefined });
     const shared = await ctx.db.query("teamGitHub").withIndex("by_teamId", q => q.eq("teamId", p.teamId!)).unique();
     if (shared) await ctx.scheduler.runAfter(0, internal.teamGitHub.autoCreate, { projectId: p._id, manual: true });
@@ -273,7 +273,7 @@ export const kick = internalAction({
     const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
     const signature = Array.from(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body))), b => b.toString(16).padStart(2, "0")).join("");
     const response = await fetch(`${origin}/api/integrations/tick`, { method: "POST", body, headers: { "x-origin-signature": signature }, signal: AbortSignal.timeout(55000) });
-    if (!response.ok) throw new Error(`Integration worker returned ${response.status}`);
+    if (!response.ok) throw new ConvexError(`Integration worker returned ${response.status}`);
     return null;
   },
 });

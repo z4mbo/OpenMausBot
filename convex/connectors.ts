@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
@@ -7,39 +7,48 @@ import { canEdit, getActiveTeamMember, projectMember, projectPeople, requireTeam
 import { createProjectRecord } from "./projects";
 import { createTaskRecord, deleteTaskRecord, updateTaskRecord } from "./tasks";
 import { priorityValidator } from "./lib/validators";
+import { isMcpConnectorToken } from "../lib/mcp-tokens";
+
+/** Personal access tokens and OAuth grants work only through the MCP tools (convex/mcp.ts), which never delete. */
+function rejectMcpToken(token: string) {
+  if (isMcpConnectorToken(token)) throw new ConvexError("This token only works with the Origin MCP server");
+}
 
 export async function authorize(ctx: QueryCtx | MutationCtx, token: string, write = false, projectId?: Id<"projects">) {
   const tokenHash = await hashToken(token);
   const grant = await ctx.db.query("connectorGrants").withIndex("by_tokenHash", q => q.eq("tokenHash", tokenHash)).unique();
-  if (!grant || grant.revoked || grant.expiresAt <= Date.now()) throw new Error("Connector authorization expired or revoked");
-  if (grant.hostId) throw new Error("Host token cannot access Origin actions");
+  if (!grant || grant.revoked || grant.expiresAt <= Date.now()) throw new ConvexError("Connector authorization expired or revoked");
+  if (grant.hostId) throw new ConvexError("Host token cannot access Origin actions");
   // Agent run tokens belong to the removed Agent feature and no longer authorize anything.
-  if (grant.runId) throw new Error("Run token cannot access Origin actions");
+  if (grant.runId) throw new ConvexError("Run token cannot access Origin actions");
   const user = await ctx.db.get(grant.userId);
   const member = user?.status === "active" ? await getActiveTeamMember(ctx, grant.teamId, user.email) : null;
-  if (!user || !member || (member.userId && member.userId !== user._id) || (write && (!grant.write || !canEdit(member)))) throw new Error("Connector access denied");
+  if (!user || !member || (member.userId && member.userId !== user._id) || (write && (!grant.write || !canEdit(member)))) throw new ConvexError("Connector access denied");
   if (projectId) {
     const project = await ctx.db.get(projectId);
     const access = project && await projectMember(ctx, project, user);
-    if (project?.teamId !== grant.teamId || !access || (write && !canEdit(access))) throw new Error("Project not found in authorized workspace");
+    if (project?.teamId !== grant.teamId || !access || (write && !canEdit(access))) throw new ConvexError("Project not found in authorized workspace");
   }
   return { grant, user, member };
+}
+
+/** Shared by connectors.createGrant (production parity) and mcp.createOAuthGrant (token prefix marks MCP grants). */
+export async function insertConnectorGrant(ctx: MutationCtx, args: { sessionToken: string; teamId: Id<"teams">; name: string; write: boolean }, prefix = "") {
+  const { user, member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
+  if (args.write && !canEdit(member)) throw new ConvexError("Read-only workspace access");
+  const active = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_runId_and_hostId_and_revoked", q => q.eq("userId", user._id).eq("teamId", args.teamId).eq("runId", undefined).eq("hostId", undefined).eq("revoked", false)).take(21);
+  if (active.filter(g => !g.revoked && g.expiresAt > Date.now()).length >= 20) throw new ConvexError("Disconnect an existing connector first");
+  const token = prefix + Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, "0")).join("");
+  const expiresAt = Date.now() + 90 * 86400000;
+  const grantId = await ctx.db.insert("connectorGrants", { teamId: args.teamId, userId: user._id, name: args.name.slice(0, 120),
+    tokenHash: await hashToken(token), write: args.write, expiresAt, createdAt: Date.now(), revoked: false });
+  return { token, grantId, expiresAt };
 }
 
 export const createGrant = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), name: v.string(), write: v.boolean() },
   returns: v.object({ token: v.string(), grantId: v.id("connectorGrants"), expiresAt: v.number() }),
-  handler: async (ctx, args) => {
-    const { user, member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (args.write && !canEdit(member)) throw new Error("Read-only workspace access");
-    const active = await ctx.db.query("connectorGrants").withIndex("by_userId_and_teamId_and_runId_and_hostId_and_revoked", q => q.eq("userId", user._id).eq("teamId", args.teamId).eq("runId", undefined).eq("hostId", undefined).eq("revoked", false)).take(21);
-    if (active.filter(g => !g.revoked && g.expiresAt > Date.now()).length >= 20) throw new Error("Disconnect an existing connector first");
-    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, "0")).join("");
-    const expiresAt = Date.now() + 90 * 86400000;
-    const grantId = await ctx.db.insert("connectorGrants", { teamId: args.teamId, userId: user._id, name: args.name.slice(0, 120),
-      tokenHash: await hashToken(token), write: args.write, expiresAt, createdAt: Date.now(), revoked: false });
-    return { token, grantId, expiresAt };
-  },
+  handler: (ctx, args) => insertConnectorGrant(ctx, args),
 });
 
 export const verify = query({
@@ -62,7 +71,7 @@ export const revoke = mutation({
   handler: async (ctx, a) => {
     const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
     const grant = await ctx.db.get(a.grantId);
-    if (!grant || grant.teamId !== a.teamId || grant.userId !== user._id) throw new Error("Connection not found");
+    if (!grant || grant.teamId !== a.teamId || grant.userId !== user._id) throw new ConvexError("Connection not found");
     await ctx.db.patch(grant._id, { revoked: true }); return null;
   },
 });
@@ -72,6 +81,7 @@ export const read = query({
     projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), cursor: v.optional(v.string()), done: v.optional(v.boolean()) },
   returns: v.string(),
   handler: async (ctx, a) => {
+    rejectMcpToken(a.token);
     const { grant, user } = await authorize(ctx, a.token, false, a.projectId);
     const run = grant.runId ? (await ctx.db.get(grant.runId))! : null;
     if (a.kind === "projects") {
@@ -106,7 +116,7 @@ export const read = query({
       const p = await ctx.db.query("teamMembers").withIndex("by_team", q => q.eq("teamId", grant.teamId)).paginate({ numItems: 50, cursor: a.cursor || null });
       return JSON.stringify({ members: p.page.filter(m => m.status === "active").map(m => ({ id: m._id, userId: m.userId, name: m.name, email: m.email, role: m.role })), nextCursor: p.isDone ? null : p.continueCursor });
     }
-    if (!a.projectId) throw new Error("Project required");
+    if (!a.projectId) throw new ConvexError("Project required");
     if (a.kind === "project") {
       const p = (await ctx.db.get(a.projectId))!;
       const columns = await ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", p._id)).take(20);
@@ -115,7 +125,7 @@ export const read = query({
     const serialize = (t: { _id: string; title: string; description?: string; columnId: string; done: boolean; priority: string; assignedToEmail?: string; dueDate?: string; githubIssueUrl?: string; githubTaskBranch?: string }) => ({ id: t._id, title: t.title, description: t.description, columnId: t.columnId, done: t.done, priority: t.priority, assignedToEmail: t.assignedToEmail, dueDate: t.dueDate, githubIssueUrl: t.githubIssueUrl, githubTaskBranch: t.githubTaskBranch });
     if (a.kind === "issue") {
       const task = a.taskId ? await ctx.db.get(a.taskId) : null;
-      if (!task || task.projectId !== a.projectId) throw new Error("Issue not found");
+      if (!task || task.projectId !== a.projectId) throw new ConvexError("Issue not found");
       return JSON.stringify(serialize(task));
     }
     const p = await ctx.db.query("tasks").withIndex("by_project_and_done", q => q.eq("projectId", a.projectId!).eq("done", a.done ?? false)).order("desc").paginate({ numItems: 50, cursor: a.cursor || null });
@@ -132,21 +142,22 @@ export const write = mutation({
     v.object({ kind: v.literal("delete_issue"), projectId: v.id("projects"), taskId: v.id("tasks") }),
   ) }, returns: v.string(),
   handler: async (ctx, a) => {
+    rejectMcpToken(a.token);
     const c = a.change;
     const { grant, user, member } = await authorize(ctx, a.token, true, "projectId" in c ? c.projectId : undefined);
-    if (c.kind === "update_project" && !["owner", "admin"].includes(member.role)) throw new Error("Workspace admin access required");
-    if (a.requestId.length < 8 || a.requestId.length > 120) throw new Error("A stable unique request ID is required");
+    if (c.kind === "update_project" && !["owner", "admin"].includes(member.role)) throw new ConvexError("Workspace admin access required");
+    if (a.requestId.length < 8 || a.requestId.length > 120) throw new ConvexError("A stable unique request ID is required");
     const key = await hashToken(JSON.stringify(c));
     const previous = await ctx.db.query("connectorOperations").withIndex("by_grantId_and_requestId", q => q.eq("grantId", grant._id).eq("requestId", a.requestId)).unique();
-    if (previous) { const saved = JSON.parse(previous.result); if (saved.key !== key) throw new Error("Request ID already used for another operation"); return JSON.stringify(saved.result); }
+    if (previous) { const saved = JSON.parse(previous.result); if (saved.key !== key) throw new ConvexError("Request ID already used for another operation"); return JSON.stringify(saved.result); }
     let result: { id: string };
     if (c.kind === "create_project") result = { id: await createProjectRecord(ctx, { teamId: grant.teamId, name: c.name, description: c.description }, user) };
     else if (c.kind === "create_issue") result = { id: await createTaskRecord(ctx, c, user._id) };
     else if (c.kind === "update_issue") { await updateTaskRecord(ctx, c, user._id); result = { id: c.taskId }; }
     else if (c.kind === "delete_issue") { await deleteTaskRecord(ctx, c); result = { id: c.taskId }; }
     else {
-      if (c.name !== undefined && (!c.name.trim() || c.name.length > 100)) throw new Error("Project name required, maximum 100 characters");
-      if ((c.description?.length || 0) > 10000) throw new Error("Description too long");
+      if (c.name !== undefined && (!c.name.trim() || c.name.length > 100)) throw new ConvexError("Project name required, maximum 100 characters");
+      if ((c.description?.length || 0) > 10000) throw new ConvexError("Description too long");
       await ctx.db.patch(c.projectId, { ...(c.name === undefined ? {} : { name: c.name.trim() }), ...(c.description === undefined ? {} : { description: c.description }), updatedAt: Date.now() });
       result = { id: c.projectId };
     }

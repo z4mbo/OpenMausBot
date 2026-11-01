@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { canEdit, getActiveTeamMember, normalizeEmail, projectMember, projectPeople, requireAdmin, requireMember, requireTeamMember, touchProject } from "./lib/permissions";
@@ -63,7 +63,7 @@ export const get = query({
   handler: async (ctx, args) => {
     const { member } = await requireMember(ctx, args.projectId, args.sessionToken);
     const project = await ctx.db.get(args.projectId);
-    if (!project) throw new Error("Project not found");
+    if (!project) throw new ConvexError("Project not found");
     return {
       ...project,
       status: project.status === "active" ? "active" as const : "inactive" as const,
@@ -115,7 +115,7 @@ export const sendChatMessage = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireMember(ctx, args.projectId, args.sessionToken);
     const body = args.body.trim();
-    if (!body) throw new Error("Message required");
+    if (!body) throw new ConvexError("Message required");
     await ctx.db.insert("chatMessages", {
       projectId: args.projectId,
       authorUserId: user._id,
@@ -241,14 +241,14 @@ export const sendCallSignal = mutation({
   },
   handler: async (ctx, args) => {
     const { user } = await requireMember(ctx, args.projectId, args.sessionToken);
-    if (args.toUserId === user._id) throw new Error("Cannot signal yourself");
-    if (!args.payload) throw new Error("Signal payload required");
-    if (args.payload.length > 80_000) throw new Error("Signal payload too large");
+    if (args.toUserId === user._id) throw new ConvexError("Cannot signal yourself");
+    if (!args.payload) throw new ConvexError("Signal payload required");
+    if (args.payload.length > 80_000) throw new ConvexError("Signal payload too large");
     const recipient = await ctx.db
       .query("callParticipants")
       .withIndex("by_project_and_user", (q) => q.eq("projectId", args.projectId).eq("userId", args.toUserId))
       .unique();
-    if (!recipient || recipient.lastSeenAt < Date.now() - callStaleMs) throw new Error("Recipient is not in the call");
+    if (!recipient || recipient.lastSeenAt < Date.now() - callStaleMs) throw new ConvexError("Recipient is not in the call");
     await ctx.db.insert("callSignals", {
       projectId: args.projectId,
       fromUserId: user._id,
@@ -308,15 +308,15 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
-    if (!args.teamId) throw new Error("Select a workspace before creating a project");
+    if (!args.teamId) throw new ConvexError("Select a workspace before creating a project");
     const { member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (!canEdit(member)) throw new Error("Edit role required");
+    if (!canEdit(member)) throw new ConvexError("Edit role required");
     return createProjectRecord(ctx, { ...args, teamId: args.teamId }, user);
   },
 });
 
 export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string; githubRepo?: "later"; githubRepoVisibility?: "private" | "public" }, user: Doc<"users">) {
-  if (!args.name.trim() || args.name.length > 100) throw new Error("Enter a project name under 100 characters");
+  if (!args.name.trim() || args.name.length > 100) throw new ConvexError("Enter a project name under 100 characters");
     const repoUrl = repositoryUrl(args.repoUrl);
     const teamMember = await getActiveTeamMember(ctx, args.teamId, user.email);
     const workspaceProjects = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(500);
@@ -490,7 +490,7 @@ export const update = mutation({
       updatedAt: number;
     }> = { updatedAt: Date.now() };
     if (args.name !== undefined) {
-      if (!args.name.trim() || args.name.length > 100) throw new Error("Enter a project name under 100 characters");
+      if (!args.name.trim() || args.name.length > 100) throw new ConvexError("Enter a project name under 100 characters");
       patch.name = args.name.trim();
     }
     if (args.status !== undefined) patch.status = args.status;
@@ -511,7 +511,7 @@ export const update = mutation({
     if (args.iconValue !== undefined) patch.iconValue = args.iconValue.trim() || undefined;
     if (args.iconStorageId !== undefined) {
       const metadata = await storageMetadata(ctx, args.iconStorageId);
-      if (!metadata) throw new Error("File not found");
+      if (!metadata) throw new ConvexError("File not found");
       validateUpload({ kind: "icon", projectId: args.projectId }, metadata.size, metadata.contentType);
       await admitStorageReference(ctx, args.iconStorageId, user, { kind: "project", projectId: args.projectId });
       patch.iconStorageId = args.iconStorageId;

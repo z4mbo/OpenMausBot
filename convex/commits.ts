@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, internalMutation, mutation, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { DEFAULT_OWNER_EMAIL } from "./lib/auth";
@@ -8,7 +8,7 @@ import type { Id } from "./_generated/dataModel";
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const result = await requireMember(ctx, projectId, sessionToken);
-  if (!canEdit(result.member)) throw new Error("Edit role required");
+  if (!canEdit(result.member)) throw new ConvexError("Edit role required");
   return result;
 }
 
@@ -77,7 +77,7 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const commit = await ctx.db.get(args.commitId);
-    if (!commit || commit.projectId !== args.projectId) throw new Error("Commit not found");
+    if (!commit || commit.projectId !== args.projectId) throw new ConvexError("Commit not found");
     await ctx.db.delete(args.commitId);
     await touchProject(ctx, args.projectId);
   },
@@ -101,7 +101,7 @@ export const upsertMany = internalMutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
-    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
+    if (project.repoUrl !== args.repoUrl) throw new ConvexError("Repository changed; sync cancelled");
     const now = Date.now();
     for (const commit of args.commits) {
       const existing = await ctx.db
@@ -136,7 +136,7 @@ export const syncGitHub = action({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
   handler: async (ctx, args) => {
     const project = await ctx.runQuery(api.projects.get, args);
-    if (project.memberRole === "viewer") throw new Error("Edit role required");
+    if (project.memberRole === "viewer") throw new ConvexError("Edit role required");
     const user = await ctx.runQuery(api.auth.me, { sessionToken: args.sessionToken });
     const parsed = parseGitHubRepo(project.repoUrl);
     if (!parsed) return { ok: false, count: 0, repo: "", error: "Add a valid GitHub repo URL in Settings, e.g. https://github.com/owner/repo" };

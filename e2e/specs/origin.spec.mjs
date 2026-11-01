@@ -139,7 +139,7 @@ test('O-063 O-064 chat and private DMs synchronize without leaking to a third cl
 
 test('O-101 O-102 O-104 vault encrypts in browser, reloads, rejects wrong key and locks', async ({ clients, f }) => {
   const page = await clients.login(f.member, f.url('tab=vault'));
-  await page.getByLabel('Vault passphrase', { exact: true }).fill('fixture-passphrase-123');
+  await page.getByLabel('Passphrase', { exact: true }).fill('fixture-passphrase-123');
   await page.getByRole('button', { name: 'Create vault', exact: true }).click();
   await page.getByRole('button', { name: 'New item', exact: true }).click();
   const dialog = page.getByRole('dialog');
@@ -154,11 +154,11 @@ test('O-101 O-102 O-104 vault encrypts in browser, reloads, rejects wrong key an
   await page.getByRole('button', { name: 'Lock', exact: true }).click();
   await expect(page.getByText('e2e-secret-value', { exact: true })).toHaveCount(0);
   await page.reload();
-  await page.getByLabel('Vault passphrase', { exact: true }).fill('wrong-passphrase');
-  await page.getByRole('button', { name: 'Unlock vault', exact: true }).click();
+  await page.getByLabel('Passphrase', { exact: true }).fill('wrong-passphrase');
+  await page.getByRole('button', { name: /^Unlock/ }).click();
   await expect(page.getByRole('alert')).toBeVisible();
-  await page.getByLabel('Vault passphrase', { exact: true }).fill('fixture-passphrase-123');
-  await page.getByRole('button', { name: 'Unlock vault', exact: true }).click();
+  await page.getByLabel('Passphrase', { exact: true }).fill('fixture-passphrase-123');
+  await page.getByRole('button', { name: /^Unlock/ }).click();
   await expect(page.getByText('Fixture secret', { exact: true })).toBeVisible();
 });
 
@@ -191,7 +191,7 @@ test('O-106 O-107 O-108 feedback public submission appears to two clients', asyn
 test('O-016 O-030 settings and project presence update across clients', async ({ clients, f }) => {
   const member = await clients.login(f.member), admin = await clients.login(f.admin);
   await expect(admin.getByLabel(`${f.member.name} is viewing this project`)).toBeVisible();
-  await admin.getByRole('navigation', { name: 'Project views' }).getByRole('button', { name: 'Settings', exact: true }).click();
+  await admin.locator('.project-navigation').getByRole('button', { name: 'Settings', exact: true }).click();
   await admin.getByLabel('Name', { exact: true }).fill('Renamed Alpha');
   await admin.getByRole('button', { name: 'Save project', exact: true }).click();
   await expect(member.locator('.project-identity')).toContainText('Renamed Alpha');

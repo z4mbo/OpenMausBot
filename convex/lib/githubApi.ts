@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 export type GitHubAppSecrets = { appId: number; privateKey: string; clientId: string; clientSecret: string; slug?: string; webhookSecret?: string };
 export type GitHubUserToken = { access_token: string; refresh_token?: string; expires_at?: number };
 
@@ -92,7 +93,7 @@ export async function installationToken(app: GitHubAppSecrets, installationId: n
   const scoped = !repository || (result.repositories?.length === 1 && result.repositories[0].full_name.toLowerCase() === `${repository.owner}/${repository.repo}`.toLowerCase());
   if (!result.token || !Number.isFinite(expiresAt) || expiresAt <= now || expiresAt > now + 65 * 60_000 || !scoped) {
     if (result.token) await revokeInstallationToken(result.token);
-    throw new Error("GitHub returned an installation token with an unexpected scope");
+    throw new ConvexError("GitHub returned an installation token with an unexpected scope");
   }
   return { token: result.token, expiresAt };
 }
@@ -108,7 +109,7 @@ export async function refreshUserToken(app: GitHubAppSecrets, refreshToken: stri
     signal: AbortSignal.timeout(15_000),
   });
   const data = await response.json().catch(() => ({})) as { access_token?: string; refresh_token?: string; expires_in?: number; error?: string };
-  if (!response.ok || !data.access_token || data.error) throw new Error("GitHub no longer accepts the workspace's connection. A workspace admin reconnects GitHub in Settings > Integrations.");
+  if (!response.ok || !data.access_token || data.error) throw new ConvexError("GitHub no longer accepts the workspace's connection. A workspace admin reconnects GitHub in Settings > Integrations.");
   return { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_in ? Date.now() + data.expires_in * 1000 : undefined };
 }
 

@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
@@ -101,7 +102,7 @@ export async function createUser(
 
 export async function createSession(ctx: MutationCtx, userId: Id<"users">) {
   const user = await ctx.db.get(userId);
-  if (!user || user.status !== "active") throw new Error("Login required");
+  if (!user || user.status !== "active") throw new ConvexError("Login required");
   const now = Date.now();
   const token = randomHex(32);
   await ctx.db.insert("sessions", {
@@ -139,7 +140,7 @@ export async function invalidateOtherSessions(ctx: MutationCtx, user: Doc<"users
 
 export async function requireUser(ctx: Ctx, sessionToken: string) {
   const result = await getSessionUser(ctx, sessionToken);
-  if (!result) throw new Error("Login required");
+  if (!result) throw new ConvexError("Login required");
   return result.user;
 }
 

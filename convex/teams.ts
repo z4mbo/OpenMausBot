@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { normalizeEmail, projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
@@ -12,7 +12,7 @@ import type { Doc } from "./_generated/dataModel";
 async function removeMembership(ctx: MutationCtx, member: Doc<"teamMembers">) {
   // Rejoining must not silently restore previous project and connector access.
   const memberships = await ctx.db.query("members").withIndex("by_email", q => q.eq("email", member.email)).take(501);
-  if (memberships.length > 500) throw new Error("Remove this account's project memberships before leaving");
+  if (memberships.length > 500) throw new ConvexError("Remove this account's project memberships before leaving");
   for (const item of memberships) {
     const project = await ctx.db.get(item.projectId);
     if (project?.teamId === member.teamId) await ctx.db.delete(item._id);
@@ -33,7 +33,7 @@ export const leave = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (member.role === "owner") throw new Error("The workspace owner cannot leave their workspace");
+    if (member.role === "owner") throw new ConvexError("The workspace owner cannot leave their workspace");
     await removeMembership(ctx, member);
     return null;
   },
@@ -53,7 +53,7 @@ export const listWithProjects = query({
       .withIndex("by_email", (q) => q.eq("email", user.email))
       .take(101);
 
-    if (memberships.length > 100) throw new Error("Workspace discovery limit exceeded");
+    if (memberships.length > 100) throw new ConvexError("Workspace discovery limit exceeded");
     const active = memberships.filter(m => m.status === "active" && (!m.userId || m.userId === user._id));
     const rows = []; let projectCount = 0;
     for (const membership of active) {
@@ -61,7 +61,7 @@ export const listWithProjects = query({
       if (!team) continue;
       const projects = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", team._id)).take(Math.min(201, 1001 - projectCount));
       projectCount += projects.length;
-      if (projects.length > 200 || projectCount > 1000) throw new Error("Project discovery limit exceeded");
+      if (projects.length > 200 || projectCount > 1000) throw new ConvexError("Project discovery limit exceeded");
       const visible = [];
       for (const project of projects) if (await projectMember(ctx, project, user)) visible.push(project);
       rows.push({ ...team, memberRole: membership.role, projects: visible.sort((a, b) => b.updatedAt - a.updatedAt) });
@@ -100,9 +100,9 @@ export const remove = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams") },
   handler: async (ctx, args) => {
     const { member, user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
-    if (member.role !== "owner") throw new Error("Owner role required");
+    if (member.role !== "owner") throw new ConvexError("Owner role required");
     const projects = await ctx.db.query("projects").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).collect();
-    if (projects.length) throw new Error("Delete projects before deleting team");
+    if (projects.length) throw new ConvexError("Delete projects before deleting team");
     const team = await ctx.db.get(args.teamId);
     if (team) await startWorkspaceDeletion(ctx, team, { userId: user._id, name: user.name });
   },
@@ -127,16 +127,16 @@ export const invite = mutation({
   },
   handler: async (ctx, args) => {
     const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
-    if (args.role === "owner") throw new Error("Owner role cannot be invited");
+    if (args.role === "owner") throw new ConvexError("Owner role cannot be invited");
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new ConvexError("Team not found");
     const now = Date.now();
     const email = normalizeEmail(args.email);
     const existing = await ctx.db
       .query("teamMembers")
       .withIndex("by_team_email", (q) => q.eq("teamId", args.teamId).eq("email", email))
       .unique();
-    if (existing?.status === "active") throw new Error("Member already active");
+    if (existing?.status === "active") throw new ConvexError("Member already active");
     const inviteToken = makeInviteToken();
     if (existing) {
       await ctx.db.patch(existing._id, {
@@ -174,7 +174,7 @@ export const sendInvite = action({
     origin: v.string(),
   },
   returns: v.object({ inviteLink: v.string(), sent: v.boolean(), reason: v.string() }),
-  handler: async () => { throw new Error("Use workspace invitations in Origin to send email invitations"); },
+  handler: async () => { throw new ConvexError("Use workspace invitations in Origin to send email invitations"); },
 });
 
 export const updateRole = mutation({
@@ -183,8 +183,8 @@ export const updateRole = mutation({
   handler: async (ctx, args) => {
     await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
-    if (!member || member.teamId !== args.teamId) throw new Error("Member not found");
-    if (member.role === "owner" || args.role === "owner") throw new Error("Workspace ownership cannot be changed here");
+    if (!member || member.teamId !== args.teamId) throw new ConvexError("Member not found");
+    if (member.role === "owner" || args.role === "owner") throw new ConvexError("Workspace ownership cannot be changed here");
     await ctx.db.patch(args.memberId, { role: args.role, updatedAt: Date.now() });
     await reviewGitHubAccess(ctx, args.teamId, member.email);
     return null;
@@ -197,9 +197,9 @@ export const removeMember = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
-    if (!member || member.teamId !== args.teamId) throw new Error("Member not found");
-    if (member.role === "owner") throw new Error("The workspace owner cannot be removed");
-    if (member.email === user.email) throw new Error("Cannot remove yourself");
+    if (!member || member.teamId !== args.teamId) throw new ConvexError("Member not found");
+    if (member.role === "owner") throw new ConvexError("The workspace owner cannot be removed");
+    if (member.email === user.email) throw new ConvexError("Cannot remove yourself");
     await removeMembership(ctx, member);
     return null;
   },

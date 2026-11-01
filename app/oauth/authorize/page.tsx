@@ -20,7 +20,6 @@ export default function Authorize() {
     try { setSession(localStorage.getItem("origin.sessionToken") || ""); } catch { /* storage unavailable */ }
     fetch(`/api/oauth/consent?${params}`).then(async r => {
       const body = await r.json();
-      if (body.redirect) { window.location.assign(body.redirect); return; }
       if (!r.ok) throw new Error(body.error); setApp(body);
     }).catch(e => setError(e.message));
   }, []);

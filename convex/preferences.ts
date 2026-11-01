@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireTeamMember } from "./lib/permissions";
 import { workspaceProject } from "./lib/features";
@@ -18,9 +18,9 @@ export const saveNotifications = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     const time = /^([01]\d|2[0-3]):[0-5]\d$/;
-    if ((args.quietStart || args.quietEnd) && (!time.test(args.quietStart) || !time.test(args.quietEnd))) throw new Error("Choose both quiet-hour times");
-    try { new Intl.DateTimeFormat("en", { timeZone: args.timeZone }).format(0); } catch { throw new Error("Choose a valid time zone"); }
-    if (args.mutedProjects.length > 200) throw new Error("Select up to 200 projects");
+    if ((args.quietStart || args.quietEnd) && (!time.test(args.quietStart) || !time.test(args.quietEnd))) throw new ConvexError("Choose both quiet-hour times");
+    try { new Intl.DateTimeFormat("en", { timeZone: args.timeZone }).format(0); } catch { throw new ConvexError("Choose a valid time zone"); }
+    if (args.mutedProjects.length > 200) throw new ConvexError("Select up to 200 projects");
     for (const projectId of new Set(args.mutedProjects)) await workspaceProject(ctx, args.teamId, projectId);
     const existing = await ctx.db.query("notificationPreferences").withIndex("by_teamId_and_userId", q => q.eq("teamId", args.teamId).eq("userId", user._id)).unique();
     const { sessionToken: _token, ...values } = args;

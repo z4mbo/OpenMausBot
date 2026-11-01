@@ -1,5 +1,5 @@
 import { paginationOptsValidator } from "convex/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internalMutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { projectMember, requireMember, requireTeamMember } from "./lib/permissions";
@@ -20,7 +20,7 @@ export const list = query({
   returns: v.object({ page: v.array(row), isDone: v.boolean(), continueCursor: v.string() }),
   handler: async (ctx, a) => {
     const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
-    if (a.projectId && (await ctx.db.get(a.projectId))?.teamId !== a.teamId) throw new Error("Project not found");
+    if (a.projectId && (await ctx.db.get(a.projectId))?.teamId !== a.teamId) throw new ConvexError("Project not found");
     if (a.projectId) await requireMember(ctx, a.projectId, a.sessionToken);
     const tasks = ctx.db.query("tasks");
     const query = a.projectId
@@ -58,7 +58,7 @@ export const activity = query({
   returns: v.object({ events: v.array(v.object({ completedAt: v.number(), projectId: v.id("projects") })), truncated: v.boolean() }),
   handler: async (ctx, a) => {
     const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
-    if (!Number.isFinite(a.since) || !Number.isFinite(a.until) || a.until < a.since || a.until - a.since > 367 * 86400000) throw new Error("Invalid activity range");
+    if (!Number.isFinite(a.since) || !Number.isFinite(a.until) || a.until < a.since || a.until - a.since > 367 * 86400000) throw new ConvexError("Invalid activity range");
     const query = a.mine
       ? ctx.db.query("taskCompletions").withIndex("by_teamId_and_assignedToEmail_and_completedAt", q => q.eq("teamId", a.teamId).eq("assignedToEmail", user.email).gte("completedAt", a.since).lt("completedAt", a.until))
       : ctx.db.query("taskCompletions").withIndex("by_teamId_and_completedAt", q => q.eq("teamId", a.teamId).gte("completedAt", a.since).lt("completedAt", a.until));
@@ -79,7 +79,7 @@ export const calendar = query({
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     validDay(args.start); validDay(args.end);
     const range = Date.parse(args.end) - Date.parse(args.start);
-    if (range < 0 || range > 62 * 86400000) throw new Error("Choose a range of up to 62 days");
+    if (range < 0 || range > 62 * 86400000) throw new ConvexError("Choose a range of up to 62 days");
     const rows = await ctx.db.query("tasks").withIndex("by_teamId_and_dueDate", q => q.eq("teamId", args.teamId).gte("dueDate", args.start).lte("dueDate", args.end)).take(501);
     const selected = rows.slice(0, 500).filter(task => !args.mine || task.assignedToEmail === user.email);
     const projects = new Map();

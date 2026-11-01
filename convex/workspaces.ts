@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
@@ -13,12 +13,12 @@ const reservedSlugs = new Set(["api", "login", "signup", "join", "settings", "ne
 
 export async function createWorkspace(ctx: MutationCtx, user: { _id: Id<"users">; email: string; name: string }, name: string, requestedSlug?: string) {
   const cleanName = name.trim();
-  if (!cleanName || cleanName.length > 60) throw new Error("Workspace name must be between 1 and 60 characters");
+  if (!cleanName || cleanName.length > 60) throw new ConvexError("Workspace name must be between 1 and 60 characters");
   const base = (requestedSlug || cleanName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48);
-  if (base.length < 2 || reservedSlugs.has(base)) throw new Error("Choose a different workspace URL (at least 2 characters)");
+  if (base.length < 2 || reservedSlugs.has(base)) throw new ConvexError("Choose a different workspace URL (at least 2 characters)");
   let slug = base;
   if (await ctx.db.query("teams").withIndex("by_slug", q => q.eq("slug", slug)).unique()) {
-    if (requestedSlug) throw new Error("That workspace URL is already taken");
+    if (requestedSlug) throw new ConvexError("That workspace URL is already taken");
     slug = `${base}-${crypto.randomUUID().slice(0, 6)}`;
   }
   const now = Date.now();
@@ -72,7 +72,7 @@ export const access = query({
   handler: async (ctx, args) => {
     const { member } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Workspace not found");
+    if (!team) throw new ConvexError("Workspace not found");
     return { teamId: team._id, slug: team.slug || team._id, role: member.role };
   },
 });
@@ -94,7 +94,7 @@ export const update = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), name: v.string() }, returns: v.null(),
   handler: async (ctx, args) => {
     await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
-    if (!args.name.trim() || args.name.length > 60) throw new Error("Enter a name under 60 characters");
+    if (!args.name.trim() || args.name.length > 60) throw new ConvexError("Enter a name under 60 characters");
     await ctx.db.patch(args.teamId, { name: args.name.trim(), updatedAt: Date.now() });
     return null;
   },
@@ -116,7 +116,7 @@ export const deletionSummary = query({
   handler: async (ctx, args) => {
     await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Workspace not found");
+    if (!team) throw new ConvexError("Workspace not found");
     const [projects, agents, members] = await Promise.all([
       ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(COUNTED_UP_TO + 1),
       ctx.db.query("workspaceAgents").withIndex("by_teamId", q => q.eq("teamId", args.teamId)).take(COUNTED_UP_TO + 1),
@@ -142,8 +142,8 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Workspace not found");
-    if (args.confirmName.trim() !== team.name.trim()) throw new Error("Type the workspace name exactly to delete it");
+    if (!team) throw new ConvexError("Workspace not found");
+    if (args.confirmName.trim() !== team.name.trim()) throw new ConvexError("Type the workspace name exactly to delete it");
     await startWorkspaceDeletion(ctx, team, { userId: user._id, name: user.name });
     return null;
   },
@@ -171,15 +171,15 @@ export const createInvite = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Workspace not found");
+    if (!team) throw new ConvexError("Workspace not found");
     if (args.projectId) {
-      if ((await ctx.db.get(args.projectId))?.teamId !== team._id) throw new Error("Project not found");
-      if (args.role === "admin") throw new Error("Project links cannot grant workspace admin access");
+      if ((await ctx.db.get(args.projectId))?.teamId !== team._id) throw new ConvexError("Project not found");
+      if (args.role === "admin") throw new ConvexError("Project links cannot grant workspace admin access");
     }
     const email = args.email?.trim().toLowerCase() || undefined;
-    if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new Error("Enter a valid email address");
+    if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new ConvexError("Enter a valid email address");
     const recent = await ctx.db.query("workspaceInvites").withIndex("by_createdBy_and_createdAt", q => q.eq("createdBy", user._id).gte("createdAt", Date.now() - 3_600_000)).take(20);
-    if (recent.length >= 20) throw new Error("Invitation limit reached. You can create 20 invitations per hour. Try again later.");
+    if (recent.length >= 20) throw new ConvexError("Invitation limit reached. You can create 20 invitations per hour. Try again later.");
     const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const expiresAt = Date.now() + 7 * 86400000;
     await ctx.db.insert("workspaceInvites", { teamId: args.teamId, projectId: args.projectId, token, email, role: args.role, createdBy: user._id, expiresAt, revoked: false, createdAt: Date.now() });
@@ -207,12 +207,12 @@ export const acceptInvite = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
     const invite = await ctx.db.query("workspaceInvites").withIndex("by_token", q => q.eq("token", args.token)).unique();
-    if (!invite || invite.revoked || invite.expiresAt < Date.now()) throw new Error("This invitation has expired or was revoked");
-    if (invite.email && invite.email !== user.email) throw new Error(`Sign in with ${invite.email} to accept this invitation`);
+    if (!invite || invite.revoked || invite.expiresAt < Date.now()) throw new ConvexError("This invitation has expired or was revoked");
+    if (invite.email && invite.email !== user.email) throw new ConvexError(`Sign in with ${invite.email} to accept this invitation`);
     const team = await ctx.db.get(invite.teamId);
-    if (!team || team.deletingAt !== undefined) throw new Error("Workspace no longer exists");
+    if (!team || team.deletingAt !== undefined) throw new ConvexError("Workspace no longer exists");
     const project = invite.projectId ? await ctx.db.get(invite.projectId) : null;
-    if (invite.projectId && (!project || project.teamId !== team._id)) throw new Error("Project no longer exists");
+    if (invite.projectId && (!project || project.teamId !== team._id)) throw new ConvexError("Project no longer exists");
     const member = await ctx.db.query("teamMembers").withIndex("by_team_email", q => q.eq("teamId", team._id).eq("email", user.email)).unique();
     const now = Date.now();
     if (!member) await ctx.db.insert("teamMembers", { teamId: team._id, userId: user._id, email: user.email, name: user.name, role: invite.role, status: "active", createdAt: now, updatedAt: now, joinedAt: now });
@@ -240,7 +240,7 @@ export const revokeInvite = mutation({
   args: { sessionToken: v.string(), inviteId: v.id("workspaceInvites") }, returns: v.null(),
   handler: async (ctx, args) => {
     const invite = await ctx.db.get(args.inviteId);
-    if (!invite) throw new Error("Invitation not found");
+    if (!invite) throw new ConvexError("Invitation not found");
     await requireTeamAdmin(ctx, invite.teamId, args.sessionToken);
     await ctx.db.patch(invite._id, { revoked: true });
     return null;
@@ -258,9 +258,9 @@ export const sendEmailInvite = action({
   returns: v.object({ token: v.string(), expiresAt: v.number(), inviteLink: v.string(), sent: v.boolean(), deliveryStatus: v.union(v.literal("not_configured"), v.literal("failed"), v.literal("accepted"), v.literal("not_requested")) }),
   handler: async (ctx, args) => {
     const { origin } = invitationAddress();
-    if (!origin) throw new Error("The invitation website is not configured for this Origin backend");
+    if (!origin) throw new ConvexError("The invitation website is not configured for this Origin backend");
     const email = args.email.trim().toLowerCase();
-    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid email address");
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new ConvexError("Enter a valid email address");
     const invitation: { token: string; expiresAt: number; teamName: string } = await ctx.runMutation(api.workspaces.createInvite, { ...args, email });
     const inviteLink = `${origin}/join/${invitation.token}`;
     const deliveryStatus = await deliverInvitation({ email, teamName: invitation.teamName, inviteLink });

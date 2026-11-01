@@ -17,7 +17,7 @@ const work = vi.hoisted(() => vi.fn());
 vi.mock("./localRealtime", () => ({
   requireLocalWorkspace: async () => ({ teamId: "fixture", _id: "fixture", workspaceRole: "owner" }),
   requireLocalChat: async () => ({ teamId: "fixture", _id: "fixture", workspaceRole: "owner" }),
-  getConvexClient: work, limitLocalAction: vi.fn(), sessionTokenFromRequest: vi.fn(),
+  getConvexClient: work, limitLocalAction: vi.fn(), sessionTokenFromRequest: vi.fn(), TooManyRequests: class extends Error {},
   sendLocalMessage: work, editLocalMessage: work, openDirectConversation: work, markConversationRead: work,
   sendLocalVoiceSignal: work, ackLocalVoiceSignals: work, joinLocalVoice: work, updateLocalVoicePresence: work,
 }));

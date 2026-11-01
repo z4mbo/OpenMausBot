@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import { DRAFT_COLUMN_TITLE, isDraftColumn, isLegacyIdeaColumn, normalizedColumnTitle } from "../../lib/origin-columns";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
@@ -27,11 +28,11 @@ export async function ensureDraftColumn(ctx: MutationCtx, projectId: Id<"project
     ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", projectId)).first(),
     ctx.db.query("columns").withIndex("by_project_order", q => q.eq("projectId", projectId)).take(101),
   ]);
-  if (!project) throw new Error("Project not found");
+  if (!project) throw new ConvexError("Project not found");
   const saved = project.draftIdeaCandidateId ? await ctx.db.get(project.draftIdeaCandidateId) : null;
   const ideas = [...legacy.filter(isLegacyIdeaColumn), ...(saved?.projectId === projectId && isLegacyIdeaColumn(saved) ? [saved] : [])];
   const draft = [...(flagged ? [flagged] : []), ...legacy.filter(isDraftColumn)].sort(compareStoredColumns)[0];
-  if (!draft && legacy.length > 100 && !options?.completeLegacyScan) throw new Error("Workflow repair required before editing this large legacy workflow");
+  if (!draft && legacy.length > 100 && !options?.completeLegacyScan) throw new ConvexError("Workflow repair required before editing this large legacy workflow");
   const candidate = draft ?? ideas.sort(compareStoredColumns)[0];
   const clearedCandidate = project.draftIdeaCandidateId !== undefined;
   if (clearedCandidate) await ctx.db.patch(projectId, { draftIdeaCandidateId: undefined });

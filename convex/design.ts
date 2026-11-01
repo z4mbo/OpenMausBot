@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { assetTypeValidator, tokenTypeValidator } from "./lib/validators";
@@ -9,7 +9,7 @@ import { requireUser } from "./lib/auth";
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const { member } = await requireMember(ctx, projectId, sessionToken);
-  if (!canEdit(member)) throw new Error("Edit role required");
+  if (!canEdit(member)) throw new ConvexError("Edit role required");
 }
 
 export const list = query({
@@ -80,7 +80,7 @@ export const updateToken = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const token = await ctx.db.get(args.tokenId);
-    if (!token || token.projectId !== args.projectId) throw new Error("Token not found");
+    if (!token || token.projectId !== args.projectId) throw new ConvexError("Token not found");
     const patch: Partial<{
       type: "color" | "typography" | "spacing" | "component" | "motion" | "other";
       name: string;
@@ -102,7 +102,7 @@ export const removeToken = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const token = await ctx.db.get(args.tokenId);
-    if (!token || token.projectId !== args.projectId) throw new Error("Token not found");
+    if (!token || token.projectId !== args.projectId) throw new ConvexError("Token not found");
     await ctx.db.delete(args.tokenId);
     await touchProject(ctx, args.projectId);
   },
@@ -124,12 +124,12 @@ export const createAsset = mutation({
   returns: v.id("designAssets"),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
-    if (!args.url && !args.storageId) throw new Error("Asset file or URL required");
-    if (args.url && !/^https?:\/\//i.test(args.url)) throw new Error("Use an http or https link");
-    if (!args.name.trim() || args.name.length > 150) throw new Error("Enter an asset name under 150 characters");
+    if (!args.url && !args.storageId) throw new ConvexError("Asset file or URL required");
+    if (args.url && !/^https?:\/\//i.test(args.url)) throw new ConvexError("Use an http or https link");
+    if (!args.name.trim() || args.name.length > 150) throw new ConvexError("Enter an asset name under 150 characters");
     if (args.storageId) {
       const metadata = await ctx.db.system.get(args.storageId);
-      if (!metadata || metadata.size > 15 * 1024 * 1024) throw new Error("Choose a file under 15 MB");
+      if (!metadata || metadata.size > 15 * 1024 * 1024) throw new ConvexError("Choose a file under 15 MB");
       await admitStorageReference(ctx, args.storageId, await requireUser(ctx, args.sessionToken), { kind: "project", projectId: args.projectId });
     }
     const now = Date.now();
@@ -164,7 +164,7 @@ export const updateAsset = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const asset = await ctx.db.get(args.assetId);
-    if (!asset || asset.projectId !== args.projectId) throw new Error("Asset not found");
+    if (!asset || asset.projectId !== args.projectId) throw new ConvexError("Asset not found");
     const patch: Partial<{
       type: Doc<"designAssets">["type"];
       name: string;
@@ -186,7 +186,7 @@ export const removeAsset = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const asset = await ctx.db.get(args.assetId);
-    if (!asset || asset.projectId !== args.projectId) throw new Error("Asset not found");
+    if (!asset || asset.projectId !== args.projectId) throw new ConvexError("Asset not found");
     await ctx.db.delete(args.assetId);
     await touchProject(ctx, args.projectId);
   },

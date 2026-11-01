@@ -105,4 +105,29 @@ describe("MCP tools", () => {
     const grants = await f.t.query(api.connectors.listGrants, { sessionToken: f.member.session, teamId: f.teamId });
     expect(grants.every(g => g.revoked)).toBe(true);
   });
+
+  test("personal access tokens and OAuth grants cannot use the legacy connectors.read/write", async () => {
+    const f = await fixture();
+    const oauth = (await f.t.mutation(api.mcp.createOAuthGrant, { sessionToken: f.owner.session, teamId: f.teamId, name: "Agent", write: true })).token;
+    expect(oauth.startsWith("origin_oauth_")).toBe(true);
+    expect(JSON.parse(await f.t.query(api.mcp.workspace, { token: oauth })).access).toBe("read_write");
+    const issueId = JSON.parse(await f.t.mutation(api.mcp.createIssue, { token: f.ownerToken, project: "Shared", title: "Keep me", dueDate: "2030-01-01" })).id;
+    for (const token of [f.ownerToken, oauth]) {
+      await expect(f.t.query(api.connectors.read, { token, kind: "projects" })).rejects.toThrow("only works with the Origin MCP server");
+      await expect(f.t.mutation(api.connectors.write, { token, requestId: "request-0001", change: { kind: "delete_issue", projectId: f.shared, taskId: issueId } })).rejects.toThrow("only works with the Origin MCP server");
+      await expect(f.t.mutation(api.connectors.write, { token, requestId: "request-0002", change: { kind: "create_project", name: "Sneaky" } })).rejects.toThrow("only works with the Origin MCP server");
+    }
+    expect(JSON.parse(await f.t.query(api.mcp.issue, { token: f.ownerToken, issueId })).title).toBe("Keep me");
+    // Grants from production's connectors.createGrant keep their behaviour.
+    const legacy = (await f.t.mutation(api.connectors.createGrant, { sessionToken: f.owner.session, teamId: f.teamId, name: "Legacy", write: true })).token;
+    expect(JSON.parse(await f.t.query(api.connectors.read, { token: legacy, kind: "projects" })).projects.length).toBe(2);
+    await f.t.mutation(api.connectors.write, { token: legacy, requestId: "request-0003", change: { kind: "delete_issue", projectId: f.shared, taskId: issueId } });
+    await expect(f.t.query(api.mcp.issue, { token: f.ownerToken, issueId })).rejects.toThrow("Issue not found");
+  });
+
+  test("create_issue errors reach the agent as ConvexError text", async () => {
+    const f = await fixture();
+    const error = await f.t.mutation(api.mcp.createIssue, { token: f.ownerToken, project: "Shared", title: "x", column: "Nope" }).catch(e => e);
+    expect(error.data).toContain("Column not found: Nope");
+  });
 });

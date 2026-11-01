@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, internalAction, internalMutation, internalQuery, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -38,7 +38,7 @@ export const saveLink = internalMutation({
   returns: v.union(v.null(), v.object({ sealed: v.string(), clientId: v.string() })),
   handler: async (ctx, a) => {
     const other = await ctx.db.query("githubUserLinks").withIndex("by_githubId", q => q.eq("githubId", a.githubId)).unique();
-    if (other && other.userId !== a.userId) throw new Error(`@${a.login} is already linked to another Origin account`);
+    if (other && other.userId !== a.userId) throw new ConvexError(`@${a.login} is already linked to another Origin account`);
     const mine = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", a.userId)).unique();
     if (mine) await ctx.db.patch(mine._id, { login: a.login, githubId: a.githubId, sealed: a.sealed, clientId: a.clientId, linkedAt: Date.now() });
     else await ctx.db.insert("githubUserLinks", { ...a, linkedAt: Date.now() });
@@ -88,7 +88,7 @@ export const caller = internalQuery({
   handler: async (ctx, a) => {
     const user = await requireUser(ctx, a.sessionToken);
     const member = await ctx.db.query("teamMembers").withIndex("by_team_email", q => q.eq("teamId", a.teamId).eq("email", user.email)).unique();
-    if (!member || member.status !== "active" || (member.userId && member.userId !== user._id)) throw new Error("No active team access");
+    if (!member || member.status !== "active" || (member.userId && member.userId !== user._id)) throw new ConvexError("No active team access");
     const link = await ctx.db.query("githubUserLinks").withIndex("by_userId", q => q.eq("userId", user._id)).unique();
     return { userId: user._id, link: link ? { login: link.login } : null };
   },
@@ -98,7 +98,7 @@ async function oauth<T>(path: string, body: Record<string, string>): Promise<T> 
   const response = await fetch(`${githubWebOrigin()}${path}`, {
     method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json", "User-Agent": "origin-backend" }, body: JSON.stringify(body), signal: AbortSignal.timeout(15_000),
   });
-  if (response.status === 404) throw new Error("GitHub sign-in from Origin needs Device Flow. The GitHub App's owner turns on \"Enable Device Flow\" in the App's settings.");
+  if (response.status === 404) throw new ConvexError("GitHub sign-in from Origin needs Device Flow. The GitHub App's owner turns on \"Enable Device Flow\" in the App's settings.");
   return await response.json() as T;
 }
 
@@ -166,7 +166,7 @@ async function invite(ctx: ActionCtx, userId: Id<"users">, found: Connection, re
 
 async function requireShared(ctx: ActionCtx, teamId: Id<"teams">): Promise<Connection> {
   const found = await connection(ctx, teamId);
-  if (!found) throw new Error(NOT_SHARED);
+  if (!found) throw new ConvexError(NOT_SHARED);
   return found;
 }
 
@@ -178,7 +178,7 @@ export const startLink = action({
     const me = await ctx.runQuery(internal.githubLinks.caller, a);
     const found = await requireShared(ctx, a.teamId);
     const started = await oauth<{ device_code?: string; user_code?: string; verification_uri?: string; expires_in?: number; interval?: number; error?: string }>("/login/device/code", { client_id: found.secrets.app.clientId });
-    if (!started.device_code || !started.user_code || !started.verification_uri) throw new Error(started.error === "device_flow_disabled" ? "GitHub sign-in from Origin needs Device Flow. The GitHub App's owner turns on \"Enable Device Flow\" in the App's settings." : "GitHub did not start the sign-in. Try again.");
+    if (!started.device_code || !started.user_code || !started.verification_uri) throw new ConvexError(started.error === "device_flow_disabled" ? "GitHub sign-in from Origin needs Device Flow. The GitHub App's owner turns on \"Enable Device Flow\" in the App's settings." : "GitHub did not start the sign-in. Try again.");
     const expiresAt = Date.now() + (started.expires_in ?? 900) * 1000;
     await ctx.runMutation(internal.githubLinks.saveFlow, { userId: me.userId, teamId: a.teamId, sealed: await seal(started.device_code, FLOW_PURPOSE(me.userId)), expiresAt });
     return { userCode: started.user_code, verificationUri: started.verification_uri, interval: Math.max(5, started.interval ?? 5), expiresAt };
@@ -191,14 +191,14 @@ export const finishLink = action({
   handler: async (ctx, a): Promise<{ state: "pending" } | { state: "linked"; login: string; invited: number }> => {
     const me = await ctx.runQuery(internal.githubLinks.caller, a);
     const row = await ctx.runQuery(internal.githubLinks.flow, { userId: me.userId, teamId: a.teamId });
-    if (!row) throw new Error("The GitHub sign-in expired. Start again.");
+    if (!row) throw new ConvexError("The GitHub sign-in expired. Start again.");
     const found = await requireShared(ctx, a.teamId);
     const answer = await oauth<{ access_token?: string; refresh_token?: string; expires_in?: number; error?: string }>("/login/oauth/access_token", {
       client_id: found.secrets.app.clientId, device_code: await unseal(row.sealed, FLOW_PURPOSE(me.userId)), grant_type: "urn:ietf:params:oauth:grant-type:device_code",
     });
     if (answer.error === "authorization_pending" || answer.error === "slow_down") return { state: "pending" };
     await ctx.runMutation(internal.githubLinks.saveFlow, { userId: me.userId, teamId: a.teamId });
-    if (!answer.access_token) throw new Error(answer.error === "access_denied" ? "The GitHub sign-in was cancelled" : "The GitHub sign-in expired. Start again.");
+    if (!answer.access_token) throw new ConvexError(answer.error === "access_denied" ? "The GitHub sign-in was cancelled" : "The GitHub sign-in expired. Start again.");
     let replaced: { sealed: string; clientId: string } | null;
     let account: { id: number; login: string };
     try {

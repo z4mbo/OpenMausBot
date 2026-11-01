@@ -6,7 +6,7 @@ import { afterAll, afterEach, expect, test, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "../app/api/github/setup/route";
 import { GET } from "../app/api/github/setup/callback/route";
-import { createGithubState, githubAppConfig } from "./github-workspace";
+import { createGithubState, githubAppConfig, saveGitHubApp } from "./github-workspace";
 import { integrationDb } from "./githubConnection";
 
 const current = vi.hoisted(() => ({ role: "owner", email: "operator@pg3.test" }));
@@ -40,7 +40,8 @@ function callback() {
 }
 const conversion = () => vi.fn(async () => Response.json({ client_id: "fixture-id", client_secret: "fixture-client-secret", slug: "fixture-app", webhook_secret: "fixture-webhook", id: 123, pem: "fixture-pem" }));
 
-test("PG3 O-110: eligible operator owner/admin gets manifest; other identities/member/viewer are denied", async () => {
+test("PG3 O-110: any workspace owner/admin gets the manifest while no App is configured; members and viewers are denied", async () => {
+  current.email = "someone@pg3.test";
   for (const role of ["owner", "admin"]) {
     current.role = role;
     const response = await manifest();
@@ -52,7 +53,15 @@ test("PG3 O-110: eligible operator owner/admin gets manifest; other identities/m
     current.role = role;
     expect((await manifest()).status).toBe(403);
   }
-  current.role = "owner"; current.email = "another@pg3.test";
+});
+
+test("PG3 O-110: ORIGIN_LEGACY_OWNER_EMAIL may also set up; nobody can once an App exists", async () => {
+  current.role = "member";
+  expect((await manifest()).status).toBe(200);
+  current.role = "removed";
+  expect((await manifest()).status).toBe(403);
+  current.role = "owner";
+  saveGitHubApp({ clientId: "existing", clientSecret: "existing-secret" });
   expect((await manifest()).status).toBe(403);
 });
 
@@ -68,9 +77,9 @@ test("PG3 O-110: manifest conversion persists encrypted credentials once with co
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
 
-test.each(["viewer", "removed"])("PG3 O-110: setup callback rejects operator whose workspace authority became %s", async role => {
+test.each(["viewer", "removed"])("PG3 O-110: setup callback rejects a user whose workspace authority became %s", async role => {
   const request = callback(), fetcher = conversion();
-  current.role = role;
+  current.role = role; current.email = "someone@pg3.test";
   vi.stubGlobal("fetch", fetcher);
   expect((await GET(request)).headers.get("location")).toContain("setup-failed");
   expect(fetcher).not.toHaveBeenCalled();
@@ -79,6 +88,7 @@ test.each(["viewer", "removed"])("PG3 O-110: setup callback rejects operator who
 
 test("PG3 O-110: revocation during manifest conversion cannot persist an App", async () => {
   const request = callback();
+  current.email = "someone@pg3.test";
   vi.stubGlobal("fetch", vi.fn(async () => { current.role = "viewer"; return conversion()(); }));
   expect((await GET(request)).headers.get("location")).toContain("setup-failed");
   expect(githubAppConfig()).toBeNull();

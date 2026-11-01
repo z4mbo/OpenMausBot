@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, internalMutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -90,14 +90,14 @@ export const protect = action({
   returns: result,
   handler: async (ctx, a): Promise<ProtectionResult> => {
     const { role, project } = await ctx.runQuery(internal.teamGitHub.projectAccess, a);
-    if (!ADMIN_ROLES.has(role)) throw new Error("A project admin protects the repository's default branch");
-    if (project.status && project.status !== "active") throw new Error("Reactivate the project before changing its repository");
+    if (!ADMIN_ROLES.has(role)) throw new ConvexError("A project admin protects the repository's default branch");
+    if (project.status && project.status !== "active") throw new ConvexError("Reactivate the project before changing its repository");
     const repo = parseRepository(project.repoUrl);
-    if (!repo || !project.repoUrl) throw new Error("Link a GitHub repository to this project first");
-    if (!project.githubWorkspaceAccess) throw new Error("A workspace admin approves this repository in the project's Repo tab first");
+    if (!repo || !project.repoUrl) throw new ConvexError("Link a GitHub repository to this project first");
+    if (!project.githubWorkspaceAccess) throw new ConvexError("A workspace admin approves this repository in the project's Repo tab first");
     const found = project.teamId ? await connection(ctx, project.teamId) : null;
-    if (!found) throw new Error(NOT_SHARED);
-    if (repo.owner.toLowerCase() !== found.row.accountLogin.toLowerCase()) throw new Error(`${repo.owner}/${repo.repo} is outside ${found.row.accountLogin}, the GitHub account this workspace is connected to`);
+    if (!found) throw new ConvexError(NOT_SHARED);
+    if (repo.owner.toLowerCase() !== found.row.accountLogin.toLowerCase()) throw new ConvexError(`${repo.owner}/${repo.repo} is outside ${found.row.accountLogin}, the GitHub account this workspace is connected to`);
     const outcome = await protectRepository(found, repo);
     await ctx.runMutation(internal.githubProtection.record, { projectId: project._id, repoUrl: project.repoUrl, ...outcome });
     return outcome;

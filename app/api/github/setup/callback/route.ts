@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DEFAULT_OWNER_EMAIL } from "@/convex/lib/auth";
 import { getConvexClient, requireLocalUser } from "@/lib/localRealtime";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { consumeGithubState, githubAppConfig, saveGitHubApp, type GithubState } from "@/lib/github-workspace";
+import { canSetupGitHubApp, consumeGithubState, saveGitHubApp, type GithubState } from "@/lib/github-workspace";
 import { originUrl } from "@/lib/integration-bridge";
 
 export const runtime = "nodejs";
 async function requireSetupAdmin(state: GithubState) {
   const user = await requireLocalUser(state.sessionToken);
   const access = await getConvexClient().query(api.workspaces.access, { sessionToken: state.sessionToken, teamId: state.teamId as Id<"teams"> });
-  if (user._id !== state.userId || user.email !== DEFAULT_OWNER_EMAIL || !["owner", "admin"].includes(access.role) || githubAppConfig()) throw new Error("Setup unavailable");
+  if (user._id !== state.userId || !canSetupGitHubApp(user.email, access.role)) throw new Error("Setup unavailable");
 }
 export async function GET(request: NextRequest) {
   try {
