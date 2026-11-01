@@ -180,3 +180,6 @@
 }
 .empty-create > .ghost-button { width: auto; }
 .project-viewer[data-self-viewer] { display: none; }
+.account-identity { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 0 var(--space-2); color: var(--text-2); font-size: var(--text-sm); }
+.account-identity > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-chip .workspace-initial { width: 20px; height: 20px; background: var(--accent); color: #fff; }

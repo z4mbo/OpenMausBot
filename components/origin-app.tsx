@@ -380,7 +380,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   return (
     <MemberProfileContext.Provider value={setMemberEmail}><div style={{ "--sidebar-width": `${sidebarLayout.width}px` } as CSSProperties} className={clsx("app-shell", "workspace-app", mobileOpen && "mobile-nav-open", sidebarCollapsed && "sidebar-collapsed", sidebarCollapsed && !sidebarHover && "sidebar-hidden", sidebarCollapsed && sidebarHover && "sidebar-floating")}>
       <MotionLayer />
-      <header className="mobile-topbar"><button className="icon-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button><strong className="mobile-project-name">{mainView === "project" ? projects?.find(project => project._id === activeProjectId)?.name : { inbox: "Inbox", chat: "Chat", voice: "Call", draw: "Draw" }[mainView]}</strong>{workspace.role !== "viewer" && mainView !== "project" && <button className="icon-button" aria-label="Create issue" onClick={() => setIssueOpen(true)}><CircleDot size={20} /></button>}</header>
+      <header className="mobile-topbar"><button className="icon-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button><strong className="mobile-project-name">{mainView === "project" ? projects?.find(project => project._id === activeProjectId)?.name : { inbox: "Inbox", chat: "Chat", voice: "Call", draw: "Draw" }[mainView]}</strong>{workspace.role !== "viewer" && mainView !== "project" && <button className="icon-button" aria-label="Create issue" onClick={() => setIssueOpen(true)}><SquarePen size={18} /></button>}</header>
       {mobileOpen && <button className="mobile-nav-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
       {sidebarCollapsed ? <div className="sidebar-hover-zone" onMouseEnter={() => setSidebarHover(true)} /> : null}
       <aside id="workspace-sidebar" className="sidebar" onMouseLeave={() => { if (sidebarCollapsed) setSidebarHover(false); }}>
@@ -531,11 +531,13 @@ function ProfileMenu({
     <div className="profile-menu-wrap" ref={menuRef} onKeyDown={event => { if (event.key === "Escape") { setMenu(false); menuRef.current?.querySelector("button")?.focus(); } }}>
       {open ? <WorkspaceSettings sessionToken={sessionToken} sound={sound} onToggleSound={onToggleSound} profile={<ProfileSettings user={user} sessionToken={sessionToken} />} security={<PasswordChanger sessionToken={sessionToken} />} onClose={() => setOpen(false)} onLogout={onLogout} /> : null}
       <button className="profile-chip bottom" type="button" aria-label="Open account menu" aria-expanded={menu} aria-haspopup="menu" onClick={() => setMenu(!menu)}>
-        <UserAvatar user={user} />
-        {!collapsed ? <div><strong>{sidebarUsername(user)}</strong></div> : null}
+        <span className="workspace-initial" aria-hidden="true">{workspace.name.slice(0, 1).toUpperCase()}</span>
+        {!collapsed ? <div><strong>{workspace.name}</strong></div> : null}
         <ChevronDown className="profile-chevron" size={13} />
       </button>
       {menu && <div className="origin-dropdown account-dropdown" role="menu" aria-label="Account and workspaces">
+        <div className="account-identity"><UserAvatar user={user} size="small" /><span>{user.email}</span></div>
+        <hr />
         <span className="dropdown-caption">Workspaces</span>
         {workspaces.map(item => <button role="menuitem" key={item._id} onClick={() => { setMenu(false); if (item._id !== workspace._id) window.location.assign(`/${item.slug}`); }}><span className="workspace-initial">{item.name.slice(0, 1)}</span><span>{item.name}</span>{item._id === workspace._id && <CheckCircle2 size={14} />}</button>)}
         <button role="menuitem" onClick={() => { setMenu(false); onCreateWorkspace(); }}><Plus size={15} />Create workspace</button>

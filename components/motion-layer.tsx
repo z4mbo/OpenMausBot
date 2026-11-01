@@ -68,7 +68,8 @@ export function MotionLayer() {
       const first = !glider.dataset.ready;
       const avatar = glider.querySelector<HTMLElement>(".nav-glider-avatar");
       if (avatar) {
-        const source = active.querySelector<HTMLElement>("[data-self-viewer]");
+        const shown = active.querySelector<HTMLElement>("[data-self-viewer]");
+        const source = shown?.offsetParent ? shown : null;
         avatar.style.display = source ? "grid" : "none";
         if (source) {
           const position = source.getBoundingClientRect();
@@ -95,9 +96,9 @@ export function MotionLayer() {
       if (reduced.matches || Date.now() - (entered.get(board) || 0) < 400) return;
       entered.set(board, Date.now());
       board.querySelectorAll<HTMLElement>(":scope > .kanban-column").forEach((column, columnIndex) => {
-        column.animate([{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: 620, delay: columnIndex * 70, easing: OUT, fill: "backwards" });
+        column.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 360, delay: columnIndex * 40, easing: OUT, fill: "backwards" });
         column.querySelectorAll<HTMLElement>(".task-card").forEach((card, cardIndex) => {
-          card.animate([{ opacity: 0, transform: "translateY(14px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 560, delay: 90 + columnIndex * 70 + Math.min(cardIndex, 8) * 45, easing: OUT, fill: "backwards" });
+          card.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: 60 + columnIndex * 40 + Math.min(cardIndex, 8) * 25, easing: OUT, fill: "backwards" });
         });
       });
     };
@@ -106,7 +107,7 @@ export function MotionLayer() {
       if (reduced.matches) return;
       list.querySelectorAll<HTMLElement>(selector).forEach((row, index) => {
         if (index > 14) return;
-        row.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 480, delay: index * 30, easing: OUT, fill: "backwards" });
+        row.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: index * 20, easing: OUT, fill: "backwards" });
       });
     };
 
@@ -114,7 +115,7 @@ export function MotionLayer() {
       if (reduced.matches) return;
       const view = [...scope.children].find(child => !child.matches(".view-loading-overlay, .project-navigation, .notice, [hidden], .persistent-tool")) as HTMLElement | undefined;
       const board = scope.querySelector<HTMLElement>(".kanban-scroll");
-      if (view && !board) view.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 460, easing: OUT });
+      if (view && !board) view.animate([{ opacity: 0, transform: "translateY(4px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: OUT });
       if (board) enterBoard(board);
       const list = scope.querySelector<HTMLElement>(".work-issue-list, .archive-list");
       if (list) enterList(list, ":scope > *");
@@ -123,7 +124,7 @@ export function MotionLayer() {
 
     const bump = (element: Element) => {
       if (reduced.matches || !(element instanceof HTMLElement)) return;
-      element.animate([{ transform: "scale(1)" }, { transform: "scale(1.42)", color: "#ffffff" }, { transform: "scale(1)" }], { duration: 460, easing: SPRING });
+      element.animate([{ transform: "scale(1)" }, { transform: "scale(1.2)", color: "#ffffff" }, { transform: "scale(1)" }], { duration: 460, easing: SPRING });
     };
 
     const burst = (x: number, y: number) => {
