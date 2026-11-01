@@ -1,9 +1,9 @@
-/* Board: toolbar, kanban lanes and cards, drag and drop, completed archive, list view, column editor. */
+/* Board: toolbar, kanban lanes and cards, drag and drop, card menu and toast, completed archive, list view. */
 
 /* Board layout. */
 .project-shell:has(.board-section) { height: 100%; min-height: 0; }
-.board-section { position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; }
-.board-section > .notice { align-self: flex-start; }
+.board-section { --lane-width: 300px; --lane-min: 256px; --lane-strip: 40px; position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.board-section > .notice { align-self: flex-start; margin-bottom: var(--space-2); }
 
 /* Toolbar. */
 .board-header { display: flex; flex: none; align-items: center; gap: var(--space-2); min-height: 44px; padding: var(--space-2) 0; }
@@ -14,82 +14,146 @@
 .board-header-actions > .issue-layout-switch { margin: 0 var(--space-1); }
 .issue-layout-switch button { width: 28px; padding: 0; justify-content: center; }
 .board-header-actions > .project-create-issue { margin-left: var(--space-1); }
-.board-filter-control { position: relative; }
+.board-filter-control { position: relative; display: flex; min-width: 0; }
 .board-filter-popover { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; display: flex; align-items: center; gap: var(--space-2); width: 280px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-3); box-shadow: var(--shadow-md); color: var(--text-3); animation: o-pop var(--duration) var(--ease-out); }
 .board-filter-popover input { min-height: 36px; padding: 0; border: 0; background: transparent; box-shadow: none; }
 .board-filter-popover input:focus { box-shadow: none; }
+.board-search-chip { display: inline-flex; align-items: center; min-width: 0; max-width: 200px; height: 28px; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border-2)); border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--text-1); animation: o-pop var(--duration) var(--ease-out); }
+.board-search-chip button { display: inline-flex; align-items: center; gap: 6px; min-width: 0; height: 100%; padding: 0 var(--space-2); border: 0; background: transparent; color: inherit; font-size: var(--text-sm); }
+.board-search-chip button:first-child { padding-right: 2px; }
+.board-search-chip button:first-child > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-search-chip button svg { flex: none; color: var(--accent-text); }
+.board-search-chip button:last-child { padding: 0 6px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.board-search-chip button:last-child svg { color: var(--text-2); }
+.board-search-chip button:hover { background: var(--hover); }
+.board-search-chip button:last-child:hover svg { color: var(--text-1); }
 
 /* Lanes. */
-.kanban-scroll { display: flex; flex: 1; gap: var(--space-3); min-height: 240px; padding-bottom: var(--space-1); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+.kanban-scroll {
+  display: flex;
+  flex: 1;
+  gap: var(--space-3);
+  min-height: 240px;
+  padding-bottom: var(--space-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-3) transparent;
+}
+.kanban-scroll[data-fade-end] { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent); }
+.kanban-scroll[data-fade-start] { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px); mask-image: linear-gradient(to right, transparent, #000 40px); }
+.kanban-scroll[data-fade-start][data-fade-end] { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 56px), transparent); }
+.kanban-scroll.is-dragging { -webkit-mask-image: none; mask-image: none; }
 .kanban-column {
   --lane: var(--text-3);
   display: flex;
-  flex: 0 0 300px;
+  flex: 0 1 var(--lane-width);
   flex-direction: column;
-  width: 300px;
+  min-width: var(--lane-min);
   min-height: 0;
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--surface-2) 55%, transparent);
-  transition: background var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out);
+  transition: background var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out), min-width var(--duration-slow) var(--ease-move), flex-basis var(--duration-slow) var(--ease-move);
 }
-.kanban-column.idea { --lane: var(--violet); }
+/* Lane colors carry meaning: grey drafts, cyan to do, amber in progress, violet in review, green done. */
+.kanban-column.draft { --lane: var(--text-3); }
+.kanban-column.idea { --lane: var(--blue); }
 .kanban-column.todo { --lane: var(--cyan); }
 .kanban-column.progress { --lane: var(--amber); }
-.kanban-column.review { --lane: var(--blue); }
+.kanban-column.review { --lane: var(--violet); }
 .kanban-column.done { --lane: var(--green); }
+.kanban-column.custom { --lane: var(--text-2); }
 .kanban-column[data-drop] { border-color: color-mix(in srgb, var(--lane) 35%, transparent); background: color-mix(in srgb, var(--lane) 5%, var(--surface-2)); }
-.kanban-title { display: flex; flex: none; align-items: center; justify-content: space-between; gap: var(--space-2); height: 40px; padding: 0 var(--space-2) 0 var(--space-3); }
-.kanban-title > div:first-child { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.kanban-title strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-base); font-weight: var(--weight-semibold); }
-.column-dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--lane); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane) 16%, transparent); }
-.kanban-tools { display: flex; align-items: center; gap: 2px; }
-.kanban-tools > span { min-width: 20px; color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; text-align: right; }
-.kanban-tools .icon-button { width: 24px; min-width: 24px; height: 24px; opacity: 0; }
-.kanban-column:hover .kanban-tools .icon-button, .kanban-tools .icon-button:focus-visible { opacity: 1; }
+.kanban-title { display: flex; flex: none; align-items: center; justify-content: space-between; gap: var(--space-2); height: 40px; padding: 0 var(--space-1) 0 var(--space-3); }
+.kanban-name { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.kanban-name .status-icon { color: var(--lane); }
+.kanban-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.lane-count { flex: none; color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.lane-rename { width: 100%; min-width: 0; min-height: 26px; padding: 0 6px; font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.kanban-tools { display: flex; flex: none; align-items: center; gap: 0; }
+.kanban-tools .icon-button { width: 28px; min-width: 28px; height: 28px; color: var(--text-3); opacity: 0; transition: opacity var(--duration-fast), background var(--duration-fast), color var(--duration-fast); }
+.kanban-tools .icon-button:hover:not(:disabled) { color: var(--text-1); }
+.kanban-column:hover .kanban-tools .icon-button, .kanban-tools .icon-button:focus-visible, .kanban-tools .icon-button[aria-expanded="true"] { opacity: 1; }
 .task-list { position: relative; display: flex; flex: 1; flex-direction: column; gap: 6px; min-height: 0; padding: 0 6px 6px; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; }
-.empty-lane { display: grid; place-items: center; min-height: 72px; border: 1px dashed var(--border-2); border-radius: var(--radius-md); color: var(--text-3); font-size: var(--text-sm); }
+.empty-lane { display: grid; place-items: center; min-height: 72px; border: 1px dashed var(--border-2); border-radius: var(--radius-md); color: var(--text-3); font-size: var(--text-sm); transition: border-color var(--duration), color var(--duration); }
 .kanban-column[data-drop] .empty-lane { border-color: color-mix(in srgb, var(--lane) 45%, transparent); color: var(--text-2); }
-.archive-lane-link { display: inline-flex; align-items: center; gap: 6px; padding: var(--space-1) var(--space-2); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-3); font-size: var(--text-sm); }
+.archive-lane-link { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: var(--space-1) var(--space-2); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-3); font-size: var(--text-sm); }
 .archive-lane-link:hover { background: var(--hover); color: var(--text-1); }
 .completed-lane-footer { align-self: flex-start; margin: 0 6px 6px; }
+
+/* Empty lanes fold into a narrow strip (name + count) and open on click or when a card is dragged over them. */
+.kanban-column.is-collapsed { flex: 0 0 var(--lane-strip); min-width: var(--lane-strip); background: color-mix(in srgb, var(--surface-2) 40%, transparent); }
+.lane-strip { display: flex; flex: 1; flex-direction: column; align-items: center; gap: var(--space-2); width: 100%; min-height: 0; padding: 11px 0 var(--space-3); border: 0; border-radius: inherit; background: transparent; color: var(--text-2); transition: background var(--duration-fast), color var(--duration-fast); }
+.lane-strip:hover:not(:disabled) { background: var(--hover); color: var(--text-1); }
+.lane-strip:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.lane-strip .status-icon { flex: none; color: var(--lane); }
+.lane-strip strong { overflow: hidden; max-height: 100%; font-size: var(--text-base); font-weight: var(--weight-semibold); white-space: nowrap; text-overflow: ellipsis; writing-mode: vertical-rl; }
+.lane-strip > span { color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+
+/* Add column: a labeled ghost lane after the last one. */
+.kanban-add-column { display: flex; flex: 0 0 var(--lane-strip); align-self: flex-start; min-width: var(--lane-strip); transition: flex-basis var(--duration-slow) var(--ease-move), min-width var(--duration-slow) var(--ease-move); }
+.kanban-add-column.is-editing { flex-basis: var(--lane-min); min-width: var(--lane-min); }
+.lane-strip.lane-add { flex: 1; padding-bottom: var(--space-4); border: 1px dashed var(--border-2); border-radius: var(--radius-lg); color: var(--text-3); }
+.lane-strip.lane-add strong { font-weight: var(--weight-medium); }
+.lane-strip.lane-add:hover:not(:disabled) { border-color: var(--border-3); color: var(--text-1); }
+.kanban-add-column form { display: grid; align-content: start; gap: var(--space-2); width: 100%; padding: 6px; border: 1px solid var(--border-2); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--surface-2) 55%, transparent); animation: o-fade var(--duration) var(--ease-out); }
+.kanban-add-column input { min-height: 32px; }
+.kanban-add-actions { display: flex; gap: var(--space-1); }
 
 /* Cards. */
 .task-card {
   position: relative;
   display: grid;
+  flex: none;
   gap: 6px;
-  padding: 10px var(--space-3) var(--space-2);
+  padding: 10px var(--space-3) 10px;
   border: 1px solid var(--border-1);
   border-radius: var(--radius-md);
   background: var(--surface-2);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+  outline: none;
   transition: transform 0.35s var(--ease-spring), background var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration);
 }
 .task-card.can-drag { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 @media (hover: hover) {
   .task-card:hover { transform: translateY(-1px); border-color: var(--border-2); background: var(--surface-3); }
 }
-.task-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
-.task-card.done .task-top strong { color: var(--text-3); text-decoration: line-through; }
-.task-card-head { display: flex; align-items: center; gap: var(--space-1); min-height: 20px; }
-.task-code { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; }
+.task-card:active:not(:has(button:active, input:active)) { transform: scale(0.99); background: var(--surface-3); transition-duration: 0.12s; }
+.task-card:focus-visible { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus), var(--shadow-sm); }
+.task-card.is-selected, .task-card.has-menu { border-color: color-mix(in srgb, var(--accent) 60%, var(--border-2)); background: var(--surface-3); }
+.task-card.done .task-top strong { color: var(--text-3); }
+.task-card.is-completing .task-top strong { text-decoration: line-through; text-decoration-color: var(--text-3); }
+.task-card.is-collapsing { overflow: hidden; pointer-events: none; }
+.task-card-head { display: flex; align-items: center; gap: var(--space-2); min-height: 18px; }
+.task-code { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
 .github-issue-indicator { display: inline-grid; color: var(--text-3); }
 .github-issue-indicator svg { width: 12px; height: 12px; }
-.task-assignee-profile { display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; }
-.task-assignee-profile .origin-user-avatar { --avatar-size: 20px; }
-.drag-handle { display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--text-3); cursor: grab; opacity: 0; transition: opacity var(--duration-fast); }
-.task-card:hover .drag-handle, .drag-handle:focus-visible, .task-card.is-moving .drag-handle { opacity: 1; }
-.drag-handle:hover { background: var(--hover); color: var(--text-1); }
 .task-top { display: flex; align-items: flex-start; gap: var(--space-2); }
-.task-top strong { min-width: 0; font-size: var(--text-base); font-weight: var(--weight-medium); line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.check-button { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin-top: 1px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-3); transition: color var(--duration-fast), transform var(--duration) var(--ease-spring); }
+.task-top strong { min-width: 0; font-size: var(--text-base); font-weight: var(--weight-medium); line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color var(--duration); }
+.task-meta { position: relative; display: flex; align-items: center; gap: var(--space-1); min-height: 22px; }
+
+/* Keyboard move target: focusable while a card is moved with the keyboard, never shown. */
+.drag-handle { position: absolute; top: 0; left: 0; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+
+/* Check: animates to a filled green tick when the issue is completed. */
+.check-button { position: relative; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin-top: 1px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-3); transition: color var(--duration-fast), transform var(--duration) var(--ease-spring); }
 .check-button:hover:not(:disabled) { color: var(--green); transform: scale(1.1); }
+.check-button:active:not(:disabled) { transform: scale(0.9); }
 .check-button:disabled { opacity: 1; cursor: inherit; }
-.task-card.done .check-button { color: var(--green); }
-.task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); min-height: 22px; }
-.priority, .due-chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 6px; border: 1px solid var(--border-2); border-radius: var(--radius-xs); color: var(--text-2); font-size: var(--text-xs); font-weight: var(--weight-medium); text-transform: capitalize; white-space: nowrap; }
+.check-done, .archive-check { display: grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--green); color: var(--text-inverse); }
+.is-completing .check-done { animation: check-pop 0.42s var(--ease-spring); }
+.is-completing .check-done svg { stroke-dasharray: 20; animation: check-draw 0.32s 0.08s var(--ease-out) backwards; }
+@keyframes check-pop { 0% { transform: scale(0.4); opacity: 0.4; } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes check-draw { from { stroke-dashoffset: 20; } }
+
+/* Chips: light, and buttons where the card can be edited in place. */
+.task-chip, .priority { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 7px; border: 1px solid var(--border-2); border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: var(--text-xs); font-weight: var(--weight-medium); text-transform: capitalize; white-space: nowrap; }
+button.task-chip { cursor: pointer; transition: background var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast); }
+button.task-chip:hover { border-color: var(--border-3); background: var(--hover); color: var(--text-1); }
+button.task-chip:active { background: var(--active); }
 .priority-icon { flex: none; }
 .priority-icon.high { color: var(--red); }
 .priority-icon.medium { color: var(--amber); }
@@ -97,12 +161,25 @@
 .due-chip svg { color: var(--text-3); }
 .due-chip.soon, .due-chip.soon svg { color: var(--amber); }
 .due-chip.overdue, .due-chip.overdue svg { color: var(--red); }
-.due-chip.overdue { border-color: rgba(242, 113, 107, 0.35); }
-.task-meta .task-actions { margin-left: auto; }
-.task-actions .icon-button { width: 22px; min-width: 22px; height: 22px; opacity: 0; transition: opacity var(--duration-fast); }
-.task-card:hover .task-actions .icon-button, .task-actions.is-open .icon-button, .task-actions .icon-button:focus-visible { opacity: 1; }
-.task-card:is(.is-moving, :has(.drag-handle:focus-visible)) .task-menu { opacity: 0; pointer-events: none; }
-.task-options { position: fixed; width: 172px; }
+.due-chip.overdue { border-color: rgba(242, 113, 107, 0.35); background: var(--red-soft); }
+button.due-chip.overdue:hover { border-color: rgba(242, 113, 107, 0.55); background: rgba(242, 113, 107, 0.18); color: var(--red); }
+.task-due-input { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+.task-assignee { position: relative; display: grid; flex: none; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text-3); }
+.task-assignee .origin-user-avatar { --avatar-size: 20px; }
+button.task-assignee { cursor: pointer; transition: box-shadow var(--duration-fast), color var(--duration-fast); }
+button.task-assignee:hover { box-shadow: 0 0 0 2px var(--border-3); color: var(--text-1); }
+.task-assignee.is-empty { border: 1px dashed var(--border-3); }
+.task-menu-button.icon-button { width: 24px; min-width: 24px; height: 22px; margin-left: auto; opacity: 0; transition: opacity var(--duration-fast), background var(--duration-fast); }
+.task-card:hover .task-menu-button, .task-card.has-menu .task-menu-button { opacity: 1; }
+.task-card.is-moving .task-menu-button { opacity: 0; }
+
+/* Touch: every control on a card is visible and at least 44px tall to the finger; the menu is a long-press. */
+@media (hover: none) {
+  .task-menu-button.icon-button { display: none; }
+  .task-chip::before, .task-assignee::before, .check-button::before { content: ""; position: absolute; inset: -11px 0; }
+  .task-assignee::before, .check-button::before { inset: -12px; }
+  .kanban-tools .icon-button { opacity: 1; width: 36px; min-width: 36px; height: 36px; }
+}
 
 /* Drag and drop (components/use-issue-drag.ts). */
 html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webkit-user-select: none !important; user-select: none !important; }
@@ -113,75 +190,149 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 .task-drag-layer { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; will-change: transform; }
 .task-drag-layer .task-card.task-ghost { box-sizing: border-box; margin: 0; border-color: var(--border-3); background: var(--surface-3); box-shadow: var(--shadow-drag); transform: rotate(2deg) scale(1.03); transition: transform 0.24s var(--ease-move), box-shadow 0.24s, border-color 0.24s, background 0.24s; animation: task-lift 0.2s var(--ease-move); }
 .task-drag-layer .task-card.task-ghost.is-settling { transform: none; border-color: var(--border-1); background: var(--surface-2); box-shadow: var(--shadow-sm); }
-.task-drag-layer .task-ghost .drag-handle, .task-drag-layer .task-ghost .task-actions .icon-button { opacity: 0; }
+.task-drag-layer .task-ghost .task-menu-button { opacity: 0; }
 @keyframes task-lift { from { transform: none; box-shadow: var(--shadow-sm); border-color: var(--border-1); } }
 @media (prefers-reduced-motion: reduce) {
   .task-drag-layer .task-card.task-ghost { animation: none; transform: none; }
+  .is-completing .check-done, .is-completing .check-done svg { animation: none; }
+  .kanban-column, .kanban-add-column { transition: none; }
 }
 
+/* Card menu (components/task-actions-menu.tsx) and lane menu: a popover on desktop, a bottom sheet on phones. */
+.task-menu-layer { position: fixed; inset: 0; z-index: 85; }
+.task-menu-scrim { position: absolute; inset: 0; }
+.task-menu.origin-dropdown { position: fixed; width: 232px; max-height: min(420px, calc(100vh - 16px)); overflow-y: auto; animation: o-pop var(--duration-fast) var(--ease-out); }
+.task-menu.lane-menu { width: 180px; }
+.task-menu button > svg:first-child, .task-menu button > .status-icon, .task-menu button > .priority-icon, .task-menu button > .origin-user-avatar { flex: none; }
+.task-menu .origin-user-avatar { --avatar-size: 18px; }
+.task-menu button > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.task-menu button > small { max-width: 96px; overflow: hidden; color: var(--text-3); font-size: var(--text-xs); text-overflow: ellipsis; white-space: nowrap; }
+.task-menu button > small.overdue { color: var(--red); }
+.task-menu .task-menu-chevron { color: var(--text-3); }
+.task-menu .task-menu-check { color: var(--text-1); }
+.task-menu .task-menu-back { color: var(--text-2); font-weight: var(--weight-medium); }
+.task-menu-search { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1); padding: 0 var(--space-2); border-bottom: 1px solid var(--border-2); color: var(--text-3); }
+.task-menu-search input { min-width: 0; min-height: 32px; padding: 0; border: 0; background: none; box-shadow: none; }
+.task-menu-search input:focus { box-shadow: none; }
+.task-menu-empty { margin: 0; padding: var(--space-2); color: var(--text-3); font-size: var(--text-sm); }
+.task-menu-title { overflow: hidden; padding: var(--space-2) var(--space-3) var(--space-3); color: var(--text-2); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
+.task-menu-layer.is-sheet .task-menu-scrim { background: var(--scrim); animation: o-fade var(--duration) var(--ease-out); }
+.task-menu-layer.is-sheet .task-menu.origin-dropdown { left: var(--space-2) !important; right: var(--space-2); top: auto !important; bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); width: auto; max-height: 70vh; padding: var(--space-2); border-radius: var(--radius-lg); animation: task-sheet-in var(--duration-slow) var(--ease-out); }
+.task-menu-layer.is-sheet .task-menu button { min-height: 44px; font-size: var(--text-md); }
+@keyframes task-sheet-in { from { transform: translateY(24px); opacity: 0; } }
+
+/* Undo toast. */
+.board-toast { position: fixed; left: 50%; bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); z-index: 95; display: flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--border-3); border-radius: var(--radius-md); background: var(--surface-4); box-shadow: var(--shadow-lg); color: var(--text-1); font-size: var(--text-base); transform: translateX(-50%); animation: toast-in var(--duration-slow) var(--ease-out); }
+.board-toast-icon { color: var(--green); }
+.board-toast button { min-height: 32px; margin-left: var(--space-1); padding: 0 var(--space-2); border: 0; border-left: 1px solid var(--border-3); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: transparent; color: var(--accent-text); font-weight: var(--weight-medium); }
+.board-toast button:hover { background: var(--hover); color: var(--text-1); }
+.board-toast:not(:has(button)) { padding-right: var(--space-3); }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } }
+
+/* Delete confirmations. */
+.confirm-dialog { width: min(420px, calc(100vw - 32px)); }
+.confirm-text { margin: 0 0 var(--space-2); color: var(--text-1); line-height: var(--leading); overflow-wrap: anywhere; }
+.confirm-text > span { margin-right: 4px; color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+
 /* Completed archive. */
-.archive-list { display: grid; align-content: start; gap: 1px; padding-top: var(--space-1); }
+.archive-list { display: grid; align-content: start; gap: 1px; padding-top: var(--space-1); overflow-y: auto; }
 .completed-scope { display: flex; align-items: center; gap: var(--space-2); padding-bottom: var(--space-2); color: var(--text-2); }
 .completed-scope > span { font-weight: var(--weight-medium); color: var(--text-1); }
-.archive-row { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm); }
+.archive-row { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm); cursor: pointer; transition: background var(--duration-fast); }
 .archive-row:hover { background: var(--hover); }
-.archive-row > svg { color: var(--green); }
+.archive-check { flex: none; }
 .archive-issue { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; padding: 0; border: 0; background: none; text-align: left; }
 .archive-issue > span { flex: none; color: var(--text-3); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
 .archive-issue > strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-medium); color: var(--text-2); }
-.archive-row > time { color: var(--text-3); font-size: var(--text-sm); }
+.archive-row > time { color: var(--text-3); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 
-/* List view. */
+/* List view: the same issue data as the cards, one row each. */
 .issue-table-scroll { flex: 1; min-height: 0; overflow: auto; }
-.issue-table { width: 100%; border-collapse: collapse; text-align: left; }
+.issue-table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: left; }
 .issue-table th { position: sticky; top: 0; z-index: 1; height: 32px; padding: 0 var(--space-3); border-bottom: 1px solid var(--border-1); background: var(--surface-1); color: var(--text-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
-.issue-table td { height: 40px; padding: 6px var(--space-3); border-bottom: 1px solid var(--border-1); color: var(--text-2); white-space: nowrap; }
-.issue-table tbody tr { cursor: default; transition: background var(--duration-fast); }
+.issue-table th.col-status { width: 160px; }
+.issue-table th.col-priority { width: 112px; }
+.issue-table th.col-assignee { width: 180px; }
+.issue-table th.col-due { width: 96px; }
+.issue-table td { height: 42px; padding: 6px var(--space-3); border-bottom: 1px solid var(--border-1); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.issue-table tbody tr { cursor: pointer; transition: background var(--duration-fast); }
 .issue-table tbody tr:hover { background: var(--hover); }
-.issue-table td:first-child { display: flex; align-items: center; gap: var(--space-3); min-width: 280px; }
+.issue-table tbody tr:active { background: var(--active); }
+.issue-table tbody tr.is-selected { background: var(--accent-soft); }
+.issue-table td.col-issue { display: flex; align-items: center; gap: var(--space-3); }
 .issue-table-title { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; padding: 0; border: 0; background: none; color: var(--text-1); text-align: left; font-weight: var(--weight-medium); }
-.issue-table-title small { flex: none; width: 72px; color: var(--text-3); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.issue-table-title:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
+.issue-table-title small { flex: none; width: 64px; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); font-variant-numeric: tabular-nums; }
 .issue-table-title > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.issue-table tr.is-completing .issue-table-title > span { color: var(--text-3); text-decoration: line-through; }
 .issue-table .check-button { margin: 0; }
-.issue-table .priority { border: 0; padding: 0; height: auto; vertical-align: middle; }
-.issue-table-assignee { display: inline-flex; align-items: center; gap: var(--space-2); }
+.status-pill { --lane: var(--text-2); display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 22px; padding: 0 8px 0 6px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--lane) 12%, transparent); color: var(--text-1); font-size: var(--text-sm); }
+.status-pill > span { overflow: hidden; text-overflow: ellipsis; }
+.status-pill .status-icon { color: var(--lane); }
+.status-pill.draft { --lane: var(--text-3); }
+.status-pill.idea { --lane: var(--blue); }
+.status-pill.todo { --lane: var(--cyan); }
+.status-pill.progress { --lane: var(--amber); }
+.status-pill.review { --lane: var(--violet); }
+.status-pill.done { --lane: var(--green); }
+.issue-table-priority, .issue-table-assignee { display: inline-flex; align-items: center; gap: var(--space-2); max-width: 100%; }
+.issue-table-assignee > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.due-text { font-variant-numeric: tabular-nums; }
 .due-text.soon { color: var(--amber); }
 .due-text.overdue { color: var(--red); }
 
-/* Column editor. */
-.column-delete-form { display: grid; gap: var(--space-3); margin-top: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--border-2); }
-
 /* Mobile. */
 @media (max-width: 760px) {
+  .board-section { --lane-strip: 44px; }
   .board-header { flex-wrap: nowrap; gap: var(--space-1); }
   .board-header-actions { gap: 0; }
   .board-header-actions > .member-picker { max-width: 44px; }
   .board-header-actions .member-picker-trigger > span:not(.origin-user-avatar), .board-header-actions .member-picker-trigger > svg:last-child { display: none; }
   .board-header-actions .member-picker-trigger { justify-content: center; width: 36px; min-height: 36px; padding: 0; }
-  .board-column-button { display: none; }
   .board-header-actions > .issue-layout-switch { margin: 0 2px; }
   .board-header .segmented-control button { padding: 0 6px; }
+  .board-header-actions .icon-button { width: 36px; min-width: 36px; height: 36px; }
+  .board-search-chip { max-width: 96px; height: 32px; }
   .project-create-issue > span { display: none; }
   .board-header-actions > .project-create-issue { width: 36px; padding: 0; }
   .board-filter-popover { position: fixed; left: var(--space-3); right: var(--space-3); top: 104px; width: auto; }
-  .kanban-scroll { gap: var(--space-2); margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4) var(--space-1); scroll-snap-type: x mandatory; scroll-padding: 0 var(--space-4); }
-  .kanban-column { flex-basis: calc(100vw - 48px); width: calc(100vw - 48px); scroll-snap-align: start; }
+  /* One lane per screen; the gap equals the gutter, so the previous lane is fully out of view when a lane snaps in. */
+  .kanban-scroll { gap: var(--space-4); margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4) var(--space-1); scroll-snap-type: x mandatory; scroll-padding: 0 var(--space-4); scrollbar-width: none; }
+  .kanban-scroll[data-fade-end], .kanban-scroll[data-fade-start] { -webkit-mask-image: none; mask-image: none; }
+  .kanban-column { flex: 0 0 calc(100vw - 56px); min-width: 0; scroll-snap-align: start; }
+  .kanban-column.is-collapsed { flex-basis: var(--lane-strip); }
+  .kanban-add-column { scroll-snap-align: end; }
+  .kanban-add-column.is-editing { flex-basis: calc(100vw - 56px); min-width: 0; }
   .kanban-scroll.is-dragging { scroll-snap-type: none; }
-  .task-card { padding: var(--space-3); }
-  .kanban-tools .icon-button { opacity: 1; }
-  .issue-table th.col-status, .issue-table td.col-status, .issue-table th.col-assignee, .issue-table td.col-assignee, .issue-table th.col-due, .issue-table td.col-due { display: none; }
-  .issue-table td:first-child { min-width: 0; }
-  .issue-table td { white-space: normal; height: 48px; }
+  .task-card { padding: var(--space-3); gap: var(--space-2); }
+  .task-top strong { font-size: var(--text-md); }
+  .task-chip { height: 24px; font-size: var(--text-sm); }
+  .issue-table thead { display: none; }
+  .issue-table, .issue-table tbody { display: block; }
+  .issue-table tr { display: grid; grid-template-columns: minmax(0, 1fr) 16px 14px 64px 20px; align-items: center; column-gap: var(--space-2); padding: 0 var(--space-2) 0 0; border-bottom: 1px solid var(--border-1); }
+  .issue-table td { display: flex; align-items: center; height: auto; min-height: 52px; padding: 0; border: 0; }
+  .issue-table td.col-issue { gap: var(--space-2); padding-left: var(--space-1); }
+  .issue-table .check-button { width: 36px; height: 44px; }
+  .issue-table-title { flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--space-2) 0; }
   .issue-table-title small { width: auto; }
   .issue-table-title > span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .issue-table td.col-status { order: 1; }
+  .issue-table td.col-priority { order: 2; }
+  .issue-table td.col-due { order: 3; justify-content: flex-end; font-size: var(--text-sm); }
+  .issue-table td.col-assignee { order: 4; }
+  .status-pill, .issue-table-priority { gap: 0; height: auto; padding: 0; background: none; }
+  .status-pill > span, .issue-table-priority > span, .issue-table-assignee > span:last-child { display: none; }
+  .archive-row { min-height: 48px; }
   .archive-row > time { display: none; }
 }
 
-/* Status ring colors follow the lane tones. */
+/* Status rings follow the lane colors. */
 .status-icon { flex: none; color: var(--text-3); }
-.status-icon.idea { color: var(--violet); }
+.status-icon.draft { color: var(--text-3); }
+.status-icon.idea { color: var(--blue); }
 .status-icon.todo { color: var(--cyan); }
 .status-icon.progress { color: var(--amber); }
-.status-icon.review { color: var(--blue); }
+.status-icon.review { color: var(--violet); }
 .status-icon.done { color: var(--green); }
+.status-icon.custom { color: var(--text-2); }
 .issue-table-status { display: inline-flex; align-items: center; gap: var(--space-2); }
