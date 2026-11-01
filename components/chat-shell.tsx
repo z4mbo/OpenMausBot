@@ -1,4 +1,5 @@
 "use client";
+import { focusQuietly } from "@/lib/initial-focus";
 import { errorText } from "@/lib/error-text";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -254,7 +255,7 @@ export function ChatView(props: Props) {
             onKeyDown={(event) => {
               if (event.key === "Escape") {
                 setSearchOpen(false);
-                searchButton.current?.focus();
+                focusQuietly(searchButton.current);
               }
             }}
           />
@@ -264,7 +265,7 @@ export function ChatView(props: Props) {
             onClick={() => {
               setQuery("");
               setSearchOpen(false);
-              searchButton.current?.focus();
+              focusQuietly(searchButton.current);
             }}
           >
             <X size={16} />

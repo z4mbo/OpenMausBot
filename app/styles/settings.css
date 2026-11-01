@@ -111,13 +111,14 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
 .muted-project-list .project-icon { color: var(--text-3); }
 
 /* Integrations. */
-.integration-section { display: grid; gap: var(--space-4); }
+.integration-section { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
+.integration-section > :not(.integration-heading, .integration-actions) { grid-column: 1 / -1; }
 .integration-heading { display: flex; align-items: center; gap: var(--space-3); color: var(--text-1); }
 .integration-heading > svg { flex: none; color: var(--text-2); }
 .integration-heading > div { flex: 1; min-width: 0; }
 .integration-heading strong { display: block; font-size: var(--text-md); font-weight: var(--weight-semibold); }
 .integration-heading span { display: block; margin-top: 2px; color: var(--text-3); font-size: var(--text-sm); }
-.integration-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.integration-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
 .integration-actions > p { margin: 0; }
 
 /* Agents. */
@@ -196,6 +197,11 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
   .invite-link-form { flex-wrap: wrap; }
   .invite-link-form label { flex: 1 1 100%; }
   .invite-link-form button { flex: 1; }
+  .integration-section { grid-template-columns: minmax(0, 1fr); }
+  .integration-actions { justify-content: flex-start; }
+  .agent-clients { flex-wrap: nowrap; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); overflow-x: auto; scrollbar-width: none; }
+  .agent-clients::-webkit-scrollbar { display: none; }
+  .agent-clients button { flex: none; }
   .agent-token-form { grid-template-columns: 1fr 1fr; }
   .agent-token-form input, .agent-token-form button { grid-column: 1 / -1; }
   .agent-token-form select { width: 100%; }
@@ -206,4 +212,7 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
 }
 @media (max-width: 760px) and (prefers-reduced-motion: reduce) {
   .settings-nav, .settings-body { transition: none; }
+}
+@media (pointer: coarse) {
+  .agent-clients button { height: 36px; }
 }

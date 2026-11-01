@@ -1,11 +1,12 @@
 "use client";
 import { ContentSkeleton } from "./content-skeleton";
 import { useEffect, useState } from "react";
-import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import { AtSign, Bell, Check, CheckCheck, Clock3, Loader2, MessageSquare, UserPlus } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { displayName, formatDateTime, formatRelative } from "@/lib/format";
+import { formatDateTime, formatRelative } from "@/lib/format";
+import { swallowPressClick } from "@/lib/outside-press";
 import { useWorkspace } from "./workspace-context";
 import { ProjectIcon } from "./project-icon";
 
@@ -15,14 +16,17 @@ export function NotificationList({ sessionToken, onOpenTask, onOpenChat }: { ses
   const workspace = useWorkspace(), [unread, setUnread] = useState(true), [error, setError] = useState("");
   const scope = { sessionToken, teamId: workspace._id };
   const { results, status, loadMore } = usePaginatedQuery(api.notifications.list, { ...scope, unreadOnly: unread }, { initialNumItems: 30 });
-  const members = useQuery(api.workspaces.members, scope);
   const mark = useMutation(api.notifications.markRead), all = useMutation(api.notifications.markAll);
   const snooze = useMutation(api.notifications.snooze);
   const [markingAll, setMarkingAll] = useState(false);
   useEffect(() => {
     // Snooze menus are <details>; close them on an outside press or Escape like every other menu.
     const closeMenus = (keep?: EventTarget | null) => document.querySelectorAll<HTMLDetailsElement>(".notification-snooze[open]").forEach(menu => { if (!(keep instanceof Node && menu.contains(keep))) menu.open = false; });
-    const press = (event: PointerEvent) => closeMenus(event.target);
+    const press = (event: PointerEvent) => {
+      const open = document.querySelector<HTMLDetailsElement>(".notification-snooze[open]");
+      if (open && !(event.target instanceof Node && open.contains(event.target))) swallowPressClick();
+      closeMenus(event.target);
+    };
     const key = (event: KeyboardEvent) => {
       const open = document.querySelector<HTMLDetailsElement>(".notification-snooze[open]");
       if (event.key !== "Escape" || !open) return;
@@ -32,8 +36,6 @@ export function NotificationList({ sessionToken, onOpenTask, onOpenChat }: { ses
     document.addEventListener("keydown", key);
     return () => { document.removeEventListener("pointerdown", press); document.removeEventListener("keydown", key); };
   }, []);
-  // Notifications carry the actor's username (or name when there is none); show the person's full name.
-  const actor = (name: string) => { const member = members?.find(member => member.username === name || member.name === name); return member ? displayName(member) : name; };
   return <div className="notification-list">
     <div className="work-list-toolbar">
       <div className="segmented-control" role="group" aria-label="Notifications shown"><button className={unread ? "active" : ""} aria-pressed={unread} onClick={() => setUnread(true)}>Unread</button><button className={!unread ? "active" : ""} aria-pressed={!unread} onClick={() => setUnread(false)}>All</button></div>
@@ -44,7 +46,7 @@ export function NotificationList({ sessionToken, onOpenTask, onOpenChat }: { ses
     {results.length > 0 && <ul className="notification-rows">{results.map(n => <li className={`notification-row ${n.read ? "" : "unread"}`} key={n._id}>
       <span className="notification-kind" aria-hidden="true">{n.kind === "mention" ? <AtSign size={15} /> : n.kind === "comment" ? <MessageSquare size={15} /> : <UserPlus size={15} />}</span>
       <button className="notification-content" onClick={async () => { try { await mark({ ...scope, id: n._id, read: true }); if (n.messageId) onOpenChat(n.messageId); else if (n.available && n.projectId && n.taskId) onOpenTask(n.projectId, n.taskId); } catch { setError("Could not open notification"); } }}>
-        <span className="notification-line"><strong>{actor(n.actorName)}</strong> {n.kind === "mention" ? n.messageId ? "mentioned you in chat" : "mentioned you on" : n.kind === "comment" ? "commented on" : "assigned you"}{n.taskTitle && <> <em>{n.taskTitle}</em></>}</span>
+        <span className="notification-line"><strong>{n.actorName}</strong> {n.kind === "mention" ? n.messageId ? "mentioned you in chat" : "mentioned you on" : n.kind === "comment" ? "commented on" : "assigned you"}{n.taskTitle && <> <em>{n.taskTitle}</em></>}</span>
         {n.preview && <span className="notification-preview">{n.preview}</span>}
         <span className="notification-meta">{n.projectName && <><ProjectIcon project={n} size={12} /><span>{n.projectName}</span><span aria-hidden="true">·</span></>}<time dateTime={new Date(n.createdAt).toISOString()} title={formatDateTime(n.createdAt)}>{formatRelative(n.createdAt)}</time>{!n.available && <><span aria-hidden="true">·</span><span>Issue removed</span></>}</span>
       </button>

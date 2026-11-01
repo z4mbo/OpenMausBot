@@ -65,6 +65,8 @@ import { activeChatTags, chatMessageParts, chatTextParts } from "@/lib/chat-text
 import { useChatTypingFocus } from "./use-chat-typing-focus";
 import { hasOpenKeyboardOverlay } from "@/lib/keyboard-navigation";
 const drafts = new Map<string, string>();
+// The last messages seen per conversation, so coming back to Chat shows them at once while they refresh.
+const recentMessages = new Map<string, LocalChatMessage[]>();
 
 type User = {
   _id: Id<"users">;
@@ -111,15 +113,16 @@ export function ChatThread({
   const workspace = useWorkspace();
   const openMember = useMemberProfile();
   const draftKey = `${user._id}:${workspace._id}:${conversation}`;
-  const [messages, setMessages] = useState<LocalChatMessage[]>([]);
+  const [messages, setMessages] = useState<LocalChatMessage[]>(() => recentMessages.get(draftKey) || []);
   const [issueMessage, setIssueMessage] = useState<LocalChatMessage | null>(null);
   const projects = useQuery(api.projects.listForUser, issueMessage ? { sessionToken, teamId: workspace._id } : "skip");
   const [searchResults, setSearchResults] = useState<LocalChatMessage[]>([]);
   const [searching, setSearching] = useState(false);
   const [moreResults, setMoreResults] = useState(false);
   const searchText = query.trim();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !recentMessages.has(draftKey));
   const [hasMore, setHasMore] = useState(false);
+  useEffect(() => { if (!loading) recentMessages.set(draftKey, messages.slice(-200)); }, [draftKey, loading, messages]);
   const [body, setBody] = useState(() => drafts.get(draftKey) || "");
   const [copied, setCopied] = useState("");
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -219,7 +222,7 @@ export function ChatThread({
       (option.reference && !activeTags.referenceIds.has(option.reference.id) && activeTags.referenceIds.size >= 12)
     )
       return;
-    const next = insertChatTag(body, trigger, option.label);
+    const next = insertChatTag(body, trigger, option.insert);
     if (next.text.length > 8000) return;
     if (option.member?.userId)
       setMentions((previous) => {
@@ -228,7 +231,7 @@ export function ChatThread({
           ? current
           : [
               ...current,
-              { userId: option.member!.userId!, name: option.label },
+              { userId: option.member!.userId!, name: option.insert },
             ];
       });
     if (option.reference)
@@ -660,7 +663,7 @@ export function ChatThread({
                     if (part.kind === "link") return <a key={index} href={part.href} target="_blank" rel="noopener noreferrer">{part.text}</a>;
                     if (part.kind === "mention") {
                       const target = members?.find(member => member.userId === part.mention.userId);
-                      return <button key={index} type="button" className="chat-inline-tag" disabled={!target} onClick={() => target && openMember(target.email)}>{part.text}</button>;
+                      return <button key={index} type="button" className="chat-inline-tag" disabled={!target} onClick={() => target && openMember(target.email)}>{target ? `@${displayName(target)}` : part.text}</button>;
                     }
                     if (part.kind === "reference") return <button key={index} type="button" className="chat-inline-tag chat-inline-reference" onClick={() => onOpenReference(part.reference.projectId as Id<"projects">, part.reference.type === "issue" ? part.reference.id as Id<"tasks"> : undefined)}>{part.text}</button>;
                     return <Fragment key={index}>{part.text}</Fragment>;
@@ -845,7 +848,7 @@ export function ChatThread({
                     <Circle size={17} />
                   )}
                   <span className="suggestion-copy">
-                    <strong>{option.name || option.label}</strong>
+                    <strong>{option.label}</strong>
                     <small>{option.detail}</small>
                   </span>
                 </button>

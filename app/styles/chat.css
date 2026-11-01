@@ -149,3 +149,13 @@
   .chat-composer-input textarea, .chat-composer-highlights { font-size: 16px; line-height: 1.5; }
   .send-message { width: 36px; height: 36px; flex-basis: 36px; }
 }
+@media (pointer: coarse) {
+  .chat-tabs > button { position: relative; height: 36px; }
+  .chat-tabs > button::after { content: ""; position: absolute; inset: -4px 0; }
+  .chat-member, .chat-profile-avatar, .chat-profile-name { position: relative; }
+  .chat-member::after { content: ""; position: absolute; inset: -10px; }
+  .chat-profile-avatar::after, .chat-profile-name::after { content: ""; position: absolute; inset: -8px -4px; }
+  .message-tools button { width: 44px; height: 40px; }
+  .send-message { position: relative; }
+  .send-message::after { content: ""; position: absolute; inset: -4px; }
+}

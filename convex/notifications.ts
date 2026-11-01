@@ -20,6 +20,11 @@ export async function notify(ctx: MutationCtx, a: { teamId: Id<"teams">; email: 
   await ctx.db.insert("notifications", { ...data, userId: user._id, read: false, createdAt: Date.now() });
 }
 
+/** The name people see for whoever caused a notification: full name, then username, then the email's local part. */
+function actorDisplayName(actor: { name?: string; username?: string; email?: string } | null) {
+  return actor?.name?.trim() || actor?.username?.trim() || actor?.email?.split("@")[0] || "Teammate";
+}
+
 const scope = { sessionToken: v.string(), teamId: v.id("teams") };
 export const summary = query({
   args: scope, returns: v.object({ unread: v.number(), more: v.boolean(), latest: v.union(v.string(), v.null()) }),
@@ -59,7 +64,7 @@ export const list = query({
       const digest = row.digestId ? await ctx.db.get(row.digestId) : null;
       if (row.kind === "lead") return null;
       if (row.projectId && (!project || !await projectMember(ctx, project, user) || (a.unreadOnly && project.status !== "active"))) return null;
-      return { _id: row._id, kind: row.kind, ...(row.digestId ? { digestId: row.digestId } : {}), read: row.read, createdAt: row.createdAt, snoozedUntil: row.snoozedUntil, projectId: row.projectId, taskId: row.taskId, messageId: row.messageId, conversation: row.conversation, agentThreadId: row.agentThreadId, preview: row.preview, actorName: digest?.chiefName ?? (actor?.username || actor?.name || "Teammate"), actorAvatar: !digest && actor?.avatarStorageId ? await ctx.storage.getUrl(actor.avatarStorageId) : null,
+      return { _id: row._id, kind: row.kind, ...(row.digestId ? { digestId: row.digestId } : {}), read: row.read, createdAt: row.createdAt, snoozedUntil: row.snoozedUntil, projectId: row.projectId, taskId: row.taskId, messageId: row.messageId, conversation: row.conversation, agentThreadId: row.agentThreadId, preview: row.preview, actorName: digest?.chiefName ?? actorDisplayName(actor), actorAvatar: !digest && actor?.avatarStorageId ? await ctx.storage.getUrl(actor.avatarStorageId) : null,
         projectName: project?.name, taskTitle: task?.title, available: Boolean(row.messageId) || Boolean(digest) || Boolean(task && project?.teamId === a.teamId),
         iconType: project?.iconType, iconValue: project?.iconValue, iconUrl: project?.iconStorageId ? await ctx.storage.getUrl(project.iconStorageId) : null };
     }));

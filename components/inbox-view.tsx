@@ -1,8 +1,9 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { formatDate, formatDue } from "@/lib/format";
+import { focusQuietly } from "@/lib/initial-focus";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { CalendarDays, List, ChevronRight, CheckCircle2, Circle, Inbox, Loader2, Search, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -18,6 +19,13 @@ import { PriorityIcon } from "./issue-icons";
 import { GitHubIssueIndicator } from "./github-issue-indicator";
 import { IssueSelect } from "./issue-select";
 
+const phoneQuery = "(max-width: 760px)";
+const subscribePhone = (change: () => void) => { const query = matchMedia(phoneQuery); query.addEventListener("change", change); return () => query.removeEventListener("change", change); };
+/** Phones show notifications and issues one at a time; wider screens stack them. */
+function usePhoneLayout() {
+  return useSyncExternalStore(subscribePhone, () => matchMedia(phoneQuery).matches, () => false);
+}
+
 export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpenProject }: { sessionToken: string; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void; onOpenChat: (messageId: string) => void; unread: number; onOpenProject: (projectId: Id<"projects">) => void }) {
   const workspace = useWorkspace();
   const openMember = useMemberProfile();
@@ -26,6 +34,11 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const [notificationsOpen, setNotificationsOpen] = useState(unread > 0);
   const hasUnread = unread > 0;
   useEffect(() => { setNotificationsOpen(hasUnread); }, [hasUnread]);
+  const phone = usePhoneLayout();
+  // Unread notifications come first; once shown, reading the last one does not switch the section away.
+  const [chosenPane, setPane] = useState<"notifications" | "issues" | null>(hasUnread ? "notifications" : null);
+  useEffect(() => { if (hasUnread) setPane(current => current ?? "notifications"); }, [hasUnread]);
+  const pane = chosenPane ?? "issues";
   const [mine, setMine] = useState(true);
   const [done, setDone] = useState(false);
   const [project, setProject] = useState("");
@@ -33,7 +46,7 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const searchButton = useRef<HTMLButtonElement>(null);
-  const closeSearch = () => { setSearchOpen(false); searchButton.current?.focus(); };
+  const closeSearch = () => { setSearchOpen(false); focusQuietly(searchButton.current); };
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState<string | null>(null);
   const projects = useQuery(api.projects.listForUser, { sessionToken, teamId: workspace._id });
@@ -45,9 +58,15 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const filtered = results.filter(task => `${task.title} ${task.projectName} ${task.assignedToName || ""}`.toLowerCase().includes(search.trim().toLowerCase()));
   const hasFilters = Boolean(project || priority || search);
   const clearFilters = () => { setSearch(""); setPriority(""); setProject(""); };
-  return <section className={`work-inbox ${section === "calendar" ? "calendar-inbox" : ""}`} aria-label="Inbox">
+  const notifications = <NotificationList sessionToken={sessionToken} onOpenTask={onOpenTask} onOpenChat={onOpenChat} />;
+  return <section className={`work-inbox ${section === "calendar" && !(phone && pane === "notifications") ? "calendar-inbox" : ""}`} aria-label="Inbox">
     <header className="view-header"><h1>Inbox</h1></header>
-    <details className="inbox-notifications" open={notificationsOpen}><summary onClick={event => { event.preventDefault(); setNotificationsOpen(open => !open); }}><ChevronRight size={14} />Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</summary>{notificationsOpen && <NotificationList sessionToken={sessionToken} onOpenTask={onOpenTask} onOpenChat={onOpenChat} />}</details>
+    {phone ? <div className="segmented-control inbox-pane-switch" role="group" aria-label="Inbox section">
+      <button className={pane === "notifications" ? "active" : ""} aria-pressed={pane === "notifications"} onClick={() => setPane("notifications")}>Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</button>
+      <button className={pane === "issues" ? "active" : ""} aria-pressed={pane === "issues"} onClick={() => setPane("issues")}>Issues</button>
+    </div>
+    : <details className="inbox-notifications" open={notificationsOpen}><summary onClick={event => { event.preventDefault(); setNotificationsOpen(open => !open); }}><ChevronRight size={14} />Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</summary>{notificationsOpen && notifications}</details>}
+    {phone && pane === "notifications" ? notifications : <>
     <div className="work-toolbar">
       <div className="work-toolbar-modes">
         <div className="segmented-control" role="group" aria-label="Issue ownership"><button className={mine ? "active" : ""} aria-pressed={mine} aria-label="Assigned to me" onClick={() => setMine(true)}><span className="label-long">Assigned to me</span><span className="label-short">Mine</span></button><button className={!mine ? "active" : ""} aria-pressed={!mine} aria-label="All issues" onClick={() => setMine(false)}><span className="label-long">All issues</span><span className="label-short">All</span></button></div>
@@ -79,6 +98,7 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
       })}
     </div>
     {(status === "CanLoadMore" || status === "LoadingMore") && <button className="ghost-button compact work-load-more" disabled={status === "LoadingMore"} onClick={() => loadMore(50)}>{status === "LoadingMore" ? <Loader2 size={14} className="spin" /> : null}Load more</button>}
+    </>}
     </>}
   </section>;
 }

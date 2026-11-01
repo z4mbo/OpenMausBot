@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import { focusInitialInput } from "@/lib/initial-focus";
+import { focusInitialInput, focusQuietly, wrapTab } from "@/lib/initial-focus";
 
 /** Where focus goes when a dialog closes: its opener, the same issue card re-rendered, else the main heading. */
 export function restoreFocus(opener: Element | null, taskId?: string | null) {
   const focus = (element: HTMLElement | null | undefined) => {
     if (!element?.isConnected || element.closest("[inert], [hidden]") || !element.getClientRects().length) return false;
-    element.focus({ preventScroll: true });
-    return document.activeElement === element;
+    return focusQuietly(element);
   };
   if (opener instanceof HTMLElement && opener !== document.body && focus(opener)) return;
   if (taskId && focus(document.querySelector<HTMLElement>(`[data-task-id="${CSS.escape(taskId)}"]`))) return;
@@ -52,12 +51,17 @@ export function Dialog({ title, heading, children, onClose, className = "" }: { 
       setTimeout(() => { if (!unmounting && element.isConnected && !element.open) element.showModal(); }, 0);
     };
     element.addEventListener("close", onNativeClose);
+    // A modal <dialog> lets Tab leave for the browser UI and <body>; keep it cycling through the dialog.
+    // Native listener: React events would also bubble here from dialogs portaled out of this one.
+    const onKeyDown = (event: KeyboardEvent) => { if (!event.defaultPrevented) wrapTab(event, element); };
+    element.addEventListener("keydown", onKeyDown);
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       unmounting = true;
       observer?.disconnect();
       element.removeEventListener("close", onNativeClose);
+      element.removeEventListener("keydown", onKeyDown);
       if (element.open) element.close();
       document.body.style.overflow = previous;
       // Another dialog opened from this one takes care of its own focus.

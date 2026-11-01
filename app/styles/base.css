@@ -50,6 +50,8 @@ label { display: grid; gap: 6px; color: var(--text-2); font-size: var(--text-sm)
 :focus { outline: none; }
 :is(button, a, [tabindex], summary, [role="option"], [role="menuitem"], [role="tab"]):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .origin-dialog:focus-visible { outline: none; }
+/* Focus moved by code after a tap or click (drawer, menus, dialog close) shows no ring; lib/initial-focus.ts sets data-input. */
+html[data-input="pointer"] :is(button, a, [tabindex], summary, [role="option"], [role="menuitem"], [role="tab"]):focus-visible { outline: none; }
 
 /* Scrollbars. */
 * { scrollbar-width: thin; scrollbar-color: var(--surface-5) transparent; }

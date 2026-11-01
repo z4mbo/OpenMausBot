@@ -129,3 +129,17 @@
   .calendar-grid.week .calendar-day.other-month { display: block; background: none; }
   .calendar-day:not(:has(.calendar-task)) > div { display: none; }
 }
+
+/* Phones: one section at a time. */
+.inbox-pane-switch { display: flex; width: 100%; margin-top: var(--space-3); }
+.inbox-pane-switch button { flex: 1; justify-content: center; height: 40px; font-size: var(--text-base); }
+.inbox-pane-switch .notification-count { color: #fff; }
+.inbox-pane-switch + .notification-list { margin-top: var(--space-3); }
+@media (pointer: coarse) {
+  .work-toolbar-modes .segmented-control button { height: 36px; }
+  .work-filters .issue-select-trigger { min-height: 40px; }
+  .work-complete { width: 44px; min-width: 44px; height: 44px; margin-left: -8px; }
+  .work-issue-main, .work-project { position: relative; }
+  .work-issue-main::after { content: ""; position: absolute; inset: -8px 0 0; }
+  .work-project::after { content: ""; position: absolute; inset: 0 0 -8px; }
+}

@@ -1,6 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { localAppOrigin } from "@/lib/client-api";
+import { focusQuietly } from "@/lib/initial-focus";
 import { displayName, formatDate, formatDateTime } from "@/lib/format";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -39,9 +40,9 @@ export function WorkspaceSettings({ sessionToken, profile, security, sound, onTo
   const current = sections.find(section => section.id === tab)!;
   useEffect(() => {
     if (!drilled || !window.matchMedia("(max-width: 760px)").matches) return;
-    body.current?.querySelector<HTMLElement>(".settings-back")?.focus({ preventScroll: true });
+    focusQuietly(body.current?.querySelector<HTMLElement>(".settings-back"));
   }, [drilled, tab]);
-  const back = () => { setDrilled(false); requestAnimationFrame(() => navRef.current?.querySelector<HTMLElement>(`[data-section="${tab}"]`)?.focus({ preventScroll: true })); };
+  const back = () => { setDrilled(false); requestAnimationFrame(() => focusQuietly(navRef.current?.querySelector<HTMLElement>(`[data-section="${tab}"]`))); };
   return <Dialog title="Settings" className="settings-dialog" onClose={onClose}>
     <div className="settings-layout" data-view={drilled ? "section" : "list"}>
       <nav ref={navRef} className="settings-nav" aria-label="Settings sections">

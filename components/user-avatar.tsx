@@ -26,8 +26,7 @@ export function avatarTone(user: AvatarIdentity) {
 export function UserAvatar({ user, size = "normal", className = "" }: { user: AvatarIdentity; size?: "normal" | "small"; className?: string }) {
   const [failedUrl, setFailedUrl] = useState<string>();
   const classes = `avatar origin-user-avatar ${size === "small" ? "small" : ""} ${className}`;
-  // Small avatars are too tight for two letters; they show the first initial.
-  const letters = size === "small" ? initials(user).slice(0, 1) : initials(user);
+  const letters = initials(user);
   return user.avatarUrl && failedUrl !== user.avatarUrl
     ? <img className={`${classes} image`} src={user.avatarUrl} onError={() => setFailedUrl(user.avatarUrl || "")} alt="" />
     : <span className={classes} style={{ "--avatar-tone": avatarTone(user) } as CSSProperties} aria-hidden="true" data-initials={letters.length}>{letters}</span>;
