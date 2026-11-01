@@ -1,7 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 
-import { Fragment, useId, useRef, useState } from "react";
+import { Fragment, useId, useLayoutEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { ArrowUp, AtSign, Hash, ListTodo, Loader2, Paperclip, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -56,7 +56,17 @@ export function IssueCommentComposer({ projectId, taskId, sessionToken, members 
   const trigger = dismissed ? null : chatTrigger(body, cursor);
   const suggestions = useChatSuggestions(trigger, members, sessionToken, workspace._id);
   const candidates = suggestions.options;
-  const focus = (at: number) => requestAnimationFrame(() => { input.current?.focus(); input.current?.setSelectionRange(at, at); setCursor(at); });
+  // Place the caret synchronously after React commits the new text, so a key typed right after picking a mention
+  // lands where the user expects instead of at the end.
+  const pendingCaret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const at = pendingCaret.current;
+    if (at === null) return;
+    pendingCaret.current = null;
+    input.current?.focus({ preventScroll: true });
+    input.current?.setSelectionRange(at, at);
+  });
+  const focus = (at: number) => { pendingCaret.current = at; setCursor(at); };
   const insert = (text: string) => {
     const at = input.current?.selectionStart ?? body.length, end = input.current?.selectionEnd ?? at;
     setBody(body.slice(0, at) + text + body.slice(end)); setCursor(at + text.length); setDismissed(false); setSelection(0); focus(at + text.length);
@@ -111,7 +121,7 @@ export function IssueCommentComposer({ projectId, taskId, sessionToken, members 
           const line = body.slice(0, input.current?.selectionStart).split("\n").at(-1) || "";
           if (/^\s*- \[[ xX]\] .+/.test(line)) { event.preventDefault(); insert("\n- [ ] "); }
         }
-      }} rows={3} placeholder="Leave a comment..." disabled={busy} maxLength={8000} />
+      }} rows={1} placeholder="Leave a comment..." disabled={busy} maxLength={8000} />
     </div>
     {!!attachments.length && <div className="composer-attachments">{attachments.map(file => <span key={file.id}><Paperclip size={13} />{file.name}<button type="button" aria-label={`Remove ${file.name}`} disabled={busy} onClick={() => setAttachments(current => current.filter(item => item.id !== file.id))}><X size={13} /></button></span>)}</div>}
     {error && <p className="notice danger" role="alert">{error}</p>}

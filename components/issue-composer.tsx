@@ -1,11 +1,12 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronRight, Circle, Loader2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { isDraftColumn } from "@/lib/origin-columns";
 import { Dialog } from "./dialog";
 import { IssueFields } from "./issue-fields";
 import { IssueSelect } from "./issue-select";
@@ -13,11 +14,30 @@ import { ProjectIcon } from "./project-icon";
 import { rankSearchResults } from "@/lib/search-ranking";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 
+type Priority = "low" | "medium" | "high";
+type Draft = { title: string; description: string; columnId: string; priority: Priority; assignee: string; dueDate: string };
+
+const EMPTY_DRAFT: Draft = { title: "", description: "", columnId: "", priority: "medium", assignee: "", dueDate: "" };
+const draftKey = (projectId: string) => `origin.issueDraft.${projectId}`;
+/** Unsent issue drafts live in this browser, one per project, so closing the composer never loses typed text. */
+function readDraft(projectId: string): Draft | null {
+  try {
+    const value = JSON.parse(localStorage.getItem(draftKey(projectId)) || "null") as Partial<Draft> | null;
+    return value && (value.title || value.description) ? { ...EMPTY_DRAFT, ...value } : null;
+  } catch { return null; }
+}
+function writeDraft(projectId: string, draft: Draft | null) {
+  try {
+    if (draft && (draft.title.trim() || draft.description.trim())) localStorage.setItem(draftKey(projectId), JSON.stringify(draft));
+    else localStorage.removeItem(draftKey(projectId));
+  } catch { /* Storage can be unavailable (private mode); the draft then lives only while the composer is open. */ }
+}
 
 export function IssueComposer({
   sessionToken,
   projects,
   activeProjectId,
+  initialColumnId,
   onClose,
   onCreated,
   initialDraft,
@@ -25,60 +45,63 @@ export function IssueComposer({
   sessionToken: string;
   projects: { _id: Id<"projects">; name: string; memberRole: string; iconType?: string; iconValue?: string; iconUrl?: string | null }[];
   activeProjectId: Id<"projects"> | null;
+  /** The lane the composer was opened from; new issues land there. */
+  initialColumnId?: string;
   onClose: () => void;
   onCreated: (id: Id<"projects">, taskId: Id<"tasks">) => void;
   initialDraft?: { title: string; description: string };
 }) {
   const online = useWorkspaceOnline();
   const editable = projects.filter((p) => p.memberRole !== "viewer");
-  const [projectId, setProjectId] = useState<Id<"projects"> | null>(
-    editable.find((p) => p._id === activeProjectId)?._id ||
-      null,
-  );
-  const [columnId, setColumnId] = useState("");
-  const [title, setTitle] = useState(initialDraft?.title || "");
-  const [description, setDescription] = useState(
-    initialDraft?.description || "",
-  );
-  const [priority, setPriority] = useState<"" | "low" | "medium" | "high">("");
+  const [projectId, setProjectId] = useState<Id<"projects"> | null>(editable.find((p) => p._id === activeProjectId)?._id || null);
+  const [draft, setDraft] = useState<Draft>(() => {
+    if (initialDraft) return { ...EMPTY_DRAFT, ...initialDraft, columnId: initialColumnId || "" };
+    const stored = projectId ? readDraft(projectId) : null;
+    return stored ? { ...stored, columnId: initialColumnId || stored.columnId } : { ...EMPTY_DRAFT, columnId: initialColumnId || "" };
+  });
+  const dirty = useRef(false);
   const [projectSearch, setProjectSearch] = useState("");
   const [projectIndex, setProjectIndex] = useState(0);
-  const titleInput = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [titleError, setTitleError] = useState(false);
+  const titleInput = useRef<HTMLInputElement>(null), descriptionInput = useRef<HTMLTextAreaElement>(null);
   const matchingProjects = rankSearchResults(editable.map(project => ({ ...project, label: project.name })).filter(project => project.name.toLowerCase().includes(projectSearch.toLowerCase())), projectSearch);
+  const board = useQuery(api.tasks.board, projectId ? { sessionToken, projectId } : "skip");
+  const members = useQuery(api.members.people, projectId ? { sessionToken, projectId } : "skip");
+  const me = useQuery(api.auth.me, { sessionToken });
+  const create = useMutation(api.tasks.createTask);
+  const ensureColumns = useMutation(api.tasks.ensureDefaultColumns);
+  const columns = board?.columns.filter((c) => !(c.isDone ?? c.title.toLowerCase() === "done")) || [];
+  const selectedColumn = columns.find((c) => c._id === draft.columnId) || columns.find(column => !isDraftColumn(column)) || columns[0];
+
   useEffect(() => {
     if (!projectId) return;
     const frame = requestAnimationFrame(() => titleInput.current?.focus({ preventScroll: true }));
     return () => cancelAnimationFrame(frame);
   }, [projectId]);
-  const [assignee, setAssignee] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const board = useQuery(
-    api.tasks.board,
-    projectId ? { sessionToken, projectId } : "skip",
-  );
-  const members = useQuery(api.members.people, projectId ? { sessionToken, projectId } : "skip");
-  const create = useMutation(api.tasks.createTask);
-  const ensureColumns = useMutation(api.tasks.ensureDefaultColumns);
-  const columns =
-    board?.columns.filter(
-      (c) => !(c.isDone ?? c.title.toLowerCase() === "done"),
-    ) || [];
   useEffect(() => {
     if (online && board?.columns.length === 0 && projectId)
-      void ensureColumns({ sessionToken, projectId }).catch((error) =>
-        setError(errorText(error, "Could not prepare columns")),
-      );
+      void ensureColumns({ sessionToken, projectId }).catch((error) => setError(errorText(error, "Could not prepare columns")));
   }, [online, board?.columns.length, projectId, ensureColumns, sessionToken]);
-  const selectedColumn = columns.find((c) => c._id === columnId) || columns[0];
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
+  // Keep the draft in this browser as the user types.
+  useEffect(() => { if (projectId && dirty.current) writeDraft(projectId, draft); }, [projectId, draft]);
+
+  const update = (patch: Partial<Draft>) => { dirty.current = true; setDraft(current => ({ ...current, ...patch })); setError(""); };
+  const chooseProject = (next: Id<"projects">) => {
+    if (next === projectId) return;
+    const stored = readDraft(next);
+    // Typed text follows the user to the new project; project-specific fields reset.
+    setDraft(current => current.title || current.description ? { ...EMPTY_DRAFT, title: current.title, description: current.description } : stored || EMPTY_DRAFT);
+    if (projectId && dirty.current) writeDraft(projectId, null);
+    setProjectId(next);
+  };
+  const close = () => { if (busy) return; if (projectId && dirty.current) writeDraft(projectId, draft); onClose(); };
+
+  const submit = async (event?: FormEvent) => {
+    event?.preventDefault();
     if (!online || busy || !projectId || !selectedColumn) return;
-    if (!title.trim()) { setError("Add a title"); titleInput.current?.focus(); return; }
-    const missing = [!priority && "priority", !assignee && "assignee", !dueDate && "due date"].filter(Boolean);
-    if (missing.length) { setError(`Choose ${missing.length > 1 ? `${missing.slice(0, -1).join(", ")} and ${missing.at(-1)}` : missing[0]}`); return; }
-    if (!priority) return;
+    if (!draft.title.trim()) { setTitleError(true); titleInput.current?.focus(); return; }
     setBusy(true);
     setError("");
     try {
@@ -86,45 +109,45 @@ export function IssueComposer({
         projectId,
         sessionToken,
         columnId: selectedColumn._id,
-        title,
-        description,
-        priority,
-        assignedToEmail: assignee,
-        dueDate,
+        title: draft.title,
+        description: draft.description,
+        priority: draft.priority,
+        ...(draft.assignee ? { assignedToEmail: draft.assignee } : {}),
+        ...(draft.dueDate ? { dueDate: draft.dueDate } : {}),
       });
+      dirty.current = false;
+      writeDraft(projectId, null);
       onCreated(projectId, taskId);
       onClose();
     } catch (error) {
-      setError(
-        errorText(error, "Could not create issue"),
-      );
+      setError(errorText(error, "Could not create issue"));
     } finally {
       setBusy(false);
     }
   };
+  const onKeyDown = (event: ReactKeyboardEvent) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !event.nativeEvent.isComposing) { event.preventDefault(); void submit(); }
+  };
+
   return (
     <Dialog
       title="New issue"
-      heading={<div className="issue-breadcrumb"><IssueSelect label="Project" icon={<Circle size={14} />} value={projectId || ""} disabled={busy} onChange={value => { setProjectId(value as Id<"projects">); setColumnId(""); setAssignee(""); }} options={editable.map(project => ({ value: project._id, label: project.name, icon: <ProjectIcon project={project} size={14} /> }))} /><ChevronRight size={14} /><h2>New issue</h2></div>}
+      heading={<div className="issue-breadcrumb"><IssueSelect label="Project" icon={<Circle size={14} />} value={projectId || ""} disabled={busy} onChange={value => chooseProject(value as Id<"projects">)} options={editable.map(project => ({ value: project._id, label: project.name, icon: <ProjectIcon project={project} size={14} /> }))} placeholder="Project" /><ChevronRight size={14} aria-hidden="true" /><h2>New issue</h2></div>}
       className="issue-composer-dialog"
-      onClose={() => {
-        if (!busy) onClose();
-      }}
+      onClose={close}
     >
-      <form onSubmit={submit} noValidate>
+      <form onSubmit={submit} onKeyDown={onKeyDown} noValidate>
         {!editable.length ? (
-          <div className="dialog-body muted">
-            Create a project first.
-          </div>
+          <div className="dialog-body muted">Create a project first.</div>
         ) : !projectId ? (
           <div className="issue-project-choice">
             <input type="search" role="combobox" aria-expanded="true" aria-controls="new-issue-projects" aria-activedescendant={matchingProjects[projectIndex] ? `choose-${matchingProjects[projectIndex]._id}` : undefined} aria-label="Choose a project" placeholder="Choose a project..." autoFocus data-initial-focus value={projectSearch} onChange={event => { setProjectSearch(event.target.value); setProjectIndex(0); }} onKeyDown={event => {
               if (event.nativeEvent.isComposing) return;
-              if (event.key === "Enter") { event.preventDefault(); if (matchingProjects[projectIndex]) setProjectId(matchingProjects[projectIndex]._id); }
+              if (event.key === "Enter") { event.preventDefault(); if (matchingProjects[projectIndex]) chooseProject(matchingProjects[projectIndex]._id); }
               else if (["ArrowDown", "ArrowUp"].includes(event.key) && matchingProjects.length) { event.preventDefault(); setProjectIndex(index => (index + (event.key === "ArrowDown" ? 1 : -1) + matchingProjects.length) % matchingProjects.length); }
             }} />
             <div className="issue-project-options" id="new-issue-projects" role="listbox" aria-label="Projects">
-              {matchingProjects.map((project, index) => <button id={`choose-${project._id}`} key={project._id} type="button" role="option" aria-selected={index === projectIndex} tabIndex={-1} onMouseEnter={() => setProjectIndex(index)} onClick={() => setProjectId(project._id)}><ProjectIcon project={project} size={16} /><span>{project.name}</span></button>)}
+              {matchingProjects.map((project, index) => <button id={`choose-${project._id}`} key={project._id} type="button" role="option" aria-selected={index === projectIndex} tabIndex={-1} onMouseEnter={() => setProjectIndex(index)} onClick={() => chooseProject(project._id)}><ProjectIcon project={project} size={16} /><span>{project.name}</span></button>)}
               {!matchingProjects.length && <p className="muted">No matching projects</p>}
             </div>
           </div>
@@ -134,41 +157,48 @@ export function IssueComposer({
               ref={titleInput}
               className="issue-title-input"
               aria-label="Issue title"
+              aria-invalid={titleError || undefined}
+              aria-describedby={titleError ? "issue-composer-title-error" : undefined}
               autoFocus
               data-initial-focus
-              value={title}
-              onChange={(e) => { setTitle(e.target.value); setError(""); }}
+              value={draft.title}
+              onChange={(e) => { update({ title: e.target.value }); setTitleError(false); }}
+              onKeyDown={event => { if (event.key === "Enter" && !event.metaKey && !event.ctrlKey && !event.nativeEvent.isComposing) { event.preventDefault(); descriptionInput.current?.focus(); } }}
               placeholder="Issue title"
-              required
               maxLength={250}
               disabled={busy}
             />
+            {titleError && <small id="issue-composer-title-error" className="issue-field-error" role="alert">Add a title</small>}
             <textarea
+              ref={descriptionInput}
               aria-label="Issue description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={draft.description}
+              onChange={(e) => update({ description: e.target.value })}
               placeholder="Add a description..."
-              rows={5}
+              rows={3}
               disabled={busy}
+              maxLength={60000}
             />
             <IssueFields
               columns={columns}
               members={members || []}
+              currentEmail={me?.email}
               columnId={selectedColumn?._id || ""}
-              onColumnChange={setColumnId}
-              priority={priority}
-              onPriorityChange={value => { setPriority(value); setError(""); }}
-              assignee={assignee}
-              onAssigneeChange={value => { setAssignee(value); setError(""); }}
-              dueDate={dueDate}
-              onDueDateChange={value => { setDueDate(value); setError(""); }}
+              onColumnChange={columnId => update({ columnId })}
+              priority={draft.priority}
+              onPriorityChange={priority => update({ priority })}
+              assignee={draft.assignee}
+              onAssigneeChange={assignee => update({ assignee })}
+              dueDate={draft.dueDate}
+              onDueDateChange={dueDate => update({ dueDate })}
               disabled={busy}
             />
             <footer className="issue-composer-footer">
-              {error ? <div role="alert" className="notice danger">{error}</div> : <span />}
-              <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !selectedColumn || !members?.length}>
+              {error ? <div role="alert" className="issue-field-error">{error}</div> : <span />}
+              <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !selectedColumn}>
                 {busy && <Loader2 size={14} className="spin" />}
                 Create issue
+                <kbd aria-hidden="true">{typeof navigator !== "undefined" && /Mac|iP(hone|ad)/.test(navigator.platform) ? "⌘↵" : "Ctrl ↵"}</kbd>
               </button>
             </footer>
           </div>

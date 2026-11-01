@@ -32,3 +32,46 @@
 .member-picker-search input:focus, .issue-select-search input:focus { box-shadow: none; }
 .member-picker-popover p, .issue-select-popover p { margin: 0; padding: var(--space-2); color: var(--text-3); font-size: var(--text-sm); }
 .member-picker-validation { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; opacity: 0; pointer-events: none; }
+.member-picker-popover [role="listbox"]:focus, .issue-select-popover [role="listbox"]:focus { outline: none; }
+.member-picker-popover [role="option"] > small, .issue-select-popover [role="option"] > small { flex: none; max-width: 45%; overflow: hidden; color: var(--text-3); font-size: var(--text-xs); text-overflow: ellipsis; white-space: nowrap; }
+.member-picker-trigger[data-empty], .issue-select-trigger[data-empty] { color: var(--text-3); }
+.member-picker-search + [role="listbox"], .issue-select-search + [role="listbox"] { padding-top: var(--space-1); }
+.member-picker-popover [role="listbox"]:first-child, .issue-select-popover [role="listbox"]:first-child { padding-top: 0; }
+
+/* Date picker: trigger shows the formatted due date; the popover has quick picks above a calendar. */
+.date-picker { position: relative; min-width: 0; }
+.date-picker-trigger { display: flex; align-items: center; gap: 6px; width: 100%; max-width: 100%; min-height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-1); font-size: var(--text-base); text-align: left; transition: background var(--duration-fast), border-color var(--duration-fast); }
+.date-picker-trigger:hover:not(:disabled), .date-picker-trigger[aria-expanded="true"] { background: var(--hover); }
+.date-picker-trigger:disabled { opacity: 1; cursor: default; }
+.date-picker-trigger > svg { flex: none; color: var(--text-3); }
+.date-picker-trigger > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.date-picker-trigger[data-empty] { color: var(--text-3); }
+.date-picker-trigger.due-soon, .date-picker-trigger.due-soon > svg { color: var(--amber); }
+.date-picker-trigger.due-overdue, .date-picker-trigger.due-overdue > svg { color: var(--red); }
+.date-picker-popover { position: fixed; inset: auto; z-index: 80; margin: 0; padding: var(--space-1); overflow: auto; border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-3); color: var(--text-1); box-shadow: var(--shadow-md); animation: o-pop var(--duration) var(--ease-out); }
+.date-picker-quick { display: grid; gap: 1px; padding-bottom: var(--space-1); margin-bottom: var(--space-1); border-bottom: 1px solid var(--border-2); }
+.date-picker-quick button { display: flex; align-items: center; gap: var(--space-2); min-height: 30px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--text-1); font-size: var(--text-base); text-align: left; }
+.date-picker-quick button > span { flex: 1; }
+.date-picker-quick button > small { color: var(--text-3); font-size: var(--text-sm); }
+.date-picker-quick button:is(:hover, :focus-visible) { background: var(--surface-5); outline: none; }
+.date-picker-quick button[aria-pressed="true"] > span { color: var(--accent-text); }
+.date-picker-quick .date-picker-clear, .date-picker-quick .date-picker-clear > svg { color: var(--text-2); }
+.date-picker-month { display: flex; align-items: center; gap: 2px; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2); }
+.date-picker-month strong { flex: 1; font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.date-picker-month .icon-button { width: 28px; min-width: 28px; height: 28px; }
+.date-picker-grid { display: grid; gap: 2px; padding: 0 2px 2px; outline: none; }
+.date-picker-grid > [role="row"] { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.date-picker-weekdays > span { display: grid; place-items: center; height: 24px; color: var(--text-3); font-size: var(--text-xs); font-weight: var(--weight-medium); }
+.date-picker-grid [role="gridcell"] { display: grid; }
+.date-picker-grid [role="gridcell"] button { display: grid; place-items: center; height: 32px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-1); font-size: var(--text-base); font-variant-numeric: tabular-nums; transition: background var(--duration-fast); }
+.date-picker-grid [role="gridcell"] button:hover { background: var(--surface-5); }
+.date-picker-grid [role="gridcell"] button:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); }
+.date-picker-grid [role="gridcell"] button.outside { color: var(--text-3); opacity: 0.6; }
+.date-picker-grid [role="gridcell"] button.today { color: var(--accent-text); font-weight: var(--weight-semibold); }
+.date-picker-grid [role="gridcell"] button.selected { background: var(--accent); color: #fff; font-weight: var(--weight-semibold); }
+.date-picker-grid [role="gridcell"] button.selected:hover { background: var(--accent-hover); }
+
+@media (pointer: coarse) {
+  .date-picker-grid [role="gridcell"] button { height: 40px; }
+  .date-picker-quick button, .member-picker-popover [role="option"], .issue-select-popover [role="option"] { min-height: 44px; }
+}

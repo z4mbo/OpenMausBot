@@ -2,24 +2,45 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Search, Users, UserRound } from "lucide-react";
-import { UserAvatar, memberName, type AvatarIdentity } from "./user-avatar";
-import { useAnchoredPopover } from "./use-anchored-popover";
+import { displayName } from "@/lib/format";
+import { UserAvatar, type AvatarIdentity } from "./user-avatar";
+import { shouldFocusSearch, useAnchoredPopover } from "./use-anchored-popover";
 
 type Person = AvatarIdentity & { email: string };
+type Option = { value: string; label: string; detail?: string; person?: Person; kind: "all" | "none" | "person" };
 
-export function MemberPicker({ members, value, onChange, label, disabled, allLabel, currentEmail, required }: {
+const SEARCH_THRESHOLD = 7;
+
+/**
+ * Picks a project member by email. Names are shown in full with the username as secondary text; the current user
+ * comes first as "You". `allLabel` adds an "everyone" option (filters), `noneLabel` an empty option (unassigned).
+ */
+export function MemberPicker({ members, value, onChange, label, disabled, allLabel, noneLabel, currentEmail, placeholder }: {
   members: Person[]; value: string; onChange: (value: string) => void; label: string;
-  disabled?: boolean; allLabel?: string; currentEmail?: string; required?: boolean;
+  disabled?: boolean; allLabel?: string; noneLabel?: string; currentEmail?: string; placeholder?: string;
+  /** @deprecated Assignees are optional; kept so older callers still type-check. */
+  required?: boolean;
 }) {
   const id = useId(), root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null);
-  const menu = useRef<HTMLDivElement>(null), search = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false), [query, setQuery] = useState(""), [active, setActive] = useState(0);
+  const menu = useRef<HTMLDivElement>(null), search = useRef<HTMLInputElement>(null), list = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false), [query, setQuery] = useState(""), [active, setActive] = useState(0), [focusSearch, setFocusSearch] = useState(false);
   const selected = members.find(member => member.email === value);
-  const selectedLabel = selected ? memberName(selected) : value ? value.split("@")[0] : allLabel || label;
-  const people = members.filter(member => `${memberName(member)} ${member.name || ""} ${member.email}`.toLowerCase().includes(query.toLowerCase()));
-  const options = [...(allLabel && !query ? [{ value: "", label: allLabel, person: undefined as Person | undefined }] : []), ...people.map(person => ({ value: person.email, label: memberName(person), person }))];
-  const close = () => { setOpen(false); trigger.current?.focus({ preventScroll: true }); };
-  useAnchoredPopover(open, trigger, menu, search);
+  const selectedLabel = selected ? displayName(selected) : value ? displayName({ email: value }) : allLabel || placeholder || label;
+  const ordered = [...members].sort((a, b) => Number(b.email === currentEmail) - Number(a.email === currentEmail));
+  const needle = query.trim().toLowerCase();
+  const people = ordered.filter(member => !needle || `${displayName(member)} ${member.username || ""} ${member.email} ${member.email === currentEmail ? "you me" : ""}`.toLowerCase().includes(needle));
+  const options: Option[] = [
+    ...(allLabel && !needle ? [{ value: "", label: allLabel, kind: "all" as const }] : []),
+    ...(noneLabel && !allLabel && !needle ? [{ value: "", label: noneLabel, kind: "none" as const }] : []),
+    ...people.map(person => person.email === currentEmail
+      ? { value: person.email, label: "You", detail: displayName(person), person, kind: "person" as const }
+      : { value: person.email, label: displayName(person), detail: person.username && person.username !== displayName(person) ? person.username : undefined, person, kind: "person" as const }),
+  ];
+  const searchable = members.length + (allLabel || noneLabel ? 1 : 0) > SEARCH_THRESHOLD;
+  const close = (restore = true) => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); };
+  const choose = (option: Option) => { if (option.value !== value) onChange(option.value); close(); };
+  const show = () => { setQuery(""); setActive(Math.max(0, options.findIndex(option => option.value === value))); setFocusSearch(searchable && shouldFocusSearch(members.length)); setOpen(true); };
+  useAnchoredPopover(open, trigger, menu, focusSearch ? search : list, { width: 260 });
   useEffect(() => {
     if (!open) return;
     const dismiss = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
@@ -30,20 +51,24 @@ export function MemberPicker({ members, value, onChange, label, disabled, allLab
   return <div className="member-picker" ref={root} onKeyDown={event => {
     if (!open) return;
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); }
-    else if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); setActive(index => (index + (event.key === "ArrowDown" ? 1 : -1) + options.length) % Math.max(1, options.length)); }
-    else if (event.key === "Enter") { event.preventDefault(); const option = options[active]; if (option) { onChange(option.value); close(); } }
+    else if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      setActive(index => event.key === "Home" ? 0 : event.key === "End" ? Math.max(0, options.length - 1) : (index + (event.key === "ArrowDown" ? 1 : -1) + options.length) % Math.max(1, options.length));
+    }
+    else if (event.key === "Enter" || (event.key === " " && event.target !== search.current)) { event.preventDefault(); const option = options[active]; if (option) choose(option); }
     else if (event.key === "Tab") close();
   }}>
-    <button ref={trigger} type="button" className="member-picker-trigger" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { setOpen(!open); setQuery(""); setActive(0); }}>
+    <button ref={trigger} type="button" className="member-picker-trigger" data-empty={!value || undefined} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { if (open) close(false); else show(); }} onKeyDown={event => {
+      if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); show(); }
+    }}>
       <span className="sr-only">{label}: </span>
-      {selected ? <UserAvatar user={selected} size="small" /> : allLabel && !value ? <Users size={15} /> : <UserRound size={15} />}
-      <span>{selectedLabel}</span><ChevronDown size={13} />
+      {selected ? <UserAvatar user={selected} size="small" /> : allLabel && !value ? <Users size={14} /> : <UserRound size={14} />}
+      <span>{selectedLabel}</span><ChevronDown size={12} />
     </button>
-    {required && <input className="member-picker-validation" aria-hidden="true" tabIndex={-1} required disabled={disabled} value={value} onChange={() => {}} onInvalid={event => { event.preventDefault(); trigger.current?.focus(); setOpen(true); }} />}
     {open && <div ref={menu} popover="manual" className="member-picker-popover">
-      <div className="member-picker-search"><Search size={14} /><input ref={search} aria-label={`Search ${label.toLowerCase()}`} placeholder="Search members..." role="combobox" aria-expanded="true" aria-controls={id} aria-activedescendant={options[active] ? `${id}-${active}` : undefined} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} /></div>
-      <div role="listbox" id={id} aria-label={label}>{options.map((option, index) => <button id={`${id}-${index}`} key={option.value} type="button" tabIndex={-1} role="option" aria-selected={value === option.value} data-highlighted={active === index} onMouseEnter={() => setActive(index)} onClick={() => { onChange(option.value); close(); }}>
-        {option.person ? <UserAvatar user={option.person} size="small" /> : <Users size={18} />}<span>{option.label}</span>{option.value === currentEmail && <small>You</small>}{value === option.value && <Check size={14} />}
+      {searchable && <div className="member-picker-search"><Search size={14} /><input ref={search} aria-label={`Search ${label.toLowerCase()}`} placeholder="Search..." role="combobox" aria-expanded="true" aria-controls={id} aria-activedescendant={options[active] ? `${id}-${active}` : undefined} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} /></div>}
+      <div ref={list} tabIndex={-1} role="listbox" id={id} aria-label={label} aria-activedescendant={options[active] ? `${id}-${active}` : undefined}>{options.map((option, index) => <button id={`${id}-${index}`} key={`${option.kind}:${option.value}`} type="button" tabIndex={-1} role="option" aria-selected={value === option.value} data-highlighted={active === index} onMouseEnter={() => setActive(index)} onClick={() => choose(option)}>
+        {option.person ? <UserAvatar user={option.person} size="small" /> : option.kind === "all" ? <Users size={16} /> : <UserRound size={16} />}<span>{option.label}</span>{option.detail && <small>{option.detail}</small>}{value === option.value && <Check size={14} />}
       </button>)}{!options.length && <p>No members found</p>}</div>
     </div>}
   </div>;
