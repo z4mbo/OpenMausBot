@@ -1,20 +1,24 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useAction, useMutation, useQueries, useQuery } from "convex/react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { flushSync } from "react-dom";
 import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
+import type { FunctionReturnType } from "convex/server";
 import { WorkspaceContext } from "./workspace-context";
 import { WorkspaceSkeleton } from "./content-skeleton";
+import { lazyComponent } from "./lazy-component";
 
-const OriginWorkspace = dynamic(() => import("./origin-app").then(module => module.OriginWorkspace), {
-  loading: () => <WorkspaceSkeleton />,
-});
+const OriginWorkspace = lazyComponent(() => import("./origin-app").then(module => module.OriginWorkspace), <WorkspaceSkeleton />);
+
+// A stored session means the workspace is next: fetch its code while the session and workspaces load.
+if (typeof window !== "undefined") {
+  try { if (localStorage.getItem("origin.sessionToken")) void OriginWorkspace.preload().catch(() => undefined); } catch { /* Storage blocked: nothing to prefetch for. */ }
+}
 
 /** Signed-out paths render nothing until the stored session is read, instead of flashing the workspace skeleton. */
 const publicPath = (path: string) => path === "/" || path === "/login" || path === "/signup" || path.startsWith("/join/");
@@ -28,7 +32,10 @@ export function OriginEntry() {
   const path = usePathname();
   const router = useRouter();
   const user = useQuery(api.auth.me, token ? { sessionToken: token } : "skip");
-  const workspaces = useQuery(api.workspaces.list, token && user ? { sessionToken: token } : "skip");
+  // Workspaces load alongside the session check; an expired session's error is dropped (it shows sign-in instead).
+  const listed = useQueries(useMemo((): Parameters<typeof useQueries>[0] => token ? { list: { query: api.workspaces.list, args: { sessionToken: token } } } : {}, [token])).list as FunctionReturnType<typeof api.workspaces.list> | Error | undefined;
+  if (user && listed instanceof Error) throw listed;
+  const workspaces = user && !(listed instanceof Error) ? listed : undefined;
   const ensureLegacy = useMutation(api.workspaces.ensureLegacyWorkspace);
   const acceptInvite = useMutation(api.workspaces.acceptInvite);
   const logout = useMutation(api.auth.logout);

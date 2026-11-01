@@ -1,0 +1,36 @@
+"use client";
+
+import { ContentSkeleton } from "./content-skeleton";
+import { DelayedSkeleton } from "./delayed-skeleton";
+import { lazyComponent } from "./lazy-component";
+
+/*
+ * Views and dialogs that the board does not need on first paint, split out of the workspace chunk. They are fetched
+ * in the background once the workspace has settled (see preloadViews), so opening one later renders at once; before
+ * that, views show their usual loading skeleton and dialogs open when their code has arrived.
+ */
+export const TaskModal = lazyComponent(() => import("./issue-detail").then(module => module.TaskModal));
+export const IssueComposer = lazyComponent(() => import("./issue-composer").then(module => module.IssueComposer));
+export const ChatView = lazyComponent(() => import("./chat-shell").then(module => module.ChatView), <ContentSkeleton kind="chat" label="Loading chat" />);
+export const InboxView = lazyComponent(() => import("./inbox-view").then(module => module.InboxView), <ContentSkeleton label="Loading inbox" />);
+export const WorkspaceSettings = lazyComponent(() => import("./workspace-settings").then(module => module.WorkspaceSettings));
+export const MemberProfile = lazyComponent(() => import("./member-profile").then(module => module.MemberProfile));
+export const CreateWorkspaceDialog = lazyComponent(() => import("./create-workspace-dialog").then(module => module.CreateWorkspaceDialog));
+export const AssetsPanel = lazyComponent(() => import("./project-library").then(module => module.AssetsPanel), <DelayedSkeleton label="Loading assets" />);
+export const VaultPanel = lazyComponent(() => import("./project-library").then(module => module.VaultPanel), <DelayedSkeleton label="Loading vault" />);
+export const FeedbackView = lazyComponent(() => import("./feedback-view").then(module => module.FeedbackView), <DelayedSkeleton label="Loading feedback" />);
+export const ProjectMembers = lazyComponent(() => import("./project-members").then(module => module.ProjectMembers));
+
+// Most used first: an issue, a new issue, then the other views.
+const preloads: Array<() => Promise<unknown>> = [TaskModal, IssueComposer, InboxView, ChatView, AssetsPanel, VaultPanel, FeedbackView, ProjectMembers, WorkspaceSettings, MemberProfile, CreateWorkspaceDialog].map(view => view.preload);
+
+let scheduled = false;
+/** Fetches every deferred view in the background, one after another, once the page is idle. */
+export function preloadViews() {
+  if (scheduled || typeof window === "undefined") return;
+  scheduled = true;
+  const idle = (run: () => void) => typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(run, { timeout: 2000 }) : window.setTimeout(run, 100);
+  window.setTimeout(() => idle(async () => {
+    for (const preload of preloads) await preload().catch(() => undefined);
+  }), 300);
+}
