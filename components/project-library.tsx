@@ -15,6 +15,7 @@ import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection"
 import { useFileDrop } from "./use-file-drop";
 import { validateAttachmentFiles } from "@/lib/dropped-content";
 import { assetFileType, saveAssetFiles } from "@/lib/asset-uploads";
+import { linkAssetName, linkAssetType } from "@/lib/asset-links";
 import { DelayedSkeleton } from "./delayed-skeleton";
 import { ConfirmButton } from "./confirm-button";
 
@@ -117,7 +118,7 @@ export function VaultPanel({ projectId, sessionToken, canEdit }: Props & { canEd
     <div className="library-toolbar">
       {items.length > 0 ? <LibrarySearch label="Search vault" value={query} onChange={setQuery} /> : <span className="library-toolbar-spacer" />}
       <button className="ghost-button compact" onClick={lock} aria-label="Lock vault"><LockKeyhole size={14} /><span className="library-button-label">Lock</span></button>
-      {canEdit && <button className="primary-button compact" disabled={!online} title={!online ? RECONNECT_TO_CREATE : undefined} aria-label="New item" onClick={() => setOpen(true)}><Plus size={14} /><span className="library-button-label">New</span></button>}
+      {canEdit && items.length > 0 && <button className="primary-button compact" disabled={!online} title={!online ? RECONNECT_TO_CREATE : undefined} aria-label="New item" onClick={() => setOpen(true)}><Plus size={14} /><span className="library-button-label">New</span></button>}
     </div>
     {notice && <p className="notice danger" role="alert">{notice}<button type="button" className="icon-button" aria-label="Dismiss" onClick={() => setNotice("")}><X size={14} /></button></p>}
     {!items.length ? <ProjectEmpty icon={KeyRound} title="No secrets">{canEdit && <button className="primary-button compact" disabled={!online} onClick={() => setOpen(true)}><Plus size={14} />New item</button>}</ProjectEmpty>
@@ -205,13 +206,18 @@ const assetTypes: Array<{ value: AssetType; label: string; plural: string; icon:
 const typeInfo = (type: string) => assetTypes.find(item => item.value === type) || assetTypes[assetTypes.length - 1];
 const VIEW_KEY = "origin.assets.view";
 
+/** Only uploaded files preview: a link's image lives on another origin, which the CSP keeps out. */
 function isPreviewable(asset: Asset) {
-  if (!asset.fileUrl) return false;
+  if (!asset.fileUrl || !asset.storageId) return false;
   if (asset.contentType) return asset.contentType.startsWith("image/");
   return asset.type === "image" || asset.type === "icon";
 }
-function assetMeta(asset: Asset) {
-  if (!asset.storageId) return hostOf(asset.url) || typeInfo(asset.type).label;
+/** Host for links, extension and size for files; `fallback` when that would only repeat the name. */
+function assetMeta(asset: Asset, fallback: string) {
+  if (!asset.storageId) {
+    const host = hostOf(asset.url);
+    return host && host !== asset.name ? host : fallback;
+  }
   const extension = asset.name.match(/\.([a-z0-9]{1,5})$/i)?.[1]?.toUpperCase() || asset.contentType?.split("/")[1]?.split(/[+.;]/)[0]?.toUpperCase() || typeInfo(asset.type).label;
   return asset.size ? `${extension} · ${formatBytes(asset.size)}` : extension;
 }
@@ -264,7 +270,7 @@ export function AssetsPanel({ projectId, sessionToken, canEdit }: Props & { canE
         : !filtered?.length ? <ProjectEmpty icon={Search} title="No matching assets" />
           : view === "grid" ? <ul className="asset-grid">{filtered.map(asset => <li className="asset-card" key={asset._id}>
             <a className="asset-thumb" href={asset.fileUrl || undefined} target="_blank" rel="noreferrer noopener" aria-label={`Open ${asset.name}`}><AssetThumb asset={asset} size="card" /></a>
-            <div className="asset-info"><strong title={asset.name}>{asset.name}</strong><small>{assetMeta(asset)}</small>{asset.notes && <small className="asset-notes" title={asset.notes}>{asset.notes}</small>}</div>
+            <div className="asset-info"><strong title={asset.name}>{asset.name}</strong><small>{assetMeta(asset, typeInfo(asset.type).label)}</small>{asset.notes && <small className="asset-notes" title={asset.notes}>{asset.notes}</small>}</div>
             {canEdit && <ConfirmButton className="asset-delete" label={`Delete ${asset.name}`} onConfirm={() => deleteAsset(asset)} />}
           </li>)}</ul>
             : <ul className="asset-list">{filtered.map(asset => <li className="asset-row" key={asset._id}>
@@ -272,7 +278,7 @@ export function AssetsPanel({ projectId, sessionToken, canEdit }: Props & { canE
                 <span className="asset-row-thumb"><AssetThumb asset={asset} size="row" /></span>
                 <span className="asset-row-name"><strong>{asset.name}</strong>{asset.notes && <small>{asset.notes}</small>}</span>
                 <span className="asset-row-type">{typeInfo(asset.type).label}</span>
-                <span className="asset-row-meta">{assetMeta(asset)}</span>
+                <span className="asset-row-meta">{assetMeta(asset, "")}</span>
                 <time className="asset-row-date" dateTime={new Date(asset.updatedAt).toISOString()}>{formatDate(asset.updatedAt)}</time>
               </a>
               {canEdit && <ConfirmButton className="icon-button" label={`Delete ${asset.name}`} onConfirm={() => deleteAsset(asset)} />}
@@ -286,25 +292,32 @@ export function AssetsPanel({ projectId, sessionToken, canEdit }: Props & { canE
 function AssetDialog({ projectId, sessionToken, online, initialFiles, initialUrl, onClose, onSaved }: Props & { online: boolean; initialFiles: File[]; initialUrl: string; onClose: () => void; onSaved: () => void }) {
   const upload = useMutation(api.design.generateUploadUrl);
   const create = useMutation(api.design.createAsset);
-  const linkHost = hostOf(initialUrl);
   const [files, setFiles] = useState<File[]>(initialFiles);
-  const [name, setName] = useState(initialFiles[0]?.name.slice(0, 150) || linkHost);
+  const [name, setName] = useState(initialFiles[0]?.name.slice(0, 150) || linkAssetName(initialUrl));
   const [url, setUrl] = useState(initialUrl);
   const [notes, setNotes] = useState("");
-  const [type, setType] = useState<AssetType>(initialFiles[0] ? assetFileType(initialFiles[0]) : /(^|\.)figma\.com$/.test(linkHost) ? "figma" : initialUrl ? "document" : "image");
+  const [type, setType] = useState<AssetType>(initialFiles[0] ? assetFileType(initialFiles[0]) : linkAssetType(initialUrl));
+  // Name and type follow the chosen file or the typed link until the user changes them.
+  const edited = useRef({ name: false, type: false });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
   const uploaded = useRef(new Map<File, Id<"_storage">>());
   const inFlight = useRef(false);
-  const drop = useFileDrop({ disabled: busy, onFiles: selection => choose(selection), onLink: link => { setFiles([]); setUrl(link); } });
+  const setLink = (link: string) => {
+    setUrl(link);
+    if (!edited.current.name) setName(linkAssetName(link));
+    if (!edited.current.type) setType(linkAssetType(link));
+  };
+  const drop = useFileDrop({ disabled: busy, onFiles: selection => choose(selection), onLink: link => { uploaded.current.clear(); setFiles([]); edited.current = { name: false, type: false }; setLink(link); } });
   const batch = files.length > 1;
   const choose = (selection: File[]) => {
     if (inFlight.current || !selection.length) return;
     try {
       validateAttachmentFiles(selection);
       uploaded.current.clear(); setError(""); setFiles(selection); setUrl("");
+      edited.current = { name: false, type: false };
       setName(selection[0].name.slice(0, 150)); setType(assetFileType(selection[0]));
     } catch (error) { setError(errorText(error, "Invalid file")); }
   };
@@ -334,10 +347,10 @@ function AssetDialog({ projectId, sessionToken, online, initialFiles, initialUrl
       {files.length ? <ul className="asset-upload-list">{files.map((file, index) => <li key={`${file.name}:${index}`}><File size={15} /><span title={file.name}>{file.name}</span><small>{formatBytes(file.size)}</small><button type="button" className="icon-button" aria-label={`Remove ${file.name}`} onClick={() => { uploaded.current.delete(file); setFiles(current => current.filter(item => item !== file)); }}><X size={14} /></button></li>)}</ul>
         : <button type="button" className={clsx("asset-drop", drop.dragging && "drop-active")} onClick={() => fileInput.current?.click()} {...drop.handlers}><Upload size={20} /><span>Choose files or drop them here</span></button>}
       <input ref={fileInput} aria-label="Asset files" type="file" multiple hidden onChange={e => { choose(Array.from(e.target.files || [])); e.target.value = ""; }} />
-      {!files.length && <label>Or a link<input type="url" value={url} onChange={e => { setUrl(e.target.value); if (!name) setName(hostOf(e.target.value)); }} placeholder="https://" /></label>}
+      {!files.length && <label>Or a link<input type="url" value={url} onChange={e => setLink(e.target.value)} placeholder="https://" /></label>}
       {!batch && (files.length > 0 || url) && <div className="library-form-pair">
-        <label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={150} /></label>
-        <label>Type<select value={type} onChange={e => setType(e.target.value as AssetType)}>{assetTypes.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+        <label>Name<input value={name} onChange={e => { edited.current.name = Boolean(e.target.value); setName(e.target.value); }} required maxLength={150} /></label>
+        <label>Type<select value={type} onChange={e => { edited.current.type = true; setType(e.target.value as AssetType); }}>{assetTypes.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
       </div>}
       {(files.length > 0 || url) && <label>Notes<textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} /></label>}
     </fieldset>

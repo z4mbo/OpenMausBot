@@ -24,8 +24,9 @@
 .project-feedback { display: flex; flex: 1; flex-direction: column; min-width: 0; }
 .feedback-off { flex: none; padding: 0 var(--space-2); color: var(--text-3); font-size: var(--text-sm); }
 .feedback-list { display: grid; margin: 0; padding: 0; list-style: none; }
-.feedback-entry { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: var(--space-3); padding: var(--space-3) var(--space-2); border-bottom: 1px solid var(--border-1); border-radius: var(--radius-sm); transition: background var(--duration-fast); }
-.feedback-entry:hover, .feedback-entry:focus-within { background: var(--hover); }
+.feedback-entry { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: var(--space-3); padding: var(--space-3) var(--space-2); border-bottom: 1px solid var(--border-1); transition: background var(--duration-fast); }
+@media (hover: hover) { .feedback-entry:hover { background: var(--hover); } }
+.feedback-entry:has(:focus-visible) { background: var(--hover); }
 .feedback-entry.dismissed { opacity: 0.6; }
 .feedback-kind { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber); }
 .feedback-kind.bug { background: var(--red-soft); color: var(--red); }
