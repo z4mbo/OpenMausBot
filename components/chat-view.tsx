@@ -11,30 +11,30 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
-  Copy,
   AtSign,
   Check,
   Circle,
-  CirclePlus,
+  Ellipsis,
   File,
   Hash,
-  Heart,
   Loader2,
   MessageCircle,
   Paperclip,
   Pencil,
   Pin,
   Reply,
-  Smile,
-  ThumbsUp,
-  Trash2,
   X,
 } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Dialog } from "./dialog";
+import { CHAT_REACTIONS, MessageMenu, type MessageAction, type MessageMenuAnchor } from "./chat-message-menu";
 import type { Id } from "@/convex/_generated/dataModel";
 import type {
   ChatAttachment,
@@ -65,6 +65,7 @@ import { activeChatTags, chatMessageParts, chatTextParts } from "@/lib/chat-text
 import { useChatTypingFocus } from "./use-chat-typing-focus";
 import { hasOpenKeyboardOverlay } from "@/lib/keyboard-navigation";
 const drafts = new Map<string, string>();
+const isSheetPointer = () => typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
 // The last messages seen per conversation, so coming back to Chat shows them at once while they refresh.
 const recentMessages = new Map<string, LocalChatMessage[]>();
 
@@ -75,6 +76,10 @@ type User = {
   email: string;
   avatarUrl?: string | null;
 };
+
+/** A message joins the one above it (no avatar or name) when the same person wrote it within five minutes. */
+const GROUP_GAP = 5 * 60 * 1000;
+const LONG_PRESS_MS = 450;
 
 function dayLabel(time: number) {
   const date = new Date(time);
@@ -97,6 +102,7 @@ export function ChatThread({
   query,
   pinnedOnly,
   onRead,
+  initialUnread = 0,
 }: {
   sessionToken: string;
   user: User;
@@ -109,6 +115,8 @@ export function ChatThread({
   query: string;
   pinnedOnly: boolean;
   onRead: () => Promise<void>;
+  /** Unread messages when the conversation was opened: a "New" divider goes above the first of them. */
+  initialUnread?: number;
 }) {
   const workspace = useWorkspace();
   const openMember = useMemberProfile();
@@ -124,7 +132,6 @@ export function ChatThread({
   const [hasMore, setHasMore] = useState(false);
   useEffect(() => { if (!loading) recentMessages.set(draftKey, messages.slice(-200)); }, [draftKey, loading, messages]);
   const [body, setBody] = useState(() => drafts.get(draftKey) || "");
-  const [copied, setCopied] = useState("");
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [notice, setNotice] = useState("");
   const [reply, setReply] = useState<LocalChatMessage | null>(null);
@@ -152,6 +159,18 @@ export function ChatThread({
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [newBelow, setNewBelow] = useState(false);
+  const [farFromBottom, setFarFromBottom] = useState(false);
+  const [menu, setMenu] = useState<{ message: LocalChatMessage; anchor: MessageMenuAnchor; opener: HTMLElement | null } | null>(null);
+  const [deleting, setDeleting] = useState<LocalChatMessage | null>(null);
+  const [toast, setToast] = useState("");
+  const [unreadFrom, setUnreadFrom] = useState("");
+  const unreadPending = useRef(initialUnread);
+  const longPress = useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(""), 1800);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -200,9 +219,10 @@ export function ChatThread({
     const member = members?.find(m => m.userId === message.authorUserId || m.email.toLowerCase() === message.authorEmail.toLowerCase());
     return member ? displayName(member) : message.authorUserId === user._id ? displayName(user) : message.authorName;
   };
+  const others = useMemo(() => members?.filter(member => member.userId !== user._id), [members, user._id]);
   const suggestions = useChatSuggestions(
     trigger,
-    members,
+    others,
     sessionToken,
     workspace._id,
   );
@@ -307,6 +327,7 @@ export function ChatThread({
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
     setNewBelow(false);
+    setFarFromBottom(false);
     stickRef.current = true;
   };
   const refresh = useCallback(
@@ -356,10 +377,33 @@ export function ChatThread({
       document.removeEventListener("visibilitychange", poll);
     };
   }, [refresh]);
+  // Only a new latest message moves the view (or raises the pill); loading earlier messages keeps the reading position.
+  const lastMessageId = messages.at(-1)?.id;
   useEffect(() => {
+    if (!lastMessageId) return;
     if (stickRef.current) scrollBottom();
     else setNewBelow(true);
-  }, [messages.length]);
+  }, [lastMessageId]);
+  // Place the "New" divider once, on the first load: above the oldest of the messages others sent since the last read.
+  useEffect(() => {
+    if (loading || !unreadPending.current) return;
+    let count = unreadPending.current, first = "";
+    unreadPending.current = 0;
+    for (let index = messages.length - 1; index >= 0 && count > 0; index--) {
+      if (messages[index].authorUserId === user._id) continue;
+      first = messages[index].id;
+      count--;
+    }
+    if (!first) return;
+    setUnreadFrom(first);
+    requestAnimationFrame(() => {
+      const element = scrollRef.current, divider = document.getElementById("chat-unread-divider");
+      if (element && divider && divider.offsetTop < element.scrollTop) {
+        stickRef.current = false;
+        element.scrollTop = Math.max(0, divider.offsetTop - 12);
+      }
+    });
+  }, [loading, messages, user._id]);
   useEffect(() => {
     if (!focusMessageId || conversation) return;
     let alive = true;
@@ -506,7 +550,73 @@ export function ChatThread({
       if (uploadRef.current) uploadRef.current.value = "";
     }
   };
+  const startEdit = (message: LocalChatMessage) => {
+    setEditing(message);
+    setReply(null);
+    setTrigger(null);
+    setBody(message.body);
+    requestAnimationFrame(() => { const input = inputRef.current; input?.focus(); input?.setSelectionRange(message.body.length, message.body.length); });
+  };
+  const startReply = (message: LocalChatMessage) => {
+    setReply(message);
+    if (editing) setBody(drafts.get(draftKey) || "");
+    setEditing(null);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+  const cancelContext = () => {
+    if (editing) setBody(drafts.get(draftKey) || "");
+    setReply(null);
+    setEditing(null);
+  };
+  const act = async (message: LocalChatMessage, action: MessageAction) => {
+    if (action.startsWith("react:")) return change(message.id, { reaction: action.slice(6) });
+    if (action === "reply") startReply(message);
+    else if (action === "edit") startEdit(message);
+    else if (action === "issue") setIssueMessage(message);
+    else if (action === "pin") await change(message.id, { pinned: !message.pinned });
+    else if (action === "delete") setDeleting(message);
+    else if (action === "copy") {
+      try { await navigator.clipboard.writeText(message.body); setToast("Copied"); }
+      catch { setNotice("Could not copy message"); }
+    }
+  };
+  const openMenu = (message: LocalChatMessage, anchor: MessageMenuAnchor, opener: HTMLElement | null) => {
+    if (!canWrite) return;
+    setMenu({ message, anchor, opener });
+  };
+  // Touch: hold a message to open its actions (a bottom sheet); moving the finger first is a scroll.
+  const pressHandlers = (message: LocalChatMessage) => ({
+    onPointerDown: (event: ReactPointerEvent<HTMLElement>) => {
+      if (event.pointerType === "mouse" || !canWrite) return;
+      const target = event.currentTarget;
+      if (longPress.current) window.clearTimeout(longPress.current.timer);
+      longPress.current = { x: event.clientX, y: event.clientY, fired: false, timer: window.setTimeout(() => {
+        if (!longPress.current) return;
+        longPress.current.fired = true;
+        target.classList.add("is-pressed");
+        navigator.vibrate?.(8);
+        openMenu(message, null, target);
+      }, LONG_PRESS_MS) };
+    },
+    onPointerMove: (event: ReactPointerEvent<HTMLElement>) => {
+      const press = longPress.current;
+      if (press && !press.fired && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 8) { window.clearTimeout(press.timer); longPress.current = null; }
+    },
+    onPointerUp: () => { const press = longPress.current; if (press && !press.fired) { window.clearTimeout(press.timer); longPress.current = null; } },
+    onPointerCancel: () => { const press = longPress.current; if (press) window.clearTimeout(press.timer); longPress.current = null; },
+    onClickCapture: (event: ReactMouseEvent<HTMLElement>) => {
+      // The click a finished long-press produces must not follow a link or open a profile underneath.
+      if (longPress.current?.fired) { event.preventDefault(); event.stopPropagation(); longPress.current = null; }
+    },
+    onContextMenu: (event: ReactMouseEvent<HTMLElement>) => {
+      if (!canWrite || (event.target as HTMLElement).closest("a[href]")) return;
+      event.preventDefault();
+      if (longPress.current?.fired || menu) return;
+      openMenu(message, isSheetPointer() ? null : { left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY }, event.currentTarget);
+    },
+  });
   const filtered = (searchText ? searchResults : messages).filter(m => !pinnedOnly || m.pinned);
+  const menuMessage = menu && (messages.find(m => m.id === menu.message.id) || searchResults.find(m => m.id === menu.message.id) || menu.message);
   return (
     <section
       className="chat-thread"
@@ -549,8 +659,9 @@ export function ChatThread({
         ref={scrollRef}
         onScroll={(e) => {
           const el = e.currentTarget;
-          stickRef.current =
-            el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+          const below = el.scrollHeight - el.scrollTop - el.clientHeight;
+          stickRef.current = below < 100;
+          setFarFromBottom(below > el.clientHeight);
           if (stickRef.current) {
             setNewBelow(false);
             void markRead(messages.at(-1)).catch(() => {});
@@ -588,9 +699,9 @@ export function ChatThread({
               m.userId === message.authorUserId ||
               m.email.toLowerCase() === message.authorEmail.toLowerCase(),
           );
+          const own = message.authorUserId === user._id;
           const identity =
-            message.authorUserId === user._id ||
-            message.authorEmail.toLowerCase() === user.email.toLowerCase()
+            own || message.authorEmail.toLowerCase() === user.email.toLowerCase()
               ? user
               : member || {
                   name: message.authorName,
@@ -603,7 +714,17 @@ export function ChatThread({
             !previous ||
             new Date(previous.createdAt).toDateString() !==
               new Date(message.createdAt).toDateString();
+          const unreadStart = message.id === unreadFrom;
+          const grouped = Boolean(previous && !newDay && !unreadStart && !message.replyTo &&
+            previous.authorUserId === message.authorUserId && message.createdAt - previous.createdAt < GROUP_GAP);
           const replyMessage = messages.find((m) => m.id === message.replyTo);
+          const reactions = Object.entries(message.reactions || {}).filter(([, ids]) => ids.length);
+          const time = <time
+            dateTime={new Date(message.createdAt).toISOString()}
+            title={formatDateTime(message.createdAt)}
+          >
+            {formatTime(message.createdAt)}
+          </time>;
           return (
             <Fragment key={message.id}>
               {newDay && (
@@ -611,21 +732,23 @@ export function ChatThread({
                   <span>{dayLabel(message.createdAt)}</span>
                 </div>
               )}
+              {unreadStart && <div className="chat-unread" id="chat-unread-divider"><span>New</span></div>}
               <article
                 id={`message-${message.id}`}
-                className={`conversation-message ${message.id === focusedMessage ? "notification-focus" : ""}`}
+                className={`conversation-message ${grouped ? "is-grouped" : ""} ${message.id === focusedMessage ? "notification-focus" : ""} ${menu?.message.id === message.id ? "is-active" : ""}`}
                 tabIndex={-1}
+                {...pressHandlers(message)}
               >
-                <button
+                {grouped ? <span className="message-gutter"><time dateTime={new Date(message.createdAt).toISOString()} title={formatDateTime(message.createdAt)}>{formatTime(message.createdAt).replace(/\s?[AP]M$/, "")}</time></span> : <button
                   className="chat-profile-avatar"
                   disabled={!member}
                   aria-label={`View ${name} profile`}
                   onClick={() => member && openMember(member.email)}
                 >
                   <UserAvatar user={identity} />
-                </button>
+                </button>}
                 <div className="message-content">
-                  <header>
+                  {!grouped && <header>
                     <button
                       className="chat-profile-name"
                       disabled={!member}
@@ -633,15 +756,8 @@ export function ChatThread({
                     >
                       {name}
                     </button>
-                    <time
-                      dateTime={new Date(message.createdAt).toISOString()}
-                      title={formatDateTime(message.createdAt)}
-                    >
-                      {formatTime(message.createdAt)}
-                    </time>
-                    {message.editedAt && <small>edited</small>}
-                    {message.pinned && <Pin size={12} />}
-                  </header>
+                    {time}
+                  </header>}
                   {replyMessage && (
                     <button
                       className="message-reply-preview"
@@ -659,7 +775,7 @@ export function ChatThread({
                       <span>{replyMessage.body || "Attachment"}</span>
                     </button>
                   )}
-                  <p className="chat-message-text">{chatMessageParts(message.body, message.mentions, message.references).map((part, index) => {
+                  {(message.body || message.editedAt || message.pinned) && <p className="chat-message-text">{chatMessageParts(message.body, message.mentions, message.references).map((part, index) => {
                     if (part.kind === "link") return <a key={index} href={part.href} target="_blank" rel="noopener noreferrer">{part.text}</a>;
                     if (part.kind === "mention") {
                       const target = members?.find(member => member.userId === part.mention.userId);
@@ -667,7 +783,7 @@ export function ChatThread({
                     }
                     if (part.kind === "reference") return <button key={index} type="button" className="chat-inline-tag chat-inline-reference" onClick={() => onOpenReference(part.reference.projectId as Id<"projects">, part.reference.type === "issue" ? part.reference.id as Id<"tasks"> : undefined)}>{part.text}</button>;
                     return <Fragment key={index}>{part.text}</Fragment>;
-                  })}</p>
+                  })}{message.editedAt ? <small className="message-meta" title={formatDateTime(message.editedAt)}>(edited)</small> : null}{message.pinned ? <small className="message-meta message-pinned" aria-label="Pinned"><Pin size={11} /></small> : null}</p>}
                   {message.attachments?.length ? (
                     <div className="message-files">
                       {message.attachments.map((file) => (
@@ -680,105 +796,44 @@ export function ChatThread({
                       ))}
                     </div>
                   ) : null}
-                  <div className="message-reactions">
-                    {Object.entries(message.reactions || {})
-                      .filter(([, ids]) => ids.length)
-                      .map(([reaction, ids]) => (
-                        <button
-                          key={reaction}
-                          className={ids.includes(user._id) ? "selected" : ""}
-                          disabled={!canWrite}
-                          onClick={() => change(message.id, { reaction })}
-                        >
-                          {reaction === "like" ? (
-                            <ThumbsUp size={12} />
-                          ) : reaction === "heart" ? (
-                            <Heart size={12} />
-                          ) : reaction === "celebrate" ? (
-                            <Smile size={12} />
-                          ) : (
-                            <Check size={12} />
-                          )}
-                          {ids.length}
-                        </button>
-                      ))}
-                  </div>
+                  {reactions.length > 0 && <div className="message-reactions">
+                    {reactions.map(([reaction, ids]) => {
+                      const option = CHAT_REACTIONS.find(item => item.key === reaction);
+                      const Icon = option?.Icon ?? Check;
+                      const names = ids.map(id => id === user._id ? "You" : (members?.find(m => m.userId === id) ? displayName(members.find(m => m.userId === id)!) : "")).filter(Boolean);
+                      return <button
+                        key={reaction}
+                        className={ids.includes(user._id) ? "selected" : ""}
+                        disabled={!canWrite}
+                        aria-pressed={ids.includes(user._id)}
+                        aria-label={`${option?.label ?? reaction}: ${names.join(", ") || ids.length}`}
+                        title={names.join(", ")}
+                        onClick={() => change(message.id, { reaction })}
+                      >
+                        <Icon size={12} />
+                        {ids.length}
+                      </button>;
+                    })}
+                  </div>}
                 </div>
                 {canWrite && (
                   <div className="message-tools">
-                    <button title="Create issue from message" aria-label="Create issue from message" onClick={() => setIssueMessage(message)}><CirclePlus size={14} /></button>
+                    {CHAT_REACTIONS.map(({ key, label, Icon }) => <button key={key} title={label} aria-label={label} aria-pressed={Boolean(message.reactions?.[key]?.includes(user._id))} onClick={() => change(message.id, { reaction: key })}><Icon size={14} /></button>)}
+                    <i aria-hidden="true" />
+                    <button title="Reply" aria-label="Reply" onClick={() => startReply(message)}><Reply size={14} /></button>
+                    {own && <button aria-label="Edit message" title="Edit" onClick={() => startEdit(message)}><Pencil size={14} /></button>}
                     <button
-                      title="Copy message"
-                      aria-label="Copy message"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(message.body);
-                          setCopied(message.id);
-                        } catch {
-                          setNotice("Could not copy message");
-                        }
+                      aria-label="More actions"
+                      title="More"
+                      aria-haspopup="menu"
+                      aria-expanded={menu?.message.id === message.id}
+                      onClick={(event) => {
+                        const box = event.currentTarget.getBoundingClientRect();
+                        openMenu(message, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }, event.currentTarget);
                       }}
                     >
-                      {copied === message.id ? (
-                        <Check size={14} />
-                      ) : (
-                        <Copy size={14} />
-                      )}
+                      <Ellipsis size={14} />
                     </button>
-                    <button
-                      title="Reply"
-                      aria-label="Reply"
-                      onClick={() => {
-                        setReply(message);
-                        if (editing) setBody(drafts.get(draftKey) || "");
-                        setEditing(null);
-                        inputRef.current?.focus();
-                      }}
-                    >
-                      <Reply size={14} />
-                    </button>
-                    <button
-                      title="Like"
-                      aria-label="Like"
-                      onClick={() => change(message.id, { reaction: "like" })}
-                    >
-                      <ThumbsUp size={14} />
-                    </button>
-                    <button
-                      title={message.pinned ? "Unpin message" : "Pin message"}
-                      aria-label="Pin message"
-                      onClick={() =>
-                        change(message.id, { pinned: !message.pinned })
-                      }
-                    >
-                      <Pin size={14} />
-                    </button>
-                    {message.authorUserId === user._id && (
-                      <>
-                        <button
-                          aria-label="Edit message"
-                          title="Edit message"
-                          onClick={() => {
-                            setEditing(message);
-                            setReply(null);
-                            setBody(message.body);
-                            inputRef.current?.focus();
-                          }}
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          aria-label="Delete message"
-                          title="Delete message"
-                          onClick={() => {
-                            if (window.confirm("Delete this message?"))
-                              void change(message.id, { delete: true });
-                          }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    )}
                   </div>
                 )}
               </article>
@@ -786,12 +841,6 @@ export function ChatThread({
           );
         })}
       </div>
-      {newBelow && (
-        <button className="new-messages" onClick={scrollBottom}>
-          <ArrowDown size={14} />
-          New messages
-        </button>
-      )}
       {notice && (
         <div className="notice danger" role="alert">
           {notice}
@@ -805,6 +854,12 @@ export function ChatThread({
         </div>
       )}
       <form className="rich-composer" onSubmit={submit}>
+        {(newBelow || farFromBottom) && !trigger && (
+          <button type="button" className={`new-messages ${newBelow ? "" : "is-icon"}`} aria-label={newBelow ? undefined : "Jump to latest"} onClick={scrollBottom}>
+            <ArrowDown size={14} />
+            {newBelow && "New messages"}
+          </button>
+        )}
         {trigger && (
           <div
             className="chat-suggestions"
@@ -870,7 +925,7 @@ export function ChatThread({
         )}
         {(reply || editing) && (
           <div className="composer-context">
-            <Reply size={14} />
+            {editing ? <Pencil size={14} /> : <Reply size={14} />}
             <span>
               {editing
                 ? "Editing your message"
@@ -879,11 +934,7 @@ export function ChatThread({
             <button
               type="button"
               aria-label="Cancel"
-              onClick={() => {
-                if (editing) setBody(drafts.get(draftKey) || "");
-                setReply(null);
-                setEditing(null);
-              }}
+              onClick={() => { cancelContext(); inputRef.current?.focus(); }}
             >
               <X size={14} />
             </button>
@@ -961,6 +1012,13 @@ export function ChatThread({
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               void submit();
+            } else if (e.key === "Escape" && (editing || reply)) {
+              e.preventDefault();
+              e.stopPropagation();
+              cancelContext();
+            } else if (e.key === "ArrowUp" && !body && !editing && !attachments.length && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
+              const last = [...messages].reverse().find(m => m.authorUserId === user._id);
+              if (last) { e.preventDefault(); startEdit(last); }
             }
           }}
           aria-autocomplete="list"
@@ -1064,6 +1122,30 @@ export function ChatThread({
           </button>
         </footer>
       </form>
+      {menu && menuMessage && <MessageMenu
+        anchor={menu.anchor}
+        preview={menuMessage.body || menuMessage.attachments?.[0]?.name || ""}
+        own={menuMessage.authorUserId === user._id}
+        pinned={Boolean(menuMessage.pinned)}
+        reacted={key => Boolean(menuMessage.reactions?.[key]?.includes(user._id))}
+        canCreateIssue={Boolean(menuMessage.body)}
+        onAction={action => void act(menuMessage, action)}
+        onClose={restore => {
+          menu.opener?.classList.remove("is-pressed");
+          setMenu(null);
+          if (restore && menu.anchor && menu.opener?.isConnected) menu.opener.focus({ preventScroll: true });
+        }}
+      />}
+      {deleting && <Dialog title="Delete message" className="confirm-dialog" onClose={() => setDeleting(null)}>
+        <div className="dialog-body">
+          <p className="confirm-text chat-delete-preview">{deleting.body || deleting.attachments?.map(file => file.name).join(", ")}</p>
+          <div className="dialog-actions">
+            <button type="button" className="ghost-button compact" onClick={() => setDeleting(null)}>Cancel</button>
+            <button type="button" className="primary-button danger compact" autoFocus onClick={() => { const target = deleting; setDeleting(null); void change(target.id, { delete: true }); }}>Delete</button>
+          </div>
+        </div>
+      </Dialog>}
+      {toast && createPortal(<div className="board-toast chat-toast" role="status"><span className="board-toast-icon"><Check size={14} /></span><span>{toast}</span></div>, document.body)}
       {issueMessage && projects && <IssueComposer sessionToken={sessionToken} projects={projects} activeProjectId={null} initialDraft={{ title: issueMessage.body.split("\n")[0].slice(0, 250) || "Follow up on chat", description: `${issueMessage.body}\n\nFrom ${nameOf(issueMessage)}, ${formatDateTime(issueMessage.createdAt)}` }} onClose={() => setIssueMessage(null)} onCreated={onOpenReference} />}
     </section>
   );

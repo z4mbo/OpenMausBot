@@ -2,7 +2,7 @@
 import { focusQuietly } from "@/lib/initial-focus";
 import { errorText } from "@/lib/error-text";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery } from "convex/react";
 import {
   Loader2,
@@ -32,6 +32,13 @@ export type ChatMember = AvatarIdentity & {
   email: string;
   name: string;
 };
+const NARROW = "(max-width: 760px)";
+const isNarrow = () => window.matchMedia(NARROW).matches;
+const subscribeNarrow = (change: () => void) => {
+  const query = window.matchMedia(NARROW);
+  query.addEventListener("change", change);
+  return () => query.removeEventListener("change", change);
+};
 type Props = {
   sessionToken: string;
   user: AvatarIdentity & { _id: Id<"users">; name: string; email: string };
@@ -49,9 +56,11 @@ export function ChatView(props: Props) {
     teamId: workspace._id,
   });
   const [section, setSection] = useState<"chat" | "dm">("chat");
-  const [selected, setSelected] = useState<{
+  const narrow = useSyncExternalStore(subscribeNarrow, isNarrow, () => false);
+  const [chosen, setSelected] = useState<{
     id: string;
     userId: string;
+    unread?: number;
   } | null>(null);
   const [conversations, setConversations] = useState<
     DirectConversation[] | null
@@ -131,6 +140,9 @@ export function ChatView(props: Props) {
       setOpening(null);
     }
   };
+  // Wide screens show the list and a conversation side by side: the latest one is open until another is chosen.
+  const latest = conversations?.[0];
+  const selected = chosen ?? (section === "dm" && !narrow && latest ? { id: latest.id, userId: latest.otherUserId, unread: latest.unread } : null);
   const peers =
     members?.filter(
       (member) => member.userId && member.userId !== props.user._id,
@@ -143,6 +155,8 @@ export function ChatView(props: Props) {
       (total, conversation) => total + conversation.unread,
       0,
     ) || 0;
+  // Teammates without a conversation yet sit under the conversations, one tap from a first message.
+  const newPeople = conversations ? peers.filter(member => !conversations.some(conversation => conversation.otherUserId === member.userId)) : [];
   const matches = peers.filter((member) =>
     `${member.name} ${member.username || ""} ${member.email}`
       .toLowerCase()
@@ -208,39 +222,36 @@ export function ChatView(props: Props) {
               </button>
             ))}
             <button
-              className="icon-button"
+              className="icon-button chat-members-browse"
               aria-label="Browse members"
               title="Browse members"
               onClick={() => setPeopleOpen(true)}
             >
-              {peers.length > 3 ? (
-                <span>+{peers.length - 3}</span>
-              ) : (
-                <MessageSquarePlus size={17} />
-              )}
+              {peers.length > 3 && <span>+{peers.length - 3}</span>}
+              <MessageSquarePlus size={17} />
             </button>
           </div>
-          <button
-            ref={searchButton}
-            className={`icon-button ${query ? "selected" : ""}`}
-            aria-label="Search messages"
-            title="Search messages"
-            aria-expanded={searchOpen}
-            disabled={section === "dm" && !selected}
-            onClick={() => setSearchOpen(!searchOpen)}
-          >
-            <Search size={17} />
-          </button>
-          <button
-            className={`icon-button ${pinnedOnly ? "selected" : ""}`}
-            title="Pinned messages"
-            aria-label="Pinned messages"
-            aria-pressed={pinnedOnly}
-            disabled={section === "dm" && !selected}
-            onClick={() => setPinnedOnly(!pinnedOnly)}
-          >
-            <Pin size={16} />
-          </button>
+          {(section === "chat" || selected) && <>
+            <button
+              ref={searchButton}
+              className={`icon-button ${query ? "selected" : ""}`}
+              aria-label="Search messages"
+              title="Search messages"
+              aria-expanded={searchOpen}
+              onClick={() => setSearchOpen(!searchOpen)}
+            >
+              <Search size={17} />
+            </button>
+            <button
+              className={`icon-button ${pinnedOnly ? "selected" : ""}`}
+              title="Pinned messages"
+              aria-label="Pinned messages"
+              aria-pressed={pinnedOnly}
+              onClick={() => setPinnedOnly(!pinnedOnly)}
+            >
+              <Pin size={16} />
+            </button>
+          </>}
         </div>
       </header>
       {searchOpen && (
@@ -311,20 +322,8 @@ export function ChatView(props: Props) {
                 rows={4}
                 label="Loading direct messages"
               />
-            ) : !conversations.length ? (
-              <div className="dm-list-empty">
-                <MessageCircle size={24} />
-                <span>No messages</span>
-                <button
-                  className="ghost-button compact"
-                  disabled={!online} title={!online ? RECONNECT_TO_CREATE : undefined}
-                  onClick={() => setPeopleOpen(true)}
-                >
-                  New message
-                </button>
-              </div>
-            ) : (
-              conversations.map((conversation) => {
+            ) : (<>
+              {              conversations.map((conversation) => {
                 const member = members?.find(
                   (member) => member.userId === conversation.otherUserId,
                 );
@@ -339,6 +338,7 @@ export function ChatView(props: Props) {
                       setSelected({
                         id: conversation.id,
                         userId: conversation.otherUserId,
+                        unread: conversation.unread,
                       });
                       setQuery("");
                       setPinnedOnly(false);
@@ -371,8 +371,23 @@ export function ChatView(props: Props) {
                     </span>
                   </button>
                 );
-              })
-            )}
+              })}
+              {newPeople.length > 0 && <div className="dm-list-caption">People</div>}
+              {newPeople.map(member => (
+                <button
+                  key={member.userId}
+                  className="dm-row dm-person"
+                  disabled={!online || workspace.role === "viewer" || Boolean(opening)}
+                  title={!online ? RECONNECT_TO_CREATE : undefined}
+                  onClick={() => void startDirect(member)}
+                >
+                  <UserAvatar user={member} />
+                  <span className="dm-row-copy"><strong>{memberName(member)}</strong></span>
+                  {opening === member.userId && <Loader2 className="spin" size={15} />}
+                </button>
+              ))}
+              {!conversations.length && !newPeople.length && members !== undefined && <div className="dm-list-empty">No teammates yet</div>}
+            </>)}
           </aside>
         )}
         {section === "chat" || selected ? (
@@ -386,6 +401,7 @@ export function ChatView(props: Props) {
             query={query}
             pinnedOnly={pinnedOnly}
             onRead={refreshConversations}
+            initialUnread={section === "dm" ? selected?.unread : 0}
           />
         ) : (
           <div className="dm-no-selection">
