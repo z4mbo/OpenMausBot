@@ -1,7 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { isDraftColumn } from "@/lib/origin-columns";
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "convex/react";
 import type { OptimisticLocalStore } from "convex/browser";
@@ -9,23 +9,23 @@ import clsx from "clsx";
 import { Check, CheckCircle2, Circle, Columns3, List, MoreHorizontal, PencilLine, Plus, Search, Trash2, Undo2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { displayName, formatDate, formatDue } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { hasOpenKeyboardOverlay, isEditingTarget } from "@/lib/keyboard-navigation";
 import { issueShortcut, matchesIssue, taskKey } from "../lib/project-issues";
 import { MenuScrim, TaskMenu, type TaskMenuAnchor, type TaskMenuView } from "./task-actions-menu";
-import { IssueCard, type CardPerson } from "./issue-card";
+import { IssueCard, IssueRow, type CardPerson } from "./issue-card";
 import { DatePopover } from "./date-picker";
 import { MemberPicker } from "./member-picker";
 import { Dialog } from "./dialog";
-import { PriorityIcon, StatusIcon, laneTone } from "./issue-icons";
+import { StatusIcon, laneTone } from "./issue-icons";
 import { useBoardScroll } from "./use-board-scroll";
-import { useCardFlip, useIssueDrag } from "./use-issue-drag";
+import { swallowNextClick, useCardFlip, useIssueDrag } from "./use-issue-drag";
+import { isSheetLayout } from "./use-anchored-popover";
 import { compareTaskOrder, planTaskMove } from "../lib/task-order";
-import { UserAvatar } from "./user-avatar";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 import { TaskModal } from "./issue-detail";
 import { IssueComposer } from "./issue-composer";
-import { LoadingState, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { LoadingState, subscribeCreatedIssue, type OpenReference, type ProjectWithUi } from "./issue-shared";
 
 type Task = Doc<"tasks">;
 type Column = Doc<"columns">;
@@ -33,13 +33,14 @@ type Priority = "low" | "medium" | "high";
 type MoveTaskArgs = { projectId: Id<"projects">; sessionToken: string; taskId: Id<"tasks">; columnId: Id<"columns">; beforeTaskId?: Id<"tasks"> };
 type UpdateTaskArgs = { projectId: Id<"projects">; sessionToken: string; taskId: Id<"tasks">; priority?: Priority; assignedToEmail?: string; dueDate?: string; done?: boolean };
 type MenuState = { taskId: Id<"tasks">; view: TaskMenuView; anchor: TaskMenuAnchor; from: HTMLElement };
-type Toast = { id: number; text: string; undo?: () => void };
+type Toast = { id: number; text: string; icon?: ReactNode; undo?: () => void };
 
 /** How long a completed card stays (checked) before it collapses, and how long the collapse takes. */
 const COMPLETE_HOLD_MS = 600;
 const COLLAPSE_MS = 220;
 let toastSeq = 0;
-const PRIORITY_LABEL: Record<string, string> = { high: "High", medium: "Medium", low: "Low" };
+const LONG_PRESS_MS = 350;
+const TOUCH_SLOP = 8;
 
 /** Mirrors `tasks.moveTask` on the cached board so a dropped card stays exactly where it was dropped. */
 function moveTaskOnBoard(store: OptimisticLocalStore, args: MoveTaskArgs) {
@@ -104,7 +105,26 @@ function swallowTapThrough(popoverSelector: string) {
   window.setTimeout(remove, 800);
 }
 
-const cardElement = (root: ParentNode | null | undefined, taskId: string) => root?.querySelector<HTMLElement>(`.kanban-scroll [data-task-id="${CSS.escape(taskId)}"]`) ?? null;
+/** A board card or list row. */
+const cardElement = (root: ParentNode | null | undefined, taskId: string) => root?.querySelector<HTMLElement>(`:is(.kanban-scroll, .issue-table) [data-task-id="${CSS.escape(taskId)}"]`) ?? null;
+
+/** Scrolls the board's own scroll areas (never the page around them) just enough to show `element`. */
+function revealInBoard(element: HTMLElement) {
+  const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for (let scroller = element.parentElement; scroller && !scroller.classList.contains("board-section"); scroller = scroller.parentElement) {
+    const style = getComputedStyle(scroller);
+    const scrollsX = /auto|scroll/.test(style.overflowX) && scroller.scrollWidth > scroller.clientWidth;
+    const scrollsY = /auto|scroll/.test(style.overflowY) && scroller.scrollHeight > scroller.clientHeight;
+    if (!scrollsX && !scrollsY) continue;
+    const box = scroller.getBoundingClientRect();
+    // Horizontally, bring in the whole lane (a phone shows one lane at a time).
+    const target = (scrollsX && element.closest("[data-column-id]")) || element;
+    const rect = target.getBoundingClientRect(), own = element.getBoundingClientRect();
+    const left = !scrollsX ? 0 : rect.left < box.left ? rect.left - box.left : rect.right > box.right ? Math.min(rect.right - box.right, rect.left - box.left) : 0;
+    const top = !scrollsY ? 0 : own.top < box.top ? own.top - box.top - 8 : own.bottom > box.bottom ? own.bottom - box.bottom + 8 : 0;
+    if (left || top) scroller.scrollBy({ left, top, behavior: smooth ? "smooth" : "auto" });
+  }
+}
 
 function EmptyBlock({ icon: Icon, title }: { icon: typeof Circle; title: string }) {
   return <div className="empty-block"><Icon size={20} /><h3>{title}</h3></div>;
@@ -186,9 +206,16 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const [columnDelete, setColumnDelete] = useState<Column | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [addingColumn, setAddingColumn] = useState(false);
-  const [expandedLanes, setExpandedLanes] = useState<Set<string>>(() => new Set());
+  /**
+   * Lanes shown open at some point during this visit. Only lanes that were already empty when the board first drew
+   * fold; a lane emptied later (a drop, a completion, a move) stays open, so nothing slides after a card settles.
+   */
+  const [openLanes, setOpenLanes] = useState<Set<string>>(() => new Set());
   const [focusId, setFocusId] = useState<string | null>(null);
   const [laneCreate, setLaneCreate] = useState<Id<"columns"> | null>(null);
+  /** A card to focus quietly once it is on the board (a new issue). */
+  const [revealId, setRevealId] = useState<string | null>(null);
+  useEffect(() => subscribeCreatedIssue(setRevealId), []);
 
   // A tap outside the card's date popover only closes it (mouse presses behave as before).
   useEffect(() => {
@@ -202,7 +229,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     return () => document.removeEventListener("pointerdown", guard, true);
   }, [datePick]);
 
-  const showToast = (text: string, undo?: () => void) => setToast({ id: ++toastSeq, text, undo });
+  const showToast = (text: string, undo?: () => void, icon?: ReactNode) => setToast({ id: ++toastSeq, text, undo, icon });
   const dnd = useIssueDrag({
     rootRef: boardScroll,
     enabled: canEdit,
@@ -219,7 +246,12 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   });
   useCardFlip(boardScroll);
   const drag = dnd.drag;
-
+  // Remember every lane that has cards (or that a dragged card opened), so it never folds under the person later.
+  if (board) {
+    const open = board.columns.filter(column => activeLaneTasks(board, column._id, () => true).length).map(column => column._id as string);
+    if (drag) open.push(drag.target.columnId);
+    if (!open.every(id => openLanes.has(id))) setOpenLanes(new Set([...openLanes, ...open]));
+  }
 
   useEffect(() => {
     setBoardNotice("");
@@ -272,6 +304,28 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     requestAnimationFrame(() => cardElement(boardScroll.current, taskId)?.focus({ preventScroll: true }));
   };
 
+  // A new issue: once its card is on the board, focus it without a ring and bring it into view.
+  useEffect(() => {
+    if (!revealId || !board) return;
+    // Two frames: after the composer has closed and handed focus back.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        setRevealId(null);
+        // Nothing to show when it was created in another project or is filtered out.
+        const card = cardElement(boardScroll.current, revealId);
+        if (!card) return;
+        setFocusId(revealId);
+        card.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+        revealInBoard(card);
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [revealId, board, boardScroll]);
+
+  /** Touch long-press on a list row opens its menu, as it does on a card. */
+  const press = useRef<(() => void) | null>(null);
+  useEffect(() => () => press.current?.(), []);
+
   if (!board) return <LoadingState label="Loading board" />;
 
   const people = new Map<string, CardPerson>();
@@ -318,7 +372,9 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     };
     if (reduced) { later(commit, 150); return; }
     later(() => {
-      const card = cardElement(boardScroll.current, task._id);
+      const found = cardElement(boardScroll.current, task._id);
+      // Cards fold away; list rows simply leave.
+      const card = found?.classList.contains("task-card") ? found : null;
       const lane = card?.parentElement;
       if (card && lane) {
         // The collapse moves the cards below for real; the lane tells useCardFlip not to animate those moves again.
@@ -340,10 +396,52 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     setFocusId(taskId);
     setMenu({ taskId: taskId as Id<"tasks">, view, anchor, from });
   };
+  const onRowPointerDown = (event: ReactPointerEvent<HTMLElement>, taskId: string) => {
+    press.current?.();
+    if (!canEdit || event.pointerType !== "touch" || !event.isPrimary || (event.target as Element).closest("button, a, input")) return;
+    const row = event.currentTarget, startX = event.clientX, startY = event.clientY, pointerId = event.pointerId;
+    let fired = false;
+    const move = (pointer: PointerEvent) => { if (pointer.pointerId === pointerId && !fired && Math.hypot(pointer.clientX - startX, pointer.clientY - startY) > TOUCH_SLOP) stop(); };
+    const up = (pointer: PointerEvent) => { if (pointer.pointerId !== pointerId) return; if (fired) swallowNextClick(pointer.timeStamp); stop(); };
+    const blockMenu = (menuEvent: Event) => menuEvent.preventDefault();
+    const stop = () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", stop);
+      window.removeEventListener("contextmenu", blockMenu);
+      if (press.current === stop) press.current = null;
+    };
+    const timer = window.setTimeout(() => {
+      if (!row.isConnected) { stop(); return; }
+      fired = true;
+      navigator.vibrate?.(8);
+      const rect = row.getBoundingClientRect();
+      openMenu(taskId, "root", { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }, row);
+    }, LONG_PRESS_MS);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", stop);
+    window.addEventListener("contextmenu", blockMenu);
+    press.current = stop;
+  };
   const closeMenu = (restoreFocus: boolean) => {
     const current = menu;
     setMenu(null);
     if (restoreFocus && current) requestAnimationFrame(() => (current.from.isConnected ? current.from.closest<HTMLElement>("[data-task-id]") ?? current.from : cardElement(boardScroll.current, current.taskId))?.focus({ preventScroll: true }));
+  };
+  /** Status from the menu. On a phone the card leaves the lane on screen, so say where it went (with Undo). */
+  const moveToLane = (task: Task, columnId: string) => {
+    const from = columnForTask(task);
+    if (!from || columnId === from) return;
+    const lane = visualColumns.find(column => column._id === columnId);
+    const siblings = activeLaneTasks(board, from, () => true);
+    const after = siblings[siblings.findIndex(item => item._id === task._id) + 1];
+    const announce = isSheetLayout() && layout === "board" && lane;
+    void moveTask({ projectId, sessionToken, taskId: task._id, columnId: columnId as Id<"columns"> }).then(() => {
+      if (!announce) return;
+      showToast(`Moved to ${lane.title}`, () => void moveTask({ projectId, sessionToken, taskId: task._id, columnId: from as Id<"columns">, ...(after ? { beforeTaskId: after._id } : {}) }).catch(report("Could not move issue")), <StatusIcon title={toneOf(lane) === "draft" ? "Draft" : lane.title} />);
+    }, report("Could not move issue"));
   };
   const menuTask = menu ? board.tasks.find(task => task._id === menu.taskId) : undefined;
   const datePickTask = datePick ? board.tasks.find(task => task._id === datePick.taskId) : undefined;
@@ -351,8 +449,9 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const onCardKeyDown = (event: ReactKeyboardEvent<HTMLElement>, task: Task) => {
     if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey) return;
     const card = event.currentTarget;
+    const row = card.matches("tr");
     if (event.key === "Enter") { event.preventDefault(); openTask(task._id); return; }
-    if (event.key === " ") { event.preventDefault(); if (canEdit) dnd.pickUp(task._id); else openTask(task._id); return; }
+    if (event.key === " ") { event.preventDefault(); if (canEdit && !row) dnd.pickUp(task._id); else openTask(task._id); return; }
     if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey)) {
       event.preventDefault();
       const rect = card.getBoundingClientRect();
@@ -360,7 +459,10 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
       return;
     }
     if (event.shiftKey) return;
-    const lanes = [...(boardScroll.current?.querySelectorAll<HTMLElement>(".kanban-scroll > [data-column-id]") ?? [])].map(lane => [...lane.querySelectorAll<HTMLElement>(".task-list > [data-task-id]")]);
+    // The list is one lane of rows; the board has one lane per column.
+    const lanes = row
+      ? [[...card.parentElement!.querySelectorAll<HTMLElement>(":scope > [data-task-id]")]]
+      : [...(boardScroll.current?.querySelectorAll<HTMLElement>(".kanban-scroll > [data-column-id]") ?? [])].map(lane => [...lane.querySelectorAll<HTMLElement>(".task-list > [data-task-id]")]);
     const laneIndex = lanes.findIndex(cards => cards.includes(card));
     if (laneIndex < 0) return;
     const index = lanes[laneIndex]!.indexOf(card);
@@ -425,7 +527,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
           {filterOpen && <div className="board-filter-popover"><Search size={14} /><input autoFocus value={filter} onChange={event => setFilter(event.target.value)} placeholder="Search issues" aria-label="Search project issues" onKeyDown={event => { if (event.key === "Escape" || event.key === "Enter") { event.preventDefault(); setFilterOpen(false); requestAnimationFrame(() => filterButton.current?.focus()); } }} />{filter && <button className="icon-button" aria-label="Clear search" onClick={() => setFilter("")}><X size={14} /></button>}</div>}
         </div>
         <MemberPicker label="Issue assignee filter" members={[...people.values()]} value={assigneeFilter} onChange={setAssigneeFilter} allLabel="All issues" currentEmail={userEmail} />
-        {!archive && <div className="segmented-control issue-layout-switch" role="group" aria-label="Issue layout"><button aria-label="Board view" aria-pressed={layout === "board"} className={layout === "board" ? "active" : ""} onClick={() => setLayout("board")} title="Board (B)"><Columns3 size={14} /></button><button aria-label="List view" aria-pressed={layout === "list"} className={layout === "list" ? "active" : ""} onClick={() => setLayout("list")} title="List (L)"><List size={14} /></button></div>}
+        <div className={clsx("segmented-control issue-layout-switch", archive && "is-idle")} role="group" aria-label="Issue layout" inert={archive} aria-hidden={archive || undefined}><button aria-label="Board view" aria-pressed={layout === "board"} className={layout === "board" ? "active" : ""} onClick={() => setLayout("board")} title="Board (B)"><Columns3 size={14} /></button><button aria-label="List view" aria-pressed={layout === "list"} className={layout === "list" ? "active" : ""} onClick={() => setLayout("list")} title="List (L)"><List size={14} /></button></div>
         {canEdit && <button disabled={!online} title={!online ? RECONNECT_TO_CREATE : "Create issue (C)"} className="primary-button compact project-create-issue" onClick={onCreateIssue}><Plus size={14} /><span>Create issue</span></button>}
       </div>
     </div>
@@ -435,8 +537,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     <div className="archive-list">
       {!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title={filtered ? "No matching issues" : "No completed issues"} />}
       {archivedTasks.map(task => <div key={task._id} className="archive-row" data-task-id={task._id} onClick={() => openTask(task._id)}>
-        <span className="archive-check"><Check size={10} strokeWidth={3} /></span>
-        <button className="archive-issue" onClick={event => { event.stopPropagation(); openTask(task._id); }}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button>
+        <span className="check-done archive-check"><Check size={10} strokeWidth={3} /></span>
+        <button className="archive-issue" onClick={event => { event.stopPropagation(); openTask(task._id); }}><span className="issue-key">{taskKey(task._id)}</span><strong>{task.title}</strong></button>
         <time>{formatDate(task.completedAt ?? task.updatedAt)}</time>
         {canEdit && <button className="ghost-button compact archive-restore" aria-label={`Restore ${task.title}`} onClick={event => { event.stopPropagation(); void restore(task); }}><Undo2 size={14} /><span>Restore</span></button>}
       </div>)}
@@ -450,19 +552,24 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         <thead><tr><th scope="col">Issue</th><th scope="col" className="col-status">Status</th><th scope="col" className="col-priority">Priority</th><th scope="col" className="col-assignee">Assignee</th><th scope="col" className="col-due">Due</th></tr></thead>
         <tbody>{listTasks.map(task => {
           const status = statusOf(task);
-          const person = assigneeOf(task);
-          const due = formatDue(task.dueDate);
-          const state = completing[task._id];
-          return <tr key={task._id} data-task-id={task._id} className={clsx(selectedTaskId === task._id && "is-selected", state && "is-completing")} onClick={() => openTask(task._id)}>
-            <td className="col-issue">
-              <button className="check-button" aria-label={state ? `Completed ${task.title}` : `Complete ${task.title}`} disabled={!canEdit || Boolean(state)} onClick={event => { event.stopPropagation(); complete(task); }}>{state ? <span className="check-done"><Check size={10} strokeWidth={3} /></span> : <Circle size={15} />}</button>
-              <button className="issue-table-title" onClick={event => { event.stopPropagation(); openTask(task._id); }}><small>{taskKey(task._id)}</small><span>{task.title}</span></button>
-            </td>
-            <td className="col-status">{status && <span className={clsx("status-pill", toneOf(status))}><StatusIcon title={isDraftColumn(status) ? "Draft" : status.title} /><span>{status.title}</span></span>}</td>
-            <td className="col-priority"><span className="issue-table-priority"><PriorityIcon priority={task.priority} /><span>{PRIORITY_LABEL[task.priority] ?? task.priority}</span></span></td>
-            <td className="col-assignee">{person ? <span className="issue-table-assignee" title={displayName(person)}><UserAvatar user={person} /><span>{displayName(person)}</span></span> : null}</td>
-            <td className="col-due">{due ? <span className={clsx("due-text", due.tone)}>{due.label}</span> : null}</td>
-          </tr>;
+          return <IssueRow
+            key={task._id}
+            task={task}
+            assignee={assigneeOf(task)}
+            status={status && { title: isDraftColumn(status) ? "Draft" : status.title, label: status.title }}
+            canEdit={canEdit}
+            tabStop={tabStopId === task._id}
+            selected={selectedTaskId === task._id}
+            completing={completing[task._id]}
+            menuOpen={menu?.taskId === task._id}
+            onOpen={openTask}
+            onComplete={complete}
+            onMenu={(item, view, anchor, from) => openMenu(item._id, view, anchor, from)}
+            onDueDate={(item, from) => setDatePick({ taskId: item._id, anchor: { current: from } })}
+            onKeyDown={onCardKeyDown}
+            onFocus={setFocusId}
+            onPointerDown={onRowPointerDown}
+          />;
         })}</tbody>
       </table>
       {!listTasks.length && <EmptyBlock icon={Circle} title={filtered ? "No matching issues" : "No active issues"} />}
@@ -475,8 +582,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         const tasks = displayTasks(column._id);
         const tone = toneOf(column);
         const statusTitle = tone === "draft" ? "Draft" : column.title;
-        // Only lanes that are really empty fold; a lane emptied by the search or filter stays open and says so.
-        const collapsed = boardHasActive && !activeLaneTasks(board, column._id, () => true).length && !expandedLanes.has(column._id) && drag?.origin.columnId !== column._id && drag?.target.columnId !== column._id && renaming !== column._id;
+        // Only lanes that were empty from the start fold; a lane emptied by the search or filter stays open and says so.
+        const collapsed = boardHasActive && !openLanes.has(column._id) && !activeLaneTasks(board, column._id, () => true).length && drag?.target.columnId !== column._id && renaming !== column._id;
         const canDelete = visualColumns.length > 1 && !isDraftColumn(column);
         return (
           <div
@@ -488,7 +595,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
             data-drop={drag?.target.columnId === column._id ? "" : undefined}
           >
             {collapsed
-              ? <button type="button" className="lane-strip" aria-expanded="false" aria-label={`${column.title}, ${tasks.length} issues`} onClick={() => setExpandedLanes(current => new Set(current).add(column._id))}>
+              ? <button type="button" className="lane-strip" aria-expanded="false" aria-label={`${column.title}, ${tasks.length} issues`} onClick={() => setOpenLanes(current => new Set(current).add(column._id))}>
                 <StatusIcon title={statusTitle} /><strong>{column.title}</strong><span>{tasks.length}</span>
               </button>
               : <>
@@ -564,7 +671,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         members={projectMembers ?? [...people.values()]}
         currentEmail={userEmail}
         dueDate={menuTask.dueDate}
-        onStatus={columnId => { if (columnId !== columnForTask(menuTask)) void moveTask({ projectId, sessionToken, taskId: menuTask._id, columnId: columnId as Id<"columns"> }).catch(report("Could not move issue")); }}
+        onStatus={columnId => moveToLane(menuTask, columnId)}
         onPriority={priority => { if (priority !== menuTask.priority) void update(menuTask._id, { priority }); }}
         onAssignee={email => { if (email !== (menuTask.assignedToEmail ?? "")) void update(menuTask._id, { assignedToEmail: email }); }}
         onDueDate={() => {
@@ -588,7 +695,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
       />}
       {deleting && <Dialog title="Delete issue" className="confirm-dialog" onClose={() => { const id = deleting._id; setDeleting(null); focusCard(id); }}>
         <div className="dialog-body">
-          <p className="confirm-text"><span>{taskKey(deleting._id)}</span> {deleting.title}</p>
+          <p className="confirm-text"><span className="issue-key">{taskKey(deleting._id)}</span> {deleting.title}</p>
           <div className="dialog-actions">
             <button type="button" className="ghost-button compact" onClick={() => { const id = deleting._id; setDeleting(null); focusCard(id); }}>Cancel</button>
             <button type="button" className="primary-button danger compact" autoFocus disabled={!online} onClick={() => {
@@ -601,7 +708,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         </div>
       </Dialog>}
       {columnDelete && <ColumnDeleteDialog column={columnDelete} columns={visualColumns} issueCount={board.tasks.filter(task => task.columnId === columnDelete._id).length} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnDelete(null)} />}
-      {laneCreate && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} initialColumnId={laneCreate} onClose={() => setLaneCreate(null)} onCreated={(_, taskId) => setFocusId(taskId)} />}
+      {laneCreate && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} initialColumnId={laneCreate} onClose={() => setLaneCreate(null)} onCreated={() => undefined} />}
       {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={(target, task) => { if (target === projectId && task) setSelectedTaskId(task); else { closeTask(); onOpenReference?.(target, task); } }} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={closeTask} /> : null}
       {toast && <BoardToast key={toast.id} toast={toast} onDismiss={() => setToast(null)} />}
     </section>
@@ -610,7 +717,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
 
 function BoardToast({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   return createPortal(<div className="board-toast" role="status">
-    <Check size={14} className="board-toast-icon" />
+    <span className="board-toast-icon">{toast.icon ?? <Check size={14} />}</span>
     <span>{toast.text}</span>
     {toast.undo && <button type="button" onClick={() => { toast.undo?.(); onDismiss(); }}>Undo</button>}
   </div>, document.body);
