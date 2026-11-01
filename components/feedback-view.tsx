@@ -1,6 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
-import { displayName, formatRelative } from "@/lib/format";
+import { formatRelative } from "@/lib/format";
+import { isDraftColumn } from "@/lib/origin-columns";
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -12,6 +13,10 @@ import type { FunctionReturnType } from "convex/server";
 import { useWorkspace } from "./workspace-context";
 import { Dialog } from "./dialog";
 import { DelayedSkeleton } from "./delayed-skeleton";
+import { DatePicker } from "./date-picker";
+import { IssueSelect } from "./issue-select";
+import { MemberPicker } from "./member-picker";
+import { StatusIcon } from "./issue-icons";
 import { ProjectEmpty } from "./project-library";
 
 type Portal = FunctionReturnType<typeof api.feedback.portals>[number];
@@ -91,15 +96,16 @@ function PortalSettings({ sessionToken, projectId, projectName, portal, onClose 
 
 function ConvertFeedback({ sessionToken, projectId, entry, onClose, onCreated }: { sessionToken: string; projectId: Id<"projects">; entry: Entry; onClose: () => void; onCreated: (id: Id<"tasks">) => void }) {
   const workspace = useWorkspace(); const convert = useMutation(api.feedback.convert);
-  const board = useQuery(api.tasks.board, { sessionToken, projectId }); const members = useQuery(api.workspaces.members, { sessionToken, teamId: workspace._id });
+  const board = useQuery(api.tasks.board, { sessionToken, projectId }); const members = useQuery(api.members.people, { sessionToken, projectId }); const me = useQuery(api.auth.me, { sessionToken });
   const [column, setColumn] = useState(""); const [assignee, setAssignee] = useState(""); const [dueDate, setDueDate] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
   const columns = board?.columns.filter(c => !c.isDone && !/^done$/i.test(c.title)) || [];
-  return <Dialog title="Create issue" onClose={onClose}><form className="stack-form library-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || columns[0]?._id) as Id<"columns">, assignedToEmail: assignee, dueDate })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}>
+  const defaultColumn = (columns.find(c => !isDraftColumn(c)) ?? columns[0])?._id || "";
+  return <Dialog title="Create issue" onClose={onClose}><form className="stack-form library-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || defaultColumn) as Id<"columns">, assignedToEmail: assignee, dueDate })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}>
     <p className="library-form-subject">{entry.kind === "bug" ? <Bug size={14} /> : <Lightbulb size={14} />}<span>{entry.title}</span></p>
-    <label>Column<select required value={column || columns[0]?._id || ""} onChange={e => setColumn(e.target.value)}>{columns.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label>
-    <div className="library-form-pair">
-      <label>Assignee<select value={assignee} required onChange={e => setAssignee(e.target.value)}><option value="">Choose</option>{members?.map(m => <option key={m._id} value={m.email}>{displayName(m)}</option>)}</select></label>
-      <label>Due date<input type="date" required value={dueDate} onChange={e => setDueDate(e.target.value)} /></label>
+    <div className="issue-property-chips">
+      <IssueSelect label="Status" value={column || defaultColumn} onChange={setColumn} options={columns.map(c => ({ value: c._id, label: c.title, icon: <StatusIcon title={c.title} /> }))} />
+      <MemberPicker label="Assignee" placeholder="Assignee" noneLabel="No assignee" members={members ?? []} value={assignee} onChange={setAssignee} currentEmail={me?.email} />
+      <DatePicker value={dueDate} onChange={setDueDate} />
     </div>
     {error && <p className="notice danger" role="alert">{error}</p>}
     <div className="library-form-actions"><button type="button" className="ghost-button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={busy || !columns.length}>{busy ? <Loader2 className="spin" size={15} /> : <CirclePlus size={15} />}Create issue</button></div>

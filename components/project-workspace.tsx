@@ -380,7 +380,7 @@ function SettingsTab({ project, sessionToken }: { project: ProjectWithUi; sessio
         <label>Description<textarea value={description} onChange={e => setDescription(e.target.value)} rows={4} /></label>
         <div className="project-settings-actions">
           {error && <p className="notice danger" role="alert">{error}</p>}
-          <button className="primary-button compact" disabled={busy || !dirty}>{busy && <Loader2 className="spin" size={13} />}{saved && !dirty ? "Saved" : "Save changes"}</button>
+          <button className="primary-button compact" disabled={busy || !dirty}>{busy && <Loader2 className="spin" size={13} />}{saved && !dirty ? "Saved" : "Save"}</button>
         </div>
       </form>
     </section>

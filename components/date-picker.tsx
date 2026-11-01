@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 import clsx from "clsx";
 import { LOCALE, formatDate, formatDue, parseDueDate, toDueDate } from "@/lib/format";
@@ -27,8 +27,8 @@ const addMonths = (date: Date, months: number) => {
 };
 const sameDay = (a: Date | null, b: Date | null) => Boolean(a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate());
 const today = () => { const now = new Date(); return new Date(now.getFullYear(), now.getMonth(), now.getDate()); };
-/** Monday of next week. */
-const nextWeek = () => { const start = today(); return addDays(start, ((8 - start.getDay()) % 7) || 7); };
+/** Monday of next week; a week later when that Monday is tomorrow (so it never repeats "Tomorrow"). */
+const nextWeek = () => { const start = today(); const days = ((8 - start.getDay()) % 7) || 7; return addDays(start, days < 2 ? days + 7 : days); };
 
 const monthFormat = new Intl.DateTimeFormat(LOCALE, { month: "long", year: "numeric" });
 const weekdayFormat = new Intl.DateTimeFormat(LOCALE, { weekday: "short" });
@@ -42,31 +42,55 @@ export function DatePicker({ value, onChange, disabled, label = "Due date", plac
   value: string; onChange: (value: string) => void; disabled?: boolean; label?: string; placeholder?: string; className?: string;
 }) {
   const id = useId();
-  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), menu = useRef<HTMLDivElement>(null), grid = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const due = formatDue(value);
+  const close = (restore = true) => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); };
+
+  return <div className={clsx("date-picker", className)}>
+    <button ref={trigger} type="button" className={clsx("date-picker-trigger", due && `due-${due.tone}`)} data-empty={!due || undefined} aria-label={due ? `${label}: ${due.label}` : label} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { if (open) close(false); else setOpen(true); }} onKeyDown={event => {
+      if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); setOpen(true); }
+      else if (open && event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); }
+      else if (open && event.key === "Tab") close(false);
+    }}>
+      <CalendarDays size={14} /><span>{due ? due.label : placeholder || label}</span>
+    </button>
+    {open && <DatePopover id={id} anchor={trigger} value={value} label={label} onChange={onChange} onClose={close} />}
+  </div>;
+}
+
+/**
+ * The due date popover on its own, anchored to any element (a board card's due chip or the card itself).
+ * Calls `onChange` only when the date changes, then `onClose(true)`; outside presses and Tab call `onClose(false)`.
+ */
+export function DatePopover({ id, anchor, value, label = "Due date", onChange, onClose }: {
+  id?: string; anchor: RefObject<HTMLElement | null>; value: string; label?: string; onChange: (value: string) => void; onClose: (restoreFocus: boolean) => void;
+}) {
+  const menu = useRef<HTMLDivElement>(null), grid = useRef<HTMLDivElement>(null);
   const selected = parseDueDate(value);
   const [cursor, setCursor] = useState<Date>(() => selected || today());
-  const due = formatDue(value);
   const weekStart = useMemo(() => localeWeekStart(), []);
   const focusDay = useRef(false);
-  useAnchoredPopover(open, trigger, menu, grid, { width: 272, maxHeight: 540 });
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; });
+  useAnchoredPopover(true, anchor, menu, grid, { width: 272, maxHeight: 540 });
 
-  const close = (restore = true) => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); };
-  const choose = (date: Date | null) => { const next = date ? toDueDate(date) : ""; if (next !== value) onChange(next); close(); };
-  const show = () => { setCursor(selected || today()); setOpen(true); };
+  const choose = (date: Date | null) => { const next = date ? toDueDate(date) : ""; if (next !== value) onChange(next); onClose(true); };
 
   useEffect(() => {
-    if (!open) return;
-    const dismiss = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
+    const dismiss = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!menu.current?.contains(target) && !anchor.current?.contains(target)) closeRef.current(false);
+    };
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
-  }, [open]);
+  }, [anchor]);
   // Keyboard moves keep focus on the active day as the month changes under it.
   useEffect(() => {
-    if (!open || !focusDay.current) return;
+    if (!focusDay.current) return;
     focusDay.current = false;
     grid.current?.querySelector<HTMLButtonElement>('[tabindex="0"]')?.focus({ preventScroll: true });
-  }, [cursor, open]);
+  }, [cursor]);
 
   const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
   const gridStart = addDays(monthStart, -((monthStart.getDay() - weekStart + 7) % 7));
@@ -93,16 +117,10 @@ export function DatePicker({ value, onChange, disabled, label = "Due date", plac
     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(cursor); }
   };
 
-  return <div ref={root} className={clsx("date-picker", className)} onKeyDown={event => {
-    if (open && event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); }
-    else if (open && event.key === "Tab" && !menu.current?.contains(event.target as Node)) close(false);
+  return <div ref={menu} id={id} popover="manual" role="dialog" aria-label={label} className="date-picker-popover" onClick={event => event.stopPropagation()} onKeyDown={event => {
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(true); }
+    else if (event.key === "Tab") onClose(false);
   }}>
-    <button ref={trigger} type="button" className={clsx("date-picker-trigger", due && `due-${due.tone}`)} data-empty={!due || undefined} aria-label={due ? `${label}: ${due.label}` : label} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { if (open) close(false); else show(); }} onKeyDown={event => {
-      if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); show(); }
-    }}>
-      <CalendarDays size={14} /><span>{due ? due.label : placeholder || label}</span>
-    </button>
-    {open && <div ref={menu} id={id} popover="manual" role="dialog" aria-label={label} className="date-picker-popover">
       <div className="date-picker-quick">
         {quick.map(item => <button key={item.key} type="button" aria-pressed={sameDay(selected, item.date)} onClick={() => choose(item.date)}><span>{item.label}</span><small>{item.key === "next-week" ? formatDate(item.date) : weekdayFormat.format(item.date)}</small></button>)}
         {selected && <button type="button" className="date-picker-clear" onClick={() => choose(null)}><X size={13} /><span>Clear</span></button>}
@@ -123,6 +141,5 @@ export function DatePicker({ value, onChange, disabled, label = "Due date", plac
           </span>;
         })}</div>)}
       </div>
-    </div>}
   </div>;
 }

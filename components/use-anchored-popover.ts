@@ -8,7 +8,7 @@ export function shouldFocusSearch(optionCount: number) {
 }
 
 /** Shows `menu` in the top layer next to `trigger` and focuses `focus` (a search field or the list itself). */
-export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLButtonElement | null>, menu: RefObject<HTMLDivElement | null>, focus: RefObject<HTMLElement | null>, options?: { width?: number; maxHeight?: number }) {
+export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLElement | null>, menu: RefObject<HTMLDivElement | null>, focus: RefObject<HTMLElement | null>, options?: { width?: number; maxHeight?: number }) {
   const preferredWidth = options?.width ?? 280;
   const preferredHeight = options?.maxHeight ?? 330;
   useLayoutEffect(() => {

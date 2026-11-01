@@ -163,7 +163,6 @@ button.task-chip:active { background: var(--active); }
 .due-chip.overdue, .due-chip.overdue svg { color: var(--red); }
 .due-chip.overdue { border-color: rgba(242, 113, 107, 0.35); background: var(--red-soft); }
 button.due-chip.overdue:hover { border-color: rgba(242, 113, 107, 0.55); background: rgba(242, 113, 107, 0.18); color: var(--red); }
-.task-due-input { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
 .task-assignee { position: relative; display: grid; flex: none; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--text-3); }
 .task-assignee .origin-user-avatar { --avatar-size: 20px; }
 button.task-assignee { cursor: pointer; transition: box-shadow var(--duration-fast), color var(--duration-fast); }

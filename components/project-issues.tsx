@@ -13,7 +13,8 @@ import { displayName, formatDate, formatDue } from "@/lib/format";
 import { hasOpenKeyboardOverlay, isEditingTarget } from "@/lib/keyboard-navigation";
 import { issueShortcut, matchesIssue, taskKey } from "../lib/project-issues";
 import { TaskMenu, type TaskMenuAnchor, type TaskMenuView } from "./task-actions-menu";
-import { IssueCard, openDatePicker, type CardPerson } from "./issue-card";
+import { IssueCard, type CardPerson } from "./issue-card";
+import { DatePopover } from "./date-picker";
 import { MemberPicker } from "./member-picker";
 import { Dialog } from "./dialog";
 import { PriorityIcon, StatusIcon, laneTone } from "./issue-icons";
@@ -159,6 +160,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const filterButton = useRef<HTMLButtonElement>(null);
   const filterBox = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<MenuState | null>(null);
+  /** The card whose due date popover is open, anchored to its due chip (or the card). */
+  const [datePick, setDatePick] = useState<{ taskId: Id<"tasks">; anchor: { current: HTMLElement } } | null>(null);
   const [completing, setCompleting] = useState<Record<string, "checked">>({});
   const [toast, setToast] = useState<Toast | null>(null);
   const [deleting, setDeleting] = useState<Task | null>(null);
@@ -313,6 +316,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     if (restoreFocus && current) requestAnimationFrame(() => (current.from.isConnected ? current.from.closest<HTMLElement>("[data-task-id]") ?? current.from : cardElement(boardScroll.current, current.taskId))?.focus({ preventScroll: true }));
   };
   const menuTask = menu ? board.tasks.find(task => task._id === menu.taskId) : undefined;
+  const datePickTask = datePick ? board.tasks.find(task => task._id === datePick.taskId) : undefined;
 
   const onCardKeyDown = (event: ReactKeyboardEvent<HTMLElement>, task: Task) => {
     if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey) return;
@@ -488,7 +492,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
                     onOpen={openTask}
                     onComplete={complete}
                     onMenu={(item, view, anchor, from) => openMenu(item._id, view, anchor, from)}
-                    onDueDate={(item, value) => void update(item._id, { dueDate: value })}
+                    onDueDate={(item, from) => setDatePick({ taskId: item._id, anchor: { current: from } })}
                     onKeyDown={onCardKeyDown}
                     onFocus={setFocusId}
                     onPointerDown={dnd.onPointerDown}
@@ -535,10 +539,24 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         onStatus={columnId => { if (columnId !== columnForTask(menuTask)) void moveTask({ projectId, sessionToken, taskId: menuTask._id, columnId: columnId as Id<"columns"> }).catch(report("Could not move issue")); }}
         onPriority={priority => { if (priority !== menuTask.priority) void update(menuTask._id, { priority }); }}
         onAssignee={email => { if (email !== menuTask.assignedToEmail) void update(menuTask._id, { assignedToEmail: email }); }}
-        onDueDate={() => openDatePicker(cardElement(boardScroll.current, menuTask._id)?.querySelector<HTMLInputElement>(".task-due-input"))}
+        onDueDate={() => {
+          const taskId = menuTask._id;
+          // After the menu has closed and handed focus back to the card.
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const card = cardElement(boardScroll.current, taskId);
+            if (card) setDatePick({ taskId, anchor: { current: card.querySelector<HTMLElement>(".due-chip") ?? card } });
+          }));
+        }}
         onCopyLink={() => copyLink(menuTask)}
         onDelete={() => setDeleting(menuTask)}
         onClose={closeMenu}
+      />}
+      {datePick && datePickTask && <DatePopover
+        key={datePick.taskId}
+        anchor={datePick.anchor}
+        value={datePickTask.dueDate ?? ""}
+        onChange={dueDate => void update(datePickTask._id, { dueDate })}
+        onClose={restore => { const id = datePick.taskId; setDatePick(null); if (restore) focusCard(id); }}
       />}
       {deleting && <Dialog title="Delete issue" className="confirm-dialog" onClose={() => { const id = deleting._id; setDeleting(null); focusCard(id); }}>
         <div className="dialog-body">
