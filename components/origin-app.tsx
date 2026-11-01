@@ -1,5 +1,5 @@
 "use client";
-import { errorText } from "@/lib/error-text";
+import { errorText, mediaErrorText } from "@/lib/error-text";
 
 import { useMutation, useQuery } from "convex/react";
 import { BoardTab, TaskModal } from "./project-issues";
@@ -918,6 +918,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       return;
     }
     let stream: MediaStream | null = null;
+    let mediaIssue = "";
     setJoining(true);
     setDevicesOpen(false);
     try {
@@ -925,8 +926,11 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       iceServersRef.current = configuration.iceServers;
       try {
         stream = audioEnabled || videoEnabled ? await navigator.mediaDevices.getUserMedia({ audio: audioEnabled ? { ...(audioDevice ? { deviceId: { exact: audioDevice } } : {}), echoCancellation: true, noiseSuppression: true } : false, video: videoEnabled ? { ...(videoDevice ? { deviceId: { exact: videoDevice } } : {}), width: { ideal: 1280 }, height: { ideal: 720 } } : false }) : new MediaStream();
-      } catch {
-        stream = audioEnabled ? await navigator.mediaDevices.getUserMedia({ audio: audioDevice ? { deviceId: { exact: audioDevice }, echoCancellation: true } : true, video: false }) : new MediaStream();
+      } catch (error) {
+        // Fall back to audio only, then to listening only, so a missing or blocked device never blocks joining.
+        try { stream = audioEnabled ? await navigator.mediaDevices.getUserMedia({ audio: audioDevice ? { deviceId: { exact: audioDevice }, echoCancellation: true } : true, video: false }) : new MediaStream(); }
+        catch (audioError) { stream = new MediaStream(); mediaIssue = mediaErrorText(audioError); }
+        if (!mediaIssue && videoEnabled) mediaIssue = mediaErrorText(error, "camera");
       }
       const hasAudio = stream.getAudioTracks().length > 0;
       const hasVideo = stream.getVideoTracks().length > 0;
@@ -948,7 +952,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       setJoinedAt(Date.now());
       setAudioEnabled(hasAudio);
       setVideoEnabled(hasVideo);
-      setNotice("");
+      setNotice(mediaIssue);
     } catch (error) {
       stream?.getTracks().forEach((track) => track.stop());
       if (mountedRef.current) setNotice(errorText(error, "Could not start call"));

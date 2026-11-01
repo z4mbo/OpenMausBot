@@ -29,3 +29,13 @@ function clean(raw: string) {
   if (!text || /^Server Error$/i.test(text) || text.length > 240) return "";
   return text;
 }
+
+// Explains why the browser refused a camera or microphone.
+export function mediaErrorText(error: unknown, device: "microphone" | "camera" = "microphone"): string {
+  const name = error && typeof error === "object" && "name" in error ? String((error as { name: unknown }).name) : "";
+  const Device = device === "camera" ? "Camera" : "Microphone";
+  if (name === "NotAllowedError" || name === "SecurityError") return `${Device} access is blocked`;
+  if (name === "NotFoundError" || name === "OverconstrainedError") return `No ${device} found`;
+  if (name === "NotReadableError" || name === "AbortError") return `${Device} is in use by another app`;
+  return `${Device} unavailable`;
+}
