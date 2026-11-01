@@ -480,7 +480,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
             {projects === undefined ? <LoadingState label="Projects" /> : null}
               {projectsOpen && <div className="sidebar-project-list">
                 {(["active", "inactive"] as const).map(group => <div className="sidebar-project-group" key={group}>
-                {group !== "active" && <button className="section-toggle project-group-toggle" aria-expanded={projectGroupsOpen[group]} onClick={() => setProjectGroupsOpen(current => ({ ...current, [group]: !current[group] }))}>{projectGroupsOpen[group] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}<span>Inactive</span><small>{sidebarProjects?.filter(project => project.status !== "active").length || 0}</small></button>}
+                {group !== "active" && sidebarProjects?.some(project => project.status !== "active") && <button className="section-toggle project-group-toggle" aria-expanded={projectGroupsOpen[group]} onClick={() => setProjectGroupsOpen(current => ({ ...current, [group]: !current[group] }))}>{projectGroupsOpen[group] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}<span>Inactive</span><small>{sidebarProjects?.filter(project => project.status !== "active").length || 0}</small></button>}
                 {(group === "active" ? projectsOpen : projectGroupsOpen[group]) && sidebarProjects?.filter(project => group === "active" ? project.status === "active" : project.status !== "active").map((project) => {
                   const viewers = (viewersByProject.get(project._id) || []).sort((a, b) => Number(b.self) - Number(a.self));
                   return (
