@@ -7,7 +7,60 @@
 .drawing-status { display: flex; flex-shrink: 0; justify-content: space-between; gap: var(--space-3); padding: 6px var(--space-6); background: var(--surface-3); color: var(--text-2); font-size: var(--text-sm); }
 .drawing-status.error { color: var(--red); }
 
+/* Excalidraw in Origin's colours, type and shadows (its dark theme reads these variables). */
+.drawing-canvas .excalidraw.theme--dark {
+  --ui-font: var(--font-sans);
+  --island-bg-color: var(--surface-3);
+  --default-bg-color: var(--surface-2);
+  --input-bg-color: var(--surface-2);
+  --input-hover-bg-color: var(--surface-3);
+  --input-border-color: var(--border-2);
+  --popup-secondary-bg-color: var(--surface-3);
+  --popup-text-color: var(--text-2);
+  --button-gray-1: var(--surface-5);
+  --button-gray-2: var(--surface-4);
+  --button-gray-3: var(--surface-3);
+  --color-primary: var(--accent-text);
+  --color-primary-darker: #aab1ff;
+  --color-primary-darkest: #bcc1ff;
+  --color-primary-hover: #aab1ff;
+  --color-primary-light: color-mix(in srgb, var(--accent) 34%, var(--surface-3));
+  --color-primary-light-darker: color-mix(in srgb, var(--accent) 44%, var(--surface-3));
+  --color-surface-primary-container: color-mix(in srgb, var(--accent) 34%, var(--surface-3));
+  --color-on-primary-container: var(--text-1);
+  --color-brand-hover: #aab1ff;
+  --color-brand-active: #bcc1ff;
+  --color-selection: var(--accent);
+  --select-highlight-color: var(--accent-text);
+  --focus-highlight-color: var(--focus);
+  --color-surface-high: var(--surface-5);
+  --color-surface-mid: var(--surface-2);
+  --color-surface-low: var(--surface-3);
+  --color-surface-lowest: var(--surface-1);
+  --color-on-surface: var(--text-1);
+  --color-border-outline-variant: var(--border-3);
+  --dialog-border-color: var(--border-2);
+  --avatar-border-color: var(--surface-1);
+  --shadow-island: 0 0 0 1px var(--border-2), 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+  --scrollbar-thumb: var(--surface-5);
+}
+.drawing-canvas .excalidraw.theme--dark :is(.App-mobile-menu, .App-menu__left) { --button-hover-bg: var(--surface-4); --button-bg: var(--surface-3); }
+/* Calm canvas: no tool hints, Origin's own presence avatars (below) instead of Excalidraw's list, no "Generate" tools
+   (they need Excalidraw's hosted services). */
+.drawing-canvas .excalidraw :is(.HintViewer, .UserList, .UserList_mobile) { display: none; }
+.drawing-canvas .App-toolbar__extra-tools-dropdown .dropdown-menu-container > div:not([class]),
+.drawing-canvas .App-toolbar__extra-tools-dropdown .dropdown-menu-container > div:not([class]) ~ * { display: none; }
+.draw-presence { display: flex; align-items: center; height: var(--control-lg); margin-right: var(--space-2); }
+.draw-presence > span { display: flex; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface-1); animation: o-pop var(--duration) var(--ease-out); }
+.draw-presence > span + span { margin-left: -6px; }
+.draw-presence .origin-user-avatar { --avatar-size: 26px; }
+.draw-presence > .draw-presence-more { display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: var(--radius-full); background: var(--surface-4); color: var(--text-2); font-size: var(--text-xs); }
+
 @media (max-width: 760px) {
   .workspace-app.sidebar-collapsed > .workspace.draw-workspace { padding-top: 0; }
   .drawing-status { padding: 6px var(--space-4); }
 }
+.draw-presence-floating { display: none; }
+.drawing-canvas:has(.excalidraw--mobile) .draw-presence-floating { position: absolute; left: 50%; bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); z-index: 5; display: flex; transform: translateX(-50%); pointer-events: none; }
+.draw-presence-floating .draw-presence { height: auto; margin: 0; }
+.drawing-canvas:has(.excalidraw--mobile :is(.dropdown-menu, .sidebar, .Modal)) .draw-presence-floating { display: none; }
