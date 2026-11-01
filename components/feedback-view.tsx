@@ -1,40 +1,92 @@
 "use client";
 import { errorText } from "@/lib/error-text";
+import { displayName, formatRelative } from "@/lib/format";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowUpRight, Bug, Check, CirclePlus, Copy, Lightbulb, Loader2, MessageSquare, Settings2, X } from "lucide-react";
+import clsx from "clsx";
+import { ArrowUpRight, Bug, Check, CirclePlus, Copy, Lightbulb, Loader2, MessageSquare, RotateCcw, Settings2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { useWorkspace } from "./workspace-context";
 import { Dialog } from "./dialog";
-import { ContentSkeleton } from "./content-skeleton";
+import { DelayedSkeleton } from "./delayed-skeleton";
+import { ProjectEmpty } from "./project-library";
 
 type Portal = FunctionReturnType<typeof api.feedback.portals>[number];
 type Entry = FunctionReturnType<typeof api.feedback.list>[number];
+type Filter = "open" | "completed" | "all";
+const filters: Array<{ value: Filter; label: string }> = [{ value: "open", label: "Open" }, { value: "completed", label: "Completed" }, { value: "all", label: "All" }];
+const isOpen = (row: Entry) => row.status === "new" || row.status === "planned";
 
-export function FeedbackView({ sessionToken, projectId, onOpenTask, origin }: { origin?: string; sessionToken: string; projectId: Id<"projects">; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void }) {
-  const workspace = useWorkspace(); const scope = { sessionToken, teamId: workspace._id };
-  const projects = useQuery(api.projects.listForUser, scope); const portals = useQuery(api.feedback.portals, scope);
-  const [filter, setFilter] = useState("open"); const [config, setConfig] = useState(false); const [entry, setEntry] = useState<Entry | null>(null); const [notice, setNotice] = useState("");
-  const project = projects?.find(p => p._id === projectId);
-  const portal = portals?.find(p => p.projectId === project?._id);
-  const rows = useQuery(api.feedback.list, portal ? { ...scope, portalId: portal._id } : "skip");
+export function FeedbackView({ sessionToken, projectId, projectName, onOpenTask }: { sessionToken: string; projectId: Id<"projects">; projectName: string; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void }) {
+  const workspace = useWorkspace();
+  const portals = useQuery(api.feedback.portals, { sessionToken, teamId: workspace._id });
+  const [filter, setFilter] = useState<Filter>("open");
+  const [config, setConfig] = useState(false);
+  const [entry, setEntry] = useState<Entry | null>(null);
+  const [notice, setNotice] = useState("");
+  const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(copyTimer.current), []);
+  const portal = portals?.find(p => p.projectId === projectId);
+  const rows = useQuery(api.feedback.list, portal ? { sessionToken, teamId: workspace._id, portalId: portal._id } : "skip");
   const dismiss = useMutation(api.feedback.dismiss);
   const admin = ["owner", "admin"].includes(workspace.role);
-  const visible = rows?.filter(row => filter === "all" || (filter === "completed" ? row.status === "completed" : row.status === "new" || row.status === "planned"));
-  return <section className="feature-page project-feedback" aria-label="Feedback"><div className="feature-toolbar"><div className="segmented-control">{["open", "completed", "all"].map(value => <button key={value} className={value === filter ? "active" : ""} aria-pressed={value === filter} onClick={() => setFilter(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</div><div className="feature-toolbar-spacer" />{portal?.enabled && <><button className="icon-button" aria-label="Copy feedback link" title="Copy feedback link" onClick={async () => { try { await navigator.clipboard.writeText(`${origin || window.location.origin}/feedback/${portal.slug}`); setNotice("Feedback link copied"); } catch { setNotice("Could not copy link"); } }}><Copy size={15} /></button><a className="icon-button" title="Open public feedback form" aria-label="Open public feedback form" target="_blank" rel="noreferrer" href={`${origin || window.location.origin}/feedback/${portal.slug}`}><ArrowUpRight size={16} /></a></>}{admin && <button className="icon-button" disabled={!project} title="Feedback settings" aria-label="Feedback settings" onClick={() => setConfig(true)}><Settings2 size={16} /></button>}</div>{notice && <p className="notice" role="status">{notice}</p>}
-    {!projects || !portals ? <ContentSkeleton rows={5} /> : !portal ? <div className="feature-empty"><MessageSquare size={28} /><strong>No feedback form</strong>{admin && project && <button className="ghost-button compact" onClick={() => setConfig(true)}>Set up feedback</button>}</div> : rows === undefined ? <ContentSkeleton rows={5} /> : !visible?.length ? <div className="feature-empty"><MessageSquare size={28} /><strong>No feedback</strong></div> : <div className="feedback-list">{visible.map(row => <article key={row._id} className="feedback-entry"><header>{row.kind === "bug" ? <Bug size={17} /> : <Lightbulb size={17} />}<strong>{row.title}</strong><span className="feature-status">{row.status}</span></header><p>{row.body}</p><footer><time>{new Date(row.createdAt).toLocaleDateString()}</time><div className="feature-toolbar-spacer" />{row.taskId ? <button className="ghost-button compact" onClick={() => onOpenTask(portal.projectId, row.taskId!)}><ArrowUpRight size={14} />Open issue</button> : workspace.role !== "viewer" && <button className="ghost-button compact" onClick={() => setEntry(row)}><CirclePlus size={14} />Create issue</button>}{workspace.role !== "viewer" && <button className="icon-button" title={row.status === "dismissed" ? "Restore feedback" : "Dismiss feedback"} aria-label={row.status === "dismissed" ? "Restore feedback" : "Dismiss feedback"} onClick={async () => { try { await dismiss({ ...scope, entryId: row._id, dismissed: row.status !== "dismissed" }); } catch (error) { setNotice(errorText(error, "Could not update")); } }}>{row.status === "dismissed" ? <Check size={14} /> : <X size={14} />}</button>}</footer></article>)}</div>}
-    {config && project && <PortalSettings sessionToken={sessionToken} projectId={project._id} projectName={project.name} portal={portal} onClose={() => setConfig(false)} />}
-    {entry && portal && <ConvertFeedback sessionToken={sessionToken} projectId={portal.projectId} entry={entry} onClose={() => setEntry(null)} onCreated={taskId => { setEntry(null); onOpenTask(portal.projectId, taskId); }} />}
+  const canEdit = workspace.role !== "viewer";
+  const visible = rows?.filter(row => filter === "all" || (filter === "completed" ? row.status === "completed" : isOpen(row)));
+  const openCount = rows?.filter(isOpen).length ?? 0;
+  const link = portal ? `${window.location.origin}/feedback/${portal.slug}` : "";
+  const settings = config && <PortalSettings sessionToken={sessionToken} projectId={projectId} projectName={projectName} portal={portal} onClose={() => setConfig(false)} />;
+
+  if (portals === undefined) return <DelayedSkeleton rows={5} label="Loading feedback" />;
+  if (!portal) return <section className="project-feedback" aria-label="Feedback">
+    <ProjectEmpty icon={MessageSquare} title="No feedback form">{admin && <button className="primary-button compact" onClick={() => setConfig(true)}>Set up feedback</button>}</ProjectEmpty>
+    {settings}
+  </section>;
+
+  return <section className="project-feedback" aria-label="Feedback">
+    <div className="library-toolbar">
+      <div className="segmented-control" role="group" aria-label="Show">{filters.map(item => <button key={item.value} type="button" className={item.value === filter ? "active" : ""} aria-pressed={item.value === filter} onClick={() => setFilter(item.value)}>{item.label}{item.value === "open" && openCount > 0 && <span>{openCount}</span>}</button>)}</div>
+      <span className="library-toolbar-spacer" />
+      {!portal.enabled && <span className="feedback-off">Form off</span>}
+      {portal.enabled && <>
+        <button className={clsx("icon-button", copied && "copied")} aria-label={copied ? "Copied" : "Copy form link"} title="Copy form link" onClick={async () => { try { await navigator.clipboard.writeText(link); setCopied(true); window.clearTimeout(copyTimer.current); copyTimer.current = window.setTimeout(() => setCopied(false), 1600); } catch { setNotice("Copy was blocked by the browser"); } }}>{copied ? <Check size={15} /> : <Copy size={15} />}</button>
+        <a className="icon-button" title="Open form" aria-label="Open form" target="_blank" rel="noreferrer" href={link}><ArrowUpRight size={16} /></a>
+      </>}
+      {admin && <button className="icon-button" title="Form settings" aria-label="Form settings" onClick={() => setConfig(true)}><Settings2 size={16} /></button>}
+    </div>
+    {notice && <p className="notice danger" role="alert">{notice}<button type="button" className="icon-button" aria-label="Dismiss" onClick={() => setNotice("")}><X size={14} /></button></p>}
+    {visible === undefined ? <DelayedSkeleton rows={5} label="Loading feedback" />
+      : !visible.length ? <ProjectEmpty icon={MessageSquare} title={filter === "completed" ? "Nothing completed" : "No feedback"} />
+        : <ul className="feedback-list">{visible.map(row => <li key={row._id} className={clsx("feedback-entry", row.status === "dismissed" && "dismissed")}>
+          <span className={clsx("feedback-kind", row.kind)} aria-label={row.kind === "bug" ? "Bug" : "Idea"}>{row.kind === "bug" ? <Bug size={15} /> : <Lightbulb size={15} />}</span>
+          <div className="feedback-main">
+            <header><strong>{row.title}</strong>{row.status !== "new" && <span className={clsx("feature-status", row.status)}>{row.status}</span>}<time dateTime={new Date(row.createdAt).toISOString()}>{formatRelative(row.createdAt)}</time></header>
+            <p>{row.body}</p>
+          </div>
+          <div className="feedback-actions">
+            {row.taskId ? <button className="ghost-button compact" onClick={() => onOpenTask(portal.projectId, row.taskId!)}><ArrowUpRight size={14} />Open issue</button>
+              : canEdit && row.status !== "dismissed" && <button className="ghost-button compact" onClick={() => setEntry(row)}><CirclePlus size={14} />Create issue</button>}
+            {canEdit && !row.taskId && <button className="icon-button" title={row.status === "dismissed" ? "Restore" : "Dismiss"} aria-label={row.status === "dismissed" ? `Restore ${row.title}` : `Dismiss ${row.title}`} onClick={async () => { try { await dismiss({ sessionToken, teamId: workspace._id, entryId: row._id, dismissed: row.status !== "dismissed" }); } catch (error) { setNotice(errorText(error, "Could not update")); } }}>{row.status === "dismissed" ? <RotateCcw size={14} /> : <X size={14} />}</button>}
+          </div>
+        </li>)}</ul>}
+    {settings}
+    {entry && <ConvertFeedback sessionToken={sessionToken} projectId={portal.projectId} entry={entry} onClose={() => setEntry(null)} onCreated={taskId => { setEntry(null); onOpenTask(portal.projectId, taskId); }} />}
   </section>;
 }
 
 function PortalSettings({ sessionToken, projectId, projectName, portal, onClose }: { sessionToken: string; projectId: Id<"projects">; projectName: string; portal?: Portal; onClose: () => void }) {
   const workspace = useWorkspace(); const save = useMutation(api.feedback.configure);
-  const [title, setTitle] = useState(portal?.title || projectName); const [description, setDescription] = useState(portal?.description || ""); const [enabled, setEnabled] = useState(portal?.enabled || false); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
-  return <Dialog title="Feedback settings" onClose={onClose}><form className="feature-form" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await save({ sessionToken, teamId: workspace._id, projectId, title, description, enabled }); onClose(); } catch (error) { setError(errorText(error, "Could not save")); } finally { setBusy(false); } }}><label>Public title<input value={title} required maxLength={120} onChange={e => setTitle(e.target.value)} /></label><label>Public description<textarea value={description} maxLength={3000} rows={4} onChange={e => setDescription(e.target.value)} /></label><label className="feature-checkbox"><input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} />Enable public feedback form</label><p className="muted">Only the title and description are public.</p>{error && <p className="notice danger" role="alert">{error}</p>}<button className="primary-button compact" disabled={busy}>{busy ? <Loader2 className="spin" size={15} /> : <Check size={15} />}Save settings</button></form></Dialog>;
+  const [title, setTitle] = useState(portal?.title || projectName); const [description, setDescription] = useState(portal?.description || ""); const [enabled, setEnabled] = useState(portal ? portal.enabled : true); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  return <Dialog title="Feedback form" onClose={onClose}><form className="stack-form library-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { await save({ sessionToken, teamId: workspace._id, projectId, title, description, enabled }); onClose(); } catch (error) { setError(errorText(error, "Could not save")); } finally { setBusy(false); } }}>
+    <label>Title<input value={title} required maxLength={120} onChange={e => setTitle(e.target.value)} /></label>
+    <label>Description<textarea value={description} maxLength={3000} rows={3} onChange={e => setDescription(e.target.value)} /></label>
+    <label className="library-check"><input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} />Enable public feedback form</label>
+    {error && <p className="notice danger" role="alert">{error}</p>}
+    <div className="library-form-actions"><button type="button" className="ghost-button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={busy}>{busy && <Loader2 className="spin" size={15} />}Save settings</button></div>
+  </form></Dialog>;
 }
 
 function ConvertFeedback({ sessionToken, projectId, entry, onClose, onCreated }: { sessionToken: string; projectId: Id<"projects">; entry: Entry; onClose: () => void; onCreated: (id: Id<"tasks">) => void }) {
@@ -42,5 +94,14 @@ function ConvertFeedback({ sessionToken, projectId, entry, onClose, onCreated }:
   const board = useQuery(api.tasks.board, { sessionToken, projectId }); const members = useQuery(api.workspaces.members, { sessionToken, teamId: workspace._id });
   const [column, setColumn] = useState(""); const [assignee, setAssignee] = useState(""); const [dueDate, setDueDate] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
   const columns = board?.columns.filter(c => !c.isDone && !/^done$/i.test(c.title)) || [];
-  return <Dialog title="Create issue from feedback" onClose={onClose}><form className="feature-form" onSubmit={async e => { e.preventDefault(); setBusy(true); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || columns[0]?._id) as Id<"columns">, assignedToEmail: assignee, dueDate })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}><strong>{entry.title}</strong><label>Column<select required value={column || columns[0]?._id || ""} onChange={e => setColumn(e.target.value)}>{columns.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label><label>Assigned to<select value={assignee} required onChange={e => setAssignee(e.target.value)}><option value="">Choose a member</option>{members?.map(m => <option key={m._id} value={m.email}>{m.username || m.name}</option>)}</select></label><label>Due date<input type="date" required value={dueDate} onChange={e => setDueDate(e.target.value)} /></label>{error && <p className="notice danger" role="alert">{error}</p>}<button className="primary-button compact" disabled={busy || !columns.length}>{busy ? <Loader2 className="spin" size={15} /> : <CirclePlus size={15} />}Create issue</button></form></Dialog>;
+  return <Dialog title="Create issue" onClose={onClose}><form className="stack-form library-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || columns[0]?._id) as Id<"columns">, assignedToEmail: assignee, dueDate })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}>
+    <p className="library-form-subject">{entry.kind === "bug" ? <Bug size={14} /> : <Lightbulb size={14} />}<span>{entry.title}</span></p>
+    <label>Column<select required value={column || columns[0]?._id || ""} onChange={e => setColumn(e.target.value)}>{columns.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label>
+    <div className="library-form-pair">
+      <label>Assignee<select value={assignee} required onChange={e => setAssignee(e.target.value)}><option value="">Choose</option>{members?.map(m => <option key={m._id} value={m.email}>{displayName(m)}</option>)}</select></label>
+      <label>Due date<input type="date" required value={dueDate} onChange={e => setDueDate(e.target.value)} /></label>
+    </div>
+    {error && <p className="notice danger" role="alert">{error}</p>}
+    <div className="library-form-actions"><button type="button" className="ghost-button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={busy || !columns.length}>{busy ? <Loader2 className="spin" size={15} /> : <CirclePlus size={15} />}Create issue</button></div>
+  </form></Dialog>;
 }
