@@ -10,6 +10,7 @@ import { priorityValidator } from "./lib/validators";
 import { addCommentRecord, createTaskRecord, moveTaskRecord, updateTaskRecord } from "./tasks";
 import { containsMention, mentionToken } from "../lib/issue-mentions";
 import { PAT_PREFIX } from "../lib/mcp-tokens";
+import { compareTaskOrder } from "../lib/task-order";
 
 // Tools for the remote MCP server (app/api/mcp). Every call carries a connector token (OAuth grant or personal
 // access token, both stored as connectorGrants) and runs with the token owner's workspace and project permissions.
@@ -173,7 +174,7 @@ export const issues = query({
         if (text && !`${task.title}\n${task.description ?? ""}\n${issueKey(task._id)}`.toLowerCase().includes(text)) return false;
         return true;
       });
-      const open = tasks.filter(t => !t.done).sort((x, y) => rank.get(columnFor(x)!)! - rank.get(columnFor(y)!)! || x.order - y.order);
+      const open = tasks.filter(t => !t.done).sort((x, y) => rank.get(columnFor(x)!)! - rank.get(columnFor(y)!)! || compareTaskOrder(x, y));
       const completed = tasks.filter(t => t.done).sort((x, y) => y.updatedAt - x.updatedAt);
       for (const task of [...open, ...completed]) {
         if (matched++ < skip) continue;

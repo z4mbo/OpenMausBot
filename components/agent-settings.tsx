@@ -5,6 +5,7 @@ import { Check, Copy, KeyRound, Loader2, Plug, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { useWorkspace } from "./workspace-context";
 import { localAppOrigin } from "@/lib/client-api";
+import { errorText } from "@/lib/error-text";
 import "./agent-settings.css";
 
 const CLIENTS = ["Claude Code", "Codex", "OpenCode", "omp", "T3 Code", "ChatGPT"] as const;
@@ -45,7 +46,7 @@ export function AgentSettings({ sessionToken }: { sessionToken: string }) {
   const url = typeof window === "undefined" ? "" : `${localAppOrigin()}/api/mcp`;
   const setup = clientSetup(client, url, created?.token);
   const active = grants?.filter(g => !g.revoked && g.expiresAt > now);
-  const attempt = async (fn: () => Promise<void>) => { setBusy(true); setNotice(""); try { await fn(); } catch (e) { setNotice(e instanceof Error ? e.message.replace(/^.*Uncaught Error: /s, "").split("\n")[0] : "Something went wrong"); } finally { setBusy(false); } };
+  const attempt = async (fn: () => Promise<void>) => { setBusy(true); setNotice(""); try { await fn(); } catch (e) { setNotice(errorText(e, "Something went wrong")); } finally { setBusy(false); } };
   const submit = (event: FormEvent) => { event.preventDefault(); void attempt(async () => { const result = await createToken({ sessionToken, teamId: workspace._id, name: name.trim(), write: write && canWrite, days }); setCreated({ token: result.token, name: name.trim() }); setName(""); }); };
 
   return <div className="agent-settings">
