@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useQuery } from "convex/react";
@@ -84,9 +85,7 @@ export function ChatView(props: Props) {
       } catch (error) {
         if (!controller.signal.aborted)
           setNotice(
-            error instanceof Error
-              ? error.message
-              : "Could not load direct messages",
+            errorText(error, "Could not load direct messages"),
           );
       } finally {
         busy = false;
@@ -124,7 +123,7 @@ export function ChatView(props: Props) {
       await refreshConversations();
     } catch (error) {
       setNotice(
-        error instanceof Error ? error.message : "Could not open conversation",
+        errorText(error, "Could not open conversation"),
       );
     } finally {
       setOpening(null);

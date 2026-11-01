@@ -1,3 +1,4 @@
+import { errorText } from "@/lib/error-text";
 export type SyncState = { saving: boolean; error: string; pending: number };
 
 // A queue outlives its editor so navigating during a save cannot drop later edits.
@@ -26,7 +27,7 @@ export class DocumentSyncQueue {
       this.publish(true);
       try { await this.send(batch); }
       catch (error) {
-        this.publish(false, error instanceof Error ? error.message : "Changes have not synced");
+        this.publish(false, errorText(error, "Changes have not synced"));
         return;
       }
       this.updates.splice(0, batch.length);

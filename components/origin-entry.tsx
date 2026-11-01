@@ -1,10 +1,12 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { flushSync } from "react-dom";
 import { ArrowRight, Eye, EyeOff, Loader2, Users } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { WorkspaceContext } from "./workspace-context";
@@ -32,7 +34,7 @@ export function OriginEntry() {
   const workspace = workspaces?.find(w => w.slug === slug);
   useEffect(() => { setToken(localStorage.getItem("origin.sessionToken")); setReady(true); }, []);
   useEffect(() => {
-    if (token && user) void ensureLegacy({ sessionToken: token }).catch(error => setNotice(error.message));
+    if (token && user) void ensureLegacy({ sessionToken: token }).catch(error => setNotice(errorText(error, "Could not open your workspace")));
   }, [token, user?._id, ensureLegacy]);
   useEffect(() => {
     if (!token || !user || !workspaces?.length || inviteToken) return;
@@ -41,8 +43,14 @@ export function OriginEntry() {
       router.replace(`/${preferred.slug}`);
     }
   }, [token, user, workspaces, inviteToken, slug, router]);
-  const saveSession = (sessionToken: string, destination?: string | null) => {
-    localStorage.setItem("origin.sessionToken", sessionToken); setToken(sessionToken);
+  const saveSession = async (sessionToken: string, destination?: string | null) => {
+    localStorage.setItem("origin.sessionToken", sessionToken);
+    // Signing in or up from an invitation link joins right away instead of asking again.
+    if (inviteToken) {
+      try { const result = await acceptInvite({ sessionToken, token: inviteToken }); setToken(sessionToken); router.replace(`/${result.slug}`); return; }
+      catch (error) { setNotice(errorText(error, "Could not join")); }
+    }
+    setToken(sessionToken);
     if (!inviteToken && destination) router.replace(`/${destination}`);
   };
   if (!ready && path === "/" && customHomePage) return <HomePage />;
@@ -51,14 +59,14 @@ export function OriginEntry() {
     if (path === "/" && customHomePage) return <HomePage />;
     return <PublicAuth signup={path === "/signup"} inviteToken={inviteToken} invitation={invitation} onSession={saveSession} />;
   }
-  if (inviteToken) return <main className="public-auth"><Link className="origin-wordmark" href="/">Origin</Link><section className="auth-content"><Users size={28} /><h1>{invitation ? `Join ${invitation.name}` : invitation === undefined ? "Loading invitation" : "Invitation unavailable"}</h1><p className="muted">{invitation ? `Signed in as ${user.email}` : "This link may have expired or been revoked."}</p>{notice && <p className="notice danger">{notice}</p>}{invitation && <button className="primary-button" onClick={async () => { try { const result = await acceptInvite({ sessionToken: token, token: inviteToken }); router.replace(`/${result.slug}`); } catch (error) { setNotice(error instanceof Error ? error.message : "Could not join"); } }}>Join workspace <ArrowRight size={16} /></button>}<Link href="/">Back to Origin</Link></section></main>;
+  if (inviteToken) return <main className="public-auth"><Link className="origin-wordmark" href="/">Origin</Link><section className="auth-content"><Users size={28} /><h1>{invitation ? `Join ${invitation.name}` : invitation === undefined ? "Loading invitation" : "Invitation unavailable"}</h1><p className="muted">{invitation ? `Signed in as ${user.email}` : "This link may have expired or been revoked."}</p>{notice && <p className="notice danger">{notice}</p>}{invitation && <button className="primary-button" onClick={async () => { try { const result = await acceptInvite({ sessionToken: token, token: inviteToken }); router.replace(`/${result.slug}`); } catch (error) { setNotice(errorText(error, "Could not join")); } }}>Join workspace <ArrowRight size={16} /></button>}<Link href="/">Back to Origin</Link></section></main>;
   if (workspaces === undefined) return <WorkspaceSkeleton />;
   if (!workspaces.length) return <WorkspaceOnboarding sessionToken={token} onCreated={s => router.replace(`/${s}`)} />;
   if (!workspace) return <main className="public-auth"><section className="auth-content"><h1>Your workspaces</h1>{workspaces.map(w => <Link className="workspace-choice" href={`/${w.slug}`} key={w._id}><span>{w.name}</span><ArrowRight size={16} /></Link>)}{notice && <p className="notice danger">{notice}</p>}</section></main>;
-  return <WorkspaceContext.Provider value={workspace}><OriginWorkspace key={workspace._id} sessionToken={token} user={user} workspaces={workspaces} onLogout={async () => { await logout({ sessionToken: token }); localStorage.removeItem("origin.sessionToken"); setToken(null); router.replace("/login"); }} /></WorkspaceContext.Provider>;
+  return <WorkspaceContext.Provider value={workspace}><OriginWorkspace key={workspace._id} sessionToken={token} user={user} workspaces={workspaces} onLogout={async () => { localStorage.removeItem("origin.sessionToken"); flushSync(() => setToken(null)); router.replace("/login"); await logout({ sessionToken: token }).catch(() => { /* The session is gone locally either way. */ }); }} /></WorkspaceContext.Provider>;
 }
 
-function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession }: { signup: boolean; inviteToken?: string; invitation?: { name: string; role: string; email?: string } | null; onSession: (token: string, slug?: string | null) => void }) {
+function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession }: { signup: boolean; inviteToken?: string; invitation?: { name: string; role: string; email?: string } | null; onSession: (token: string, slug?: string | null) => Promise<void> }) {
   const [signup, setSignup] = useState(initialSignup);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -78,15 +86,16 @@ function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession 
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setBusy(true); setError("");
     try {
-      if (signup) { const result = await register({ email, password, name, ...(inviteToken ? { inviteToken } : { workspaceName, slug }) }); onSession(result.sessionToken, result.slug); }
-      else { const result = await login({ email, password }); onSession(result.sessionToken); }
-    } catch (error) { setError(error instanceof Error ? error.message.replace(/\[CONVEX[^\]]*\]\s*/g, "").replace(/Uncaught Error: /g, "") : "Please try again"); }
+      if (signup) { const result = await register({ email, password, name, ...(inviteToken ? { inviteToken } : { workspaceName, slug }) }); await onSession(result.sessionToken, result.slug); }
+      else { const result = await login({ email, password }); await onSession(result.sessionToken); }
+    } catch (error) { setError(errorText(error, "Please try again")); }
     finally { setBusy(false); }
   };
   return <main className="public-auth"><nav><Link className="origin-wordmark" href="/">Origin</Link>{customHomePage && <Link href="/">Back to home</Link>}</nav><section className="auth-content">
     
     <h1>{invitation ? `Join ${invitation.name}` : signup ? "Make room for your next idea." : "Welcome back."}</h1>
-    <p className="muted">{signup ? "Create your account and bring your team together." : "Sign in to your workspace."}</p>
+    <p className="muted">{invitation ? signup ? "Create your account to join." : "Sign in to join." : signup ? "Create your account and bring your team together." : "Sign in to your workspace."}</p>
+    {inviteToken && invitation === null && <p className="notice danger">This invitation has expired or was revoked.</p>}
     {signup && inviteOnly ? <p className="notice">This Origin instance is invite-only. Ask a workspace admin for an invitation link.</p> : <form className="stack-form" onSubmit={submit}>
       {signup && <label>Your name<input autoComplete="name" value={name} onChange={e => setName(e.target.value)} required maxLength={100} placeholder="Alex Smith" /></label>}
       <label>Email<input autoComplete="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" /></label>
@@ -103,5 +112,5 @@ export function WorkspaceOnboarding({ sessionToken, onCreated }: { sessionToken:
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  return <main className="public-auth"><section className="auth-content"><Users size={28} /><h1>Create your workspace</h1><form className="stack-form" onSubmit={async e => { e.preventDefault(); setBusy(true); try { const result = await create({ sessionToken, name }); onCreated(result.slug); } catch (error) { setError(error instanceof Error ? error.message : "Could not create workspace"); } finally { setBusy(false); } }}><label>Workspace name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<button className="primary-button" disabled={busy}>Create workspace<ArrowRight size={16} /></button></form></section></main>;
+  return <main className="public-auth"><section className="auth-content"><Users size={28} /><h1>Create your workspace</h1><form className="stack-form" onSubmit={async e => { e.preventDefault(); setBusy(true); try { const result = await create({ sessionToken, name }); onCreated(result.slug); } catch (error) { setError(errorText(error, "Could not create workspace")); } finally { setBusy(false); } }}><label>Workspace name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<button className="primary-button" disabled={busy}>Create workspace<ArrowRight size={16} /></button></form></section></main>;
 }

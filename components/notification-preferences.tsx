@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Check, Loader2 } from "lucide-react";
@@ -22,7 +23,7 @@ function PreferenceForm({ sessionToken, initial }: { sessionToken: string; initi
   return <form className="stack-form settings-section" onSubmit={async event => {
     event.preventDefault(); setBusy(true); setNotice("");
     try { await save({ sessionToken, teamId: workspace._id, ...values }); setNotice("Notification preferences saved"); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Could not save preferences"); }
+    catch (error) { setNotice(errorText(error, "Could not save preferences")); }
     finally { setBusy(false); }
   }}>
     {(["assignments", "comments", "mentions"] as const).map(key => <label className="notification-setting" key={key}><span>{key === "assignments" ? "New assignments" : key === "comments" ? "Issue comments" : "Chat mentions"}</span><input type="checkbox" role="switch" checked={values[key]} onChange={event => setValues(current => ({ ...current, [key]: event.target.checked }))} /></label>)}

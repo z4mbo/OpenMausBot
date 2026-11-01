@@ -1,4 +1,5 @@
 "use client";
+import { formatBytes } from "@/lib/format-bytes";
 import { useEffect, useState } from "react";
 import { Download, File, Loader2, RotateCw } from "lucide-react";
 import { localFetch } from "@/lib/client-api";
@@ -25,7 +26,7 @@ export function LocalAttachment({ file, sessionToken, scope }: { file: { id: str
     {url && video && <video controls preload="metadata" src={url} aria-label={`Play ${file.name}`} />}
     <a className={`message-file ${image ? "image-attachment" : ""}`} href={url || undefined} download={file.name} aria-disabled={!url}>
       {image && url ? <img src={url} alt={file.name} loading="lazy" /> : <File size={24} />}
-      <span><strong>{file.name}</strong><small>{error ? "Download unavailable" : `${Math.max(1, Math.round(file.size / 1024))} KB`}</small></span>
+      <span><strong>{file.name}</strong><small>{error ? "Download unavailable" : formatBytes(file.size)}</small></span>
       {url ? <Download size={15} /> : !error && <Loader2 className="spin" size={15} />}
     </a>
     {error && <button className="icon-button" aria-label={`Retry ${file.name}`} title="Retry download" onClick={() => setRetry(value => value + 1)}><RotateCw size={14} /></button>}

@@ -233,7 +233,8 @@ export async function sendLocalVoiceSignal(user: LocalWorkspaceUser, toUserId: I
   if (toUserId === user._id || !["offer", "answer", "candidate"].includes(kind) || typeof payload !== "string" || !payload || payload.length > 80000) throw new Error("Invalid call signal");
   const active = await listLocalVoiceParticipants(user);
   const sender = active.find(p => p.userId === user._id), recipient = active.find(p => p.userId === toUserId);
-  if (!sender || !recipient) throw new Error("Both participants must be in this workspace call");
+  // A peer that just left (or a stale participant list on the sender) is a normal race, not a client error.
+  if (!sender || !recipient) return null;
   if ((fromJoinedAt !== undefined && fromJoinedAt !== sender.joinedAt) || (toJoinedAt !== undefined && toJoinedAt !== recipient.joinedAt)) return null;
   const signal: LocalVoiceSignal = { id: crypto.randomUUID(), fromUserId: user._id, toUserId, fromJoinedAt: sender.joinedAt, toJoinedAt: recipient.joinedAt, kind, payload, createdAt: Date.now() };
   db().prepare("INSERT INTO signals VALUES(?,?,?,?,?,?)").run(signal.id, user.teamId, toUserId, user._id, signal.createdAt, JSON.stringify(signal)); return signal;

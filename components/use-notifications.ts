@@ -15,7 +15,8 @@ export function useNotifications(sessionToken: string | undefined, teamId: Id<"t
   useEffect(() => {
     if (!userId || !teamId) return;
     setSound(localStorage.getItem(preference) !== "off"); last.current = undefined;
-    const unlock = () => { try { context.current ||= new AudioContext(); void context.current.resume().catch(() => {}); } catch { /* Audio is optional. */ } };
+    // Escape does not count as a user gesture, so creating audio then only logs an autoplay warning.
+    const unlock = (event: Event) => { if (event instanceof KeyboardEvent && event.key === "Escape") return; try { context.current ||= new AudioContext(); void context.current.resume().catch(() => {}); } catch { /* Audio is optional. */ } };
     window.addEventListener("pointerdown", unlock); window.addEventListener("keydown", unlock);
     return () => { window.removeEventListener("pointerdown", unlock); window.removeEventListener("keydown", unlock); void context.current?.close(); context.current = null; };
   }, [preference, teamId, userId]);

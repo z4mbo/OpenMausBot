@@ -6,6 +6,8 @@ import "./features.css";
 import "./project-workflow.css";
 import "./experience.css";
 import "./workspace-refinement.css";
+// Loaded globally: CSS imported only inside the dynamically loaded workspace chunk is never attached in dev.
+import "@/components/project-issues.css";
 import { Providers } from "./providers";
 import { bodyFont, displayFont, monoFont } from "@/lib/fonts";
 import { siteUrl } from "@/lib/site";

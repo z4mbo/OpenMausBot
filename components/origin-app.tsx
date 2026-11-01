@@ -1,4 +1,5 @@
 "use client";
+import { errorText, mediaErrorText } from "@/lib/error-text";
 
 import { useMutation, useQuery } from "convex/react";
 import { BoardTab, TaskModal } from "./project-issues";
@@ -15,6 +16,7 @@ import {
   CircleDot,
   Power,
   RotateCcw,
+  CircleAlert,
   Copy,
   ExternalLink,
   FileText,
@@ -75,6 +77,7 @@ import { useProjectPresence } from "./use-project-presence";
 import { Dialog } from "./dialog";
 import { MotionLayer } from "./motion-layer";
 import { WhatsNew } from "./whats-new";
+import { ErrorBoundary } from "./error-boundary";
 import { IssueComposer } from "./issue-composer";
 import { InboxView } from "./inbox-view";
 import { CallDevices } from "./call-devices";
@@ -107,6 +110,7 @@ type AuthUser = {
   username?: string;
   email: string;
   avatarUrl?: string | null;
+  createdAt?: number;
   role: "owner" | "user";
   status: "active" | "disabled";
 };
@@ -291,7 +295,7 @@ function useGitHubSnapshot(projectId: Id<"projects">, repoUrl: string | undefine
       .catch((issue) => {
         if (alive) {
           setSnapshot(null);
-          setError(issue instanceof Error ? issue.message : "GitHub sync failed");
+          setError(errorText(issue, "GitHub sync failed"));
         }
       })
       .finally(() => {
@@ -335,6 +339,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
   const [memberEmail, setMemberEmail] = useState<string | null>(null);
   const [linkedTask, setLinkedTask] = useState<{ projectId: Id<"projects">; taskId: Id<"tasks"> } | null>(null);
+  const [initialIssue, setInitialIssue] = useState<{ projectId: Id<"projects">; taskId: Id<"tasks"> } | null>(null);
   const reorder = useMutation(api.projects.reorder);
   const projects = useQuery(api.projects.listForUser, { sessionToken, teamId: workspace._id });
   const viewLoading = useContentTransition(`${workspace._id}:${mainView}:${mainView === "project" ? activeProjectId : ""}`);
@@ -370,7 +375,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
     const project = params.get("project");
     if (project) setActiveProjectId(project as Id<"projects">);
     const issue = params.get("issue");
-    if (project && issue) setLinkedTask({ projectId: project as Id<"projects">, taskId: issue as Id<"tasks"> });
+    if (project && issue) setInitialIssue({ projectId: project as Id<"projects">, taskId: issue as Id<"tasks"> });
   }, [workspace.slug]);
 
   useEffect(() => {
@@ -404,10 +409,13 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
 
   const openProject = (projectId: Id<"projects">) => {
     setActiveProjectId(projectId);
+    setInitialIssue(null);
     setMainView("project");
     setMobileOpen(false);
     window.history.replaceState(null, "", `/${workspace.slug}?project=${projectId}`);
   };
+  const openIssue = (projectId: Id<"projects">, taskId: Id<"tasks">) => { setLinkedTask(null); openProject(projectId); setInitialIssue({ projectId, taskId }); };
+  const openReference = (projectId: Id<"projects">, taskId?: Id<"tasks">) => { if (taskId) setLinkedTask({ projectId, taskId }); else { setLinkedTask(null); openProject(projectId); } };
   const openView = (view: MainView) => {
     setMainView(view); setMobileOpen(false);
     window.history.replaceState(null, "", `/${workspace.slug}?view=${view}`);
@@ -418,7 +426,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
     ids.splice(ids.indexOf(target), 0, dragProject);
     changeProjectSort("manual"); setProjectOrder(ids); setDragProject(null);
     try { await reorder({ sessionToken, teamId: workspace._id, projectIds: ids }); }
-    catch (error) { setShellNotice(error instanceof Error ? error.message : "Could not reorder projects"); }
+    catch (error) { setShellNotice(errorText(error, "Could not reorder projects")); }
     finally { setProjectOrder(null); }
   };
 
@@ -434,7 +442,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
           <button className="icon-button" type="button" onClick={() => setSearchOpen(true)} aria-label="Search" title="Search (F or ⌘K)" aria-keyshortcuts="f Meta+K Control+K /">
             <Search size={17} />
           </button>
-          <button className="icon-button sidebar-new-issue" title="Create issue (C)" aria-label="Create issue" aria-keyshortcuts="C" onClick={() => setIssueOpen(true)}><SquarePen size={17} /></button>
+          <button className="icon-button sidebar-new-issue" title="Create issue (C)" aria-label="Create issue" aria-keyshortcuts="C" disabled={workspace.role === "viewer"} onClick={() => setIssueOpen(true)}><SquarePen size={17} /></button>
         </div>
         <div className="sidebar-content">
           <span className="nav-glider" aria-hidden="true"><span className="nav-glider-avatar"><UserAvatar user={user} size="small" /></span></span>
@@ -472,7 +480,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
             {projects === undefined ? <LoadingState label="Projects" /> : null}
               {projectsOpen && <div className="sidebar-project-list">
                 {(["active", "inactive"] as const).map(group => <div className="sidebar-project-group" key={group}>
-                {group !== "active" && <button className="section-toggle project-group-toggle" aria-expanded={projectGroupsOpen[group]} onClick={() => setProjectGroupsOpen(current => ({ ...current, [group]: !current[group] }))}>{projectGroupsOpen[group] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}<span>Inactive</span><small>{sidebarProjects?.filter(project => project.status !== "active").length || 0}</small></button>}
+                {group !== "active" && sidebarProjects?.some(project => project.status !== "active") && <button className="section-toggle project-group-toggle" aria-expanded={projectGroupsOpen[group]} onClick={() => setProjectGroupsOpen(current => ({ ...current, [group]: !current[group] }))}>{projectGroupsOpen[group] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}<span>Inactive</span><small>{sidebarProjects?.filter(project => project.status !== "active").length || 0}</small></button>}
                 {(group === "active" ? projectsOpen : projectGroupsOpen[group]) && sidebarProjects?.filter(project => group === "active" ? project.status === "active" : project.status !== "active").map((project) => {
                   const viewers = (viewersByProject.get(project._id) || []).sort((a, b) => Number(b.self) - Number(a.self));
                   return (
@@ -500,30 +508,32 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
               </div>}
           </div>
         </div>
-        <WhatsNew userId={user._id} />
+        <WhatsNew userId={user._id} createdAt={user.createdAt} />
       </aside>
       {!sidebarCollapsed && <SidebarResizeHandle width={sidebarLayout.width} onResize={width => setSidebarLayout(current => ({ ...current, width }))} onCollapse={width => { setSidebarLayout({ width, collapsed: true }); setSidebarHover(false); }} />}
       <main ref={workspaceRef} className={clsx("workspace", mainView === "draw" && "draw-workspace", viewLoading && "view-loading")} aria-busy={viewLoading}>
         {sidebarCollapsed && <button className="icon-button sidebar-restore" aria-label="Keep sidebar open" title="Keep sidebar open" aria-controls="workspace-sidebar" aria-expanded="false" onClick={() => { setSidebarCollapsed(false); setSidebarHover(false); }}><PanelLeftOpen size={18} /></button>}
         {viewLoading && <div className="view-loading-overlay"><ContentSkeleton kind={mainView === "chat" ? "chat" : mainView === "draw" ? "canvas" : mainView === "project" || mainView === "voice" ? "board" : "list"} label="Loading view" rows={6} /></div>}
         {shellNotice && <div className="notice danger">{shellNotice}<button className="icon-button" aria-label="Dismiss" onClick={() => setShellNotice("")}><X size={14} /></button></div>}
+        <ErrorBoundary resetKey={`${mainView}:${activeProjectId}`} fallback={<EmptyBlock icon={CircleAlert} title="This view could not load" body="It may have been deleted or your access changed." />}>
         {mainView === "chat" ? (
-          <ChatView sessionToken={sessionToken} user={user} focusMessageId={chatFocus} onOpenReference={(projectId, taskId) => { if (taskId) setLinkedTask({ projectId, taskId }); else openProject(projectId); }} />
+          <ChatView sessionToken={sessionToken} user={user} focusMessageId={chatFocus} onOpenReference={openReference} />
         ) : mainView === "draw" || mainView === "voice" ? null
         : mainView === "inbox" ? (
           <InboxView sessionToken={sessionToken} unread={notifications.summary?.unread || 0} onOpenProject={openProject} onOpenChat={messageId => { setChatFocus(messageId); openView("chat"); }} onOpenTask={(projectId, taskId) => setLinkedTask({ projectId, taskId })} />
         ) : activeProjectId ? (
-          <ProjectWorkspace key={activeProjectId} projectId={activeProjectId} sessionToken={sessionToken} user={user} viewers={projectViewers.filter(v => v.projectId === activeProjectId)} />
+          <ProjectWorkspace key={activeProjectId} projectId={activeProjectId} sessionToken={sessionToken} user={user} viewers={projectViewers.filter(v => v.projectId === activeProjectId)} initialTaskId={initialIssue?.projectId === activeProjectId ? initialIssue.taskId : undefined} onOpenReference={(projectId, taskId) => { if (taskId) openIssue(projectId, taskId); else openProject(projectId); }} />
         ) : (
           <EmptyProjects sessionToken={sessionToken} onCreated={openProject} />
         )}
+        </ErrorBoundary>
         {visitedTools.draw && <div className="persistent-tool draw-tool" hidden={mainView !== "draw"}><DrawView sessionToken={sessionToken} user={user} /></div>}
         {visitedTools.voice && <div className="persistent-tool voice-tool" hidden={mainView !== "voice"}><VoiceChatView sessionToken={sessionToken} user={user} /></div>}
       </main>
       {issueOpen && <IssueComposer sessionToken={sessionToken} activeProjectId={mainView === "project" ? activeProjectId : null} projects={sidebarProjects || []} onClose={() => setIssueOpen(false)} onCreated={openProject} />}
       {createWorkspaceOpen && <CreateWorkspaceDialog sessionToken={sessionToken} onClose={() => setCreateWorkspaceOpen(false)} />}
       {memberEmail && <MemberProfile key={memberEmail} email={memberEmail} sessionToken={sessionToken} onClose={() => setMemberEmail(null)} onOpenIssue={(projectId, taskId) => { openProject(projectId); setLinkedTask({ projectId, taskId }); }} />}
-      {linkedTask && projects?.find(p => p._id === linkedTask.projectId) && <TaskModal project={projects.find(p => p._id === linkedTask.projectId)!} projectId={linkedTask.projectId} taskId={linkedTask.taskId} sessionToken={sessionToken} canEdit={projects.find(p => p._id === linkedTask.projectId)!.memberRole !== "viewer"} onClose={() => setLinkedTask(null)} />}
+      {linkedTask && projects?.find(p => p._id === linkedTask.projectId) && <TaskModal project={projects.find(p => p._id === linkedTask.projectId)!} projectId={linkedTask.projectId} taskId={linkedTask.taskId} sessionToken={sessionToken} canEdit={projects.find(p => p._id === linkedTask.projectId)!.memberRole !== "viewer"} onClose={() => setLinkedTask(null)} onOpenReference={openReference} />}
       {searchOpen ? (
         <SearchDialog
           activeProjectId={activeProjectId}
@@ -608,6 +618,7 @@ function ProfileSettings({ user, sessionToken }: { user: AuthUser; sessionToken:
     try {
       let avatarStorageId: Id<"_storage"> | undefined;
       if (avatarFile) {
+        if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(avatarFile.type) || avatarFile.size > 5 * 1024 * 1024) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
         const uploadUrl = await generateAvatarUploadUrl({ sessionToken });
         const res = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": avatarFile.type || "application/octet-stream" }, body: avatarFile });
         if (!res.ok) throw new Error("Avatar upload failed");
@@ -623,7 +634,7 @@ function ProfileSettings({ user, sessionToken }: { user: AuthUser; sessionToken:
       setAvatarFile(null);
       setNotice("Profile updated");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Profile update failed");
+      setNotice(errorText(error, "Profile update failed"));
     }
   };
   return (
@@ -649,10 +660,10 @@ function PasswordChanger({ sessionToken }: { sessionToken: string }) {
     try {
       await changePassword({ sessionToken, currentPassword, newPassword });
       setCurrentPassword(""); setNewPassword(""); setNotice("Password changed");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Password change failed"); }
+    } catch (error) { setNotice(errorText(error, "Password change failed")); }
   };
   if (!open) return <button className="ghost-button full" type="button" onClick={() => setOpen(true)}><KeyRound size={16} /> Change password</button>;
-  return <form className="mini-form" onSubmit={submit}><input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" placeholder="Current password" /><input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="New password" />{notice ? <div className="notice">{notice}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit">Save</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form>;
+  return <form className="mini-form" onSubmit={submit}><input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" placeholder="Current password" aria-label="Current password" autoComplete="current-password" required maxLength={128} autoFocus /><input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="New password (10+ characters)" aria-label="New password" autoComplete="new-password" required minLength={10} maxLength={128} />{notice ? <div className="notice">{notice}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit">Save</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form>;
 }
 
 function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { sessionToken: string; onCreated: (id: Id<"projects">) => void; iconOnly?: boolean }) {
@@ -660,7 +671,10 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
   const createProject = useMutation(api.projects.create);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [repoMode, setRepoMode] = useState<"create" | "existing">("create");
+  const github = useQuery(api.integrations.status, open ? { sessionToken, teamId: workspace._id } : "skip");
+  const [chosenRepoMode, setRepoMode] = useState<"create" | "existing" | "later" | null>(null);
+  // Without a connected GitHub account a "create" request would only sit pending, so default to no repository.
+  const repoMode = chosenRepoMode ?? (github?.login && github.autoCreate ? "create" : "later");
   const [repoUrl, setRepoUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -670,18 +684,19 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
     setBusy(true);
     setError("");
     try {
-      const id = await createProject({ name, sessionToken, teamId: workspace._id, repoUrl: repoMode === "existing" ? repoUrl : undefined });
+      const id = await createProject({ name, sessionToken, teamId: workspace._id, repoUrl: repoMode === "existing" ? repoUrl : undefined, ...(repoMode === "later" ? { githubRepo: "later" as const } : {}) });
       setName("");
       setRepoUrl("");
+      setRepoMode(null);
       setOpen(false);
       onCreated(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Project creation failed");
+      setError(errorText(err, "Project creation failed"));
     } finally {
       setBusy(false);
     }
   };
-  return <><button className={clsx("ghost-button", iconOnly ? "icon-create" : "full")} type="button" aria-label="Create project" title="Create project" disabled={workspace.role === "viewer"} onClick={() => setOpen(true)}><Plus size={14} strokeWidth={1.5} />{iconOnly ? null : "New project"}</button>{open && <Dialog title="New project" onClose={() => setOpen(false)}><form className="dialog-body stack-form" onSubmit={submit}><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Project name" autoFocus required maxLength={100} /></label><fieldset className="repo-choice"><legend>Repository</legend><label><input type="radio" name="repository-mode" checked={repoMode === "create"} onChange={() => setRepoMode("create")} />Create a private repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "existing"} onChange={() => setRepoMode("existing")} />Link an existing repository</label></fieldset>{repoMode === "existing" && <label>GitHub repository<input value={repoUrl} onChange={event => setRepoUrl(event.target.value)} placeholder="owner/repository" required /></label>}<WorkspaceGitHubSetup sessionToken={sessionToken} />{error ? <div className="notice danger">{error}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit" disabled={busy}>{busy ? "Creating..." : "Create project"}</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form></Dialog>}</>;
+  return <><button className={clsx("ghost-button", iconOnly ? "icon-create" : "full")} type="button" aria-label="Create project" title="Create project" disabled={workspace.role === "viewer"} onClick={() => setOpen(true)}><Plus size={14} strokeWidth={1.5} />{iconOnly ? null : "New project"}</button>{open && <Dialog title="New project" onClose={() => setOpen(false)}><form className="dialog-body stack-form" onSubmit={submit}><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Project name" autoFocus required maxLength={100} /></label><fieldset className="repo-choice"><legend>Repository</legend><label><input type="radio" name="repository-mode" checked={repoMode === "create"} onChange={() => setRepoMode("create")} />Create a private repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "existing"} onChange={() => setRepoMode("existing")} />Link an existing repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "later"} onChange={() => setRepoMode("later")} />No repository</label></fieldset>{repoMode === "existing" && <label>GitHub repository<input value={repoUrl} onChange={event => setRepoUrl(event.target.value)} placeholder="owner/repository" required /></label>}<WorkspaceGitHubSetup sessionToken={sessionToken} />{error ? <div className="notice danger">{error}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit" disabled={busy}>{busy ? "Creating..." : "Create project"}</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form></Dialog>}</>;
 }
 
 
@@ -846,7 +861,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
     const send = (kind: "offer" | "answer" | "candidate", payload: string) => sendPeerSignal(remoteUserId, kind, payload, fromSession, toSession);
     const signaling = createCallSignaling(connection, user._id.toString() < key, send);
     signalingRef.current.set(key, signaling);
-    const signalError = (error: unknown) => { if (joinedRef.current && peerConnectionsRef.current.get(key) === connection) setNotice(error instanceof Error ? error.message : "Could not connect call"); };
+    const signalError = (error: unknown) => { if (joinedRef.current && peerConnectionsRef.current.get(key) === connection) setNotice(errorText(error, "Could not connect call")); };
     connection.onnegotiationneeded = () => { void signaling.offer().catch(signalError); };
     const stream = localStreamRef.current;
     const audioTrack = stream?.getAudioTracks()[0];
@@ -912,6 +927,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       return;
     }
     let stream: MediaStream | null = null;
+    let mediaIssue = "";
     setJoining(true);
     setDevicesOpen(false);
     try {
@@ -919,8 +935,11 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       iceServersRef.current = configuration.iceServers;
       try {
         stream = audioEnabled || videoEnabled ? await navigator.mediaDevices.getUserMedia({ audio: audioEnabled ? { ...(audioDevice ? { deviceId: { exact: audioDevice } } : {}), echoCancellation: true, noiseSuppression: true } : false, video: videoEnabled ? { ...(videoDevice ? { deviceId: { exact: videoDevice } } : {}), width: { ideal: 1280 }, height: { ideal: 720 } } : false }) : new MediaStream();
-      } catch {
-        stream = audioEnabled ? await navigator.mediaDevices.getUserMedia({ audio: audioDevice ? { deviceId: { exact: audioDevice }, echoCancellation: true } : true, video: false }) : new MediaStream();
+      } catch (error) {
+        // Fall back to audio only, then to listening only, so a missing or blocked device never blocks joining.
+        try { stream = audioEnabled ? await navigator.mediaDevices.getUserMedia({ audio: audioDevice ? { deviceId: { exact: audioDevice }, echoCancellation: true } : true, video: false }) : new MediaStream(); }
+        catch (audioError) { stream = new MediaStream(); mediaIssue = mediaErrorText(audioError); }
+        if (!mediaIssue && videoEnabled) mediaIssue = mediaErrorText(error, "camera");
       }
       const hasAudio = stream.getAudioTracks().length > 0;
       const hasVideo = stream.getVideoTracks().length > 0;
@@ -942,10 +961,10 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       setJoinedAt(Date.now());
       setAudioEnabled(hasAudio);
       setVideoEnabled(hasVideo);
-      setNotice("");
+      setNotice(mediaIssue);
     } catch (error) {
       stream?.getTracks().forEach((track) => track.stop());
-      if (mountedRef.current) setNotice(error instanceof Error ? error.message : "Could not start call");
+      if (mountedRef.current) setNotice(errorText(error, "Could not start call"));
     } finally { if (mountedRef.current) setJoining(false); }
   };
   const leaveCall = async () => {
@@ -986,7 +1005,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
     } catch (error) {
       screen?.getTracks().forEach(track => track.stop());
       await stopSharing();
-      if (!(error instanceof DOMException && error.name === "NotAllowedError")) setNotice(error instanceof Error ? error.message : "Could not share screen");
+      if (!(error instanceof DOMException && error.name === "NotAllowedError")) setNotice(errorText(error, "Could not share screen"));
     } finally { sharingRef.current = false; }
   };
   useEffect(() => { if (!joinedAt) return; const tick = () => setElapsed(Math.floor((Date.now() - joinedAt) / 1000)); tick(); const timer = setInterval(tick, 1000); return () => clearInterval(timer); }, [joinedAt]);
@@ -1055,7 +1074,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
         const result = await localApi<{ signals: LocalVoiceSignal[] }>("/api/local-voice/signals", sessionToken);
         if (alive) setSignals(result.signals);
       } catch (error) {
-        if (alive) setNotice(error instanceof Error ? error.message : "Could not load call signals");
+        if (alive) setNotice(errorText(error, "Could not load call signals"));
       }
     };
     void load();
@@ -1103,7 +1122,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
         try {
           await signalingRef.current.get(signal.fromUserId)?.receive(signal.kind, signal.payload);
         } catch (error) {
-          setNotice(error instanceof Error ? error.message : "Call connection failed");
+          setNotice(errorText(error, "Call connection failed"));
         }
       }
       if (ackIds.length) {
@@ -1226,20 +1245,21 @@ function CallVideoTile({
   );
 }
 
-function ProjectWorkspace({ projectId, sessionToken, user, viewers }: { projectId: Id<"projects">; sessionToken: string; user: AuthUser; viewers: Array<AvatarUser & { userId: string }> }) {
+function ProjectWorkspace({ projectId, sessionToken, user, viewers, initialTaskId, onOpenReference }: { projectId: Id<"projects">; sessionToken: string; user: AuthUser; viewers: Array<AvatarUser & { userId: string }>; initialTaskId?: Id<"tasks">; onOpenReference: (projectId: Id<"projects">, taskId?: Id<"tasks">) => void }) {
   const [tab, setTab] = useState<TabKey>("board");
   useEffect(() => { const value = new URLSearchParams(window.location.search).get("tab"); setTab(value === "team" ? "settings" : tabs.some(tab => tab.key === value) ? value as TabKey : "board"); }, [projectId]);
   const tabLoading = useContentTransition(`${projectId}:${tab}`);
   const [issueOpen, setIssueOpen] = useState(false);
+  const [pendingTask, setPendingTask] = useState(initialTaskId);
   const [feedbackTask, setFeedbackTask] = useState<Id<"tasks"> | null>(null);
   const project = useQuery(api.projects.get, { projectId, sessionToken });
   if (!project) return <LoadingState label="Opening project" />;
   return (
     <div className={clsx("project-shell", tabLoading && "tab-loading")} aria-busy={tabLoading}>
       {tabLoading && <div className="view-loading-overlay"><ContentSkeleton kind={tab === "board" ? "board" : "list"} label="Loading project view" /></div>}
-      <div className="project-navigation"><div className="project-identity"><ProjectIcon project={project} /><strong>{project.name}</strong></div><nav className="tabs" aria-label="Project views"><span className="tab-glider" aria-hidden="true" />{tabs.map((item) => { const Icon = item.icon; return <button key={item.key} aria-label={item.label} title={item.label} className={clsx(tab === item.key && "active", item.key === "feedback" && "project-feedback-tab", item.key === "settings" && "project-settings-tab")} onClick={() => { setTab(item.key); const params = new URLSearchParams(window.location.search); params.set("tab", item.key); window.history.replaceState(null, "", `${location.pathname}?${params}`); }}><Icon size={16} />{item.key !== "settings" && <span>{item.label}</span>}</button>; })}</nav></div>
+      <div className="project-navigation"><div className="project-identity"><ProjectIcon project={project} /><strong>{project.name}</strong></div><nav className="tabs" aria-label="Project views"><span className="tab-glider" aria-hidden="true" />{tabs.map((item) => { const Icon = item.icon; return <button key={item.key} aria-label={item.label} title={item.label} className={clsx(tab === item.key && "active", item.key === "feedback" && "project-feedback-tab", item.key === "settings" && "project-settings-tab")} onClick={() => { setTab(item.key); setPendingTask(undefined); const params = new URLSearchParams(window.location.search); params.set("tab", item.key); window.history.replaceState(null, "", `${location.pathname}?${params}`); }}><Icon size={16} />{item.key !== "settings" && <span>{item.label}</span>}</button>; })}</nav></div>
       {project.status !== "active" && <ProjectStateBanner project={project} sessionToken={sessionToken} />}
-      {tab === "board" ? <BoardTab key={projectId} project={project} projectId={projectId} sessionToken={sessionToken} userEmail={user.email} canEdit={project.memberRole !== "viewer"} onCreateIssue={() => setIssueOpen(true)} /> : null}
+      {tab === "board" ? <BoardTab key={projectId} project={project} projectId={projectId} sessionToken={sessionToken} userEmail={user.email} canEdit={project.memberRole !== "viewer"} onCreateIssue={() => setIssueOpen(true)} initialTaskId={pendingTask} onOpenReference={onOpenReference} /> : null}
       {tab === "repo" ? <RepoTab project={project} sessionToken={sessionToken} /> : null}
       {tab === "assets" ? <AssetsPanel projectId={projectId} sessionToken={sessionToken} /> : null}
       {tab === "vault" ? <VaultPanel projectId={projectId} sessionToken={sessionToken} /> : null}
@@ -1256,7 +1276,7 @@ function ProjectStateBanner({ project, sessionToken }: { project: ProjectWithUi;
   const update = useMutation(api.projects.update);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  return <div className="project-state-banner inactive"><Power size={14} /><span>Inactive</span>{["owner", "admin"].includes(project.memberRole) && <button className="icon-button" aria-label="Reactivate project" title="Reactivate project" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await update({ sessionToken, projectId: project._id, status: "active" }); } catch (error) { setError(error instanceof Error ? error.message : "Could not reactivate"); } finally { setBusy(false); } }}><RotateCcw size={16} /></button>}{error && <span role="alert">{error}</span>}</div>;
+  return <div className="project-state-banner inactive"><Power size={14} /><span>Inactive</span>{["owner", "admin"].includes(project.memberRole) && <button className="icon-button" aria-label="Reactivate project" title="Reactivate project" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await update({ sessionToken, projectId: project._id, status: "active" }); } catch (error) { setError(errorText(error, "Could not reactivate")); } finally { setBusy(false); } }}><RotateCcw size={16} /></button>}{error && <span role="alert">{error}</span>}</div>;
 }
 
 function SettingsTab({ project, sessionToken }: { project: ProjectWithUi; sessionToken: string }) {
@@ -1307,7 +1327,7 @@ function SettingsTab({ project, sessionToken }: { project: ProjectWithUi; sessio
     setIconFile(null);
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1200);
-    } catch (error) { setError(error instanceof Error ? error.message : "Could not save project"); }
+    } catch (error) { setError(errorText(error, "Could not save project")); }
     finally { setBusy(false); }
   };
   if (!["owner", "admin"].includes(project.memberRole)) return <ProjectMembers projectId={project._id} sessionToken={sessionToken} />;
@@ -1324,7 +1344,7 @@ function SettingsTab({ project, sessionToken }: { project: ProjectWithUi; sessio
     <label>Brief<textarea value={description} onChange={e => setDescription(e.target.value)} rows={6} /></label>
     {error && <p className="notice danger" role="alert">{error}</p>}
     <button className="primary-button" disabled={busy}>{busy ? "Saving..." : saved ? "Saved" : "Save project"}</button>
-    <div className="project-lifecycle-actions"><span>Project status</span><button className="project-active-toggle" type="button" role="switch" aria-checked={project.status === "active"} aria-label="Active project" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await updateProject({ projectId: project._id, sessionToken, status: project.status === "active" ? "inactive" : "active" }); } catch (error) { setError(error instanceof Error ? error.message : "Could not update project"); } finally { setBusy(false); } }}><span aria-hidden="true" />{project.status === "active" ? "Active" : "Inactive"}</button></div>
+    <div className="project-lifecycle-actions"><span>Project status</span><button className="project-active-toggle" type="button" role="switch" aria-checked={project.status === "active"} aria-label="Active project" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await updateProject({ projectId: project._id, sessionToken, status: project.status === "active" ? "inactive" : "active" }); } catch (error) { setError(errorText(error, "Could not update project")); } finally { setBusy(false); } }}><span aria-hidden="true" />{project.status === "active" ? "Active" : "Inactive"}</button></div>
   </form><ProjectMembers projectId={project._id} sessionToken={sessionToken} /></div>;
 }
 

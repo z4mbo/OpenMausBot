@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -35,7 +36,7 @@ export function InboxCalendar({ sessionToken, onOpenTask, mine, done, project, p
       <button className="icon-button" aria-label="Next period" title="Next period" onClick={() => move(1)}><ChevronRight size={17} /></button>
     </div>
     {notice && <p className="notice danger" role="alert">{notice}</p>}
-    {calendar?.truncated && <p className="notice">Showing the first 500 scheduled issues. Use the issue list for the complete workload.</p>}
+    {calendar?.truncated && <p className="notice">Showing the first 500 issues.</p>}
     {!calendar ? <ContentSkeleton rows={7} /> : <div className={`calendar-grid ${mode}`} aria-busy={pending}>{days.map(date => {
       const key = day(date); const tasks = calendar.tasks.filter(task => task.dueDate === key && Boolean(task.done) === done && (!project || task.projectId === project) && (!priority || task.priority === priority) && `${task.title} ${task.projectName}`.toLowerCase().includes(search.trim().toLowerCase()));
       return <section className={`calendar-day ${key === day(new Date()) ? "today" : ""} ${date.getMonth() !== current.getMonth() ? "other-month" : ""}`} key={key} aria-label={date.toLocaleDateString(undefined, { dateStyle: "full" })}
@@ -45,7 +46,7 @@ export function InboxCalendar({ sessionToken, onOpenTask, mine, done, project, p
           if (!task || task.dueDate === key) return;
           setPending(true); setNotice("");
           try { await update({ sessionToken, projectId: task.projectId, taskId: task._id, dueDate: key }); }
-          catch (error) { setNotice(error instanceof Error ? error.message : "Could not reschedule issue"); }
+          catch (error) { setNotice(errorText(error, "Could not reschedule issue")); }
           finally { setPending(false); }
         }}>
         <time dateTime={key}><span>{date.toLocaleDateString(undefined, { weekday: "short" })}</span><strong>{date.getDate()}</strong></time>

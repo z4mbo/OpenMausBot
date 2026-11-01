@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -33,7 +34,7 @@ export function TaskActionsMenu({ title, canEdit, canMoveLeft, canMoveRight, onM
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
     try { await action(); setOpen(false); }
-    catch (error) { onError(error instanceof Error ? error.message : "Could not update issue"); }
+    catch (error) { onError(errorText(error, "Could not update issue")); }
     finally { setBusy(false); }
   };
   if (!canEdit) return null;

@@ -15,7 +15,7 @@ function ReleasePreview() {
   </div>;
 }
 
-export function WhatsNew({ userId }: { userId: string }) {
+export function WhatsNew({ userId, createdAt }: { userId: string; createdAt?: number }) {
   const [history, setHistory] = useState(releases);
   const latestRelease = history[0];
   const [open, setOpen] = useState(false);
@@ -41,6 +41,12 @@ export function WhatsNew({ userId }: { userId: string }) {
   useEffect(() => {
     let seen = seenThisSession.has(`${key}:${latestRelease.version}`);
     try { seen ||= localStorage.getItem(key) === latestRelease.version; } catch { /* The session still remembers dismissed updates. */ }
+    // Accounts created after this release never saw the previous version, so there is nothing new to announce.
+    if (!seen && createdAt !== undefined && createdAt >= Date.parse(`${latestRelease.date}T00:00:00Z`)) {
+      seen = true;
+      seenThisSession.add(`${key}:${latestRelease.version}`);
+      try { localStorage.setItem(key, latestRelease.version); } catch { /* The session still remembers it. */ }
+    }
     setUnread(!seen);
     if (seen) return;
     let interacted = false;
@@ -53,7 +59,7 @@ export function WhatsNew({ userId }: { userId: string }) {
     const sync = (event: StorageEvent) => { if (event.key === key && event.newValue === latestRelease.version) { setUnread(false); setOpen(false); } };
     window.addEventListener("storage", sync);
     return () => { clearTimeout(timer); document.removeEventListener("keydown", interacting); document.removeEventListener("pointerdown", interacting); window.removeEventListener("storage", sync); };
-  }, [key, latestRelease.version]);
+  }, [key, latestRelease.version, createdAt]);
   const close = () => {
     seenThisSession.add(`${key}:${latestRelease.version}`);
     try { localStorage.setItem(key, latestRelease.version); } catch { /* Keep working when storage is unavailable. */ }

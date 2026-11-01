@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -14,7 +15,7 @@ export function ProjectPRSettings({ project, sessionToken }: { project: Doc<"pro
   return <form className="stack-form settings-section" onSubmit={async e => {
     e.preventDefault(); setBusy(true); setNotice("");
     try { await configure({ sessionToken, projectId: project._id, mode, reviewColumnId: !review ? undefined : review === "none" ? null : review as Id<"columns">, doneColumnId: done === "auto" ? undefined : done as Id<"columns"> }); setNotice("Task GitHub settings saved"); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Could not save settings"); }
+    catch (error) { setNotice(errorText(error, "Could not save settings")); }
     finally { setBusy(false); }
   }}><h3>Tasks on GitHub</h3><label>Create tasks as<select value={mode} onChange={e => setMode(e.target.value as typeof mode)}><option value="issue">GitHub issues (default)</option><option value="pull_request">Draft pull requests with task branches</option></select></label>
     <label>In review column<select value={review} required={mode === "pull_request"} onChange={e => setReview(e.target.value)}><option value="" disabled>Choose a column or keep the current column</option><option value="none">Keep current column</option>{columns?.filter(c => !c.isDone).map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>

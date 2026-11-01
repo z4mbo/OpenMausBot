@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { Fragment, useId, useRef, useState } from "react";
 import { useMutation } from "convex/react";
@@ -36,7 +37,7 @@ export function IssueCommentBody({ comment, sessionToken, canEdit, onOpenReferen
     return item ? <div className="comment-checklist-item" key={index}><input type="checkbox" aria-label={item.text} checked={item.checked} disabled={!canEdit || busy} onChange={async event => {
       setBusy(true); setError("");
       try { await check({ sessionToken, projectId: comment.projectId, commentId: comment._id, line: index, text: item.text, checked: event.target.checked }); }
-      catch (error) { setError(error instanceof Error ? error.message : "Could not update checklist"); }
+      catch (error) { setError(errorText(error, "Could not update checklist")); }
       finally { setBusy(false); }
     }} /><span className={item.checked ? "checked" : ""}>{content(item.text)}</span></div> : <div key={index}>{line ? content(line) : <br />}</div>;
   })}{error && <p className="notice danger" role="alert">{error}</p>}</div>;
@@ -79,7 +80,7 @@ export function IssueCommentComposer({ projectId, taskId, sessionToken, members 
         const result = await localApi<{ file: Attachment }>(`/api/local-chat/files?teamId=${workspace._id}&projectId=${projectId}`, sessionToken, { method: "POST", body: form });
         setAttachments(current => [...current, result.file]);
       }
-    } catch (error) { setError(error instanceof Error ? error.message : "Could not upload file"); }
+    } catch (error) { setError(errorText(error, "Could not upload file")); }
     finally { uploading.current = false; setUploadBusy(false); }
   };
   const drop = useFileDrop({ disabled: busy || uploadBusy, onFiles: files => void upload(files), onLink: url => insert(url) });
@@ -89,7 +90,7 @@ export function IssueCommentComposer({ projectId, taskId, sessionToken, members 
     try {
       await post({ projectId, taskId, sessionToken, body, mentions: mentions.filter(m => containsMention(body, m.token)), references: references.filter(r => containsMention(body, `#${r.label}`)).map(r => ({ ...r, projectId: r.projectId as Id<"projects"> })), attachments: attachments.map(({ id, name, size, contentType }) => ({ id, name, size, contentType })) });
       setBody(""); setMentions([]); setReferences([]); setAttachments([]); setCursor(0);
-    } catch (error) { setError(error instanceof Error ? error.message : "Could not send comment"); }
+    } catch (error) { setError(errorText(error, "Could not send comment")); }
     finally { setBusy(false); }
   };
   return <form className={`issue-comment-composer ${drop.dragging ? "drop-active" : ""}`} {...drop.handlers} onSubmit={event => { event.preventDefault(); void submit(); }} onPaste={event => { if (event.clipboardData.files.length) { event.preventDefault(); void upload(Array.from(event.clipboardData.files)); } }}>

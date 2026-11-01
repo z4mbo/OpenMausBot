@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -74,7 +75,7 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
       busy.current = true;
       const batch = [...pending.current.values()].slice(0, 100); batch.forEach(e => pending.current.delete(e.id));
       try { await update({ ...args, elements: batch.map(e => JSON.stringify(e)) }); failures.current = 0; setNotice(""); }
-      catch (error) { batch.forEach(e => { if (!pending.current.has(e.id)) pending.current.set(e.id, e); }); retryAt.current = Date.now() + Math.min(30000, 1000 * 2 ** failures.current++); setNotice(error instanceof Error ? error.message : "Could not save drawing"); }
+      catch (error) { batch.forEach(e => { if (!pending.current.has(e.id)) pending.current.set(e.id, e); }); retryAt.current = Date.now() + Math.min(30000, 1000 * 2 ** failures.current++); setNotice(errorText(error, "Could not save drawing")); }
       finally { busy.current = false; }
     };
     const timer = setInterval(flush, 200);
@@ -92,7 +93,8 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
   useEffect(() => {
     if (!canvas || !presence) return;
     const collaborators: AppState["collaborators"] = new Map();
-    for (const member of online ? presence : []) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, pointer: { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
+    for (const member of online ? presence : []) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, // (0, 0) is the placeholder sent before someone moves their pointer; show them without a cursor until then.
+      pointer: member.x === 0 && member.y === 0 ? undefined : { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
     canvas.updateScene({ collaborators });
   }, [canvas, presence, clock, user._id, online]);
   useEffect(() => {
@@ -117,7 +119,7 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
     for (const file of Object.values(files)) {
       if (knownFiles.current.has(file.id)) continue;
       knownFiles.current.add(file.id);
-      void (async () => { try { const blob = imageBlob(file); const url = await uploadUrl(args); const response = await fetch(url, { method: "POST", headers: { "Content-Type": file.mimeType }, body: blob }); if (!response.ok) throw new Error("Image upload failed"); const { storageId } = await response.json() as { storageId: Id<"_storage"> }; await saveFile({ ...args, fileId: file.id, storageId, mimeType: file.mimeType }); } catch (error) { knownFiles.current.delete(file.id); setNotice(error instanceof Error ? error.message : "Image upload failed"); } })();
+      void (async () => { try { const blob = imageBlob(file); const url = await uploadUrl(args); const response = await fetch(url, { method: "POST", headers: { "Content-Type": file.mimeType }, body: blob }); if (!response.ok) throw new Error("Image upload failed"); const { storageId } = await response.json() as { storageId: Id<"_storage"> }; await saveFile({ ...args, fileId: file.id, storageId, mimeType: file.mimeType }); } catch (error) { knownFiles.current.delete(file.id); setNotice(errorText(error, "Image upload failed")); } })();
     }
   };
   if (scene === undefined) return <ContentSkeleton kind="canvas" label="Loading drawing" />;

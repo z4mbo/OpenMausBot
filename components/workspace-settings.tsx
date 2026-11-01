@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { localAppOrigin } from "@/lib/client-api";
 
 import { useState, type ReactNode } from "react";
@@ -21,9 +22,9 @@ export function WorkspaceSettings({ sessionToken, profile, security, sound, onTo
   const revoke = useMutation(api.auth.revokeOtherSessions);
   return <Dialog title="Settings" className="settings-dialog" onClose={onClose}><div className="settings-layout"><nav className="settings-nav"><span>ACCOUNT</span><button className={tab === "profile" ? "active" : ""} onClick={() => setTab("profile")}><User size={15} />My profile</button><button className={tab === "security" ? "active" : ""} onClick={() => setTab("security")}><Shield size={15} />Security</button><button className={tab === "notifications" ? "active" : ""} onClick={() => setTab("notifications")}><Bell size={15} />Notifications</button><span>{workspace.name}</span><button className={tab === "workspace" ? "active" : ""} onClick={() => setTab("workspace")}><Settings2 size={15} />Workspace</button><button className={tab === "members" ? "active" : ""} onClick={() => setTab("members")}><Users size={15} />Members & invites</button><button className={tab === "integrations" ? "active" : ""} onClick={() => setTab("integrations")}><Plug size={15} />Integrations</button><button className={tab === "agents" ? "active" : ""} onClick={() => setTab("agents")}><Bot size={15} />Agents</button><button className="settings-logout" onClick={onLogout}><LogOut size={15} />Sign out</button></nav><div className="settings-body">
     {tab === "profile" && <><h3>My profile</h3>{profile}</>}
-    {tab === "security" && <><h3>Security</h3>{security}<div className="settings-section"><h4>Active sessions</h4><button className="ghost-button" onClick={async () => { try { await revoke({ sessionToken }); setNotice("Signed out on all other devices"); } catch { setNotice("Could not sign out other devices"); } }}>Sign out other devices</button>{notice && <p className="notice">{notice}</p>}</div></>}
+    {tab === "security" && <><h3>Security</h3>{security}<div className="settings-section"><h4>Active sessions</h4><button type="button" className="ghost-button" onClick={async () => { try { await revoke({ sessionToken }); setNotice("Signed out on all other devices"); } catch { setNotice("Could not sign out other devices"); } }}>Sign out other devices</button>{notice && <p className="notice">{notice}</p>}</div></>}
     {tab === "notifications" && <><h3>Notifications</h3><label className="notification-setting"><span>Notification sound</span><input type="checkbox" role="switch" checked={sound} onChange={onToggleSound} /></label><NotificationPreferences sessionToken={sessionToken} /></>}
-    {tab === "workspace" && <><WorkspaceGeneral sessionToken={sessionToken} /><LeaveWorkspace sessionToken={sessionToken} /></>}
+    {tab === "workspace" && <><WorkspaceGeneral sessionToken={sessionToken} /><LeaveWorkspace sessionToken={sessionToken} /><DeleteWorkspace sessionToken={sessionToken} /></>}
     {tab === "members" && <WorkspaceMembers sessionToken={sessionToken} beforeOpenProfile={onClose} />}
     {tab === "integrations" && <IntegrationSettings sessionToken={sessionToken} />}
     {tab === "agents" && <AgentSettings sessionToken={sessionToken} />}
@@ -38,7 +39,7 @@ function WorkspaceGeneral({ sessionToken }: { sessionToken: string }) {
   const update = useMutation(api.workspaces.update);
   const create = useMutation(api.workspaces.create);
   const admin = ["owner", "admin"].includes(workspace.role);
-  return <><h3>Workspace</h3><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { await update({ sessionToken, teamId: workspace._id, name }); setNotice("Workspace updated"); } catch (error) { setNotice(error instanceof Error ? error.message : "Could not save"); } }}><label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} disabled={!admin} /></label><label>Workspace URL<input value={`${typeof window !== "undefined" ? localAppOrigin() : ""}/${workspace.slug}`} readOnly /></label>{admin && <button className="primary-button compact">Save changes</button>}</form>{notice && <p className="notice">{notice}</p>}<div className="settings-section"><h4>Create another workspace</h4><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { const result = await create({ sessionToken, name: newName }); window.location.href = `/${result.slug}`; } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create workspace"); } }}><label>Name<input value={newName} onChange={e => setNewName(e.target.value)} required placeholder="New workspace" maxLength={60} /></label><button className="ghost-button compact">Create workspace</button></form></div></>;
+  return <><h3>Workspace</h3><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { await update({ sessionToken, teamId: workspace._id, name }); setNotice("Workspace updated"); } catch (error) { setNotice(errorText(error, "Could not save")); } }}><label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} disabled={!admin} /></label><label>Workspace URL<input value={`${typeof window !== "undefined" ? localAppOrigin() : ""}/${workspace.slug}`} readOnly /></label>{admin && <button className="primary-button compact">Save changes</button>}</form>{notice && <p className="notice">{notice}</p>}<div className="settings-section"><h4>Create another workspace</h4><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { const result = await create({ sessionToken, name: newName }); window.location.href = `/${result.slug}`; } catch (error) { setNotice(errorText(error, "Could not create workspace")); } }}><label>Name<input value={newName} onChange={e => setNewName(e.target.value)} required placeholder="New workspace" maxLength={60} /></label><button className="ghost-button compact">Create workspace</button></form></div></>;
 }
 
 function LeaveWorkspace({ sessionToken }: { sessionToken: string }) {
@@ -49,8 +50,36 @@ function LeaveWorkspace({ sessionToken }: { sessionToken: string }) {
   const [error, setError] = useState("");
   if (workspace.role === "owner") return null;
   return <div className="settings-section leave-workspace"><h4>Membership</h4>
-    {confirming ? <><p>Leave {workspace.name}? You will need a new invitation to return.</p><div className="settings-confirm-actions"><button className="ghost-button" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button><button className="ghost-button danger-text" disabled={busy} onClick={async () => { setBusy(true); try { await leave({ sessionToken, teamId: workspace._id }); window.location.assign("/"); } catch (e) { setError(e instanceof Error ? e.message : "Could not leave workspace"); setBusy(false); } }}><LogOut size={14} />Leave workspace</button></div></> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><LogOut size={14} />Leave workspace</button>}
+    {confirming ? <><p>Leave {workspace.name}? You will need a new invitation to return.</p><div className="settings-confirm-actions"><button className="ghost-button" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button><button className="ghost-button danger-text" disabled={busy} onClick={async () => { setBusy(true); try { await leave({ sessionToken, teamId: workspace._id }); window.location.assign("/"); } catch (e) { setError(errorText(e, "Could not leave workspace")); setBusy(false); } }}><LogOut size={14} />Leave workspace</button></div></> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><LogOut size={14} />Leave workspace</button>}
     {error && <p className="notice danger" role="alert">{error}</p>}
+  </div>;
+}
+
+const plural = (count: number, one: string) => `${count} ${count === 1 ? one : `${one}s`}`;
+
+function DeleteWorkspace({ sessionToken }: { sessionToken: string }) {
+  const workspace = useWorkspace();
+  const admin = ["owner", "admin"].includes(workspace.role);
+  const [confirming, setConfirming] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const summary = useQuery(api.workspaces.deletionSummary, admin && confirming ? { sessionToken, teamId: workspace._id } : "skip");
+  const remove = useMutation(api.workspaces.remove);
+  if (!admin) return null;
+  const matches = typed.trim() === workspace.name.trim();
+  return <div className="settings-section delete-workspace"><h4>Delete workspace</h4>
+    {confirming ? <form className="stack-form" onSubmit={async event => {
+      event.preventDefault(); if (!matches || busy) return;
+      setBusy(true); setError("");
+      try { await remove({ sessionToken, teamId: workspace._id, confirmName: typed }); window.location.assign("/"); }
+      catch (e) { setError(errorText(e, "Could not delete workspace")); setBusy(false); }
+    }}>
+      <p className="muted">Deletes {summary ? `${plural(summary.projectCount, "project")}, ${plural(summary.openIssueCount, "open issue")}, chat and files` : "all projects, issues, chat and files"} for {summary ? plural(summary.memberCount, "member") : "everyone"}. GitHub repositories are kept. This cannot be undone.</p>
+      <label>Type {workspace.name} to confirm<input value={typed} onChange={event => setTyped(event.target.value)} autoComplete="off" spellCheck={false} disabled={busy} autoFocus /></label>
+      {error && <p className="notice danger" role="alert">{error}</p>}
+      <div className="settings-confirm-actions"><button type="button" className="ghost-button" disabled={busy} onClick={() => { setConfirming(false); setTyped(""); setError(""); }}>Cancel</button><button className="ghost-button danger-text" disabled={!matches || busy}>{busy ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}Delete workspace</button></div>
+    </form> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><Trash2 size={14} />Delete workspace</button>}
   </div>;
 }
 
@@ -69,7 +98,7 @@ export function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionT
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
-  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(error instanceof Error ? error.message : "Action failed"); } finally { setBusy(false); } };
+  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(errorText(error, "Action failed")); } finally { setBusy(false); } };
   const copy = async (value: string) => { try { await navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setNotice("Clipboard unavailable. Select and copy the invitation link."); } };
   const workspaceInvites = invitations?.filter(invite => !invite.projectId);
   return <><h3>Members & invitations</h3>{admin && <>
