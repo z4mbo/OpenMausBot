@@ -1,8 +1,8 @@
 /* Repo tab: linked GitHub repository with commits, issues and pull requests; the repository dialog. */
 .repo-dashboard { display: flex; flex: 1; flex-direction: column; gap: var(--space-4); min-width: 0; }
-.repo-address-row { display: flex; align-items: center; gap: var(--space-3); min-width: 0; min-height: var(--control); }
+.repo-address-row { display: flex; flex: none; align-items: center; gap: var(--space-3); min-width: 0; min-height: 44px; }
 .repo-address-row > a { display: flex; align-items: center; gap: var(--space-2); min-width: 0; margin-right: auto; color: var(--text-1); font-size: var(--text-md); font-weight: var(--weight-medium); text-decoration: none; }
-.repo-address-row > a:hover span { text-decoration: underline; text-underline-offset: 3px; }
+@media (hover: hover) { .repo-address-row > a:hover span { text-decoration: underline; text-underline-offset: 3px; } }
 .repo-address-row > a svg { flex: none; color: var(--text-3); }
 .repo-address-row > a span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .repo-refreshing { flex: none; color: var(--text-3); }
@@ -17,7 +17,7 @@
 .repository-item { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; margin: 0 calc(var(--space-2) * -1); padding: var(--space-2); border-radius: var(--radius-sm); color: var(--text-1); text-decoration: none; transition: background var(--duration-fast); }
 .repository-item.with-state { grid-template-columns: 16px minmax(0, 1fr); column-gap: var(--space-2); }
 .repository-item.with-state > .repository-meta { grid-column: 2; }
-.repository-item:hover { background: var(--hover); }
+@media (hover: hover) { .repository-item:hover { background: var(--hover); } }
 .repository-item:focus-visible { outline-offset: -2px; }
 .repository-item > strong { display: -webkit-box; overflow: hidden; font-weight: var(--weight-medium); line-height: 1.4; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .repository-meta { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--text-3); font-size: var(--text-sm); }
