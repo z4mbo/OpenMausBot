@@ -350,7 +350,7 @@ function TaskModalContent({
             return <article className="issue-timeline-entry" key={comment._id}>
               <UserAvatar user={author || { name: comment.authorName, email: comment.authorEmail }} size="small" />
               <div className="activity-entry-content"><header><strong>{author ? displayName(author) : comment.authorName}</strong><time dateTime={new Date(comment.createdAt).toISOString()} title={formatDateTime(comment.createdAt)}>{formatRelative(comment.createdAt)}</time></header>
-                <IssueCommentBody comment={comment} sessionToken={sessionToken} canEdit={canEdit} onOpenReference={openReference} />
+                <IssueCommentBody comment={comment} sessionToken={sessionToken} canEdit={canEdit} members={details.members} onOpenReference={openReference} />
                 <div className="comment-media">{details.assets.filter(asset => asset.commentId === comment._id && asset.localFileId).map(asset => <LocalAttachment key={asset._id} file={{ id: asset.localFileId!, name: asset.name, size: asset.size || 0, contentType: asset.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} />)}</div>
               </div>
             </article>;
@@ -366,14 +366,8 @@ type IssueAction = { key: string; label: string; icon: ReactNode; danger?: boole
 
 function IssueActionsMenu({ actions, onError }: { actions: IssueAction[]; onError: (message: string) => void }) {
   const [open, setOpen] = useState(false), [busy, setBusy] = useState(""), [confirming, setConfirming] = useState("");
-  const root = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null), menu = useRef<HTMLDivElement>(null), first = useRef<HTMLButtonElement>(null);
-  useAnchoredPopover(open, trigger, menu, first, { width: 210 });
-  useEffect(() => {
-    if (!open) return;
-    const dismiss = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) { setOpen(false); setConfirming(""); } };
-    document.addEventListener("pointerdown", dismiss);
-    return () => document.removeEventListener("pointerdown", dismiss);
-  }, [open]);
+  const trigger = useRef<HTMLButtonElement>(null), menu = useRef<HTMLDivElement>(null), first = useRef<HTMLButtonElement>(null);
+  useAnchoredPopover(open, trigger, menu, first, { width: 210, onDismiss: restore => { setOpen(false); setConfirming(""); if (restore) trigger.current?.focus({ preventScroll: true }); } });
   const close = () => { setOpen(false); setConfirming(""); trigger.current?.focus({ preventScroll: true }); };
   const run = async (action: IssueAction) => {
     if (action.confirm && confirming !== action.key) { setConfirming(action.key); return; }
@@ -382,7 +376,7 @@ function IssueActionsMenu({ actions, onError }: { actions: IssueAction[]; onErro
     catch (error) { onError(errorText(error, `Could not ${action.label.toLowerCase()}`)); setOpen(false); }
     finally { setBusy(""); }
   };
-  return <div ref={root} className="issue-actions" onKeyDown={event => {
+  return <div className="issue-actions" onKeyDown={event => {
     if (!open) return;
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
     if (event.key === "Tab") { setOpen(false); setConfirming(""); return; }

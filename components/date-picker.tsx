@@ -73,18 +73,9 @@ export function DatePopover({ id, anchor, value, label = "Due date", onChange, o
   const focusDay = useRef(false);
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; });
-  useAnchoredPopover(true, anchor, menu, grid, { width: 272, maxHeight: 540 });
+  useAnchoredPopover(true, anchor, menu, grid, { width: 272, maxHeight: 540, onDismiss: restore => closeRef.current(restore) });
 
   const choose = (date: Date | null) => { const next = date ? toDueDate(date) : ""; if (next !== value) onChange(next); onClose(true); };
-
-  useEffect(() => {
-    const dismiss = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!menu.current?.contains(target) && !anchor.current?.contains(target)) closeRef.current(false);
-    };
-    document.addEventListener("pointerdown", dismiss);
-    return () => document.removeEventListener("pointerdown", dismiss);
-  }, [anchor]);
   // Keyboard moves keep focus on the active day as the month changes under it.
   useEffect(() => {
     if (!focusDay.current) return;
@@ -121,8 +112,9 @@ export function DatePopover({ id, anchor, value, label = "Due date", onChange, o
     if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(true); }
     else if (event.key === "Tab") onClose(false);
   }}>
+      <div className="picker-sheet-caption" aria-hidden="true">{label}</div>
       <div className="date-picker-quick">
-        {quick.map(item => <button key={item.key} type="button" aria-pressed={sameDay(selected, item.date)} onClick={() => choose(item.date)}><span>{item.label}</span><small>{item.key === "next-week" ? formatDate(item.date) : weekdayFormat.format(item.date)}</small></button>)}
+        {quick.map(item => <button key={item.key} type="button" aria-pressed={sameDay(selected, item.date)} onClick={() => choose(item.date)}><span>{item.label}</span><small>{formatDate(item.date)}</small></button>)}
         {selected && <button type="button" className="date-picker-clear" onClick={() => choose(null)}><X size={13} /><span>Clear</span></button>}
       </div>
       <div className="date-picker-month">

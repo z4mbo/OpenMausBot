@@ -68,7 +68,7 @@ test('O-031 O-033 O-034 O-036 O-038 board CRUD and real drag synchronizes two co
   await f.member.api.m('tasks:updateTask', { ...f.project, taskId: task._id, done: false });
   await expect(observer.locator('.task-card')).toContainText('Edited browser task');
   await writer.locator('.task-card').filter({ hasText: 'Edited browser task' }).click({ button: 'right' });
-  await writer.getByRole('menuitem', { name: 'Delete', exact: true }).click();
+  await writer.getByRole('menuitem', { name: 'Delete issue', exact: true }).click();
   await writer.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click();
   await expect(observer.locator('.task-card')).toHaveCount(0);
 });

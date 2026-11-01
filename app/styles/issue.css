@@ -16,7 +16,8 @@
 .issue-detail-dialog .dialog-heading { position: static; flex: none; gap: var(--space-1); min-height: 48px; padding: 0 var(--space-2) 0 var(--space-4); border-bottom: 1px solid var(--border-1); }
 .issue-detail-heading { display: flex; flex: 1; align-items: center; gap: var(--space-1); min-width: 0; }
 .issue-detail-heading h2 { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; height: 28px; padding: 0 var(--space-1); margin-left: calc(var(--space-1) * -1); border-radius: var(--radius-xs); color: var(--text-2); font-size: var(--text-base); font-weight: var(--weight-medium); outline: none; }
-.issue-detail-heading h2:focus-visible { box-shadow: var(--focus-ring); }
+/* The heading is only a programmatic focus target (opening the issue, Escape out of a field): no ring. */
+.issue-detail-heading h2:focus-visible { outline: none; box-shadow: none; }
 .issue-detail-heading h2 > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .issue-detail-heading h2 > svg { flex: none; color: var(--text-3); }
 .issue-detail-heading h2 .project-icon { width: 14px; height: 14px; color: var(--text-3); }
@@ -185,7 +186,8 @@
 .issue-composer-fields > textarea:focus { box-shadow: none; }
 .issue-composer-fields > .issue-property-chips { padding-top: var(--space-2); }
 .issue-composer-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: var(--space-2) calc(var(--space-5) * -1) calc(var(--space-4) * -1); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border-1); }
-.issue-create-submit kbd { height: 16px; margin-left: 2px; border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.82); font-family: var(--font-sans); }
+/* White on the accent itself (4.7:1); a tinted key background would lower the contrast. */
+.issue-create-submit kbd { height: 16px; margin-left: 2px; border-color: rgba(255, 255, 255, 0.4); background: transparent; color: #fff; font-family: var(--font-sans); }
 .issue-project-choice { padding: 0 var(--space-3) var(--space-3); }
 .issue-project-choice > input { min-height: 44px; padding: 0 var(--space-2); border: 0; background: transparent; font-size: var(--text-md); box-shadow: none; }
 .issue-project-options { display: grid; gap: 1px; max-height: 300px; overflow-y: auto; }
@@ -245,4 +247,18 @@
   .issue-composer-fields > textarea, .issue-composer-fields > .issue-title-input { font-size: 16px; }
   .issue-composer-fields > .issue-title-input { font-size: var(--text-lg); }
   .issue-property-chips :is(.member-picker-trigger, .issue-select-trigger, .date-picker-trigger) { min-height: 36px; font-size: var(--text-base); }
+  .issue-breadcrumb .issue-select-trigger, .relation-picker-head .issue-select-trigger { min-height: 36px; }
+  .relation-picker .feature-search input { min-height: 44px; font-size: 16px; }
 }
+
+/* Touch: every control in the issue view and composer gets a 44px target; dense controls keep their size and grow an
+   invisible hit area instead. */
+@media (pointer: coarse) {
+  :is(.issue-detail-dialog, .issue-composer-dialog) :is(.member-picker-trigger, .issue-select-trigger, .date-picker-trigger, .icon-button, .issue-add-row, .send-message),
+  .issue-labels > span > button, .issue-label-add, .related-issue-list > div > button:not(.icon-button) { position: relative; }
+  :is(.issue-detail-dialog, .issue-composer-dialog) :is(.member-picker-trigger, .issue-select-trigger, .date-picker-trigger, .icon-button, .issue-add-row, .send-message)::after,
+  .issue-labels > span > button::after, .issue-label-add::after { content: ""; position: absolute; inset: -4px; }
+  .issue-labels > span > button::after { inset: -8px; }
+  .related-issue-list > div > button:not(.icon-button), .relation-picker .feature-picker-results > button { min-height: 44px; }
+}
+@media (hover: none) { .relation-picker .feature-picker-results > button:hover { background: none; } }
