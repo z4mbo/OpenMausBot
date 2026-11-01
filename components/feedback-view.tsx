@@ -25,7 +25,7 @@ type Filter = "open" | "completed" | "all";
 const filters: Array<{ value: Filter; label: string }> = [{ value: "open", label: "Open" }, { value: "completed", label: "Completed" }, { value: "all", label: "All" }];
 const isOpen = (row: Entry) => row.status === "new" || row.status === "planned";
 
-export function FeedbackView({ sessionToken, projectId, projectName, onOpenTask }: { sessionToken: string; projectId: Id<"projects">; projectName: string; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void }) {
+export function FeedbackView({ sessionToken, projectId, projectName, canEdit, onOpenTask }: { sessionToken: string; projectId: Id<"projects">; projectName: string; canEdit: boolean; onOpenTask: (projectId: Id<"projects">, taskId: Id<"tasks">) => void }) {
   const workspace = useWorkspace();
   const portals = useQuery(api.feedback.portals, { sessionToken, teamId: workspace._id });
   const [filter, setFilter] = useState<Filter>("open");
@@ -39,7 +39,6 @@ export function FeedbackView({ sessionToken, projectId, projectName, onOpenTask 
   const rows = useQuery(api.feedback.list, portal ? { sessionToken, teamId: workspace._id, portalId: portal._id } : "skip");
   const dismiss = useMutation(api.feedback.dismiss);
   const admin = ["owner", "admin"].includes(workspace.role);
-  const canEdit = workspace.role !== "viewer";
   const visible = rows?.filter(row => filter === "all" || (filter === "completed" ? row.status === "completed" : isOpen(row)));
   const openCount = rows?.filter(isOpen).length ?? 0;
   const link = portal ? `${window.location.origin}/feedback/${portal.slug}` : "";

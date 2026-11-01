@@ -52,3 +52,8 @@
   .repository-columns { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
 }
 .repository-columns[data-columns="1"] { grid-template-columns: minmax(0, 1fr); max-width: 720px; }
+
+/* Workspace GitHub connection line (repository-settings.tsx WorkspaceGitHubSetup, also in the new-project dialog). */
+.repo-workspace-setup { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4) 0; border-top: 1px solid var(--border-2); font-size: var(--text-sm); }
+.repo-workspace-setup > div:first-child { display: flex; flex: 1; align-items: center; gap: var(--space-2); }
+.repo-workspace-setup > p { width: 100%; margin: 0; }

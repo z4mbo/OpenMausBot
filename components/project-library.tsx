@@ -11,7 +11,6 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { decryptSecret, encryptSecret } from "@/lib/vaultCrypto";
 import { Dialog } from "./dialog";
-import { useWorkspace } from "./workspace-context";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 import { useFileDrop } from "./use-file-drop";
 import { validateAttachmentFiles } from "@/lib/dropped-content";
@@ -42,13 +41,19 @@ function hostOf(url?: string) {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; }
 }
 
-export function VaultPanel({ projectId, sessionToken }: Props) {
-  const workspace = useWorkspace();
+/** The vault's oldest item; its passphrase is the vault's passphrase. */
+function vaultAnchor(items: Doc<"credentials">[]) {
+  return items.reduce<Doc<"credentials"> | null>((oldest, item) => !oldest || item._creationTime < oldest._creationTime ? item : oldest, null);
+}
+
+export function VaultPanel({ projectId, sessionToken, canEdit }: Props & { canEdit: boolean }) {
   const online = useWorkspaceOnline();
   const items = useQuery(api.credentials.list, { projectId, sessionToken });
   const remove = useMutation(api.credentials.remove);
   const [passphrase, setPassphrase] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  // The vault's first item is its passphrase check: every passphrase must open it before it unlocks or adds items.
+  const [verifiedId, setVerifiedId] = useState<Id<"credentials"> | null>(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, string>>({});
@@ -57,8 +62,7 @@ export function VaultPanel({ projectId, sessionToken }: Props) {
   const [notice, setNotice] = useState("");
   const epoch = useRef(0);
   const copyTimer = useRef<number | undefined>(undefined);
-  const canEdit = workspace.role !== "viewer";
-  const lock = () => { epoch.current++; setPassphrase(""); setRevealed({}); setUnlocked(false); setOpen(false); setNotice(""); };
+  const lock = () => { epoch.current++; setPassphrase(""); setRevealed({}); setUnlocked(false); setVerifiedId(null); setOpen(false); setNotice(""); };
   useEffect(() => {
     if (!unlocked) return;
     let timer: ReturnType<typeof setTimeout>;
@@ -71,8 +75,10 @@ export function VaultPanel({ projectId, sessionToken }: Props) {
   const unlock = async (e: FormEvent) => {
     e.preventDefault(); setBusy(true); setNotice("");
     try {
-      if (items?.length) await decryptSecret(items[0], passphrase);
+      const anchor = items ? vaultAnchor(items) : null;
+      if (anchor) await decryptSecret(anchor, passphrase);
       else if (passphrase.length < 10) { setNotice("Use at least 10 characters"); return; }
+      setVerifiedId(anchor?._id ?? null);
       setUnlocked(true);
     } catch { setNotice("Wrong passphrase"); }
     finally { setBusy(false); }
@@ -90,10 +96,11 @@ export function VaultPanel({ projectId, sessionToken }: Props) {
         window.clearTimeout(copyTimer.current);
         copyTimer.current = window.setTimeout(() => setCopied(null), 1600);
       } else setRevealed(current => ({ ...current, [item._id]: value }));
-    } catch (error) { setNotice(copy && error instanceof DOMException && error.name === "NotAllowedError" ? "Copy was blocked by the browser" : "Could not decrypt this item"); }
+    } catch (error) { setNotice(copy && error instanceof DOMException && error.name === "NotAllowedError" ? "Copy was blocked by the browser" : "This item uses a different passphrase"); }
   };
 
   if (items === undefined) return <DelayedSkeleton label="Loading vault" />;
+  if (!items.length && !canEdit) return <section className="project-library" aria-label="Vault"><ProjectEmpty icon={KeyRound} title="No secrets" /></section>;
   if (!unlocked) return <section className="vault-locked" aria-label="Vault">
     <span className="project-empty-icon"><LockKeyhole size={20} /></span>
     <h2>{items.length ? "Vault locked" : "Create a vault"}</h2>
@@ -133,11 +140,17 @@ export function VaultPanel({ projectId, sessionToken }: Props) {
             </div>
           </li>;
         })}</ul>}
-    {open && <VaultItemDialog projectId={projectId} sessionToken={sessionToken} passphrase={passphrase} online={online} onClose={() => setOpen(false)} />}
+    {open && <VaultItemDialog projectId={projectId} sessionToken={sessionToken} passphrase={passphrase} online={online} verify={async () => {
+      // Someone may have created the vault's first item since this one was unlocked empty: check against it now.
+      const anchor = vaultAnchor(items);
+      if (!anchor || anchor._id === verifiedId) return;
+      try { await decryptSecret(anchor, passphrase); setVerifiedId(anchor._id); }
+      catch { throw new Error("This vault uses a different passphrase"); }
+    }} onClose={() => setOpen(false)} />}
   </section>;
 }
 
-function VaultItemDialog({ projectId, sessionToken, passphrase, online, onClose }: Props & { passphrase: string; online: boolean; onClose: () => void }) {
+function VaultItemDialog({ projectId, sessionToken, passphrase, online, verify, onClose }: Props & { passphrase: string; online: boolean; verify: () => Promise<void>; onClose: () => void }) {
   const create = useMutation(api.credentials.create);
   const [kind, setKind] = useState<Kind>("password");
   const [title, setTitle] = useState("");
@@ -151,6 +164,7 @@ function VaultItemDialog({ projectId, sessionToken, passphrase, online, onClose 
   const save = async (e: FormEvent) => {
     e.preventDefault(); if (!online) return; setBusy(true); setError("");
     try {
+      await verify();
       await create({ projectId, sessionToken, kind, title, username: kind === "password" && username ? username : undefined, url: kind === "password" && url ? url : undefined, ...await encryptSecret(secret, passphrase) });
       onClose();
     } catch (error) { setError(errorText(error, "Could not save")); }
@@ -209,8 +223,7 @@ function AssetThumb({ asset, size }: { asset: Asset; size: "card" | "row" }) {
   return <span className="asset-type-icon"><Icon size={size === "card" ? 26 : 15} strokeWidth={size === "card" ? 1.5 : 2} /></span>;
 }
 
-export function AssetsPanel({ projectId, sessionToken }: Props) {
-  const workspace = useWorkspace();
+export function AssetsPanel({ projectId, sessionToken, canEdit }: Props & { canEdit: boolean }) {
   const online = useWorkspaceOnline();
   const design = useQuery(api.design.list, { projectId, sessionToken });
   const remove = useMutation(api.design.removeAsset);
@@ -220,7 +233,6 @@ export function AssetsPanel({ projectId, sessionToken }: Props) {
   const [dialog, setDialog] = useState<{ files: File[]; url: string } | null>(null);
   const [notice, setNotice] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
-  const canEdit = workspace.role !== "viewer";
   const chooseView = (next: "grid" | "list") => { setView(next); try { window.localStorage.setItem(VIEW_KEY, next); } catch { /* Per-browser preference only. */ } };
   const selectFiles = (selection: File[]) => {
     if (!selection.length) return;
