@@ -33,6 +33,7 @@ http.route({ path: "/integrations", method: "POST", handler: httpAction(async (c
       case "context": result = JSON.parse(await ctx.runQuery(internal.integrations.context, p.args)); break;
       case "targets": result = JSON.parse(await ctx.runQuery(internal.integrations.targets, p.args)); break;
       case "webhookTargets": result = JSON.parse(await ctx.runQuery(internal.integrations.webhookTargets, p.args)); break;
+      case "instanceOperator": result = await ctx.runQuery(internal.integrations.instanceOperator, {}); break;
       case "pending": result = await ctx.runQuery(internal.integrations.pending, {}); break;
       case "unlinkedTasks": result = JSON.parse(await ctx.runQuery(internal.integrations.unlinkedTasks, p.args)); break;
       case "repoResult": result = await ctx.runMutation(internal.integrations.repoResult, p.args); break;

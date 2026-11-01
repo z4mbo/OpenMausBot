@@ -60,7 +60,7 @@ Persist `/data/origin`. It contains chat history, attachment files, call state, 
 
 ## 3. Connect GitHub
 
-While no GitHub App is configured, any workspace owner or admin can register the instance's GitHub App from **Settings > Integrations** using the GitHub manifest flow (the App is then stored encrypted in `/data/origin`). To use an existing App instead, set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `GITHUB_WEBHOOK_SECRET`, plus `GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY` for issues as pull requests; `deploy/docker-compose.yml` passes them through from `.env`. Review GitHub's requested permissions before approving it. Configure the callback and webhook against your own public origin. Then install the app and finish account authorization for each workspace.
+One GitHub App serves every workspace on the instance, so only the instance operator may register it. Set `ORIGIN_ADMIN_EMAILS` in `.env` to the operators' account emails (comma-separated; `ORIGIN_LEGACY_OWNER_EMAIL` also counts). When neither is set, the operator is the owner of the first workspace created on the instance. Origin does not verify email addresses, so create the operator accounts before you open sign-up. While no App is configured, the operator registers it from **Settings > Integrations** using the GitHub manifest flow; everyone else sees GitHub as not available yet. The App is stored encrypted in `/data/origin` and takes precedence over the `GITHUB_CLIENT_*` variables; to replace a registered App, stop the app, delete the `github_app` row from `integrations.sqlite` in the persisted `/data/origin` volume (`sqlite3 <path>/integrations.sqlite "DELETE FROM github_app"`), start it again and reconnect each workspace. To use an existing App instead, set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `GITHUB_WEBHOOK_SECRET`, plus `GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY` for issues as pull requests; `deploy/docker-compose.yml` passes them through from `.env`. Review GitHub's requested permissions before approving it. Configure the callback and webhook against your own public origin. Then install the app and finish account authorization for each workspace.
 
 Repository creation uses the connected administrator's personal account and creates private repositories. For an existing repository, an admin must approve workspace access. A fine-grained project token is an optional alternative; never ask ordinary members for a server-wide token.
 
@@ -88,14 +88,14 @@ Allow TCP/UDP 3478 and UDP 49160-49260. Keep the TURN secret identical in the ap
 - Enable a test feedback portal and check that no internal data is public.
 - Check navigation on desktop and mobile browsers, HTTPS, health, disk capacity, and logs.
 
-`ORIGIN_LEGACY_OWNER_EMAIL` and `GITHUB_TOKEN` exist only for an operator-controlled migration of an older Origin installation; leave them unset for a new installation. The legacy owner may also register the GitHub App.
+`ORIGIN_LEGACY_OWNER_EMAIL` and `GITHUB_TOKEN` exist only for an operator-controlled migration of an older Origin installation; leave them unset for a new installation. The legacy owner also counts as an instance operator (see section 3).
 
 ## 6. Upgrade an Existing Installation
 
 Do not replace or import production data merely to publish code.
 
 1. **Deploy Convex first, then the web image.** New web code calls Convex functions that only exist after `npx convex deploy`; old web code keeps working against the new functions because changes are additive.
-2. **Check pending scheduled jobs for removed functions.** This release removes the desktop-only modules. Before deploying, open the Convex dashboard's *Schedules* page for the production deployment and confirm nothing is pending for `agentRuns.promoteQueued`, `agentRuns.expireStale`, `standup.runAll`, `standup.runProject` or `realtime.cleanup`. A job left for a removed function fails once with "function not found" and is not retried; no data depends on it.
-3. **Avoid 07:00 UTC.** The old daily `standup.runAll` cron fires then and schedules `standup.runProject` jobs; deploy well away from that time. Convex replaces the cron table on deploy, so the removed crons stop afterwards.
+2. **Pending jobs for removed functions are absorbed.** This release removes the desktop-only modules. Production may still hold scheduled jobs for `agentRuns.promoteQueued`, `standup.runAll`, `standup.runProject` (or an in-flight run of the old `agentRuns.expireStale` and `realtime.cleanup` crons); this release keeps no-op stubs with the same names and arguments (`convex/agentRuns.ts`, `convex/standup.ts`, `convex/realtime.ts`), so those jobs finish without doing anything. The stubs are removed in a later release, so do not skip this release when upgrading from the desktop backend.
+3. **Crons.** Convex replaces the cron table on deploy, so the removed crons (including the daily 07:00 UTC standup) stop afterwards.
 4. **Check the reverse proxy** sets `X-Real-IP` as above before setting `ORIGIN_TRUSTED_PROXY=1`.
 5. After the web image is up, run the checks in section 5.

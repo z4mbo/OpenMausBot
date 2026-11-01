@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { integrationDb, openIntegration, sealIntegration } from "./githubConnection";
 import { githubHeaders } from "./github-repo";
-import { originUrl } from "./integration-bridge";
+import { integrationBridge, originUrl } from "./integration-bridge";
 import { DEFAULT_OWNER_EMAIL } from "@/convex/lib/auth";
 
 export type GitHubAppConfig = { clientId: string; clientSecret: string; slug?: string; webhookSecret?: string; appId?: number; privateKey?: string };
@@ -24,13 +24,25 @@ export function githubAppConfig(): GitHubAppConfig | null {
   if (row) { const saved = JSON.parse(openIntegration(row.encrypted, "github-app")); return { ...saved, appId: credentials.appId ?? saved.appId, privateKey: credentials.privateKey ?? saved.privateKey }; }
   return process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? { ...credentials, clientId: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, webhookSecret: process.env.GITHUB_WEBHOOK_SECRET } : null;
 }
+/** ORIGIN_ADMIN_EMAILS (comma separated) plus the legacy ORIGIN_LEGACY_OWNER_EMAIL, lowercased. */
+export function instanceAdminEmails() {
+  return [...(process.env.ORIGIN_ADMIN_EMAILS || "").split(","), DEFAULT_OWNER_EMAIL].map(email => email.trim().toLowerCase()).filter(Boolean);
+}
 /**
- * Who may register the instance's GitHub App with the manifest flow: while none is configured, any workspace owner
- * or admin, and the operator named by ORIGIN_LEGACY_OWNER_EMAIL.
+ * Who may register the instance-wide GitHub App with the manifest flow, while none is configured: the instance
+ * operator only. With ORIGIN_ADMIN_EMAILS or ORIGIN_LEGACY_OWNER_EMAIL set, those accounts (in any workspace role);
+ * otherwise the owner of the first workspace created on the instance, from a workspace they own or administer.
+ * Fails closed when the operator cannot be determined.
  */
-export function canSetupGitHubApp(email: string, workspaceRole: string) {
+export async function canSetupGitHubApp(user: { _id: string; email: string }, workspaceRole: string) {
   if (githubAppConfig()) return false;
-  return ["owner", "admin"].includes(workspaceRole) || Boolean(DEFAULT_OWNER_EMAIL && email.trim().toLowerCase() === DEFAULT_OWNER_EMAIL);
+  const admins = instanceAdminEmails();
+  if (admins.length) return admins.includes(user.email.trim().toLowerCase());
+  if (!["owner", "admin"].includes(workspaceRole)) return false;
+  try {
+    const operator = await integrationBridge<{ userId: string } | null>("instanceOperator", {});
+    return Boolean(operator && operator.userId === user._id);
+  } catch { return false; }
 }
 export function saveGitHubApp(config: GitHubAppConfig) {
   db().prepare("INSERT INTO github_app VALUES(1,?) ON CONFLICT(id) DO UPDATE SET encrypted=excluded.encrypted").run(sealIntegration(JSON.stringify(config), "github-app"));
