@@ -153,7 +153,7 @@ function DeleteWorkspace({ sessionToken }: { sessionToken: string }) {
 
 const roleLabel = (role: string) => role[0].toUpperCase() + role.slice(1);
 
-export function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionToken: string; beforeOpenProfile?: () => void }) {
+function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionToken: string; beforeOpenProfile?: () => void }) {
   const workspace = useWorkspace();
   const openMember = useMemberProfile();
   const admin = ["owner", "admin"].includes(workspace.role);

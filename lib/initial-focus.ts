@@ -16,8 +16,6 @@ if (typeof window !== "undefined") {
   window.addEventListener("keydown", event => { if (!event.metaKey && !event.ctrlKey && event.key !== "Meta" && event.key !== "Control") set(true); }, true);
   window.addEventListener("pointerdown", () => set(false), true);
 }
-export const usingKeyboard = () => keyboardInput;
-
 /** Moves focus without scrolling; the focus ring shows only when the person is using the keyboard. */
 export function focusQuietly(element: HTMLElement | null | undefined) {
   if (!element) return false;

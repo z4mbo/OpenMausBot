@@ -14,10 +14,11 @@ function db() {
   database.exec(`CREATE TABLE IF NOT EXISTS github_workspace (team TEXT PRIMARY KEY, login TEXT NOT NULL, account_id INTEGER NOT NULL, connected_by TEXT NOT NULL, encrypted TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS github_app (id INTEGER PRIMARY KEY CHECK(id=1), encrypted TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS github_oauth_states (hash TEXT PRIMARY KEY, browser_hash TEXT NOT NULL, encrypted TEXT NOT NULL, expires INTEGER NOT NULL);
-    CREATE TABLE IF NOT EXISTS github_jobs (key TEXT PRIMARY KEY, state TEXT NOT NULL, payload TEXT, updated INTEGER NOT NULL);`);
+    CREATE TABLE IF NOT EXISTS github_jobs (key TEXT PRIMARY KEY, state TEXT NOT NULL, payload TEXT, updated INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS instance_operator (id INTEGER PRIMARY KEY CHECK(id=1), user_id TEXT NOT NULL, recorded INTEGER NOT NULL);`);
   return database;
 }
-export const hashSecret = (value: string) => createHash("sha256").update(value).digest("hex");
+const hashSecret = (value: string) => createHash("sha256").update(value).digest("hex");
 export function githubAppConfig(): GitHubAppConfig | null {
   const row = db().prepare("SELECT encrypted FROM github_app WHERE id=1").get() as { encrypted: string } | undefined;
   const credentials = { appId: process.env.GITHUB_APP_ID ? Number(process.env.GITHUB_APP_ID) : undefined, privateKey: process.env.GITHUB_APP_PRIVATE_KEY?.replace(/\\n/g, "\n") };
@@ -25,13 +26,27 @@ export function githubAppConfig(): GitHubAppConfig | null {
   return process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? { ...credentials, clientId: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, webhookSecret: process.env.GITHUB_WEBHOOK_SECRET } : null;
 }
 /** ORIGIN_ADMIN_EMAILS (comma separated) plus the legacy ORIGIN_LEGACY_OWNER_EMAIL, lowercased. */
-export function instanceAdminEmails() {
+function instanceAdminEmails() {
   return [...(process.env.ORIGIN_ADMIN_EMAILS || "").split(","), DEFAULT_OWNER_EMAIL].map(email => email.trim().toLowerCase()).filter(Boolean);
+}
+/**
+ * The fallback instance operator's user id. Resolved once (the owner of the first workspace created, via the signed
+ * bridge) and recorded here, so deleting or handing over that workspace later never moves the role to someone else.
+ * Null while no workspace exists; throws when the bridge is unavailable.
+ */
+export async function fallbackInstanceOperator() {
+  const recorded = () => (db().prepare("SELECT user_id FROM instance_operator WHERE id=1").get() as { user_id: string } | undefined)?.user_id;
+  const existing = recorded();
+  if (existing) return existing;
+  const operator = await integrationBridge<{ userId: string } | null>("instanceOperator", {});
+  if (!operator) return null;
+  db().prepare("INSERT INTO instance_operator VALUES(1,?,?) ON CONFLICT(id) DO NOTHING").run(operator.userId, Date.now());
+  return recorded() ?? null;
 }
 /**
  * Who may register the instance-wide GitHub App with the manifest flow, while none is configured: the instance
  * operator only. With ORIGIN_ADMIN_EMAILS or ORIGIN_LEGACY_OWNER_EMAIL set, those accounts (in any workspace role);
- * otherwise the owner of the first workspace created on the instance, from a workspace they own or administer.
+ * otherwise the recorded fallback operator (see fallbackInstanceOperator), from a workspace they own or administer.
  * Fails closed when the operator cannot be determined.
  */
 export async function canSetupGitHubApp(user: { _id: string; email: string }, workspaceRole: string) {
@@ -40,8 +55,7 @@ export async function canSetupGitHubApp(user: { _id: string; email: string }, wo
   if (admins.length) return admins.includes(user.email.trim().toLowerCase());
   if (!["owner", "admin"].includes(workspaceRole)) return false;
   try {
-    const operator = await integrationBridge<{ userId: string } | null>("instanceOperator", {});
-    return Boolean(operator && operator.userId === user._id);
+    return (await fallbackInstanceOperator()) === user._id;
   } catch { return false; }
 }
 export function saveGitHubApp(config: GitHubAppConfig) {

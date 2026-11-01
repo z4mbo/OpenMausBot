@@ -104,7 +104,7 @@ export async function createTaskPR(sessionToken: string, projectId: string, task
   } finally { saveGitHubJob(key, "done"); }
 }
 
-export async function syncPRTarget(target: Target, eventHeadSha?: string) {
+async function syncPRTarget(target: Target, eventHeadSha?: string) {
   const repoUrl = target.url.split("/pull/")[0];
   const sequence = await integrationBridge<number | null>("prBeginSync", { id: target._id });
   if (sequence === null) return;

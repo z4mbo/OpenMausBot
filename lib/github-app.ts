@@ -3,7 +3,7 @@ import { githubAppConfig, githubRequest, workspaceGitHubInfo } from "./github-wo
 import { parseGitHubRepo } from "./github-repo";
 import { integrationBridge } from "./integration-bridge";
 
-export const prPermissions = { contents: "write", pull_requests: "write", checks: "read" } as const;
+const prPermissions = { contents: "write", pull_requests: "write", checks: "read" } as const;
 export const permissionNotice = "Tasks as pull requests needs Contents: write, Pull requests: write and Checks: read. The App owner must save these permissions and subscribe to pull_request, pull_request_review, check_suite and check_run (keep issues). Then open GitHub Settings > Applications > Installed GitHub Apps > Origin > Configure and accept the new permissions. Existing issue sync continues with the current permissions.";
 type Installation = { id: number; account?: { id: number; login: string }; suspended_at?: string | null; permissions: Record<string, string> };
 type Account = { id: number; login: string };

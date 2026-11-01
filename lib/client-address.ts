@@ -2,7 +2,7 @@
 // i.e. the operator runs a reverse proxy that overwrites them (see deploy/README.md). Without it callers fall back
 // to per-endpoint keys that a client cannot change by sending a header.
 
-export function trustedProxy() {
+function trustedProxy() {
   const value = (process.env.ORIGIN_TRUSTED_PROXY || "").trim().toLowerCase();
   return value !== "" && value !== "0" && value !== "false";
 }

@@ -1,5 +1,5 @@
 export const SIDEBAR_DEFAULT_WIDTH = 244;
-export const SIDEBAR_MIN_WIDTH = 220;
+const SIDEBAR_MIN_WIDTH = 220;
 export const SIDEBAR_MAX_WIDTH = 360;
 export const SIDEBAR_COLLAPSE_WIDTH = 180;
 

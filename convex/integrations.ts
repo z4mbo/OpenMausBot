@@ -278,7 +278,7 @@ export const kick = internalAction({
   },
 });
 
-/** The instance operator when ORIGIN_ADMIN_EMAILS is unset: the current owner of the first workspace created here. */
+/** The instance operator when ORIGIN_ADMIN_EMAILS is unset: the current owner of the first workspace created here (the Next server records the first answer and keeps it). */
 export const instanceOperator = internalQuery({
   args: {}, returns: v.union(v.object({ userId: v.id("users") }), v.null()),
   handler: async ctx => {

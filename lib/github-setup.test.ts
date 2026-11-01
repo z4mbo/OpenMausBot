@@ -37,7 +37,7 @@ afterAll(() => { integrationDb().close(); rmSync(directory, { recursive: true, f
 afterEach(() => {
   current.role = "owner"; current.email = "operator@pg3.test"; current.userId = "operator-user"; current.legacy = ""; current.operator = "operator-user";
   vi.unstubAllEnvs();
-  integrationDb().exec("DELETE FROM github_app; DELETE FROM github_oauth_states");
+  integrationDb().exec("DELETE FROM github_app; DELETE FROM github_oauth_states; DELETE FROM instance_operator");
   vi.unstubAllGlobals();
 });
 const manifest = () => POST(new Request("http://localhost:3000/api/github/setup?teamId=fixture-team", { method: "POST" }));
@@ -73,10 +73,34 @@ test("GitHub App setup: without ORIGIN_ADMIN_EMAILS only the first workspace's o
     expect((await manifest()).status).toBe(403);
   }
   current.role = "owner";
+  integrationDb().exec("DELETE FROM instance_operator");
   for (const operator of [null, new Error("Integration update failed (503)")]) {
     current.operator = operator;
     expect((await manifest()).status).toBe(403);
   }
+});
+
+test("GitHub App setup: the fallback operator is recorded once and survives the first workspace being deleted", async () => {
+  current.operator = new Error("Integration update failed (503)");
+  expect((await manifest()).status).toBe(403);
+  current.operator = null;
+  expect((await manifest()).status).toBe(403);
+  current.operator = "operator-user";
+  expect((await manifest()).status).toBe(200);
+  // The first workspace is deleted: the bridge would now name the next-oldest workspace's owner (or fail).
+  for (const next of ["stranger-user", null, new Error("Integration update failed (503)")]) {
+    current.operator = next;
+    expect((await manifest()).status).toBe(200);
+    stranger(); current.role = "owner";
+    expect((await manifest()).status).toBe(403);
+    expect(await workspaceStatus()).toMatchObject({ canSetup: false });
+    current.userId = "operator-user"; current.email = "operator@pg3.test";
+  }
+  expect(integrationDb().prepare("SELECT user_id FROM instance_operator").all()).toEqual([{ user_id: "operator-user" }]);
+  vi.stubEnv("ORIGIN_ADMIN_EMAILS", "stranger@evil.test");
+  expect((await manifest()).status).toBe(403);
+  stranger(); current.role = "member";
+  expect((await manifest()).status).toBe(200);
 });
 
 test("GitHub App setup: ORIGIN_ADMIN_EMAILS names the operators (any role) and replaces the first-workspace rule", async () => {

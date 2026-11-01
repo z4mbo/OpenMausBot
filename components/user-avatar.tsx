@@ -16,7 +16,7 @@ export function initials(user: AvatarIdentity) {
 
 // Soft, dark-theme friendly tones. Each person keeps the same tone everywhere.
 const avatarTones = ["#b5e853", "#7fd6e4", "#c9b3ff", "#f7cf7a", "#ff9a91", "#8ff0c2", "#9ec5ff", "#f5a8d4"];
-export function avatarTone(user: AvatarIdentity) {
+function avatarTone(user: AvatarIdentity) {
   const seed = (user.email || user.username || user.name || "origin").toLowerCase();
   let hash = 0;
   for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;

@@ -116,7 +116,7 @@ function Welcome() {
   return <main className="public-auth welcome"><section className="auth-content"><span className="origin-wordmark"><OriginMark />Origin</span><div className="welcome-actions"><Link className="primary-button large" href="/login">Sign in</Link><Link className="ghost-button large" href="/signup">Create account</Link></div></section></main>;
 }
 
-export function WorkspaceOnboarding({ sessionToken, onCreated }: { sessionToken: string; onCreated: (slug: string) => void }) {
+function WorkspaceOnboarding({ sessionToken, onCreated }: { sessionToken: string; onCreated: (slug: string) => void }) {
   const create = useMutation(api.workspaces.create);
   const [name, setName] = useState("");
   const [error, setError] = useState("");

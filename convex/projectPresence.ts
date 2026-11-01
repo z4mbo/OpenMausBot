@@ -6,15 +6,23 @@ export const update = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), clientId: v.string(), sequence: v.number(), projectId: v.union(v.id("projects"), v.null()) },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     if (!args.clientId || args.clientId.length > 80 || !Number.isSafeInteger(args.sequence) || args.sequence < 0) throw new ConvexError("Invalid presence session");
-    if (args.projectId) {
-      const project = await ctx.db.get(args.projectId);
-      if (!project || project.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new ConvexError("Project is not in this workspace");
+    // A tab whose access just ended (member removed, project access revoked, signed out) keeps sending heartbeats
+    // and a final leave until it notices; those publish nothing instead of failing (the client logs every failure).
+    const access = await requireTeamMember(ctx, args.teamId, args.sessionToken).catch((error: unknown) => {
+      if (error instanceof ConvexError) return null;
+      throw error;
+    });
+    if (!access) return null;
+    const { user } = access;
+    let projectId = args.projectId;
+    if (projectId) {
+      const project = await ctx.db.get(projectId);
+      if (!project || project.teamId !== args.teamId || !await projectMember(ctx, project, user)) projectId = null;
     }
     const existing = await ctx.db.query("projectPresence").withIndex("by_team_user_client", q => q.eq("teamId", args.teamId).eq("userId", user._id).eq("clientId", args.clientId)).unique();
     if (existing && existing.sequence >= args.sequence) return null;
-    const data = { projectId: args.projectId ?? undefined, sequence: args.sequence, updatedAt: Date.now() };
+    const data = { projectId: projectId ?? undefined, sequence: args.sequence, updatedAt: Date.now() };
     // Keep a short-lived tombstone so an in-flight heartbeat cannot undo a leave.
     if (existing) await ctx.db.patch(existing._id, data);
     else await ctx.db.insert("projectPresence", { teamId: args.teamId, userId: user._id, clientId: args.clientId, ...data });
