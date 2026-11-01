@@ -2,6 +2,7 @@
 import { errorText, mediaErrorText } from "@/lib/error-text";
 
 import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import { TaskModal } from "./issue-detail";
 import { ProjectWorkspace } from "./project-workspace";
 import { taskKey } from "../lib/project-issues";
@@ -194,6 +195,8 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const [initialIssue, setInitialIssue] = useState<{ projectId: Id<"projects">; taskId: Id<"tasks"> } | null>(null);
   const reorder = useMutation(api.projects.reorder);
   const projects = useQuery(api.projects.listForUser, { sessionToken, teamId: workspace._id });
+  // The composer needs a project to file into; without one the create buttons and the C shortcut stay off.
+  const canCreateIssue = workspace.role !== "viewer" && Boolean(projects?.some(project => project.memberRole !== "viewer"));
   const workspaceRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const root = workspaceRef.current;
@@ -235,7 +238,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
       const action = workspaceShortcut(event, {
         editing: isEditingTarget(event.target) || isEditingTarget(document.activeElement),
         overlayOpen: hasOpenKeyboardOverlay(),
-        canCreate: workspace.role !== "viewer",
+        canCreate: canCreateIssue,
       });
       if (!action) return;
       event.preventDefault();
@@ -244,7 +247,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
     };
     window.addEventListener("keydown", handleKeys);
     return () => window.removeEventListener("keydown", handleKeys);
-  }, [workspace.role]);
+  }, [canCreateIssue]);
 
   useEffect(() => {
     if (projects === undefined) return;
@@ -284,7 +287,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   return (
     <MemberProfileContext.Provider value={setMemberEmail}><div style={{ "--sidebar-width": `${sidebarLayout.width}px` } as CSSProperties} className={clsx("app-shell", "workspace-app", mobileOpen && "mobile-nav-open", sidebarCollapsed && "sidebar-collapsed", sidebarCollapsed && !sidebarHover && "sidebar-hidden", sidebarCollapsed && sidebarHover && "sidebar-floating")}>
       <MotionLayer />
-      <header className="mobile-topbar" inert={mobileOpen || undefined}><button ref={navButtonRef} className="icon-button" aria-label="Open navigation" aria-expanded={mobileOpen} aria-controls="workspace-sidebar" onClick={() => setMobileOpen(true)}><Menu size={20} /></button><strong className="mobile-project-name">{mainView === "project" ? projects?.find(project => project._id === activeProjectId)?.name : { inbox: "Inbox", chat: "Chat", voice: "Call", draw: "Draw" }[mainView]}</strong>{workspace.role !== "viewer" && mainView !== "project" && <button className="icon-button" aria-label="Create issue" onClick={() => setIssueOpen(true)}><SquarePen size={18} /></button>}</header>
+      <header className="mobile-topbar" inert={mobileOpen || undefined}><button ref={navButtonRef} className="icon-button" aria-label="Open navigation" aria-expanded={mobileOpen} aria-controls="workspace-sidebar" onClick={() => setMobileOpen(true)}><Menu size={20} /></button><strong className="mobile-project-name">{mainView === "project" ? projects?.find(project => project._id === activeProjectId)?.name ?? (projects?.length === 0 ? workspace.name : null) : { inbox: "Inbox", chat: "Chat", voice: "Call", draw: "Draw" }[mainView]}</strong>{canCreateIssue && mainView !== "project" && <button className="icon-button" aria-label="Create issue" onClick={() => setIssueOpen(true)}><SquarePen size={18} /></button>}</header>
       {mobileOpen && <button className="mobile-nav-scrim" aria-label="Close navigation" tabIndex={-1} onClick={() => setMobileOpen(false)} />}
       {sidebarCollapsed ? <div className="sidebar-hover-zone" onMouseEnter={() => setSidebarHover(true)} /> : null}
       <aside ref={sidebarRef} id="workspace-sidebar" className="sidebar" aria-label="Workspace" onMouseLeave={() => { if (sidebarCollapsed) setSidebarHover(false); }}>
@@ -293,7 +296,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
           <button className="icon-button" type="button" onClick={() => setSearchOpen(true)} aria-label="Search" title="Search (F or ⌘K)" aria-keyshortcuts="f Meta+K Control+K /">
             <Search size={17} />
           </button>
-          <button className="icon-button sidebar-new-issue" title="Create issue (C)" aria-label="Create issue" aria-keyshortcuts="C" disabled={workspace.role === "viewer"} onClick={() => setIssueOpen(true)}><SquarePen size={17} /></button>
+          <button className="icon-button sidebar-new-issue" title="Create issue (C)" aria-label="Create issue" aria-keyshortcuts="C" disabled={!canCreateIssue} onClick={() => setIssueOpen(true)}><SquarePen size={17} /></button>
         </div>
         <div className="sidebar-content">
           <span className="nav-glider" aria-hidden="true"><span className="nav-glider-avatar"><UserAvatar user={user} size="small" /></span></span>
@@ -324,7 +327,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
                 {projectsOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 <span>Projects</span>
               </button>
-              <ProjectSortMenu value={projectSort} onChange={changeProjectSort} />
+              {(projects?.length ?? 0) > 1 && <ProjectSortMenu value={projectSort} onChange={changeProjectSort} />}
               <CreateProjectInline sessionToken={sessionToken} onCreated={openProject} iconOnly />
             </div>
             {projects === undefined ? <LoadingState label="Projects" /> : null}
@@ -426,6 +429,8 @@ function ProfileMenu({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const workspace = useWorkspace();
+  // Switching stays in the app: the workspace view remounts for the new workspace without a page load.
+  const router = useRouter();
   const items = () => [...(listRef.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not(:disabled)') || [])];
   const closeMenu = (refocus = true) => { setMenu(false); if (refocus) focusQuietly(triggerRef.current); };
   useEffect(() => {
@@ -467,7 +472,7 @@ function ProfileMenu({
         <hr />
         <span className="dropdown-caption" id="account-menu-workspaces">Workspaces</span>
         <div role="group" aria-labelledby="account-menu-workspaces">
-          {workspaces.map(item => <button role="menuitemradio" aria-checked={item._id === workspace._id} tabIndex={-1} key={item._id} onClick={() => choose(() => { if (item._id !== workspace._id) window.location.assign(`/${item.slug}`); })}><span className="workspace-initial" aria-hidden="true">{item.name.slice(0, 1).toUpperCase()}</span><span>{item.name}</span>{item._id === workspace._id && <Check size={14} className="menu-check" />}</button>)}
+          {workspaces.map(item => <button role="menuitemradio" aria-checked={item._id === workspace._id} tabIndex={-1} key={item._id} onClick={() => choose(() => { if (item._id !== workspace._id) router.push(`/${item.slug}`); })}><span className="workspace-initial" aria-hidden="true">{item.name.slice(0, 1).toUpperCase()}</span><span>{item.name}</span>{item._id === workspace._id && <Check size={14} className="menu-check" />}</button>)}
         </div>
         <button role="menuitem" tabIndex={-1} onClick={() => choose(onCreateWorkspace)}><Plus size={15} /><span>Create workspace</span></button>
         <hr />
@@ -599,14 +604,13 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
       setBusy(false);
     }
   };
-  return <><button className={clsx("ghost-button", iconOnly ? "icon-create" : "full")} type="button" aria-label="Create project" title="Create project" disabled={workspace.role === "viewer"} onClick={() => setOpen(true)}><Plus size={14} strokeWidth={1.5} />{iconOnly ? null : "New project"}</button>{open && <Dialog title="New project" onClose={() => setOpen(false)}><form className="dialog-body stack-form" onSubmit={submit}><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Project name" autoFocus required maxLength={100} /></label><fieldset className="repo-choice"><legend>Repository</legend><label><input type="radio" name="repository-mode" checked={repoMode === "create"} onChange={() => setRepoMode("create")} />Create a private repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "existing"} onChange={() => setRepoMode("existing")} />Link an existing repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "later"} onChange={() => setRepoMode("later")} />No repository</label></fieldset>{repoMode === "existing" && <label>GitHub repository<input value={repoUrl} onChange={event => setRepoUrl(event.target.value)} placeholder="owner/repository" required /></label>}<WorkspaceGitHubSetup sessionToken={sessionToken} />{error ? <div className="notice danger">{error}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit" disabled={busy}>{busy ? "Creating..." : "Create project"}</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form></Dialog>}</>;
+  return <><button className={iconOnly ? "ghost-button icon-create" : "primary-button"} type="button" aria-label={iconOnly ? "Create project" : undefined} title={iconOnly ? "Create project" : undefined} disabled={workspace.role === "viewer"} onClick={() => setOpen(true)}><Plus size={14} strokeWidth={iconOnly ? 1.5 : 2} />{iconOnly ? null : "New project"}</button>{open && <Dialog title="New project" onClose={() => setOpen(false)}><form className="dialog-body stack-form" onSubmit={submit}><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Project name" autoFocus required maxLength={100} /></label><fieldset className="repo-choice"><legend>Repository</legend><label><input type="radio" name="repository-mode" checked={repoMode === "create"} onChange={() => setRepoMode("create")} />Create a private repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "existing"} onChange={() => setRepoMode("existing")} />Link an existing repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "later"} onChange={() => setRepoMode("later")} />No repository</label></fieldset>{repoMode === "existing" && <label>GitHub repository<input value={repoUrl} onChange={event => setRepoUrl(event.target.value)} placeholder="owner/repository" required /></label>}{repoMode !== "later" && <WorkspaceGitHubSetup sessionToken={sessionToken} />}{error ? <div className="notice danger" role="alert">{error}</div> : null}<div className="dialog-actions"><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button><button className="primary-button compact" type="submit" disabled={busy || !name.trim()}>{busy && <Loader2 size={14} className="spin" />}Create project</button></div></form></Dialog>}</>;
 }
 
 
 function EmptyProjects({ sessionToken, onCreated }: { sessionToken: string; onCreated: (id: Id<"projects">) => void }) {
   const workspace = useWorkspace();
-  const admin = ["owner", "admin"].includes(workspace.role);
-  return <section className="empty-projects"><FolderPlus size={22} /><h1>No projects</h1>{admin ? <div className="empty-create"><CreateProjectInline sessionToken={sessionToken} onCreated={onCreated} /></div> : <p>A workspace admin can add you to a project.</p>}</section>;
+  return <section className="empty-projects"><FolderPlus size={22} /><h1>No projects</h1>{workspace.role !== "viewer" ? <div className="empty-create"><CreateProjectInline sessionToken={sessionToken} onCreated={onCreated} /></div> : <p>A workspace admin can add you to a project.</p>}</section>;
 }
 
 function SearchDialog({
