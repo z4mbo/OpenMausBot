@@ -1,11 +1,15 @@
-import { exchangeMcpToken, oauthHeaders } from "@/lib/mcp-oauth";
+import { exchangeMcpToken, oauthHeaders, OAuthError } from "@/lib/mcp-oauth";
 import { limitLocalAction } from "@/lib/localRealtime";
+import { readBoundedText } from "@/lib/http-body";
+
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     limitLocalAction(`mcp-token:${request.headers.get("x-real-ip") || "unknown"}`, 100, 60000);
-    const text = await request.text(); if (text.length > 20000) throw new Error("invalid_request");
-    return Response.json(exchangeMcpToken(new URLSearchParams(text)), { headers: oauthHeaders });
-  } catch (error) { return Response.json({ error: error instanceof Error && ["invalid_target", "invalid_scope", "unsupported_grant_type"].includes(error.message) ? error.message : "invalid_grant" }, { status: 400, headers: oauthHeaders }); }
+    return Response.json(exchangeMcpToken(new URLSearchParams(await readBoundedText(request, 20000))), { headers: oauthHeaders });
+  } catch (error) {
+    const code = error instanceof OAuthError ? error.code : "invalid_request";
+    return Response.json({ error: code, ...(error instanceof OAuthError && error.message !== code ? { error_description: error.message } : {}) }, { status: code === "invalid_client" ? 401 : 400, headers: oauthHeaders });
+  }
 }
 export { OPTIONS } from "../register/route";

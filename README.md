@@ -48,7 +48,18 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm r
 
 ## Connect AI agents (MCP)
 
-Origin exposes an MCP server at `/api/mcp` for Claude Code, Codex, ChatGPT, OpenCode and other MCP clients.
+Origin is a remote MCP server at `https://<your-origin>/api/mcp` (Streamable HTTP). Agents act as you, with your workspace and project permissions. Settings → Agents has the URL, per-client setup and access tokens.
+
+```sh
+claude mcp add --transport http origin https://<your-origin>/api/mcp   # Claude Code; sign in with /mcp
+codex mcp add origin --url https://<your-origin>/api/mcp && codex mcp login origin
+```
+
+- **Sign-in:** OAuth 2.1 with dynamic client registration and PKCE (Claude Code, Codex, OpenCode, omp, ChatGPT developer mode).
+- **Header-only clients:** create an access token in Settings → Agents and send `Authorization: Bearer <token>`.
+- **Tools:** `get_workspace`, `list_projects`, `list_issues`, `get_issue`, `get_inbox`, `list_members`, and with write access `create_issue`, `update_issue`, `move_issue`, `add_comment`.
+
+Revoke connections and tokens in Settings → Agents.
 
 ## License
 

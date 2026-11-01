@@ -3,7 +3,7 @@ import { afterEach, expect, test, vi } from "vitest";
 import { POST as message, PATCH as edit } from "../app/api/local-chat/messages/route";
 import { POST as conversation, PATCH as readConversation } from "../app/api/local-chat/conversations/route";
 import { POST as invite } from "../app/api/workspace/invites/route";
-import { POST as consent } from "../app/api/mcp/authorize/route";
+import { POST as consent } from "../app/api/oauth/consent/route";
 import { POST as signal, DELETE as ack } from "../app/api/local-voice/signals/route";
 import { POST as participant } from "../app/api/local-voice/participants/route";
 import { POST as issue } from "../app/api/github/issues/route";
@@ -26,7 +26,7 @@ vi.mock("./github-workspace", () => ({ lockGitHubJob: work, saveGitHubJob: work 
 vi.mock("./githubConnection", () => ({ saveGitHubConnection: work }));
 vi.mock("./github-sync", () => ({ createGitHubTask: work, createProjectRepository: work, syncGitHubPage: work }));
 vi.mock("./github-prs", () => ({ createTaskPR: work, syncPRPage: work }));
-vi.mock("./mcp-oauth", () => ({ validateMcpAuthorization: work, issueMcpCode: work }));
+vi.mock("./mcp-oauth", () => ({ validateMcpAuthorization: work, validateMcpClient: work, issueMcpCode: work, authorizationError: work, OAuthError: Error }));
 vi.mock("./invite-mail", () => ({ sendInviteMail: work }));
 afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); });
 
