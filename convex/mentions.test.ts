@@ -41,7 +41,7 @@ describe("chat mentions over the signed bridge", () => {
       teamId: f.teamId, actorId: f.owner.id, messageId: "m-1", userIds: [f.member.id, f.bystander.id, f.outsider.id],
       conversation: `project:${f.projectId}`, preview: "  @member   please review\nthe draft  ",
     });
-    expect(await inbox(f, f.member)).toMatchObject([{ kind: "mention", messageId: "m-1", conversation: `project:${f.projectId}`, projectId: f.projectId, preview: "@member please review the draft" }]);
+    expect(await inbox(f, f.member)).toMatchObject([{ kind: "mention", messageId: "m-1", conversation: `project:${f.projectId}`, projectId: f.projectId, preview: "@member please review the draft", actorName: "Owner Person" }]);
     expect(await inbox(f, f.bystander)).toEqual([]);
     await expect(inbox(f, f.outsider)).rejects.toThrow();
   });

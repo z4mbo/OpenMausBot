@@ -31,12 +31,12 @@ import { FormStatus, type FormNotice } from "./settings-controls";
 import { ChatView } from "./chat-shell";
 import { UserAvatar, memberName } from "./user-avatar";
 import { ContentSkeleton } from "./content-skeleton";
-import { useContentTransition } from "./use-content-transition";
 import { DrawView } from "./draw-view";
 import { CreateWorkspaceDialog } from "./create-workspace-dialog";
 import { SidebarResizeHandle } from "./sidebar-resize-handle";
 import { useSidebarLayout } from "./use-sidebar-layout";
-import { focusInitialInput } from "@/lib/initial-focus";
+import { focusInitialInput, focusQuietly } from "@/lib/initial-focus";
+import { swallowPressClick } from "@/lib/outside-press";
 import { hasOpenKeyboardOverlay, isEditingTarget, workspaceShortcut } from "@/lib/keyboard-navigation";
 import { rankSearchResults } from "@/lib/search-ranking";
 import { localApi as requestLocalApi } from "@/lib/client-api";
@@ -170,8 +170,8 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const drawerWasOpen = useRef(false);
   useEffect(() => {
     // The phone drawer takes focus when it opens and gives it back to the menu button when it closes.
-    if (mobileOpen) sidebarRef.current?.querySelector<HTMLElement>('.nav-item[aria-current="page"], .project-button[aria-current="page"], .nav-item')?.focus({ preventScroll: true });
-    else if (drawerWasOpen.current && navButtonRef.current?.getClientRects().length && !document.querySelector("dialog[open]")) navButtonRef.current.focus({ preventScroll: true });
+    if (mobileOpen) focusQuietly(sidebarRef.current?.querySelector<HTMLElement>('.nav-item[aria-current="page"], .project-button[aria-current="page"], .nav-item'));
+    else if (drawerWasOpen.current && navButtonRef.current?.getClientRects().length && !document.querySelector("dialog[open]")) focusQuietly(navButtonRef.current);
     drawerWasOpen.current = mobileOpen;
   }, [mobileOpen]);
   const [dragProject, setDragProject] = useState<Id<"projects"> | null>(null);
@@ -194,14 +194,13 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const [initialIssue, setInitialIssue] = useState<{ projectId: Id<"projects">; taskId: Id<"tasks"> } | null>(null);
   const reorder = useMutation(api.projects.reorder);
   const projects = useQuery(api.projects.listForUser, { sessionToken, teamId: workspace._id });
-  const viewLoading = useContentTransition(`${workspace._id}:${mainView}:${mainView === "project" ? activeProjectId : ""}`);
   const workspaceRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const root = workspaceRef.current;
-    if (viewLoading || !root || document.querySelector('dialog[open], [aria-modal="true"]')) return;
+    // Phones would pop the keyboard over the view they just opened.
+    if (!root || document.querySelector('dialog[open], [aria-modal="true"]') || matchMedia("(pointer: coarse)").matches) return;
     if (root.querySelector("[data-initial-focus]") && !root.contains(document.activeElement)) focusInitialInput(root);
-  }, [mainView, viewLoading]);
-  const inbox = useQuery(api.tasks.inbox, { sessionToken, teamId: workspace._id });
+  }, [mainView]);
   const voiceParticipants = useLocalVoiceParticipants(sessionToken, !!sessionToken && !!user);
   const sidebarProjects: ProjectWithUi[] | undefined = projects ? projectOrder ? [...projects].sort((a, b) => projectOrder.indexOf(a._id) - projectOrder.indexOf(b._id)) : sortProjects(orderSidebarProjects(projects), projectSort) : undefined;
   const collaborators = useProjectPresence(sessionToken, workspace._id, mainView === "project" && projects?.some(project => project._id === activeProjectId) ? activeProjectId : null);
@@ -306,8 +305,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
           >
             <Inbox size={16} />
             <span>Inbox</span>
-            {(notifications.summary?.unread || 0) > 0 && <span className="inbox-unread-dot" aria-label={`${notifications.summary!.unread}${notifications.summary!.more ? "+" : ""} unread notifications`} />}
-            {(inbox?.length || 0) > 0 && <small aria-label={`${inbox!.length} open issues assigned to you`}>{inbox!.length}</small>}
+            {(notifications.summary?.unread || 0) > 0 && <small className="nav-unread" aria-label={`${notifications.summary!.unread}${notifications.summary!.more ? "+" : ""} unread notifications`}>{notifications.summary!.unread}{notifications.summary!.more ? "+" : ""}</small>}
           </button>
           <button aria-current={mainView === "chat" ? "page" : undefined} className={clsx("nav-item", mainView === "chat" && "active")} type="button" onClick={() => openView("chat")}>
             <MessageCircle size={16} />
@@ -362,9 +360,8 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
         </div>
       </aside>
       {!sidebarCollapsed && <SidebarResizeHandle width={sidebarLayout.width} onResize={width => setSidebarLayout(current => ({ ...current, width }))} onCollapse={width => { setSidebarLayout({ width, collapsed: true }); setSidebarHover(false); }} />}
-      <main ref={workspaceRef} inert={mobileOpen || undefined} className={clsx("workspace", mainView === "draw" && "draw-workspace", viewLoading && "view-loading")} aria-busy={viewLoading}>
+      <main ref={workspaceRef} inert={mobileOpen || undefined} className={clsx("workspace", mainView === "draw" && "draw-workspace")}>
         {sidebarCollapsed && <button className="icon-button sidebar-restore" aria-label="Keep sidebar open" title="Keep sidebar open" aria-controls="workspace-sidebar" aria-expanded="false" onClick={() => { setSidebarCollapsed(false); setSidebarHover(false); }}><PanelLeftOpen size={18} /></button>}
-        {viewLoading && <div className="view-loading-overlay"><ContentSkeleton kind={mainView === "chat" ? "chat" : mainView === "draw" ? "canvas" : mainView === "project" || mainView === "voice" ? "board" : "list"} label="Loading view" rows={6} /></div>}
         {shellNotice && <div className="notice danger">{shellNotice}<button className="icon-button" aria-label="Dismiss" onClick={() => setShellNotice("")}><X size={14} /></button></div>}
         <ErrorBoundary resetKey={`${mainView}:${activeProjectId}`} fallback={<EmptyBlock icon={CircleAlert} title="This view could not load" body="It may have been deleted or your access changed." />}>
         {mainView === "chat" ? (
@@ -427,12 +424,12 @@ function ProfileMenu({
   const listRef = useRef<HTMLDivElement>(null);
   const workspace = useWorkspace();
   const items = () => [...(listRef.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not(:disabled)') || [])];
-  const closeMenu = (refocus = true) => { setMenu(false); if (refocus) triggerRef.current?.focus(); };
+  const closeMenu = (refocus = true) => { setMenu(false); if (refocus) focusQuietly(triggerRef.current); };
   useEffect(() => {
     if (!menu) return;
     const list = items();
-    (menu === "last" ? list.at(-1) : list[0])?.focus();
-    const close = (event: PointerEvent) => { if (!menuRef.current?.contains(event.target as Node)) setMenu(false); };
+    focusQuietly(menu === "last" ? list.at(-1) : list[0]);
+    const close = (event: PointerEvent) => { if (!menuRef.current?.contains(event.target as Node)) { setMenu(false); swallowPressClick(); } };
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [menu]);

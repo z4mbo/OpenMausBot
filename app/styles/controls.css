@@ -120,7 +120,7 @@ input[type="checkbox"][role="switch"]:disabled { cursor: not-allowed; opacity: 0
   object-fit: cover;
 }
 .origin-user-avatar.small { --avatar-size: 20px; }
-.origin-user-avatar[data-initials="2"] { font-size: calc(var(--avatar-size) * 0.36); letter-spacing: -0.02em; }
+.origin-user-avatar[data-initials="2"] { font-size: max(8px, calc(var(--avatar-size) * 0.38)); letter-spacing: -0.03em; }
 .project-icon { width: 16px; height: 16px; flex: none; color: currentColor; }
 .project-icon.image { border-radius: var(--radius-xs); object-fit: cover; }
 .project-icon.emoji { display: inline-grid; place-items: center; font-size: 15px; line-height: 1; font-family: var(--font-sans); font-variant-emoji: emoji; }
@@ -196,3 +196,13 @@ input[type="checkbox"][role="switch"]:disabled { cursor: not-allowed; opacity: 0
 }
 .origin-dialog > form.stack-form, .origin-dialog > .stack-form { padding: var(--space-2) var(--space-5) var(--space-5); }
 .origin-dialog > form.stack-form > .primary-button:last-child { justify-self: end; }
+
+/* Touch: shared controls are at least 44px to tap. Icon buttons grow; small text controls keep their look and get an
+   invisible hit area instead. */
+@media (pointer: coarse) {
+  .icon-button { width: 44px; min-width: 44px; height: 44px; }
+  .primary-button, .ghost-button { min-height: 44px; }
+  .primary-button.compact, .ghost-button.compact { position: relative; min-height: 36px; }
+  .primary-button.compact::after, .ghost-button.compact::after, .segmented-control button::after { content: ""; position: absolute; inset: -6px 0; }
+  .segmented-control button { min-width: 44px; min-height: 32px; justify-content: center; }
+}

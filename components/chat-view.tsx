@@ -219,7 +219,7 @@ export function ChatThread({
       (option.reference && !activeTags.referenceIds.has(option.reference.id) && activeTags.referenceIds.size >= 12)
     )
       return;
-    const next = insertChatTag(body, trigger, option.label);
+    const next = insertChatTag(body, trigger, option.insert);
     if (next.text.length > 8000) return;
     if (option.member?.userId)
       setMentions((previous) => {
@@ -228,7 +228,7 @@ export function ChatThread({
           ? current
           : [
               ...current,
-              { userId: option.member!.userId!, name: option.label },
+              { userId: option.member!.userId!, name: option.insert },
             ];
       });
     if (option.reference)
@@ -660,7 +660,7 @@ export function ChatThread({
                     if (part.kind === "link") return <a key={index} href={part.href} target="_blank" rel="noopener noreferrer">{part.text}</a>;
                     if (part.kind === "mention") {
                       const target = members?.find(member => member.userId === part.mention.userId);
-                      return <button key={index} type="button" className="chat-inline-tag" disabled={!target} onClick={() => target && openMember(target.email)}>{part.text}</button>;
+                      return <button key={index} type="button" className="chat-inline-tag" disabled={!target} onClick={() => target && openMember(target.email)}>{target ? `@${displayName(target)}` : part.text}</button>;
                     }
                     if (part.kind === "reference") return <button key={index} type="button" className="chat-inline-tag chat-inline-reference" onClick={() => onOpenReference(part.reference.projectId as Id<"projects">, part.reference.type === "issue" ? part.reference.id as Id<"tasks"> : undefined)}>{part.text}</button>;
                     return <Fragment key={index}>{part.text}</Fragment>;
@@ -845,7 +845,7 @@ export function ChatThread({
                     <Circle size={17} />
                   )}
                   <span className="suggestion-copy">
-                    <strong>{option.name || option.label}</strong>
+                    <strong>{option.label}</strong>
                     <small>{option.detail}</small>
                   </span>
                 </button>
