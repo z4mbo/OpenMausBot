@@ -42,8 +42,9 @@
 .asset-info small { overflow: hidden; color: var(--text-3); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
 .asset-delete { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 1; height: 28px; min-width: 28px; padding: 0 7px; border: 0; border-radius: var(--radius-sm); background: rgba(8, 9, 10, 0.72); color: var(--text-1); backdrop-filter: blur(6px); opacity: 0; transition: opacity var(--duration-fast) var(--ease-out), background var(--duration-fast); }
 .asset-card:hover .asset-delete, .asset-delete:focus-visible, .asset-delete.armed { opacity: 1; }
-.asset-delete:hover:not(:disabled) { background: rgba(8, 9, 10, 0.9); }
-.asset-delete.armed, .asset-delete.armed:hover:not(:disabled) { background: #c9453f; color: #fff; }
+@media (hover: hover) { .asset-delete:hover:not(:disabled) { background: rgba(8, 9, 10, 0.9); } }
+/* Same armed look as every ConfirmButton, laid on an opaque surface so it reads over images. */
+.asset-delete.armed, .asset-delete.armed:hover:not(:disabled) { background: linear-gradient(var(--red-soft), var(--red-soft)), var(--surface-2); color: var(--red); }
 
 /* Assets: list. */
 .asset-list { display: grid; margin: 0; padding: 0; list-style: none; }
@@ -120,13 +121,13 @@
   .library-filter { max-width: 96px; }
 }
 @media (pointer: coarse) {
-  .asset-delete { top: auto; bottom: 6px; right: 4px; min-width: 36px; height: 36px; background: transparent; color: var(--text-3); backdrop-filter: none; opacity: 1; }
-  .asset-delete:hover:not(:disabled) { background: var(--hover); }
-  .asset-card .asset-info { padding-right: 40px; }
-  .library-toolbar > .primary-button, .library-toolbar > .ghost-button, .library-search, .library-filter { min-height: 40px; height: 40px; }
-  .library-toolbar > .primary-button, .library-toolbar > .ghost-button { width: 40px; }
-  .library-view button { width: 34px; height: 34px; }
-  .library-row-actions .icon-button { width: 40px; min-width: 40px; height: 40px; }
+  .asset-delete { top: auto; bottom: 2px; right: 2px; min-width: 44px; height: 44px; background: transparent; color: var(--text-3); backdrop-filter: none; opacity: 1; }
+  .asset-card .asset-info { padding-right: 46px; }
+  .library-toolbar > .primary-button, .library-toolbar > .ghost-button, .library-search, .library-filter { min-height: 44px; height: 44px; }
+  .library-toolbar > .primary-button, .library-toolbar > .ghost-button { width: 44px; }
+  .library-view button { width: 40px; height: 40px; }
+  .library-row-actions .icon-button { width: 44px; min-width: 44px; height: 44px; }
+  .vault-unlock input, .vault-unlock .primary-button { min-height: 44px; }
   .asset-card:hover { transform: none; }
 }
 @media (pointer: coarse) and (min-width: 761px) {

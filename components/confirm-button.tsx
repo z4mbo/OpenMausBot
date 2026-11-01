@@ -5,10 +5,11 @@ import clsx from "clsx";
 import { Loader2, Trash2 } from "lucide-react";
 
 /**
- * Two-step destructive button: the first press arms it (it widens into a red "Delete"), the second confirms.
- * It disarms after a few seconds, on Escape or when focus leaves, so a stray tap never deletes anything.
+ * The one two-step destructive button (project and workspace settings, assets, vault): the first press arms it (it
+ * widens into a red confirm label), the second confirms. It disarms after a few seconds, on Escape or when focus
+ * leaves, so a stray tap never deletes anything. Without `text` it is an icon button labelled by `label`.
  */
-export function ConfirmButton({ label, text, confirmLabel = "Delete", onConfirm, disabled, icon, className }: { label: string; text?: string; confirmLabel?: string; onConfirm: () => Promise<unknown> | unknown; disabled?: boolean; icon?: ReactNode; className?: string }) {
+export function ConfirmButton({ label, text, confirmLabel = "Delete", onConfirm, disabled, icon, className = "icon-button" }: { label: string; text?: string; confirmLabel?: string; onConfirm: () => Promise<unknown> | unknown; disabled?: boolean; icon?: ReactNode; className?: string }) {
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const timer = useRef<number | undefined>(undefined);

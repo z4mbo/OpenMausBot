@@ -5,14 +5,9 @@
 .feature-search { display: flex; align-items: center; gap: var(--space-2); min-width: 0; color: var(--text-3); }
 .feature-search input { width: 200px; max-width: 100%; min-width: 0; min-height: 32px; padding: 0; border: 0; background: transparent; box-shadow: none; }
 .feature-search input:focus { box-shadow: none; }
-.feature-empty { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); min-height: 240px; padding: var(--space-8); color: var(--text-3); text-align: center; }
-.feature-empty > svg { width: 22px; height: 22px; color: var(--text-3); }
-.feature-empty strong { color: var(--text-1); font-size: var(--text-md); font-weight: var(--weight-medium); }
 .feature-form { display: flex; flex-direction: column; gap: var(--space-4); max-height: 75dvh; overflow: auto; padding: var(--space-2) var(--space-5) var(--space-5); }
-.feature-form > label, .feature-form-pair > label { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.feature-form > label { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .feature-form textarea { min-height: 90px; }
-.feature-form label.feature-checkbox { flex-direction: row; align-items: center; gap: var(--space-2); color: var(--text-1); font-size: var(--text-base); font-weight: var(--weight-regular); }
-.feature-checkbox input { flex-shrink: 0; }
 .feature-form .muted { margin: 0; font-size: var(--text-sm); }
 .feature-form > button.primary-button { align-self: flex-end; }
 .feature-issue-picker { overflow: hidden; border: 1px solid var(--border-2); border-radius: var(--radius-md); }

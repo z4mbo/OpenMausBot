@@ -171,10 +171,10 @@ export function ProjectWorkspace({ projectId, sessionToken, user, initialTaskId,
       {project.status !== "active" && <ProjectStateBanner project={project} sessionToken={sessionToken} />}
       <div key={tab} className="project-panel" data-tab={tab} role="tabpanel" id="project-panel" aria-labelledby={`project-tab-${tab}`}>
         {tab === "issues" && <BoardTab key={projectId} project={project} projectId={projectId} sessionToken={sessionToken} userEmail={user.email} canEdit={canEdit} onCreateIssue={() => setIssueOpen(true)} initialTaskId={pendingTask} onOpenReference={onOpenReference} />}
-        {tab === "assets" && <AssetsPanel projectId={projectId} sessionToken={sessionToken} />}
-        {tab === "vault" && <VaultPanel projectId={projectId} sessionToken={sessionToken} />}
+        {tab === "assets" && <AssetsPanel projectId={projectId} sessionToken={sessionToken} canEdit={canEdit} />}
+        {tab === "vault" && <VaultPanel projectId={projectId} sessionToken={sessionToken} canEdit={canEdit} />}
         {tab === "repo" && <RepoTab project={project} sessionToken={sessionToken} />}
-        {tab === "feedback" && <FeedbackView key={projectId} projectId={projectId} projectName={project.name} sessionToken={sessionToken} onOpenTask={(_, taskId) => setFeedbackTask(taskId)} />}
+        {tab === "feedback" && <FeedbackView key={projectId} projectId={projectId} projectName={project.name} sessionToken={sessionToken} canEdit={canEdit} onOpenTask={(_, taskId) => setFeedbackTask(taskId)} />}
         {tab === "settings" && <SettingsTab project={project} sessionToken={sessionToken} />}
       </div>
       {feedbackTask && <TaskModal project={project} projectId={projectId} sessionToken={sessionToken} taskId={feedbackTask} canEdit={canEdit} onClose={() => setFeedbackTask(null)} />}
@@ -183,12 +183,16 @@ export function ProjectWorkspace({ projectId, sessionToken, user, initialTaskId,
   );
 }
 
-/** Project identity, the tab menu (an ARIA tablist with arrow keys) and the settings tab at the end. */
+/**
+ * Project identity, the tab menu and the settings tab at the end. An ARIA tablist with manual activation: arrow keys,
+ * Home and End move focus; Enter, Space or a click opens the tab (so arrowing across never stacks history entries).
+ */
 function ProjectHeader({ project, tab, onSelect, onIntent }: { project: ProjectWithUi; tab: TabKey; onSelect: (key: TabKey) => void; onIntent: (key: TabKey) => void }) {
   const scroller = useRef<HTMLDivElement>(null);
   const indicator = useRef<HTMLSpanElement>(null);
   const [edges, setEdges] = useState({ start: false, end: false });
-  const openCount = project.openIssueCount ?? 0;
+  // Roving tab stop: the tab that holds focus while arrowing, otherwise the open tab.
+  const [focusKey, setFocusKey] = useState<TabKey | null>(null);
 
   const place = useCallback((animate: boolean) => {
     const list = scroller.current, bar = indicator.current;
@@ -220,7 +224,6 @@ function ProjectHeader({ project, tab, onSelect, onIntent }: { project: ProjectW
       else if (list.scrollLeft < right) list.scrollTo({ left: right, behavior: reduce ? "auto" : "smooth" });
     }
   }, [tab, place]);
-  useLayoutEffect(() => place(false), [openCount, place]);
   useEffect(() => {
     const list = scroller.current;
     if (!list) return;
@@ -240,7 +243,7 @@ function ProjectHeader({ project, tab, onSelect, onIntent }: { project: ProjectW
         : event.key === "Home" ? tabKeys[0] : event.key === "End" ? tabKeys[tabKeys.length - 1] : null;
     if (!next) return;
     event.preventDefault();
-    onSelect(next);
+    setFocusKey(next);
     event.currentTarget.querySelector<HTMLElement>(`[data-tab="${next}"]`)?.focus();
   };
 
@@ -250,20 +253,17 @@ function ProjectHeader({ project, tab, onSelect, onIntent }: { project: ProjectW
     "data-tab": key,
     "aria-selected": tab === key,
     "aria-controls": tab === key ? "project-panel" : undefined,
-    tabIndex: tab === key ? 0 : -1,
-    onClick: () => onSelect(key),
+    tabIndex: (focusKey ?? tab) === key ? 0 : -1,
+    onClick: () => { setFocusKey(null); onSelect(key); },
     onPointerEnter: () => onIntent(key),
-    onFocus: () => onIntent(key),
+    onFocus: () => { setFocusKey(key); onIntent(key); },
   });
 
   return <header className="project-navigation">
     <div className="project-identity"><ProjectIcon project={project} /><h1>{project.name}</h1></div>
-    <div className="project-tabs" role="tablist" aria-label="Project" onKeyDown={onKeyDown}>
+    <div className="project-tabs" role="tablist" aria-label="Project" onKeyDown={onKeyDown} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusKey(null); }}>
       <div ref={scroller} className="project-tab-scroll" data-fade-start={edges.start || undefined} data-fade-end={edges.end || undefined}>
-        {tabs.map(item => <button key={item.key} type="button" className="project-tab" {...tabProps(item.key)}>
-          <span>{item.label}</span>
-          {item.key === "issues" && openCount > 0 && <span className="project-tab-count" aria-label={`${openCount} open`}>{openCount}</span>}
-        </button>)}
+        {tabs.map(item => <button key={item.key} type="button" className="project-tab" {...tabProps(item.key)}><span>{item.label}</span></button>)}
         <span ref={indicator} className="project-tab-indicator" aria-hidden="true" />
       </div>
       <button type="button" className="project-settings-tab" aria-label="Settings" title="Settings" {...tabProps("settings")}><Settings size={16} /></button>
