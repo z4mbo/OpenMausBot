@@ -693,6 +693,16 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
   const [audioDevice, setAudioDevice] = useState("");
   const [videoDevice, setVideoDevice] = useState("");
   const [focusedTile, setFocusedTile] = useState<string | null>(null);
+  // True once the person picks a tile; until then the stage follows selectCallFocus's automatic choice.
+  const [pinnedTile, setPinnedTile] = useState(false);
+  const chooseTile = (id: string) => { setFocusedTile(id); setPinnedTile(true); };
+  // Lobby camera preview: only while the Call view is on screen, the camera is on and access was granted or asked for.
+  const lobbyRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLVideoElement>(null);
+  const [lobbyVisible, setLobbyVisible] = useState(false);
+  const [previewAllowed, setPreviewAllowed] = useState(false);
+  const [preview, setPreview] = useState<MediaStream | null>(null);
+  const [previewError, setPreviewError] = useState("");
   const previousScreensRef = useRef(new Set<string>());
   const screenRef = useRef<MediaStream | null>(null);
   const iceServersRef = useRef<RTCIceServer[]>([]);
@@ -875,7 +885,7 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
     screenRef.current?.getTracks().forEach((track) => track.stop());
     screenRef.current = null; localStreamRef.current = null;
-    setScreenStream(null); setJoinedAt(null); setFocusedTile(null);
+    setScreenStream(null); setJoinedAt(null); setFocusedTile(null); setPinnedTile(false);
     setLocalStream(null);
     setRemoteStreams({});
     peerConnectionsRef.current.forEach((connection) => connection.close());
@@ -1037,9 +1047,9 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
 
   const activeParticipants = participants ?? [];
   const remoteParticipants = activeParticipants.filter((participant) => participant.userId !== user._id);
-  const callTiles: { id: string; stream?: MediaStream; participant: AvatarUser; label: string; audioEnabled: boolean; videoEnabled: boolean; screenSharing?: boolean }[] = localStream ? [
+  const callTiles: { id: string; stream?: MediaStream; participant: AvatarUser; label: string; audioEnabled: boolean; videoEnabled: boolean; screenSharing?: boolean; mirror?: boolean }[] = localStream ? [
     ...(screenStream ? [{ id: "self:screen", stream: screenStream, participant: user, label: "Your screen", audioEnabled: false, videoEnabled: true, screenSharing: true }] : []),
-    { id: "self:camera", stream: localStream, participant: user, label: "You", audioEnabled, videoEnabled },
+    { id: "self:camera", stream: localStream, participant: user, label: "You", audioEnabled, videoEnabled, mirror: true },
     ...remoteParticipants.flatMap(participant => {
       const remote = remoteStreams[participant.userId];
       return [
@@ -1048,13 +1058,48 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
       ];
     }),
   ] : [];
-  const selectedTileId = selectCallFocus(callTiles, focusedTile, previousScreensRef.current);
+  const selectedTileId = selectCallFocus(callTiles, focusedTile, previousScreensRef.current, pinnedTile);
   const mainTile = callTiles.find(tile => tile.id === selectedTileId);
   const screenTileIds = callTiles.filter(tile => tile.screenSharing).map(tile => tile.id).join(",");
   useEffect(() => {
-    setFocusedTile(selectedTileId);
     previousScreensRef.current = new Set(screenTileIds ? screenTileIds.split(",") : []);
-  }, [selectedTileId, screenTileIds]);
+    if (focusedTile === selectedTileId) return;
+    setFocusedTile(selectedTileId);
+    setPinnedTile(false);
+  }, [selectedTileId, screenTileIds, focusedTile]);
+  useEffect(() => {
+    const element = lobbyRef.current;
+    if (!element || localStream) return;
+    const observer = new IntersectionObserver(([entry]) => setLobbyVisible(entry.isIntersecting));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [localStream]);
+  useEffect(() => {
+    let alive = true;
+    void navigator.permissions?.query({ name: "camera" as PermissionName }).then(status => { if (alive && status.state === "granted") setPreviewAllowed(true); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  const previewWanted = lobbyVisible && videoEnabled && previewAllowed && !localStream && !joining;
+  useEffect(() => {
+    if (!previewWanted || !navigator.mediaDevices?.getUserMedia) return;
+    let alive = true, stream: MediaStream | null = null;
+    void navigator.mediaDevices.getUserMedia({ video: videoDevice ? { deviceId: { exact: videoDevice } } : true, audio: false }).then(captured => {
+      stream = captured;
+      if (!alive) { captured.getTracks().forEach(track => track.stop()); return; }
+      setPreview(captured); setPreviewError("");
+    }).catch(error => {
+      if (!alive) return;
+      setPreviewError(mediaErrorText(error, "camera"));
+      setVideoEnabled(false);
+    });
+    return () => { alive = false; stream?.getTracks().forEach(track => track.stop()); setPreview(null); };
+  }, [previewWanted, videoDevice]);
+  useEffect(() => { if (previewRef.current) previewRef.current.srcObject = preview; }, [preview]);
+  const toggleLobbyCamera = () => {
+    const next = !videoEnabled;
+    setVideoEnabled(next);
+    if (next) { setPreviewAllowed(true); setPreviewError(""); }
+  };
   const changeDevice = async (kind: "audio" | "video", deviceId: string) => {
     const stream = localStreamRef.current;
     if (stream && (kind === "audio" ? audioEnabled : videoEnabled)) {
@@ -1074,15 +1119,16 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
   };
   return (
     <section className="voice-workspace">
-      <div className={clsx("call-utility-bar", !localStream && !activeParticipants.length && "idle")}><h1 className="call-title">Call</h1><div className="call-participant-strip" aria-label="Call participants">{participants === undefined ? <ContentSkeleton label="Loading participants" rows={1} /> : activeParticipants.map(participant => <button key={participant.userId} className="call-participant-chip" onClick={() => setFocusedTile(participant.userId === user._id ? "self:camera" : `${participant.userId}:camera`)}><UserAvatar user={participant.userId === user._id ? user : participant} size="small" /><span>{participant.userId === user._id ? "You" : memberName(participant)}</span></button>)}</div><div className="call-header-actions">{localStream && <time className="call-elapsed" aria-label="Call duration">{Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}</time>}<button className="icon-button" title="Call devices" aria-label="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={16} /></button></div></div>
-      {devicesOpen && <CallDevices audioId={audioDevice} videoId={videoDevice} inCall={!!localStream} onChange={changeDevice} onClose={() => setDevicesOpen(false)} />}
+      <div className={clsx("call-utility-bar", !localStream && !activeParticipants.length && "idle")}><h1 className="call-title">Call</h1><div className="call-participant-strip" aria-label="Call participants">{participants === undefined ? <ContentSkeleton label="Loading participants" rows={1} /> : activeParticipants.map(participant => <button key={participant.userId} className="call-participant-chip" onClick={() => chooseTile(participant.userId === user._id ? "self:camera" : `${participant.userId}:camera`)}><UserAvatar user={participant.userId === user._id ? user : participant} size="small" /><span>{participant.userId === user._id ? "You" : memberName(participant)}</span></button>)}</div><div className="call-header-actions">{localStream && <time className="call-elapsed" aria-label="Call duration">{Math.floor(elapsed / 60).toString().padStart(2, "0")}:{(elapsed % 60).toString().padStart(2, "0")}</time>}<button className="icon-button" title="Call devices" aria-label="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={16} /></button></div></div>
+      {devicesOpen && <><button type="button" className="call-device-scrim" tabIndex={-1} aria-label="Close devices" onClick={() => setDevicesOpen(false)} /><CallDevices audioId={audioDevice} videoId={videoDevice} inCall={!!localStream || Boolean(preview)} onChange={changeDevice} onClose={() => setDevicesOpen(false)} /></>}
+      {notice ? <div className="notice danger call-notice" role="alert"><CircleAlert size={15} /><span>{notice}</span><button className="icon-button" aria-label="Dismiss" onClick={() => setNotice("")}><X size={14} /></button></div> : null}
       <div className="call-dock" hidden={!localStream}>
         <div className="call-filmstrip" aria-label="Other cameras and shared screens">
-          {callTiles.filter(tile => tile.id !== selectedTileId).map(tile => <CallVideoTile key={tile.id} {...tile} thumbnail onFocus={() => setFocusedTile(tile.id)} />)}
+          {callTiles.filter(tile => tile.id !== selectedTileId).map(tile => <CallVideoTile key={tile.id} {...tile} thumbnail onFocus={() => chooseTile(tile.id)} />)}
         </div>
         {localStream && <div className="call-controls">
-          <button type="button" aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"} title={audioEnabled ? "Mute microphone" : "Unmute microphone"} onClick={toggleAudio}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button>
-          <button type="button" aria-label={videoEnabled ? "Turn camera off" : "Turn camera on"} title={videoEnabled ? "Turn camera off" : "Turn camera on"} onClick={toggleVideo}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button>
+          <button type="button" className={audioEnabled ? "" : "is-off"} aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"} title={audioEnabled ? "Mute microphone" : "Unmute microphone"} onClick={toggleAudio}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button>
+          <button type="button" className={videoEnabled ? "" : "is-off"} aria-label={videoEnabled ? "Turn camera off" : "Turn camera on"} title={videoEnabled ? "Turn camera off" : "Turn camera on"} onClick={toggleVideo}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button>
           <button type="button" className={screenStream ? "sharing" : ""} aria-label={screenStream ? "Stop sharing" : "Share screen"} title={screenStream ? "Stop sharing" : "Share screen"} onClick={shareScreen}>{screenStream ? <MonitorOff size={18} /> : <MonitorUp size={18} />}</button>
           <button type="button" className="leave-call" aria-label="Leave call" title="Leave call" onClick={leaveCall}><PhoneOff size={18} /></button>
         </div>}
@@ -1092,12 +1138,26 @@ function VoiceChatView({ sessionToken, user }: { sessionToken: string; user: Aut
           {mainTile ? (
             <CallVideoTile key={mainTile.id} {...mainTile} />
           ) : (
-            <div className="call-lobby"><div className="lobby-avatar"><UserAvatar user={user} /></div>{remoteParticipants.length > 0 && <h2>{remoteParticipants.map(participant => memberName(participant).split(" ")[0]).slice(0, 3).join(", ")}{remoteParticipants.length > 3 ? ` +${remoteParticipants.length - 3}` : ""} in call</h2>}<div className="lobby-devices"><button title={audioEnabled ? "Microphone on" : "Microphone off"} aria-label="Microphone" aria-pressed={audioEnabled} onClick={() => setAudioEnabled(!audioEnabled)}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button><button title={videoEnabled ? "Camera on" : "Camera off"} aria-label="Camera" aria-pressed={videoEnabled} onClick={() => setVideoEnabled(!videoEnabled)}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button><button className="lobby-settings" aria-label="Call devices" title="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={18} /></button><button className="primary-button lobby-join" onClick={startCall} disabled={joining || workspace.role === "viewer"}>{joining ? <Loader2 className="spin" size={16} /> : <Video size={16} />}Join call</button></div></div>
+            <div ref={lobbyRef} className="call-lobby">
+              <div className={clsx("lobby-preview", preview && "has-video")}>
+                <video ref={previewRef} autoPlay muted playsInline aria-hidden="true" />
+                {!preview && <div className="video-avatar"><UserAvatar user={user} /></div>}
+                <div className="lobby-devices">
+                  <button title={audioEnabled ? "Microphone on" : "Microphone off"} aria-label="Microphone" aria-pressed={audioEnabled} onClick={() => setAudioEnabled(!audioEnabled)}>{audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}</button>
+                  <button title={videoEnabled ? "Camera on" : "Camera off"} aria-label="Camera" aria-pressed={videoEnabled} onClick={toggleLobbyCamera}>{videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}</button>
+                  <button className="lobby-settings" aria-label="Call devices" title="Call devices" aria-expanded={devicesOpen} onClick={() => setDevicesOpen(!devicesOpen)}><Settings2 size={18} /></button>
+                </div>
+              </div>
+              {previewError && <p className="lobby-error" role="status"><CircleAlert size={14} />{previewError}</p>}
+              <div className="lobby-join-row">
+                {remoteParticipants.length > 0 && <span className="lobby-in-call"><span className="lobby-in-call-avatars" aria-hidden="true">{remoteParticipants.slice(0, 3).map(participant => <UserAvatar key={participant.userId} user={participant} size="small" />)}</span>{remoteParticipants.map(participant => memberName(participant).split(" ")[0]).slice(0, 3).join(", ")}{remoteParticipants.length > 3 ? ` +${remoteParticipants.length - 3}` : ""} in call</span>}
+                <button className="primary-button lobby-join" onClick={startCall} disabled={joining || workspace.role === "viewer"}>{joining ? <Loader2 className="spin" size={16} /> : <Video size={16} />}Join call</button>
+              </div>
+            </div>
           )}
         </div>
       </div>
       <div className="call-audio-output">{localStream && remoteParticipants.map(participant => remoteStreams[participant.userId] && <CallAudio key={participant.userId} stream={remoteStreams[participant.userId].stream} name={participant.name} />)}</div>
-      {notice ? <small className="call-notice">{notice}</small> : null}
     </section>
   );
 }
@@ -1110,6 +1170,7 @@ function CallVideoTile({
   videoEnabled,
   screenSharing = false,
   thumbnail = false,
+  mirror = false,
   onFocus,
 }: {
   stream?: MediaStream;
@@ -1119,6 +1180,8 @@ function CallVideoTile({
   videoEnabled: boolean;
   screenSharing?: boolean;
   thumbnail?: boolean;
+  /** Your own camera shows mirrored, as in a mirror; what others receive is not flipped. */
+  mirror?: boolean;
   onFocus?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -1129,7 +1192,7 @@ function CallVideoTile({
     if (videoRef.current) videoRef.current.srcObject = stream ?? null;
   }, [stream]);
   return (
-    <div ref={tileRef} className={clsx("call-tile", (!videoEnabled || !stream) && "video-off", screenSharing && "screen-share-tile", thumbnail && "call-thumbnail")}>
+    <div ref={tileRef} className={clsx("call-tile", (!videoEnabled || !stream) && "video-off", screenSharing && "screen-share-tile", thumbnail && "call-thumbnail", mirror && "is-mirrored")}>
       {thumbnail && <button type="button" className="call-tile-focus" title={`Enlarge ${label || participant.name}`} aria-label={`Enlarge ${label || participant.name}`} onClick={onFocus} />}
       <video ref={videoRef} autoPlay muted playsInline style={!videoEnabled || !stream ? { position: "absolute", width: 1, height: 1, opacity: 0 } : undefined} />{(!videoEnabled || !stream) && <div className="video-avatar"><UserAvatar user={participant} />{!stream && <small>Connecting</small>}</div>}
       <div className="call-tile-meta">
