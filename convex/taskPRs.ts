@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 import { canEdit, changeOpenIssueCount, requireAdmin, requireMember, touchProject } from "./lib/permissions";
 import { recordCompletion } from "./lib/completions";
 import { agentsTables } from "./agentsTables";

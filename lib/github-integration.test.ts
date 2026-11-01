@@ -58,7 +58,7 @@ async function fixture() {
   });
   const { teamId } = await t.mutation(api.workspaces.create, { sessionToken: owner.sessionToken, name: "PG3 GitHub" });
   const projectId = await t.mutation(api.projects.create, { sessionToken: owner.sessionToken, teamId, name: "PG3 GitHub project", repoUrl: "https://github.com/z4mbo/origin-pr-sandbox" });
-  const columnId = (await t.query(api.tasks.board, { sessionToken: owner.sessionToken, projectId })).columns[0]._id;
+  const columnId = (await t.query(api.tasks.board, { sessionToken: owner.sessionToken, projectId })).columns.find(column => !column.isDraft)!._id;
   const taskId = await t.mutation(api.tasks.createTask, { sessionToken: owner.sessionToken, projectId, columnId, title: "PG3 fixture issue", priority: "low", assignedToEmail: "owner@pg3.test", dueDate: "2026-12-31" });
   vi.mocked(integrationBridge).mockImplementation(async (operation, args) => {
     const input = args as Record<string, unknown>;

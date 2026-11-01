@@ -61,6 +61,8 @@ export const tokenTypeValidator = v.union(
 export const assetTypeValidator = v.union(
   v.literal("figma"),
   v.literal("image"),
+  v.literal("video"),
+  v.literal("audio"),
   v.literal("icon"),
   v.literal("font"),
   v.literal("document"),
@@ -75,3 +77,15 @@ export const taskAssetTypeValidator = v.union(
   v.literal("file"),
   v.literal("other"),
 );
+
+export const credentialKindValidator = v.union(
+  v.literal("password"),
+  v.literal("api_key"),
+  v.literal("secret"),
+  v.literal("note"),
+  v.literal("apk"),
+  v.literal("file"),
+  v.literal("service"),
+);
+
+export const canvasKindValidator = v.union(v.literal("design"), v.literal("board"), v.literal("deck"));

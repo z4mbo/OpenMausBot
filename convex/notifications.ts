@@ -6,7 +6,7 @@ import type { Id } from "./_generated/dataModel";
 import { getActiveTeamMember, projectMember, requireTeamMember } from "./lib/permissions";
 import { projectIconTypeValidator } from "./lib/validators";
 
-export async function notify(ctx: MutationCtx, a: { teamId: Id<"teams">; email: string; actorId: Id<"users">; kind: "assignment" | "comment" | "mention"; eventId: string; projectId?: Id<"projects">; taskId?: Id<"tasks">; messageId?: string; preview?: string }) {
+export async function notify(ctx: MutationCtx, a: { teamId: Id<"teams">; email: string; actorId: Id<"users">; kind: "assignment" | "comment" | "mention"; eventId: string; projectId?: Id<"projects">; taskId?: Id<"tasks">; messageId?: string; conversation?: string; agentThreadId?: Id<"agentThreads">; preview?: string }) {
   const user = await ctx.db.query("users").withIndex("by_email", q => q.eq("email", a.email)).unique();
   if (!user || user.status !== "active" || user._id === a.actorId || !await getActiveTeamMember(ctx, a.teamId, user.email)) return;
   if (a.projectId) {
@@ -28,12 +28,14 @@ export const summary = query({
     const rows = await ctx.db.query("notifications").withIndex("by_user_team_read", q => q.eq("userId", user._id).eq("teamId", a.teamId).eq("read", false)).order("desc").take(100);
     const visible = [];
     for (const row of rows) {
+      if (row.kind === "lead") continue;
       const project = row.projectId ? await ctx.db.get(row.projectId) : null;
       if (!row.projectId || (project?.status === "active" && await projectMember(ctx, project, user))) visible.push(row);
     }
     const recent = await ctx.db.query("notifications").withIndex("by_user_team", q => q.eq("userId", user._id).eq("teamId", a.teamId)).order("desc").take(100);
     let latest: string | null = null;
     for (const row of recent) {
+      if (row.kind === "lead") continue;
       const project = row.projectId ? await ctx.db.get(row.projectId) : null;
       if (!row.projectId || (project?.status === "active" && await projectMember(ctx, project, user))) { latest = row._id; break; }
     }
@@ -43,8 +45,8 @@ export const summary = query({
 export const list = query({
   args: { ...scope, unreadOnly: v.boolean(), paginationOpts: paginationOptsValidator },
   returns: v.object({ isDone: v.boolean(), continueCursor: v.string(), page: v.array(v.object({
-    _id: v.id("notifications"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention")), read: v.boolean(), createdAt: v.number(), snoozedUntil: v.optional(v.number()),
-    projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), preview: v.optional(v.string()),
+    _id: v.id("notifications"), kind: v.union(v.literal("assignment"), v.literal("comment"), v.literal("mention"), v.literal("digest")), digestId: v.optional(v.id("standupDigests")), read: v.boolean(), createdAt: v.number(), snoozedUntil: v.optional(v.number()),
+    projectId: v.optional(v.id("projects")), taskId: v.optional(v.id("tasks")), messageId: v.optional(v.string()), conversation: v.optional(v.string()), agentThreadId: v.optional(v.id("agentThreads")), preview: v.optional(v.string()),
     actorName: v.string(), actorAvatar: v.union(v.string(), v.null()), projectName: v.optional(v.string()), taskTitle: v.optional(v.string()), available: v.boolean(),
     iconType: v.optional(projectIconTypeValidator), iconValue: v.optional(v.string()), iconUrl: v.union(v.string(), v.null()),
   })) }),
@@ -54,9 +56,11 @@ export const list = query({
     const page = await query.order("desc").paginate({ ...a.paginationOpts, numItems: Math.min(a.paginationOpts.numItems, 50) });
     const visible = await Promise.all(page.page.map(async row => {
       const actor = await ctx.db.get(row.actorId), project = row.projectId ? await ctx.db.get(row.projectId) : null, task = row.taskId ? await ctx.db.get(row.taskId) : null;
+      const digest = row.digestId ? await ctx.db.get(row.digestId) : null;
+      if (row.kind === "lead") return null;
       if (row.projectId && (!project || !await projectMember(ctx, project, user) || (a.unreadOnly && project.status !== "active"))) return null;
-      return { _id: row._id, kind: row.kind, read: row.read, createdAt: row.createdAt, snoozedUntil: row.snoozedUntil, projectId: row.projectId, taskId: row.taskId, messageId: row.messageId, preview: row.preview, actorName: actor?.username || actor?.name || "Teammate", actorAvatar: actor?.avatarStorageId ? await ctx.storage.getUrl(actor.avatarStorageId) : null,
-        projectName: project?.name, taskTitle: task?.title, available: Boolean(row.messageId) || Boolean(task && project?.teamId === a.teamId),
+      return { _id: row._id, kind: row.kind, ...(row.digestId ? { digestId: row.digestId } : {}), read: row.read, createdAt: row.createdAt, snoozedUntil: row.snoozedUntil, projectId: row.projectId, taskId: row.taskId, messageId: row.messageId, conversation: row.conversation, agentThreadId: row.agentThreadId, preview: row.preview, actorName: digest?.chiefName ?? (actor?.username || actor?.name || "Teammate"), actorAvatar: !digest && actor?.avatarStorageId ? await ctx.storage.getUrl(actor.avatarStorageId) : null,
+        projectName: project?.name, taskTitle: task?.title, available: Boolean(row.messageId) || Boolean(digest) || Boolean(task && project?.teamId === a.teamId),
         iconType: project?.iconType, iconValue: project?.iconValue, iconUrl: project?.iconStorageId ? await ctx.storage.getUrl(project.iconStorageId) : null };
     }));
     return { isDone: page.isDone, continueCursor: page.continueCursor, page: visible.filter((row): row is NonNullable<typeof row> => row !== null) };
@@ -93,7 +97,12 @@ export const wake = internalMutation({
 });
 export const markAll = mutation({
   args: scope, returns: v.null(),
-  handler: async (ctx, a) => { const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken); await readBatch(ctx, a.teamId, user._id, Date.now()); return null; },
+  handler: async (ctx, a) => {
+    const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
+    const newest = await ctx.db.query("notifications").withIndex("by_user_team_read", q => q.eq("userId", user._id).eq("teamId", a.teamId).eq("read", false)).order("desc").first();
+    if (newest) await readBatch(ctx, a.teamId, user._id, newest._creationTime);
+    return null;
+  },
 });
 async function readBatch(ctx: MutationCtx, teamId: Id<"teams">, userId: Id<"users">, before: number) {
   const rows = await ctx.db.query("notifications").withIndex("by_user_team_read", q => q.eq("userId", userId).eq("teamId", teamId).eq("read", false).lte("_creationTime", before)).take(100);
@@ -102,13 +111,35 @@ async function readBatch(ctx: MutationCtx, teamId: Id<"teams">, userId: Id<"user
 }
 export const readMore = internalMutation({ args: { teamId: v.id("teams"), userId: v.id("users"), before: v.number() }, returns: v.null(), handler: async (ctx, a) => { await readBatch(ctx, a.teamId, a.userId, a.before); return null; } });
 
+const PREVIEW_MAX = 140;
+const clip = (text: string) => { const line = text.replace(/\s+/g, " ").trim(); return line.length > PREVIEW_MAX ? `${line.slice(0, PREVIEW_MAX - 1)}…` : line; };
+
+/** "" is the workspace channel, "project:<id>" a project's chat, "dm:<a>:<b>" a conversation between two members. */
+function chatTarget(ctx: MutationCtx, conversation: string | undefined): { projectId?: Id<"projects">; members?: string[] } | null {
+  if (!conversation) return {};
+  const project = /^project:([a-z0-9]{10,64})$/.exec(conversation);
+  if (project) { const projectId = ctx.db.normalizeId("projects", project[1]!); return projectId ? { projectId } : null; }
+  const dm = /^dm:([a-z0-9]{1,64}):([a-z0-9]{1,64})$/.exec(conversation);
+  return dm ? { members: [dm[1]!, dm[2]!] } : null;
+}
+
 export const chatMentions = internalMutation({
-  args: { teamId: v.id("teams"), actorId: v.id("users"), messageId: v.string(), userIds: v.array(v.id("users")) }, returns: v.null(),
+  args: { teamId: v.id("teams"), actorId: v.id("users"), messageId: v.string(), userIds: v.array(v.id("users")), conversation: v.optional(v.string()), preview: v.optional(v.string()) }, returns: v.null(),
   handler: async (ctx, a) => {
     const actor = await ctx.db.get(a.actorId);
     if (a.userIds.length > 20 || a.messageId.length > 80) throw new Error("Invalid mention");
+    const target = chatTarget(ctx, a.conversation);
+    if (!target) throw new Error("Invalid mention");
+    if (target.members && !target.members.includes(a.actorId)) throw new Error("Invalid mention");
+    if (target.projectId && (await ctx.db.get(target.projectId))?.teamId !== a.teamId) return null;
     if (!actor || actor.status !== "active" || !await getActiveTeamMember(ctx, a.teamId, actor.email)) return null;
-    for (const id of new Set(a.userIds)) { const user = await ctx.db.get(id); if (user) await notify(ctx, { teamId: a.teamId, actorId: a.actorId, email: user.email, kind: "mention", eventId: `chat:${a.messageId}`, messageId: a.messageId }); }
+    const located = a.conversation === undefined ? {} : { conversation: a.conversation, ...(target.projectId ? { projectId: target.projectId } : {}) };
+    const preview = a.preview ? clip(a.preview) : "";
+    for (const id of new Set(a.userIds)) {
+      if (target.members && !target.members.includes(id)) continue;
+      const user = await ctx.db.get(id);
+      if (user) await notify(ctx, { teamId: a.teamId, actorId: a.actorId, email: user.email, kind: "mention", eventId: `chat:${a.messageId}`, messageId: a.messageId, ...located, ...(preview ? { preview } : {}) });
+    }
     return null;
   },
 });

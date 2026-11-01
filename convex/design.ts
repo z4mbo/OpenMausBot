@@ -3,7 +3,9 @@ import { mutation, query } from "./_generated/server";
 import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { assetTypeValidator, tokenTypeValidator } from "./lib/validators";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
+import { admitStorageReference, issueUpload } from "./lib/storage";
+import { requireUser } from "./lib/auth";
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const { member } = await requireMember(ctx, projectId, sessionToken);
@@ -33,9 +35,10 @@ export const list = query({
 
 export const generateUploadUrl = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
+  returns: v.string(),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
-    return await ctx.storage.generateUploadUrl();
+    return issueUpload(ctx, args.sessionToken, { kind: "asset", projectId: args.projectId });
   },
 });
 
@@ -116,7 +119,9 @@ export const createAsset = mutation({
     contentType: v.optional(v.string()),
     size: v.optional(v.number()),
     notes: v.optional(v.string()),
+    folder: v.optional(v.string()),
   },
+  returns: v.id("designAssets"),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     if (!args.url && !args.storageId) throw new Error("Asset file or URL required");
@@ -125,9 +130,10 @@ export const createAsset = mutation({
     if (args.storageId) {
       const metadata = await ctx.db.system.get(args.storageId);
       if (!metadata || metadata.size > 15 * 1024 * 1024) throw new Error("Choose a file under 15 MB");
+      await admitStorageReference(ctx, args.storageId, await requireUser(ctx, args.sessionToken), { kind: "project", projectId: args.projectId });
     }
     const now = Date.now();
-    await ctx.db.insert("designAssets", {
+    const assetId = await ctx.db.insert("designAssets", {
       projectId: args.projectId,
       type: args.type,
       name: args.name.trim(),
@@ -136,10 +142,12 @@ export const createAsset = mutation({
       contentType: args.contentType,
       size: args.size,
       notes: args.notes?.trim() || undefined,
+      folder: args.folder?.trim().slice(0, 60) || undefined,
       createdAt: now,
       updatedAt: now,
     });
     await touchProject(ctx, args.projectId);
+    return assetId;
   },
 });
 
@@ -158,7 +166,7 @@ export const updateAsset = mutation({
     const asset = await ctx.db.get(args.assetId);
     if (!asset || asset.projectId !== args.projectId) throw new Error("Asset not found");
     const patch: Partial<{
-      type: "figma" | "image" | "icon" | "font" | "document" | "apk" | "other";
+      type: Doc<"designAssets">["type"];
       name: string;
       url: string | undefined;
       notes: string | undefined;

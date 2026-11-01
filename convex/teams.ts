@@ -1,10 +1,11 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { api } from "./_generated/api";
 import { requireUser } from "./lib/auth";
 import { normalizeEmail, projectMember, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
 import schema from "./schema";
 import { roleValidator } from "./lib/validators";
+import { reviewGitHubAccess } from "./lib/githubAccess";
+import { startWorkspaceDeletion } from "./workspaceDeletion";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 
@@ -24,6 +25,7 @@ async function removeMembership(ctx: MutationCtx, member: Doc<"teamMembers">) {
     for (const grant of grants) await ctx.db.patch(grant._id, { revoked: true });
   }
   await ctx.db.delete(member._id);
+  await reviewGitHubAccess(ctx, member.teamId, member.email);
 }
 
 export const leave = mutation({
@@ -97,13 +99,12 @@ export const create = mutation({
 export const remove = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    const { member } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    const { member, user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
     if (member.role !== "owner") throw new Error("Owner role required");
     const projects = await ctx.db.query("projects").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).collect();
     if (projects.length) throw new Error("Delete projects before deleting team");
-    const members = await ctx.db.query("teamMembers").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).collect();
-    for (const item of members) await ctx.db.delete(item._id);
-    await ctx.db.delete(args.teamId);
+    const team = await ctx.db.get(args.teamId);
+    if (team) await startWorkspaceDeletion(ctx, team, { userId: user._id, name: user.name });
   },
 });
 
@@ -172,39 +173,8 @@ export const sendInvite = action({
     role: roleValidator,
     origin: v.string(),
   },
-  handler: async (ctx, args) => {
-    const result: { inviteToken: string; email: string; teamName: string; invitedBy: string } = await ctx.runMutation(
-      api.teams.invite,
-      {
-        sessionToken: args.sessionToken,
-        teamId: args.teamId,
-        email: args.email,
-        name: args.name,
-        role: args.role,
-      },
-    );
-    const inviteLink = `${args.origin.replace(/\/$/, "")}/?invite=${result.inviteToken}`;
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.INVITE_FROM_EMAIL || "Origin <onboarding@resend.dev>";
-    if (!apiKey) return { inviteLink, sent: false, reason: "RESEND_API_KEY not set" };
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from,
-        to: result.email,
-        subject: `You're invited to ${result.teamName} on Origin`,
-        html: `<p>${result.invitedBy} invited you to <strong>${result.teamName}</strong> on Origin.</p><p><a href="${inviteLink}">Accept invite</a></p>`,
-        text: `${result.invitedBy} invited you to ${result.teamName} on Origin. Accept: ${inviteLink}`,
-      }),
-    });
-    if (!response.ok) {
-      const body = await response.text();
-      return { inviteLink, sent: false, reason: `Email failed: ${response.status} ${body.slice(0, 160)}` };
-    }
-    return { inviteLink, sent: true, reason: "Email sent" };
-  },
+  returns: v.object({ inviteLink: v.string(), sent: v.boolean(), reason: v.string() }),
+  handler: async () => { throw new Error("Use workspace invitations in Origin to send email invitations"); },
 });
 
 export const updateRole = mutation({
@@ -216,6 +186,7 @@ export const updateRole = mutation({
     if (!member || member.teamId !== args.teamId) throw new Error("Member not found");
     if (member.role === "owner" || args.role === "owner") throw new Error("Workspace ownership cannot be changed here");
     await ctx.db.patch(args.memberId, { role: args.role, updatedAt: Date.now() });
+    await reviewGitHubAccess(ctx, args.teamId, member.email);
     return null;
   },
 });

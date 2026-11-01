@@ -3,12 +3,14 @@ import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { canEdit, getActiveTeamMember, normalizeEmail, projectMember, projectPeople, requireAdmin, requireMember, requireTeamMember, touchProject } from "./lib/permissions";
 import { repositoryUrl } from "./lib/repository";
+import { compareProjectOrder, reorderWorkspaceProjects } from "./lib/projectOrder";
+import { repoVisibility } from "./integrationTables";
 import { callSignalKindValidator, projectIconTypeValidator, projectStatusValidator } from "./lib/validators";
 import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
-
-const defaultColumns = ["Idea", "Todo", "In progress"];
+import { admitStorageReference, issueUpload, storageMetadata, validateUpload } from "./lib/storage";
+import { DEFAULT_WORKFLOW_COLUMNS, ensureDraftColumn } from "./lib/columns";
 const accents = ["#111111", "#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626"];
 const callStaleMs = 30_000;
 
@@ -19,7 +21,7 @@ export const listForUser = query({
     if (args.teamId) {
       await requireTeamMember(ctx, args.teamId, args.sessionToken);
       const projects = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(500);
-      const rows = await Promise.all(projects.sort((a, b) => (a.order ?? a.createdAt) - (b.order ?? b.createdAt)).map(async project => {
+      const rows = await Promise.all(projects.sort(compareProjectOrder).map(async project => {
         const member = await projectMember(ctx, project, user);
         return member ? {
         ...project, status: project.status === "active" ? "active" as const : "inactive" as const, memberRole: member.role,
@@ -285,9 +287,10 @@ export const ackCallSignals = mutation({
 
 export const generateIconUploadUrl = mutation({
   args: { projectId: v.id("projects"), sessionToken: v.string() },
+  returns: v.string(),
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.projectId, args.sessionToken);
-    return await ctx.storage.generateUploadUrl();
+    return issueUpload(ctx, args.sessionToken, { kind: "icon", projectId: args.projectId });
   },
 });
 
@@ -298,6 +301,10 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     repoUrl: v.optional(v.string()),
+    /** "later": no repository is created automatically; the person links or creates one from the project afterwards. */
+    githubRepo: v.optional(v.literal("later")),
+    /** Who can see the repository Origin creates for the project; private unless chosen. */
+    githubRepoVisibility: v.optional(repoVisibility),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
@@ -308,7 +315,7 @@ export const create = mutation({
   },
 });
 
-export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string }, user: Doc<"users">) {
+export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"teams">; name: string; description?: string; repoUrl?: string; githubRepo?: "later"; githubRepoVisibility?: "private" | "public" }, user: Doc<"users">) {
   if (!args.name.trim() || args.name.length > 100) throw new Error("Enter a project name under 100 characters");
     const repoUrl = repositoryUrl(args.repoUrl);
     const teamMember = await getActiveTeamMember(ctx, args.teamId, user.email);
@@ -316,8 +323,9 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
     const now = Date.now();
     const ownerEmail = normalizeEmail(user.email);
     const projectId = await ctx.db.insert("projects", {
-      githubRepoState: repoUrl ? "ready" : "pending",
+      githubRepoState: repoUrl ? "ready" : args.githubRepo === "later" ? undefined : "pending",
       githubWorkspaceAccess: Boolean(repoUrl && teamMember && ["owner", "admin"].includes(teamMember.role)),
+      ...(args.githubRepoVisibility ? { githubRepoVisibility: args.githubRepoVisibility } : {}),
       teamId: args.teamId,
       openIssueCount: 0,
       order: Math.max(-1, ...workspaceProjects.map(p => p.order ?? 0)) + 1,
@@ -344,35 +352,30 @@ export async function createProjectRecord(ctx: MutationCtx, args: { teamId: Id<"
       joinedAt: now,
     });
 
-    for (const [index, title] of defaultColumns.entries()) {
+    for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
       await ctx.db.insert("columns", {
         projectId,
         title,
         order: index,
-        isDone: title === "Done",
+        isDone: false,
+        ...(title === "Draft" ? { isDraft: true } : {}),
         createdAt: now,
         updatedAt: now,
       });
     }
 
-    if (!repoUrl) await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId });
+    if (!repoUrl && args.githubRepo !== "later") {
+      const shared = await ctx.db.query("teamGitHub").withIndex("by_teamId", q => q.eq("teamId", args.teamId)).unique();
+      if (shared) await ctx.scheduler.runAfter(0, internal.teamGitHub.autoCreate, { projectId });
+      else await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId });
+    }
     return projectId;
 }
 
 export const reorder = mutation({
-  args: { sessionToken: v.string(), teamId: v.id("teams"), projectIds: v.array(v.id("projects")) },
+  args: { sessionToken: v.string(), teamId: v.id("teams"), projectIds: v.array(v.id("projects")), expectedProjectIds: v.optional(v.array(v.id("projects"))) },
   returns: v.null(),
-  handler: async (ctx, args) => {
-    const { member, user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (!canEdit(member)) throw new Error("Edit role required");
-    if (args.projectIds.length > 500 || new Set(args.projectIds).size !== args.projectIds.length) throw new Error("Invalid project order");
-    for (const [order, id] of args.projectIds.entries()) {
-      const project = await ctx.db.get(id);
-      if (!project || project.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new Error("Project does not belong to this workspace");
-      await ctx.db.patch(id, { order });
-    }
-    return null;
-  },
+  handler: reorderWorkspaceProjects,
 });
 
 export const importRepos = mutation({
@@ -408,7 +411,11 @@ export const importRepos = mutation({
         return project.repoUrl?.trim().toLowerCase() === normalizedRepoUrl || project.name.trim().toLowerCase() === normalizedName;
       });
       if (existing || existingRepoUrls.has(normalizedRepoUrl) || existingNames.has(normalizedName)) {
-        if (existing) imported.push({ projectId: existing._id, name: existing.name, repoUrl: existing.repoUrl || repoUrl, created: false });
+        if (existing) {
+          const access = await projectMember(ctx, existing, user);
+          if (access && canEdit(access)) await ensureDraftColumn(ctx, existing._id);
+          imported.push({ projectId: existing._id, name: existing.name, repoUrl: existing.repoUrl || repoUrl, created: false });
+        }
         continue;
       }
 
@@ -435,11 +442,13 @@ export const importRepos = mutation({
         updatedAt: now,
         joinedAt: now,
       });
-      for (const [index, title] of defaultColumns.entries()) {
+      for (const [index, title] of DEFAULT_WORKFLOW_COLUMNS.entries()) {
         await ctx.db.insert("columns", {
           projectId,
           title,
           order: index,
+          isDone: false,
+          ...(title === "Draft" ? { isDraft: true } : {}),
           createdAt: now,
           updatedAt: now,
         });
@@ -465,6 +474,7 @@ export const update = mutation({
     iconValue: v.optional(v.string()),
     iconStorageId: v.optional(v.id("_storage")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { user, project: existingProject } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const patch: Partial<{
@@ -499,9 +509,16 @@ export const update = mutation({
       if (args.iconType === "default") patch.iconValue = undefined;
     }
     if (args.iconValue !== undefined) patch.iconValue = args.iconValue.trim() || undefined;
-    if (args.iconStorageId !== undefined) patch.iconStorageId = args.iconStorageId;
+    if (args.iconStorageId !== undefined) {
+      const metadata = await storageMetadata(ctx, args.iconStorageId);
+      if (!metadata) throw new Error("File not found");
+      validateUpload({ kind: "icon", projectId: args.projectId }, metadata.size, metadata.contentType);
+      await admitStorageReference(ctx, args.iconStorageId, user, { kind: "project", projectId: args.projectId });
+      patch.iconStorageId = args.iconStorageId;
+    }
     await ctx.db.patch(args.projectId, patch);
     if (args.status === "active" && existingProject.githubRepoState === "pending") await ctx.scheduler.runAfter(0, internal.integrations.kick, { projectId: args.projectId });
+    return null;
   },
 });
 

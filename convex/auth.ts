@@ -3,11 +3,13 @@ import { action, internalMutation, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { createWorkspace } from "./workspaces";
+import { admitStorageReference, issueUpload, storageMetadata } from "./lib/storage";
 import {
   createSession,
   createUser,
   getSessionUser,
   getUserByEmail,
+  invalidateOtherSessions,
   makePasswordRecord,
   normalizeEmail,
   publicUser,
@@ -29,9 +31,10 @@ export const me = query({
 
 export const generateAvatarUploadUrl = mutation({
   args: { sessionToken: v.string() },
+  returns: v.string(),
   handler: async (ctx, args) => {
-    await requireUser(ctx, args.sessionToken);
-    return await ctx.storage.generateUploadUrl();
+    const user = await requireUser(ctx, args.sessionToken);
+    return issueUpload(ctx, args.sessionToken, { kind: "profile", userId: user._id });
   },
 });
 
@@ -42,6 +45,7 @@ export const updateProfile = mutation({
     name: v.optional(v.string()),
     avatarStorageId: v.optional(v.id("_storage")),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, args.sessionToken);
     const patch: Partial<{
@@ -60,11 +64,13 @@ export const updateProfile = mutation({
       patch.name = args.name.trim() || user.name;
     }
     if (args.avatarStorageId !== undefined) {
-      const file = await ctx.db.system.get("_storage", args.avatarStorageId);
+      const file = await storageMetadata(ctx, args.avatarStorageId);
       if (!file || file.size > 5 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.contentType || "")) throw new Error("Choose a PNG, JPEG, WebP or GIF under 5 MB");
+      await admitStorageReference(ctx, args.avatarStorageId, user, { kind: "user", userId: user._id });
       patch.avatarStorageId = args.avatarStorageId;
     }
     await ctx.db.patch(user._id, patch);
+    return null;
   },
 });
 
@@ -154,8 +160,7 @@ export const revokeOtherSessions = mutation({
   handler: async (ctx, args) => {
     const result = await getSessionUser(ctx, args.sessionToken);
     if (!result) throw new Error("Login required");
-    const sessions = await ctx.db.query("sessions").withIndex("by_user", q => q.eq("userId", result.user._id)).take(500);
-    for (const session of sessions) if (session._id !== result.session._id) await ctx.db.delete(session._id);
+    await invalidateOtherSessions(ctx, result.user, result.session);
     return null;
   },
 });
@@ -179,8 +184,7 @@ export const changePassword = mutation({
     if (!(await verifyPassword(user, args.currentPassword))) throw new Error("Current password is wrong");
     const passwordRecord = await makePasswordRecord(args.newPassword);
     await ctx.db.patch(user._id, { ...passwordRecord, updatedAt: Date.now() });
-    const sessions = await ctx.db.query("sessions").withIndex("by_user", q => q.eq("userId", user._id)).take(500);
-    for (const session of sessions) if (session._id !== current.session._id) await ctx.db.delete(session._id);
+    await invalidateOtherSessions(ctx, user, current.session);
     return null;
   },
 });
@@ -201,11 +205,17 @@ export const acceptInviteAccount = internalMutation({
           .unique();
     const invite = projectInvite ?? teamInvite;
     if (!invite || invite.status !== "invited") throw new Error("Invite not found");
+    const project = projectInvite ? await ctx.db.get(projectInvite.projectId) : null;
+    if (projectInvite && !project) throw new Error("Project no longer exists");
+    const teamId = project?.teamId ?? teamInvite?.teamId;
+    const team = teamId ? await ctx.db.get(teamId) : null;
+    if (teamId && (!team || team.deletingAt !== undefined)) throw new Error("Workspace no longer exists");
 
     const now = Date.now();
     const email = normalizeEmail(invite.email);
     let user = await getUserByEmail(ctx, email);
     if (user) {
+      if (user.status !== "active") throw new Error("Account is unavailable");
       if (!(await verifyPassword(user, args.password))) throw new Error("Existing account password is wrong");
       await ctx.db.patch(user._id, { name: args.name.trim() || user.name, updatedAt: now });
     } else {
@@ -231,9 +241,16 @@ export const acceptInviteAccount = internalMutation({
     };
 
     if (projectInvite) {
+      if (project?.teamId) {
+        const membership = await ctx.db.query("teamMembers").withIndex("by_team_email", q => q.eq("teamId", project.teamId!).eq("email", email)).unique();
+        if (membership?.userId && membership.userId !== user._id) throw new Error("Workspace membership belongs to another account");
+        const fields = { ...patch, role: projectInvite.role === "viewer" ? "viewer" as const : "member" as const };
+        if (!membership) await ctx.db.insert("teamMembers", { teamId: project.teamId, ...fields, createdAt: now });
+        else if (membership.status !== "active") await ctx.db.patch(membership._id, fields);
+      }
       await ctx.db.patch(projectInvite._id, patch);
       const sessionToken = await createSession(ctx, user._id);
-      return { sessionToken, user: publicUser(user), projectId: projectInvite.projectId, teamId: null };
+      return { sessionToken, user: publicUser(user), projectId: projectInvite.projectId, teamId: project?.teamId ?? null };
     }
 
     if (!teamInvite) throw new Error("Invite not found");

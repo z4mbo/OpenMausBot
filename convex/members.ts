@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { api } from "./_generated/api";
-import { getActiveTeamMember, normalizeEmail, projectPeople, requireAdmin, requireMember, requireTeamAdmin } from "./lib/permissions";
+import { getActiveTeamMember, normalizeEmail, projectPeople, requireAdmin, requireMember } from "./lib/permissions";
 import { roleValidator } from "./lib/validators";
+import { reviewGitHubAccess } from "./lib/githubAccess";
 
 function makeInviteToken() {
   return crypto.randomUUID().replace(/-/g, "");
@@ -30,12 +30,11 @@ export const people = query({
 });
 
 export const addWorkspaceMember = mutation({
-  args: { projectId: v.id("projects"), sessionToken: v.string(), email: v.string(), role: v.union(v.literal("member"), v.literal("viewer")) },
+  args: { projectId: v.id("projects"), sessionToken: v.string(), email: v.string(), role: v.union(v.literal("admin"), v.literal("member"), v.literal("viewer")) },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const project = await ctx.db.get(args.projectId);
-    if (!project?.teamId) throw new Error("Workspace project required");
-    await requireTeamAdmin(ctx, project.teamId, args.sessionToken);
+    const { project } = await requireAdmin(ctx, args.projectId, args.sessionToken);
+    if (!project.teamId) throw new Error("Workspace project required");
     const person = await getActiveTeamMember(ctx, project.teamId, args.email);
     const user = person?.userId ? await ctx.db.get(person.userId) : null;
     if (!person || user?.status !== "active") throw new Error("Choose an active workspace member");
@@ -44,6 +43,7 @@ export const addWorkspaceMember = mutation({
     const fields = { userId: user._id, email: user.email, name: user.name, role: args.role, status: "active" as const, inviteToken: undefined, updatedAt: Date.now(), joinedAt: Date.now() };
     if (existing) await ctx.db.patch(existing._id, fields);
     else await ctx.db.insert("members", { projectId: project._id, ...fields, createdAt: Date.now() });
+    await reviewGitHubAccess(ctx, project.teamId, user.email);
     return null;
   },
 });
@@ -147,47 +147,8 @@ export const sendInvite = action({
     role: roleValidator,
     origin: v.string(),
   },
-  handler: async (ctx, args) => {
-    const result: { inviteToken: string; email: string; projectName: string; invitedBy: string } = await ctx.runMutation(
-      api.members.invite,
-      {
-        projectId: args.projectId,
-        sessionToken: args.sessionToken,
-        email: args.email,
-        name: args.name,
-        role: args.role,
-      },
-    );
-    const inviteLink = `${args.origin.replace(/\/$/, "")}/?invite=${result.inviteToken}`;
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.INVITE_FROM_EMAIL || "Origin <onboarding@resend.dev>";
-
-    if (!apiKey) {
-      return { inviteLink, sent: false, reason: "RESEND_API_KEY not set" };
-    }
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: result.email,
-        subject: `You're invited to ${result.projectName} on Origin`,
-        html: `<p>${result.invitedBy} invited you to <strong>${result.projectName}</strong> on Origin.</p><p><a href="${inviteLink}">Accept invite</a></p><p>If the button does not work, open this link:<br>${inviteLink}</p>`,
-        text: `${result.invitedBy} invited you to ${result.projectName} on Origin. Accept: ${inviteLink}`,
-      }),
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      return { inviteLink, sent: false, reason: `Email failed: ${response.status} ${body.slice(0, 160)}` };
-    }
-
-    return { inviteLink, sent: true, reason: "Email sent" };
-  },
+  returns: v.object({ inviteLink: v.string(), sent: v.boolean(), reason: v.string() }),
+  handler: async () => { throw new Error("Use workspace invitations in Origin to send email invitations"); },
 });
 
 export const updateRole = mutation({
@@ -198,12 +159,13 @@ export const updateRole = mutation({
     role: roleValidator,
   },
   handler: async (ctx, args) => {
-    const { member: requester } = await requireAdmin(ctx, args.projectId, args.sessionToken);
+    const { member: requester, project } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
     if (!member || member.projectId !== args.projectId) throw new Error("Member not found");
     if (member.role === "owner" && requester.role !== "owner") throw new Error("Owner role required");
     if (args.role === "owner" && requester.role !== "owner") throw new Error("Owner role required");
     await ctx.db.patch(args.memberId, { role: args.role, updatedAt: Date.now() });
+    await reviewGitHubAccess(ctx, project.teamId, member.email);
   },
 });
 
@@ -214,11 +176,12 @@ export const remove = mutation({
     memberId: v.id("members"),
   },
   handler: async (ctx, args) => {
-    const { member: requester, user } = await requireAdmin(ctx, args.projectId, args.sessionToken);
+    const { member: requester, user, project } = await requireAdmin(ctx, args.projectId, args.sessionToken);
     const member = await ctx.db.get(args.memberId);
     if (!member || member.projectId !== args.projectId) throw new Error("Member not found");
     if (member.role === "owner" && requester.role !== "owner") throw new Error("Owner role required");
     if (member.email === user.email) throw new Error("Cannot remove yourself");
     await ctx.db.delete(args.memberId);
+    await reviewGitHubAccess(ctx, project.teamId, member.email);
   },
 });

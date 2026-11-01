@@ -3,8 +3,10 @@ import { action, mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { api } from "./_generated/api";
+import { deliverInvitation, invitationAddress } from "./lib/invitationMail";
 import { DEFAULT_OWNER_EMAIL, requireUser } from "./lib/auth";
 import { changeOpenIssueCount, requireTeamAdmin, requireTeamMember } from "./lib/permissions";
+import { startWorkspaceDeletion } from "./workspaceDeletion";
 
 const inviteRole = v.union(v.literal("admin"), v.literal("member"), v.literal("viewer"));
 const reservedSlugs = new Set(["api", "login", "signup", "join", "settings", "new", "_next", "favicon.ico", "feedback", "privacy", "terms", "oauth", "docs"]);
@@ -98,6 +100,71 @@ export const update = mutation({
   },
 });
 
+const COUNTED_UP_TO = 1000;
+
+export const deletionSummary = query({
+  args: { sessionToken: v.string(), teamId: v.id("teams") },
+  returns: v.object({
+    name: v.string(),
+    projects: v.array(v.string()),
+    projectCount: v.number(),
+    agentCount: v.number(),
+    memberCount: v.number(),
+    openIssueCount: v.number(),
+    countsCapped: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    const team = await ctx.db.get(args.teamId);
+    if (!team) throw new Error("Workspace not found");
+    const [projects, agents, members] = await Promise.all([
+      ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(COUNTED_UP_TO + 1),
+      ctx.db.query("workspaceAgents").withIndex("by_teamId", q => q.eq("teamId", args.teamId)).take(COUNTED_UP_TO + 1),
+      ctx.db.query("teamMembers").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(COUNTED_UP_TO + 1),
+    ]);
+    const counted = (rows: unknown[]) => Math.min(rows.length, COUNTED_UP_TO);
+    return {
+      name: team.name,
+      projects: projects.slice(0, 20).map(project => project.name),
+      projectCount: counted(projects),
+      agentCount: counted(agents),
+      memberCount: counted(members.filter(member => member.status === "active")),
+      openIssueCount: projects.slice(0, COUNTED_UP_TO).reduce((sum, project) => sum + (project.openIssueCount ?? 0), 0),
+      countsCapped: [projects, agents, members].some(rows => rows.length > COUNTED_UP_TO),
+    };
+  },
+});
+
+/** Deletes the workspace and everything in it for every member. Owners and admins only; `confirmName` must repeat its name. */
+export const remove = mutation({
+  args: { sessionToken: v.string(), teamId: v.id("teams"), confirmName: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { user } = await requireTeamAdmin(ctx, args.teamId, args.sessionToken);
+    const team = await ctx.db.get(args.teamId);
+    if (!team) throw new Error("Workspace not found");
+    if (args.confirmName.trim() !== team.name.trim()) throw new Error("Type the workspace name exactly to delete it");
+    await startWorkspaceDeletion(ctx, team, { userId: user._id, name: user.name });
+    return null;
+  },
+});
+
+const DELETED_LISTED = 100;
+
+/**
+ * Workspaces the signed-in person was an active member of when an owner or admin deleted them, newest first, for
+ * 180 days. Being removed from a workspace never appears here.
+ */
+export const deleted = query({
+  args: { sessionToken: v.string() },
+  returns: v.array(v.object({ teamId: v.id("teams"), name: v.string(), deletedBy: v.string(), byYou: v.boolean(), deletedAt: v.number() })),
+  handler: async (ctx, { sessionToken }) => {
+    const user = await requireUser(ctx, sessionToken);
+    const notices = await ctx.db.query("deletedWorkspaces").withIndex("by_email_and_deletedAt", q => q.eq("email", user.email)).order("desc").take(DELETED_LISTED);
+    return notices.map(notice => ({ teamId: notice.teamId, name: notice.name, deletedBy: notice.deletedBy.name, byYou: notice.deletedBy.userId === user._id, deletedAt: notice.deletedAt }));
+  },
+});
+
 export const createInvite = mutation({
   args: { sessionToken: v.string(), teamId: v.id("teams"), projectId: v.optional(v.id("projects")), email: v.optional(v.string()), role: inviteRole },
   returns: v.object({ token: v.string(), expiresAt: v.number(), teamName: v.string() }),
@@ -110,7 +177,9 @@ export const createInvite = mutation({
       if (args.role === "admin") throw new Error("Project links cannot grant workspace admin access");
     }
     const email = args.email?.trim().toLowerCase() || undefined;
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid email address");
+    if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new Error("Enter a valid email address");
+    const recent = await ctx.db.query("workspaceInvites").withIndex("by_createdBy_and_createdAt", q => q.eq("createdBy", user._id).gte("createdAt", Date.now() - 3_600_000)).take(20);
+    if (recent.length >= 20) throw new Error("Invitation limit reached. You can create 20 invitations per hour. Try again later.");
     const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const expiresAt = Date.now() + 7 * 86400000;
     await ctx.db.insert("workspaceInvites", { teamId: args.teamId, projectId: args.projectId, token, email, role: args.role, createdBy: user._id, expiresAt, revoked: false, createdAt: Date.now() });
@@ -125,6 +194,7 @@ export const invitePreview = query({
     const invite = await ctx.db.query("workspaceInvites").withIndex("by_token", q => q.eq("token", token)).unique();
     if (!invite || invite.revoked || invite.expiresAt < Date.now()) return null;
     const team = await ctx.db.get(invite.teamId);
+    if (team?.deletingAt !== undefined) return null;
     const project = invite.projectId ? await ctx.db.get(invite.projectId) : null;
     if (invite.projectId && project?.teamId !== team?._id) return null;
     return team ? { name: project ? `${team.name} / ${project.name}` : team.name, role: invite.role, email: invite.email } : null;
@@ -140,7 +210,7 @@ export const acceptInvite = mutation({
     if (!invite || invite.revoked || invite.expiresAt < Date.now()) throw new Error("This invitation has expired or was revoked");
     if (invite.email && invite.email !== user.email) throw new Error(`Sign in with ${invite.email} to accept this invitation`);
     const team = await ctx.db.get(invite.teamId);
-    if (!team) throw new Error("Workspace no longer exists");
+    if (!team || team.deletingAt !== undefined) throw new Error("Workspace no longer exists");
     const project = invite.projectId ? await ctx.db.get(invite.projectId) : null;
     if (invite.projectId && (!project || project.teamId !== team._id)) throw new Error("Project no longer exists");
     const member = await ctx.db.query("teamMembers").withIndex("by_team_email", q => q.eq("teamId", team._id).eq("email", user.email)).unique();
@@ -177,14 +247,23 @@ export const revokeInvite = mutation({
   },
 });
 
+export const inviteAddress = query({
+  args: {},
+  returns: v.object({ convexUrl: v.union(v.string(), v.null()), origin: v.union(v.string(), v.null()) }),
+  handler: async () => invitationAddress(),
+});
+
 export const sendEmailInvite = action({
-  args: { sessionToken: v.string(), teamId: v.id("teams"), email: v.string(), role: inviteRole },
-  returns: v.object({ inviteLink: v.string(), sent: v.boolean() }),
-  handler: async (ctx, args): Promise<{ inviteLink: string; sent: boolean }> => {
-    const invitation = await ctx.runMutation(api.workspaces.createInvite, args);
-    const inviteLink = `${process.env.ORIGIN_SITE_URL || process.env.ORIGIN_PUBLIC_URL || "http://localhost:3000"}/join/${invitation.token}`;
-    if (!process.env.RESEND_API_KEY) return { inviteLink, sent: false };
-    const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: process.env.INVITE_FROM_EMAIL || "Origin <onboarding@resend.dev>", to: args.email, subject: `Join ${invitation.teamName} on Origin`, text: `You've been invited to ${invitation.teamName}. Join your workspace: ${inviteLink}\nThis invitation expires in 7 days.` }) });
-    return { inviteLink, sent: response.ok };
+  args: { sessionToken: v.string(), teamId: v.id("teams"), projectId: v.optional(v.id("projects")), email: v.string(), role: inviteRole },
+  returns: v.object({ token: v.string(), expiresAt: v.number(), inviteLink: v.string(), sent: v.boolean(), deliveryStatus: v.union(v.literal("not_configured"), v.literal("failed"), v.literal("accepted"), v.literal("not_requested")) }),
+  handler: async (ctx, args) => {
+    const { origin } = invitationAddress();
+    if (!origin) throw new Error("The invitation website is not configured for this Origin backend");
+    const email = args.email.trim().toLowerCase();
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid email address");
+    const invitation: { token: string; expiresAt: number; teamName: string } = await ctx.runMutation(api.workspaces.createInvite, { ...args, email });
+    const inviteLink = `${origin}/join/${invitation.token}`;
+    const deliveryStatus = await deliverInvitation({ email, teamName: invitation.teamName, inviteLink });
+    return { token: invitation.token, expiresAt: invitation.expiresAt, inviteLink, sent: deliveryStatus === "accepted", deliveryStatus };
   },
 });

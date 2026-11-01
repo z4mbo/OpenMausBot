@@ -28,8 +28,8 @@ async function fixture() {
   const shared = await t.mutation(api.projects.create, { sessionToken: data.owner.token, teamId, name: "Shared", repoUrl: "https://github.com/example/shared" });
   const privateProject = await t.mutation(api.projects.create, { sessionToken: data.owner.token, teamId, name: "Private", repoUrl: "https://github.com/example/private" });
   for (const person of [data.member, data.viewer]) await t.mutation(api.members.addWorkspaceMember, { sessionToken: data.owner.token, projectId: shared, email: person.email, role: "member" });
-  const column = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: shared })).columns[0]._id;
-  const privateColumn = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: privateProject })).columns[0]._id;
+  const column = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: shared })).columns.find(c => c.title === "Todo")!._id;
+  const privateColumn = (await t.query(api.tasks.board, { sessionToken: data.owner.token, projectId: privateProject })).columns.find(c => c.title === "Todo")!._id;
   const issue = await t.mutation(api.tasks.createTask, { sessionToken: data.owner.token, projectId: shared, columnId: column, title: "Shared issue", priority: "high", assignedToEmail: data.member.email, dueDate: "2026-10-01" });
   const privateIssue = await t.mutation(api.tasks.createTask, { sessionToken: data.owner.token, projectId: privateProject, columnId: privateColumn, title: "Private issue", priority: "high", assignedToEmail: data.owner.email, dueDate: "2026-10-01" });
   return { t, ...data, teamId, shared, privateProject, column, issue, privateIssue };
@@ -165,25 +165,15 @@ test("comment mentions validate access, store inline tokens and notify once", as
   expect(containsMention("@member2", "@member")).toBe(false);
 });
 
-test("canvases isolate scenes, files and viewers from global Draw", async () => {
-  const f = await fixture();
-  const canvasId = await f.t.mutation(api.draw.createCanvas, { sessionToken: f.member.token, projectId: f.shared, name: "Architecture" });
-  const otherCanvas = await f.t.mutation(api.draw.createCanvas, { sessionToken: f.owner.token, projectId: f.privateProject, name: "Private design" });
-  const element = JSON.stringify({ id: "box", version: 1, versionNonce: 1, type: "rectangle", x: 0, y: 0, width: 100, height: 100 });
-  await f.t.mutation(api.draw.updateElements, { sessionToken: f.member.token, teamId: f.teamId, canvasId, elements: [element] });
-  expect(await f.t.query(api.draw.scene, { sessionToken: f.viewer.token, teamId: f.teamId, canvasId })).toEqual([element]);
-  expect(await f.t.query(api.draw.scene, { sessionToken: f.member.token, teamId: f.teamId })).toEqual([]);
-  expect(await f.t.query(api.draw.scene, { sessionToken: f.owner.token, teamId: f.teamId, canvasId: otherCanvas })).toEqual([]);
-  await expect(f.t.query(api.draw.scene, { sessionToken: f.member.token, teamId: f.teamId, canvasId: otherCanvas })).rejects.toThrow();
-  await expect(f.t.query(api.draw.files, { sessionToken: f.member.token, teamId: f.teamId, canvasId: otherCanvas })).rejects.toThrow();
-  await expect(f.t.mutation(api.draw.updateElements, { sessionToken: f.viewer.token, teamId: f.teamId, canvasId, elements: [element] })).rejects.toThrow();
-});
-
 test("MCP inbox, completion and deletion are scoped and idempotent", async () => {
   const f = await fixture();
   const grant = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.member.token, teamId: f.teamId, name: "Codex", write: true });
   expect(JSON.parse(await f.t.query(api.connectors.read, { token: grant.token, kind: "inbox" })).issues[0].id).toBe(f.issue);
-  await f.t.mutation(api.connectors.write, { token: grant.token, requestId: "complete-issue-1", change: { kind: "update_issue", projectId: f.shared, taskId: f.issue, done: true } });
+  const complete = { token: grant.token, requestId: "complete-issue-1", change: { kind: "update_issue" as const, projectId: f.shared, taskId: f.issue, done: true } };
+  await f.t.mutation(api.connectors.write, complete);
+  await f.t.mutation(api.connectors.write, complete);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
+  expect((await f.t.query(api.projects.get, { sessionToken: f.owner.token, projectId: f.shared })).openIssueCount).toBe(0);
   const request = { token: grant.token, requestId: "delete-issue-1", change: { kind: "delete_issue" as const, projectId: f.shared, taskId: f.issue } };
   expect(await f.t.mutation(api.connectors.write, request)).toBe(await f.t.mutation(api.connectors.write, request));
   const read = await f.t.mutation(api.connectors.createGrant, { sessionToken: f.owner.token, teamId: f.teamId, name: "Read-only", write: false });
@@ -191,17 +181,23 @@ test("MCP inbox, completion and deletion are scoped and idempotent", async () =>
   await expect(f.t.query(api.connectors.read, { token: grant.token, kind: "issue", projectId: f.privateProject, taskId: f.privateIssue })).rejects.toThrow();
 });
 
-test("GitHub closure completes Origin once and stale events cannot reopen it", async () => {
+test("a merge receipt completes a mirrored issue once, and stale or repeated GitHub reports change nothing", async () => {
   const f = await fixture();
   const args = { projectId: f.shared, taskId: f.issue, repoUrl: "https://github.com/example/shared", number: 1, issueUrl: "https://github.com/example/shared/issues/1", state: "closed" as const, updatedAt: Date.now() };
   await f.t.mutation(internal.integrations.linkIssue, args);
   await f.t.mutation(internal.integrations.linkIssue, args);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
+  const receipt = { projectId: f.shared, taskId: f.issue, repoUrl: args.repoUrl, issueNumber: args.number, pullRequest: { number: 9, headSha: "a".repeat(40), mergeSha: "b".repeat(40), mergedAt: args.updatedAt } };
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
   await f.t.mutation(internal.integrations.linkIssue, { ...args, state: "open", updatedAt: args.updatedAt - 1 });
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
   expect((await f.t.query(api.projects.get, { sessionToken: f.owner.token, projectId: f.shared })).openIssueCount).toBe(0);
   await f.t.mutation(api.tasks.updateTask, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue, done: false });
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
   await f.t.mutation(internal.integrations.linkIssue, args);
+  expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(false);
+  await f.t.mutation(internal.integrations.completeMergedIssue, receipt);
   expect((await f.t.query(api.tasks.details, { sessionToken: f.owner.token, projectId: f.shared, taskId: f.issue })).task.done).toBe(true);
 });
 
@@ -215,6 +211,14 @@ test("repository linking normalizes URLs and only workspace admins approve crede
   expect((await f.t.query(api.projects.get, { sessionToken: f.member.token, projectId })).githubWorkspaceAccess).toBe(true);
   await f.t.mutation(api.projects.update, { sessionToken: f.member.token, projectId, repoUrl: "https://github.com/example/different" });
   expect((await f.t.query(api.projects.get, { sessionToken: f.member.token, projectId })).githubWorkspaceAccess).toBe(false);
+});
+
+test("a member who creates a project can share it, but not into projects they do not own", async () => {
+  const f = await fixture();
+  const projectId = await f.t.mutation(api.projects.create, { sessionToken: f.member.token, teamId: f.teamId, name: "Member share", repoUrl: "https://github.com/example/member-share" });
+  await f.t.mutation(api.members.addWorkspaceMember, { sessionToken: f.member.token, projectId, email: f.viewer.email, role: "viewer" });
+  expect((await f.t.query(api.projects.get, { sessionToken: f.viewer.token, projectId })).memberRole).toBe("viewer");
+  await expect(f.t.mutation(api.members.addWorkspaceMember, { sessionToken: f.member.token, projectId: f.shared, email: f.viewer.email, role: "member" })).rejects.toThrow("Admin role required");
 });
 
 test("assignees and legacy local attachments respect project membership", async () => {

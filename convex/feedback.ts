@@ -84,7 +84,7 @@ export const dismiss = mutation({
 });
 
 export const convert = mutation({
-  args: { ...scope, entryId: v.id("feedbackEntries"), columnId: v.id("columns"), assignedToEmail: v.string(), dueDate: v.string() }, returns: v.id("tasks"),
+  args: { ...scope, entryId: v.id("feedbackEntries"), columnId: v.optional(v.id("columns")), assignedToEmail: v.string(), dueDate: v.string() }, returns: v.id("tasks"),
   handler: async (ctx, args) => {
     const { user } = await requireWorkspaceEditor(ctx, args.teamId, args.sessionToken);
     const entry = await ctx.db.get(args.entryId);

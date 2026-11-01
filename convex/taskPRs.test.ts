@@ -20,7 +20,7 @@ async function fixture() {
   const projectId = await t.mutation(api.projects.create, { sessionToken, teamId, name: "PRs", repoUrl });
   const { taskId, columnId, reviewId } = await t.run(async ctx => {
     await ctx.db.patch(projectId, { githubWorkspaceAccess: true });
-    const columnId = (await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", projectId)).first())!._id;
+    const columnId = (await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", projectId)).collect()).find(column => column.title === "Todo")!._id;
     const reviewId = await ctx.db.insert("columns", { projectId, title: "In review", order: 5, isDone: false, createdAt: 1, updatedAt: 1 });
     const taskId = await ctx.db.insert("tasks", { projectId, teamId, title: "Implement", columnId, done: false, priority: "medium", order: 1, createdAt: 1, updatedAt: 1 });
     await ctx.db.patch(projectId, { openIssueCount: 1, githubReviewColumnId: reviewId });
@@ -121,7 +121,7 @@ describe("PR lifecycle and missed event recovery", () => {
     await f.t.run(ctx => ctx.db.patch(f.projectId, { repoUrl: "https://github.com/test/changed" }));
     expect(await f.t.mutation(internal.taskPRs.sync, { id, sequence: latest + 2, snapshot: { ...f.s, state: "merged", githubUpdatedAt: 2000 } })).toBe(false);
   });
-  test("issue keyword closure never completes a PR task; ordinary issue sync still completes/reopens", async () => {
+  test("issue closure needs trusted merge evidence, and issue-mode reopening still applies", async () => {
     const f = await fixture(); await f.t.mutation(internal.taskPRs.humanContext, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, choosePR: true }); // Protect before the first PR link exists.
     const issue = { projectId: f.projectId, taskId: f.taskId, repoUrl, number: 42, issueUrl: `${repoUrl}/issues/42`, state: "closed" as const, updatedAt: 2000 };
     await f.t.mutation(internal.integrations.linkIssue, issue);
@@ -130,6 +130,8 @@ describe("PR lifecycle and missed event recovery", () => {
     await f.t.mutation(internal.integrations.linkIssue, { ...issue, state: "open", updatedAt: 4000 });
     expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
     const g = await fixture(); await g.t.mutation(internal.integrations.linkIssue, { ...issue, taskId: g.taskId, projectId: g.projectId });
+    expect((await g.t.run(ctx => ctx.db.get(g.taskId)))!.done).toBe(false);
+    await g.t.mutation(internal.integrations.completeMergedIssue, { projectId: g.projectId, taskId: g.taskId, repoUrl, issueNumber: 42, pullRequest: { number: 9, headSha: sha("a"), mergeSha: sha("b"), mergedAt: 2500 } });
     expect((await g.t.run(ctx => ctx.db.get(g.taskId)))!.done).toBe(true);
     await g.t.mutation(internal.integrations.linkIssue, { ...issue, taskId: g.taskId, projectId: g.projectId, state: "open", updatedAt: 3000 });
     expect((await g.t.run(ctx => ctx.db.get(g.taskId)))!.done).toBe(false);
@@ -167,5 +169,36 @@ describe("Delivery dedupe and finalize authority", () => {
     expect(next.task.githubTaskMode).toBe("pull_request");
     await f.t.run(ctx => ctx.db.patch(f.projectId, { githubWorkspaceAccess: false }));
     await expect(f.t.mutation(internal.taskPRs.humanContext, a)).rejects.toThrow("Authorize");
+  });
+});
+
+describe("GitHub-first issue lifecycle", () => {
+  test("a GitHub-linked issue completes by hand or through a merged pull request", async () => {
+    const f = await fixture();
+    await f.t.run(ctx => ctx.db.patch(f.taskId, { githubIssueNumber: 7, githubIssueUrl: `${repoUrl}/issues/7`, githubIssueState: "open" }));
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true });
+    expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: false });
+    await f.link({ ...f.s, state: "merged", githubUpdatedAt: 3000 });
+    expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: false });
+    await f.t.mutation(api.tasks.updateTask, { sessionToken: f.sessionToken, projectId: f.projectId, taskId: f.taskId, done: true });
+    expect((await f.t.run(ctx => ctx.db.get(f.taskId)))!.done).toBe(true);
+  });
+  test("unlinked open issues of authorized projects are listed for mirroring, and the context carries the last GitHub state", async () => {
+    const f = await fixture();
+    const page = JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null }));
+    expect(page.rows).toEqual([{ projectId: f.projectId, taskId: f.taskId }]);
+    await f.t.run(ctx => ctx.db.patch(f.taskId, { githubIssueNumber: 3, githubIssueState: "closed" }));
+    expect(JSON.parse(await f.t.query(internal.integrations.unlinkedTasks, { cursor: null })).rows).toEqual([]);
+    const context = JSON.parse(await f.t.query(internal.integrations.context, { projectId: f.projectId, taskId: f.taskId }));
+    expect(context.task.githubIssueState).toBe("closed");
+  });
+  test("a project created with githubRepo later waits for the person instead of creating a repository", async () => {
+    const f = await fixture();
+    const later = await f.t.mutation(api.projects.create, { sessionToken: f.sessionToken, teamId: f.teamId, name: "Later", githubRepo: "later" });
+    const project = await f.t.run(ctx => ctx.db.get(later));
+    expect(project!.githubRepoState).toBeUndefined();
+    expect(await f.t.query(internal.integrations.pending, {})).not.toContain(later);
   });
 });

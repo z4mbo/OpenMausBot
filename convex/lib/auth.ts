@@ -100,6 +100,8 @@ export async function createUser(
 }
 
 export async function createSession(ctx: MutationCtx, userId: Id<"users">) {
+  const user = await ctx.db.get(userId);
+  if (!user || user.status !== "active") throw new Error("Login required");
   const now = Date.now();
   const token = randomHex(32);
   await ctx.db.insert("sessions", {
@@ -108,6 +110,7 @@ export async function createSession(ctx: MutationCtx, userId: Id<"users">) {
     expiresAt: now + SESSION_DAYS * 24 * 60 * 60 * 1000,
     createdAt: now,
     lastSeenAt: now,
+    sessionVersion: user.sessionVersion ?? 0,
   });
   return token;
 }
@@ -122,7 +125,16 @@ export async function getSessionUser(ctx: Ctx, sessionToken: string) {
   if (!session || session.expiresAt < Date.now()) return null;
   const user = await ctx.db.get(session.userId);
   if (!user || user.status !== "active") return null;
+  if ((session.sessionVersion ?? 0) !== (user.sessionVersion ?? 0)) return null;
   return { session, user };
+}
+
+export async function invalidateOtherSessions(ctx: MutationCtx, user: Doc<"users">, current: Doc<"sessions">) {
+  const sessionVersion = (user.sessionVersion ?? 0) + 1;
+  await ctx.db.patch(user._id, { sessionVersion });
+  await ctx.db.patch(current._id, { sessionVersion });
+  const sessions = await ctx.db.query("sessions").withIndex("by_user", q => q.eq("userId", user._id)).take(500);
+  for (const session of sessions) if (session._id !== current._id) await ctx.db.delete(session._id);
 }
 
 export async function requireUser(ctx: Ctx, sessionToken: string) {
