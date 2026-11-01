@@ -59,6 +59,7 @@
 
 /* Forms. */
 .stack-form { display: grid; gap: var(--space-3); }
+.stack-form > :is(.primary-button, .ghost-button) { justify-self: start; }
 .mini-form { display: grid; gap: var(--space-2); padding: var(--space-3); background: var(--surface-2); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
 .panel { min-width: 0; }
 
@@ -186,7 +187,6 @@
   transition: opacity var(--duration) ease, transform var(--duration-slow) var(--ease-out), overlay var(--duration) allow-discrete, display var(--duration) allow-discrete;
 }
 .origin-dialog::backdrop { background: var(--scrim); transition: background var(--duration) ease; }
-@starting-style { .origin-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.98); } }
 @starting-style { .origin-dialog[open]::backdrop { background: transparent; } }
 .dialog-heading { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 48px; padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5); background: var(--surface-1); }
 .dialog-heading h2 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-md); font-weight: var(--weight-semibold); }
@@ -202,3 +202,5 @@
   .icon-button { width: 36px; min-width: 36px; height: 36px; }
   .primary-button, .ghost-button { min-height: 36px; }
 }
+.origin-dialog > form.stack-form, .origin-dialog > .stack-form { padding: var(--space-2) var(--space-5) var(--space-5); }
+.origin-dialog > form.stack-form > .primary-button:last-child { justify-self: end; }

@@ -310,7 +310,9 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
   .board-header-actions > .member-picker { max-width: 44px; }
   .board-header-actions .member-picker-trigger > span:not(.origin-user-avatar), .board-header-actions .member-picker-trigger > svg:last-child { display: none; }
   .board-header-actions .member-picker-trigger { justify-content: center; width: 36px; min-height: 36px; padding: 0; }
-  .board-header-actions > .issue-layout-switch, .board-column-button { display: none; }
+  .board-column-button { display: none; }
+  .board-header-actions > .issue-layout-switch { margin: 0 2px; }
+  .board-header .segmented-control button { padding: 0 6px; }
   .project-create-issue > span { display: none; }
   .board-header-actions > .project-create-issue { width: 36px; padding: 0; }
   .board-filter-popover { position: fixed; left: var(--space-3); right: var(--space-3); top: 104px; width: auto; }

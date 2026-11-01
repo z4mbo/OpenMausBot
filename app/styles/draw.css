@@ -1,20 +1,13 @@
-.workspace-app .draw-workspace { padding: 0; overflow: hidden; }
-.draw-view { display: flex; flex-direction: column; height: 100%; }
-.draw-view > header { padding: 18px 24px; }
-.drawing-canvas { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.drawing-status { font-size: 11px; color: var(--text-2); background: var(--surface-3); padding: 7px 24px; display: flex; justify-content: space-between; gap: 12px; flex-shrink: 0; }
+/* Draw: the shared Excalidraw canvas fills the main panel. */
+.workspace-app > .workspace.draw-workspace { padding: 0; overflow: hidden; }
+.workspace-app.sidebar-collapsed > .workspace.draw-workspace { padding-top: 44px; }
+.draw-view { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.drawing-canvas { position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .drawing-canvas > .excalidraw { flex: 1; min-height: 0; height: auto; }
+.drawing-status { display: flex; flex-shrink: 0; justify-content: space-between; gap: var(--space-3); padding: 6px var(--space-6); background: var(--surface-3); color: var(--text-2); font-size: var(--text-sm); }
 .drawing-status.error { color: var(--red); }
+
 @media (max-width: 760px) {
-.workspace-app .draw-workspace { padding: 0; }
-.draw-view > header { padding: 14px 16px; }
-.drawing-status { top: auto; bottom: 62px; right: 8px; font-size: 9px; }
-.drawing-status { padding: 7px 14px; } }
-.draw-view { min-height: 0; }
-.project-canvases .draw-view { flex: 1; min-height: 300px; height: auto; }
-.project-canvases .drawing-canvas { height: 100%; }
-@media (max-width: 700px) {
-.project-canvases .draw-view { min-height: 360px; } }
-.workspace-app.sidebar-collapsed > .draw-workspace { padding-top: 44px; }
-@media (max-width: 760px) {
-.workspace-app.sidebar-collapsed > .draw-workspace { padding-top: 0; } }
+  .workspace-app.sidebar-collapsed > .workspace.draw-workspace { padding-top: 0; }
+  .drawing-status { padding: 6px var(--space-4); }
+}

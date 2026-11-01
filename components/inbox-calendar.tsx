@@ -52,7 +52,7 @@ export function InboxCalendar({ sessionToken, onOpenTask, mine, done, project, p
         <time dateTime={key}><span>{date.toLocaleDateString(undefined, { weekday: "short" })}</span><strong>{date.getDate()}</strong></time>
         <div>{tasks.map(task => <button className={`calendar-task ${task.done ? "done" : ""}`} key={task._id} draggable={workspace.role !== "viewer" && !pending} onDragStart={event => event.dataTransfer.setData("application/x-origin-issue", task._id)} onClick={() => onOpenTask(task.projectId, task._id)} title={task.title}>
           {task.done ? <CheckCircle2 size={13} /> : <Circle className={`priority-${task.priority}`} size={13} />}<span><strong>{task.title}</strong><small>{task.projectName}</small></span>
-        </button>)}{!tasks.length && <span className="calendar-empty">No issues</span>}</div>
+        </button>)}</div>
       </section>;
     })}</div>}
   </section>;

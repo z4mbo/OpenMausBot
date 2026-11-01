@@ -598,6 +598,7 @@ export function ChatThread({
               <article
                 id={`message-${message.id}`}
                 className={`conversation-message ${message.id === focusedMessage ? "notification-focus" : ""}`}
+                tabIndex={-1}
               >
                 <button
                   className="chat-profile-avatar"
