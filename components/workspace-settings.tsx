@@ -1,7 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { localAppOrigin } from "@/lib/client-api";
-import { displayName, formatDate } from "@/lib/format";
+import { displayName, formatDate, formatDateTime } from "@/lib/format";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -191,7 +191,7 @@ export function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionT
       <h4>Pending invites<span className="settings-count">{workspaceInvites.length}</span></h4>
       <div className="settings-list">{workspaceInvites.map(invite => <div className="settings-list-row pending-invitation" key={invite._id}>
         <span className="settings-row-icon"><UserPlus size={15} /></span>
-        <div><strong>{invite.email || `${roleLabel(invite.role)} link`}</strong><small>{invite.email ? `${roleLabel(invite.role)} · ` : ""}Created {formatDate(invite.createdAt)} by {creator(invite.createdBy)} · Expires {formatDate(invite.expiresAt)}</small></div>
+        <div><strong>{invite.email || `${roleLabel(invite.role)} link`}</strong><small>{invite.email ? `${roleLabel(invite.role)} · ` : ""}Created {formatDateTime(invite.createdAt)} by {creator(invite.createdBy)} · Expires {formatDate(invite.expiresAt)}</small></div>
         <button type="button" className="icon-button" title="Copy invite link" aria-label={`Copy ${invite.email || `${invite.role} invite`} link`} onClick={() => copy(`${localAppOrigin()}/join/${invite.token}`, invite._id)}>{copied === invite._id ? <Check size={14} /> : <Copy size={14} />}</button>
         <ConfirmButton label={`Revoke ${invite.email || `${invite.role} invite`}`} confirmLabel="Revoke" disabled={busy} icon={<Trash2 size={14} />} onConfirm={() => void attempt(() => revokeInvite({ sessionToken, inviteId: invite._id }))} />
       </div>)}</div>

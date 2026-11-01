@@ -82,6 +82,7 @@
 .nav-item > svg, .project-button .project-icon { width: 16px; height: 16px; color: var(--text-3); transition: color var(--duration-fast); }
 .nav-item > span { flex: 1; }
 .nav-item:hover, .project-button:hover { background: var(--hover); color: var(--text-1); }
+.nav-item:active, .project-button:active, .profile-chip:active { background: var(--active); }
 .nav-item.active, .project-button.active { background: var(--surface-4); color: var(--text-1); }
 .nav-item.active > svg, .project-button.active .project-icon { color: var(--text-1); }
 .sidebar-content:has(> .nav-glider[data-visible="true"]) :is(.nav-item, .project-button).active { background: transparent; }

@@ -13,7 +13,7 @@ function Harness({ keep = false }: { keep?: boolean }) {
   return createElement("main", null,
     createElement("h1", null, "Board"),
     createElement("button", { id: "opener", onClick: () => setOpen(true) }, "Open"),
-    open && createElement(Dialog, { title: "Test", onClose: () => { if (!keep) setOpen(false); } }, createElement("button", { id: "inside" }, "Inside")));
+    open && createElement(Dialog, { title: "Test", onClose: () => { if (!keep) setOpen(false); }, children: createElement("button", { id: "inside" }, "Inside") }));
 }
 
 function mount(keep = false) {

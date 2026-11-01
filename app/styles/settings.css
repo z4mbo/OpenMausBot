@@ -162,7 +162,7 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
 .member-profile-issue > span:not(.member-issue-priority) { flex: 1; min-width: 0; }
 .member-profile-issue strong { display: block; overflow: hidden; font-weight: var(--weight-medium); text-overflow: ellipsis; white-space: nowrap; }
 .member-profile-issue small { display: flex; align-items: center; gap: 6px; margin-top: 2px; color: var(--text-3); font-size: var(--text-sm); }
-.member-profile-issue i { width: 7px; height: 7px; border-radius: 2px; }
+.member-profile-issue i { width: 7px; height: 7px; border-radius: 2px; background: var(--text-3); }
 .member-profile-issue .completed-issue-icon { color: var(--green); }
 .member-issue-priority { display: inline-grid; flex: none; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; background: none; }
 .member-profile-empty { margin: 0; padding: var(--space-10) 0; color: var(--text-3); text-align: center; }
@@ -233,6 +233,7 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
   .settings-field-pair { grid-template-columns: 1fr 1fr; gap: var(--space-2); }
   .settings-avatar-row { flex-wrap: wrap; }
   .settings-list-row > select, .settings-list-row > .role-label { width: 92px; }
+  .pending-invitation small, .connector-grant small { white-space: normal; }
   .invite-link-form { flex-wrap: wrap; }
   .invite-link-form label { flex: 1 1 100%; }
   .invite-link-form button { flex: 1; }
@@ -240,6 +241,7 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
   .agent-token-form input, .agent-token-form button { grid-column: 1 / -1; }
   .agent-token-form select { width: 100%; }
   .project-members-form { grid-template-columns: minmax(0, 1fr) 100px; }
+  .origin-dialog.member-profile-dialog { width: 100vw; }
   .member-profile-body { padding: var(--space-2) var(--space-4) var(--space-5); }
   .member-profile-header { gap: var(--space-3); }
   .member-profile-avatar.origin-user-avatar { --avatar-size: 48px; }

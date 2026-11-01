@@ -7,16 +7,14 @@ import { ProjectWorkspace } from "./project-workspace";
 import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
 import { FolderPlus, Check, ChevronDown, ChevronRight, CircleDot, CircleAlert, ImageUp, Inbox, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { FormEvent, useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { decryptSecret, encryptSecret, type EncryptedSecret } from "@/lib/vaultCrypto";
 import { MemberProfileContext, useMemberProfile, useWorkspace, type Workspace } from "./workspace-context";
 import { MemberProfile } from "./member-profile";
 import { useModalKeyboard } from "./use-modal-keyboard";
 import { WorkspaceGitHubSetup } from "./repository-settings";
 import { useNotifications } from "./use-notifications";
-import { MemberPicker } from "./member-picker";
 import { ProjectIcon } from "./project-icon";
 import { ProjectSortMenu } from "./project-sort-menu";
 import { projectSortOptions, sortProjects, type ProjectSort } from "@/lib/project-sort";
@@ -41,7 +39,6 @@ import { useSidebarLayout } from "./use-sidebar-layout";
 import { focusInitialInput } from "@/lib/initial-focus";
 import { hasOpenKeyboardOverlay, isEditingTarget, workspaceShortcut } from "@/lib/keyboard-navigation";
 import { rankSearchResults } from "@/lib/search-ranking";
-import Link from "next/link";
 import { localApi as requestLocalApi } from "@/lib/client-api";
 import { createCallSignaling } from "@/lib/call-signaling";
 import { isScreenTrack, selectCallFocus } from "@/lib/call-layout";
@@ -57,12 +54,7 @@ export type AuthUser = {
   role: "owner" | "user";
   status: "active" | "disabled";
 };
-type AuthSession = { sessionToken: string; user: AuthUser };
 type MainView = "project" | "inbox" | "chat" | "voice" | "draw";
-type Role = "admin" | "member" | "viewer";
-type CredentialKind = "password" | "api_key" | "secret" | "note";
-type StoredCredentialKind = CredentialKind | "apk" | "file";
-type AssetType = "figma" | "image" | "icon" | "font" | "document" | "apk" | "other";
 type ProjectWithUi = Doc<"projects"> & { memberRole: string; iconUrl?: string | null; openIssueCount?: number };
 type RemoteCallStream = { stream: MediaStream; screen?: MediaStream; addedAt: number };
 type AvatarUser = { username?: string; name: string; email: string; avatarUrl?: string | null };
@@ -98,17 +90,6 @@ type LocalVoiceSignal = {
   createdAt: number;
 };
 
-const roles: Role[] = ["admin", "member", "viewer"];
-const credentialKinds: Array<{ value: CredentialKind; label: string }> = [
-  { value: "password", label: "Website login" },
-  { value: "api_key", label: "API key" },
-  { value: "secret", label: "Secret" },
-  { value: "note", label: "Secure note" },
-];
-const assetTypes: AssetType[] = ["figma", "image", "icon", "font", "document", "apk", "other"];
-function projectInitial(name: string) {
-  return (name.trim()[0] || "P").toUpperCase();
-}
 function orderSidebarProjects(projects: ProjectWithUi[]) {
   return [...projects].sort((a, b) => {
     if (a.order !== undefined || b.order !== undefined) return (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER);
