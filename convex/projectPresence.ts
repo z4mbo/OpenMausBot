@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { projectMember, requireTeamMember } from "./lib/permissions";
 
@@ -7,10 +7,10 @@ export const update = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (!args.clientId || args.clientId.length > 80 || !Number.isSafeInteger(args.sequence) || args.sequence < 0) throw new Error("Invalid presence session");
+    if (!args.clientId || args.clientId.length > 80 || !Number.isSafeInteger(args.sequence) || args.sequence < 0) throw new ConvexError("Invalid presence session");
     if (args.projectId) {
       const project = await ctx.db.get(args.projectId);
-      if (!project || project.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new Error("Project is not in this workspace");
+      if (!project || project.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new ConvexError("Project is not in this workspace");
     }
     const existing = await ctx.db.query("projectPresence").withIndex("by_team_user_client", q => q.eq("teamId", args.teamId).eq("userId", user._id).eq("clientId", args.clientId)).unique();
     if (existing && existing.sequence >= args.sequence) return null;
@@ -27,7 +27,7 @@ export const list = query({
   returns: v.array(v.object({ userId: v.id("users"), projectId: v.id("projects"), name: v.string(), email: v.string(), username: v.optional(v.string()), avatarUrl: v.union(v.string(), v.null()), updatedAt: v.number() })),
   handler: async (ctx, args) => {
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-    if (!Number.isFinite(args.activeSince)) throw new Error("Invalid presence window");
+    if (!Number.isFinite(args.activeSince)) throw new ConvexError("Invalid presence window");
     const rows = await ctx.db.query("projectPresence").withIndex("by_team_updatedAt", q => q.eq("teamId", args.teamId).gt("updatedAt", args.activeSince)).order("desc").take(500);
     const seen = new Set<string>();
     const result = [];

@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { requireUser } from "./auth";
@@ -26,7 +27,7 @@ export async function sharedAgentsOn(ctx: Ctx, teamId: Id<"teams">): Promise<boo
 }
 
 export async function requireSharedAgents(ctx: Ctx, teamId: Id<"teams">): Promise<void> {
-  if (!await sharedAgentsOn(ctx, teamId)) throw new Error("Shared agents are off for this workspace");
+  if (!await sharedAgentsOn(ctx, teamId)) throw new ConvexError("Shared agents are off for this workspace");
 }
 
 /** Read needs project (or workspace) membership; edit needs owner/admin/project admin or the creator; send needs a non-viewer role. */
@@ -54,7 +55,7 @@ export async function requireAgent(ctx: Ctx, agentId: Id<"workspaceAgents">, ses
   const user = await requireUser(ctx, sessionToken);
   const agent = await ctx.db.get(agentId);
   const access = agent ? await agentAccess(ctx, agent, user) : null;
-  if (!agent || !access) throw new Error("Agent not found");
+  if (!agent || !access) throw new ConvexError("Agent not found");
   return { agent, access };
 }
 
@@ -67,16 +68,16 @@ export async function requireThread(ctx: Ctx, threadId: Id<"agentThreads">, sess
   const thread = await ctx.db.get(threadId);
   const agent = thread ? await ctx.db.get(thread.agentId) : null;
   const access = agent ? await agentAccess(ctx, agent, user) : null;
-  if (!thread || !agent || !access || !canSeeThread(thread, user)) throw new Error("Thread not found");
+  if (!thread || !agent || !access || !canSeeThread(thread, user)) throw new ConvexError("Thread not found");
   return { thread, agent, access, user };
 }
 
 export async function requireWritableThread(ctx: Ctx, threadId: Id<"agentThreads">, sessionToken: string) {
   const context = await requireThread(ctx, threadId, sessionToken);
   await requireSharedAgents(ctx, context.thread.teamId);
-  if (!context.access.canSend) throw new Error("View-only access");
-  if (context.thread.archivedAt !== undefined || context.agent.archivedAt !== undefined) throw new Error("This thread is archived");
-  if (context.agent.disabled) throw new Error("This agent is disabled");
+  if (!context.access.canSend) throw new ConvexError("View-only access");
+  if (context.thread.archivedAt !== undefined || context.agent.archivedAt !== undefined) throw new ConvexError("This thread is archived");
+  if (context.agent.disabled) throw new ConvexError("This agent is disabled");
   return context;
 }
 

@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
-import { DEFAULT_OWNER_EMAIL } from "@/convex/lib/auth";
 import { limitLocalAction, requireLocalWorkspace, sessionTokenFromRequest } from "@/lib/localRealtime";
-import { createGithubState, githubAppConfig } from "@/lib/github-workspace";
+import { canSetupGitHubApp, createGithubState, githubAppConfig } from "@/lib/github-workspace";
 import { originUrl } from "@/lib/integration-bridge";
 
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const user = await requireLocalWorkspace(request);
-    if (user.email !== DEFAULT_OWNER_EMAIL || !["owner", "admin"].includes(user.workspaceRole)) throw new Error("Origin administrator required");
     if (githubAppConfig()) throw new Error("GitHub App is already configured");
+    if (!canSetupGitHubApp(user.email, user.workspaceRole)) throw new Error("Workspace admin access required");
     limitLocalAction(`github-setup:${user._id}`, 3, 60000);
     const { state, browser } = createGithubState({ teamId: user.teamId, userId: user._id, sessionToken: sessionTokenFromRequest(request), slug: user.slug, mode: "setup" });
     const origin = originUrl();

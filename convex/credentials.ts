@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { canEdit, requireMember, touchProject } from "./lib/permissions";
 import { credentialKindValidator } from "./lib/validators";
@@ -8,7 +8,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const { member } = await requireMember(ctx, projectId, sessionToken);
-  if (!canEdit(member)) throw new Error("Edit role required");
+  if (!canEdit(member)) throw new ConvexError("Edit role required");
 }
 
 
@@ -85,7 +85,7 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const item = await ctx.db.get(args.credentialId);
-    if (!item || item.projectId !== args.projectId) throw new Error("Credential not found");
+    if (!item || item.projectId !== args.projectId) throw new ConvexError("Credential not found");
     const patch: Partial<{
       kind: Doc<"credentials">["kind"];
       service: string | undefined;
@@ -123,7 +123,7 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const item = await ctx.db.get(args.credentialId);
-    if (!item || item.projectId !== args.projectId) throw new Error("Credential not found");
+    if (!item || item.projectId !== args.projectId) throw new ConvexError("Credential not found");
     await ctx.db.delete(args.credentialId);
     await touchProject(ctx, args.projectId);
   },
@@ -136,7 +136,7 @@ export const setAgentUse = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const item = await ctx.db.get(args.credentialId);
-    if (!item || item.projectId !== args.projectId) throw new Error("Credential not found");
+    if (!item || item.projectId !== args.projectId) throw new ConvexError("Credential not found");
     await ctx.db.patch(args.credentialId, { agentUse: args.agentUse || undefined, updatedAt: Date.now() });
     return null;
   },

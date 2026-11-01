@@ -4,7 +4,8 @@ import { api } from "@/convex/_generated/api";
 import { getConvexClient, limitLocalAction } from "@/lib/localRealtime";
 import { BodyTooLarge, readBoundedJson } from "@/lib/http-body";
 import { mcpResourceMetadata, mcpScopes, resolveMcpToken } from "@/lib/mcp-oauth";
-import { PAT_PREFIX } from "@/lib/mcp-tokens";
+import { isPatFormat, PAT_PREFIX } from "@/lib/mcp-tokens";
+import { mcpAuthBlocked, recordMcpAuthFailure } from "@/lib/mcp-rate-limit";
 import { originMcpServer } from "@/lib/mcp-server";
 
 // Remote MCP server, Streamable HTTP in stateless JSON mode: each POST carries one JSON-RPC message or batch and
@@ -21,23 +22,49 @@ function unauthorized(error = "invalid_token") {
   return Response.json({ error }, { status: 401, headers: { ...cors, "WWW-Authenticate": challenge, "Cache-Control": "no-store" } });
 }
 
-async function authenticate(request: Request) {
+type Auth = { token: string; write: boolean; key: string };
+const tooMany = () => Response.json({ jsonrpc: "2.0", id: null, error: { code: -32000, message: "Too many requests" } }, { status: 429, headers: { ...cors, "Retry-After": "60" } });
+// PATs verified recently skip the failed-authentication gate, so a flood of bad tokens cannot lock them out.
+const knownPats = new Map<string, number>();
+const KNOWN_PAT_TTL = 10 * 60000;
+
+/**
+ * Resolves the bearer without calling Convex for anything that cannot be valid: malformed personal access tokens
+ * and unknown OAuth tokens fail locally. Failures are rate limited before any Convex call.
+ */
+async function authenticate(request: Request): Promise<Auth | Response> {
   const header = request.headers.get("authorization") || "";
   const bearer = /^Bearer\s+(\S+)$/i.exec(header)?.[1];
-  if (!bearer) return null;
+  if (!bearer) return unauthorized("");
+  const fail = () => { recordMcpAuthFailure(request); return unauthorized(); };
+  let resolved: { connectorToken: string; write: boolean; key: string };
+  if (bearer.startsWith(PAT_PREFIX)) {
+    if (!isPatFormat(bearer)) return fail();
+    const key = createHash("sha256").update(bearer).digest("hex").slice(0, 24);
+    if ((knownPats.get(key) ?? 0) < Date.now() && mcpAuthBlocked(request)) return tooMany();
+    resolved = { connectorToken: bearer, write: true, key };
+  } else {
+    // OAuth tokens resolve locally; only valid ones reach Convex.
+    try { const grant = resolveMcpToken(bearer); resolved = { connectorToken: grant.connectorToken, write: grant.write, key: grant.grantId }; }
+    catch { return mcpAuthBlocked(request) ? tooMany() : fail(); }
+  }
+  try { limitLocalAction(`mcp:${resolved.key}`, 240, 60000); } catch { return tooMany(); }
   try {
-    const pat = bearer.startsWith(PAT_PREFIX);
-    const resolved = pat ? { connectorToken: bearer, write: true, grantId: createHash("sha256").update(bearer).digest("hex").slice(0, 24) } : resolveMcpToken(bearer);
     const access = await getConvexClient().query(api.connectors.verify, { token: resolved.connectorToken });
-    return { token: resolved.connectorToken, write: resolved.write && access.write, key: resolved.grantId };
-  } catch { return undefined; }
+    if (bearer.startsWith(PAT_PREFIX)) {
+      knownPats.set(resolved.key, Date.now() + KNOWN_PAT_TTL);
+      if (knownPats.size > 10000) for (const [key, expires] of knownPats) if (expires < Date.now()) knownPats.delete(key);
+    }
+    return { token: resolved.connectorToken, write: resolved.write && access.write, key: resolved.key };
+  } catch {
+    knownPats.delete(resolved.key);
+    return fail();
+  }
 }
 
 export async function POST(request: Request) {
   const auth = await authenticate(request);
-  if (!auth) return unauthorized(auth === null ? "" : "invalid_token");
-  try { limitLocalAction(`mcp:${auth.key}`, 240, 60000); }
-  catch { return Response.json({ jsonrpc: "2.0", id: null, error: { code: -32000, message: "Too many requests" } }, { status: 429, headers: { ...cors, "Retry-After": "60" } }); }
+  if (auth instanceof Response) return auth;
   let parsedBody: unknown;
   try { parsedBody = await readBoundedJson(request, 200000); }
   catch (error) { return Response.json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: error instanceof BodyTooLarge ? "Request too large" : "Parse error" } }, { status: error instanceof BodyTooLarge ? 413 : 400, headers: cors }); }
@@ -56,7 +83,7 @@ export async function POST(request: Request) {
 // No server-initiated stream: GET and DELETE are not offered (Streamable HTTP allows 405).
 export async function GET(request: Request) {
   const auth = await authenticate(request);
-  if (!auth) return unauthorized(auth === null ? "" : "invalid_token");
+  if (auth instanceof Response) return auth;
   return new Response(null, { status: 405, headers: { ...cors, Allow: "POST" } });
 }
 export async function DELETE() { return new Response(null, { status: 405, headers: { ...cors, Allow: "POST" } }); }

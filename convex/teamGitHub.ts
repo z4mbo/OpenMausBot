@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, internalAction, internalMutation, internalQuery, mutation, query, type ActionCtx, type QueryCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -75,9 +75,9 @@ export const projectAccess = internalQuery({
   handler: async (ctx, a): Promise<ProjectAccess> => {
     const user = await requireUser(ctx, a.sessionToken);
     const project = await ctx.db.get(a.projectId);
-    if (!project) throw new Error("Project not found");
+    if (!project) throw new ConvexError("Project not found");
     const member = await projectMember(ctx, project, user);
-    if (!member) throw new Error("No active project access");
+    if (!member) throw new ConvexError("No active project access");
     const { _id, teamId, name, description, repoUrl, status, githubWorkspaceAccess, githubRepoVisibility } = project;
     return { userId: user._id, role: member.role, project: { _id, teamId, name, description, repoUrl, status, githubWorkspaceAccess, githubRepoVisibility } };
   },
@@ -87,7 +87,7 @@ export const projectView = internalQuery({
   args: { projectId: v.id("projects") },
   handler: async (ctx, a): Promise<ProjectView> => {
     const project = await ctx.db.get(a.projectId);
-    if (!project) throw new Error("Project not found");
+    if (!project) throw new ConvexError("Project not found");
     const { _id, teamId, name, description, repoUrl, status, githubWorkspaceAccess, githubRepoVisibility } = project;
     return { _id, teamId, name, description, repoUrl, status, githubWorkspaceAccess, githubRepoVisibility };
   },
@@ -139,7 +139,7 @@ export const useInstallation = internalMutation({
   returns: v.null(),
   handler: async (ctx, a) => {
     const row = await ctx.db.query("teamGitHub").withIndex("by_teamId", q => q.eq("teamId", a.teamId)).unique();
-    if (!row || row.version !== a.version) throw new Error("The workspace's GitHub connection changed. Reload and try again.");
+    if (!row || row.version !== a.version) throw new ConvexError("The workspace's GitHub connection changed. Reload and try again.");
     await ctx.db.patch(row._id, { accountLogin: a.accountLogin, accountId: a.accountId, accountType: a.accountType, installationId: a.installationId, version: row.version + 1, updatedAt: Date.now() });
     return null;
   },
@@ -167,7 +167,7 @@ export async function connection(ctx: ActionCtx, teamId: Id<"teams">): Promise<(
 
 async function requireConnection(ctx: ActionCtx, teamId: Id<"teams"> | undefined): Promise<Connection> {
   const found = teamId ? await connection(ctx, teamId) : null;
-  if (!found) throw new Error(NOT_SHARED);
+  if (!found) throw new ConvexError(NOT_SHARED);
   return found;
 }
 
@@ -175,7 +175,7 @@ async function requireConnection(ctx: ActionCtx, teamId: Id<"teams"> | undefined
 async function userToken(ctx: ActionCtx, found: Connection): Promise<string> {
   const { token } = found.secrets;
   if (!token.expires_at || token.expires_at > Date.now() + 60_000) return token.access_token;
-  if (!token.refresh_token) throw new Error("The workspace's GitHub connection expired. A workspace admin reconnects GitHub in Settings > Integrations.");
+  if (!token.refresh_token) throw new ConvexError("The workspace's GitHub connection expired. A workspace admin reconnects GitHub in Settings > Integrations.");
   const next = await refreshUserToken(found.secrets.app, token.refresh_token);
   const saved = await ctx.runMutation(internal.teamGitHub.saveToken, { teamId: found.row.teamId, version: found.row.version, sealed: await seal(JSON.stringify({ ...found.secrets, token: next }), purpose(found.row.teamId)) });
   if (!saved) {
@@ -187,7 +187,7 @@ async function userToken(ctx: ActionCtx, found: Connection): Promise<string> {
 
 function repositoryOf(project: ProjectView): ParsedRepository {
   const repo = parseRepository(project.repoUrl);
-  if (!repo) throw new Error("Link a GitHub repository to this project first");
+  if (!repo) throw new ConvexError("Link a GitHub repository to this project first");
   return repo;
 }
 
@@ -195,31 +195,31 @@ const repoUrlOf = (repo: ParsedRepository) => `https://github.com/${repo.owner}/
 
 /** Security: only a repository an admin approved (or Origin created) for this project, in the workspace's own GitHub account, gets a token. */
 async function projectToken(ctx: ActionCtx, project: ProjectView, access: Access, extra: Record<string, string> = {}) {
-  if (project.status && project.status !== "active") throw new Error("Reactivate the project before using GitHub");
+  if (project.status && project.status !== "active") throw new ConvexError("Reactivate the project before using GitHub");
   const repo = repositoryOf(project);
-  if (!project.githubWorkspaceAccess) throw new Error("A workspace admin approves this repository in the project's Repo tab before the workspace's GitHub connection works on it");
+  if (!project.githubWorkspaceAccess) throw new ConvexError("A workspace admin approves this repository in the project's Repo tab before the workspace's GitHub connection works on it");
   const found = await requireConnection(ctx, project.teamId);
-  if (repo.owner.toLowerCase() !== found.row.accountLogin.toLowerCase()) throw new Error(`${repo.owner}/${repo.repo} is outside ${found.row.accountLogin}, the GitHub account this workspace is connected to`);
+  if (repo.owner.toLowerCase() !== found.row.accountLogin.toLowerCase()) throw new ConvexError(`${repo.owner}/${repo.repo} is outside ${found.row.accountLogin}, the GitHub account this workspace is connected to`);
   const minted = await installationToken(found.secrets.app, found.row.installationId, { ...PERMISSIONS[access], ...extra }, repo);
   return { token: minted.token, expiresAt: new Date(minted.expiresAt).toISOString(), repoUrl: repoUrlOf(repo), repo };
 }
 
 function accessOf(value: unknown): Access {
   if (value === "read" || value === "write" || value === "push") return value;
-  throw new Error("access must be read, write or push");
+  throw new ConvexError("access must be read, write or push");
 }
 
 function extraOf(value: unknown): Record<string, string> {
   const extra = record(value);
-  for (const [name, level] of Object.entries(extra)) if (name !== "actions" || (level !== "read" && level !== "write")) throw new Error("Only Actions permissions may be added");
+  for (const [name, level] of Object.entries(extra)) if (name !== "actions" || (level !== "read" && level !== "write")) throw new ConvexError("Only Actions permissions may be added");
   return extra as Record<string, string>;
 }
 
 async function requireProject(ctx: ActionCtx, sessionToken: string, projectId: unknown, need: "member" | "editor" | "admin" = "member"): Promise<ProjectAccess> {
-  if (typeof projectId !== "string") throw new Error("Project required");
+  if (typeof projectId !== "string") throw new ConvexError("Project required");
   const found = await ctx.runQuery(internal.teamGitHub.projectAccess, { sessionToken, projectId: projectId as Id<"projects"> });
-  if (need === "editor" && !canEdit(found)) throw new Error("Edit role required");
-  if (need === "admin" && !ADMIN_ROLES.has(found.role)) throw new Error("A project admin approves and merges pull requests");
+  if (need === "editor" && !canEdit(found)) throw new ConvexError("Edit role required");
+  if (need === "admin" && !ADMIN_ROLES.has(found.role)) throw new ConvexError("A project admin approves and merges pull requests");
   return found;
 }
 
@@ -256,15 +256,15 @@ export const share = action({
   returns: v.object({ accountLogin: v.string() }),
   handler: async (ctx, a) => {
     const admin = await ctx.runQuery(internal.teamGitHub.teamAccess, { sessionToken: a.sessionToken, teamId: a.teamId });
-    if (!ADMIN_ROLES.has(admin.role)) throw new Error("A workspace owner or admin shares GitHub with the workspace");
-    if (!sealingConfigured()) throw new Error(SEALING_MISSING);
+    if (!ADMIN_ROLES.has(admin.role)) throw new ConvexError("A workspace owner or admin shares GitHub with the workspace");
+    if (!sealingConfigured()) throw new ConvexError(SEALING_MISSING);
     const user = await github<{ id: number; login: string }>("/user", a.token.access_token);
     const jwt = await appJwt(a.app);
     const installation = await github<{ id: number; account: { id: number; login: string }; suspended_at?: string | null }>(`/users/${encodeURIComponent(user.login)}/installation`, jwt).catch((error: unknown) => {
-      if (error instanceof GitHubError && error.status === 404) throw new Error(`Install the Origin GitHub App on ${user.login} first, then share again`);
+      if (error instanceof GitHubError && error.status === 404) throw new ConvexError(`Install the Origin GitHub App on ${user.login} first, then share again`);
       throw error;
     });
-    if (installation.suspended_at || installation.account.id !== user.id) throw new Error("The Origin GitHub App's installation on your account is suspended or belongs to someone else");
+    if (installation.suspended_at || installation.account.id !== user.id) throw new ConvexError("The Origin GitHub App's installation on your account is suspended or belongs to someone else");
     const sealed = await seal(JSON.stringify({ app: a.app, token: a.token } satisfies Secrets), purpose(a.teamId));
     const account: SharedAccount = await keptOrganization(ctx, a.teamId, a.app, a.token.access_token) ?? { accountLogin: user.login, accountId: user.id, accountType: "User", installationId: installation.id };
     await ctx.runMutation(internal.teamGitHub.store, { teamId: a.teamId, sealed, ...account, connectorLogin: user.login, connectorId: user.id, sharedBy: admin.userId });
@@ -283,7 +283,7 @@ export const accounts = action({
   returns: v.array(v.object({ installationId: v.number(), login: v.string(), type: githubAccountType, current: v.boolean() })),
   handler: async (ctx, a) => {
     const admin = await ctx.runQuery(internal.teamGitHub.teamAccess, a);
-    if (!ADMIN_ROLES.has(admin.role)) throw new Error("A workspace owner or admin chooses the GitHub account");
+    if (!ADMIN_ROLES.has(admin.role)) throw new ConvexError("A workspace owner or admin chooses the GitHub account");
     const found = await requireConnection(ctx, a.teamId);
     return (await installations(ctx, found)).map((row) => ({ installationId: row.id, login: row.account.login, type: row.account.type as "User" | "Organization", current: row.id === found.row.installationId }));
   },
@@ -294,10 +294,10 @@ export const chooseAccount = action({
   returns: v.null(),
   handler: async (ctx, a) => {
     const admin = await ctx.runQuery(internal.teamGitHub.teamAccess, { sessionToken: a.sessionToken, teamId: a.teamId });
-    if (!ADMIN_ROLES.has(admin.role)) throw new Error("A workspace owner or admin chooses the GitHub account");
+    if (!ADMIN_ROLES.has(admin.role)) throw new ConvexError("A workspace owner or admin chooses the GitHub account");
     const found = await requireConnection(ctx, a.teamId);
     const chosen = (await installations(ctx, found)).find((row) => row.id === a.installationId);
-    if (!chosen) throw new Error("The Origin GitHub App is not installed on that account, or you cannot reach it");
+    if (!chosen) throw new ConvexError("The Origin GitHub App is not installed on that account, or you cannot reach it");
     await ctx.runMutation(internal.teamGitHub.useInstallation, {
       teamId: a.teamId, version: found.row.version, accountLogin: chosen.account.login, accountId: chosen.account.id, accountType: chosen.account.type as "User" | "Organization", installationId: chosen.id,
     });
@@ -309,9 +309,9 @@ export const beginRepository = internalMutation({
   args: { projectId: v.id("projects"), visibility: v.optional(repoVisibility) },
   handler: async (ctx, a): Promise<{ state: "ready"; repoUrl: string } | { state: "working" } | { state: "start"; teamId: Id<"teams">; name: string; description: string; visibility: "private" | "public" }> => {
     const project = await ctx.db.get(a.projectId);
-    if (!project?.teamId) throw new Error("Project not found");
+    if (!project?.teamId) throw new ConvexError("Project not found");
     if (project.repoUrl) return { state: "ready", repoUrl: project.repoUrl };
-    if (project.status && project.status !== "active") throw new Error("Reactivate the project before creating a repository");
+    if (project.status && project.status !== "active") throw new ConvexError("Reactivate the project before creating a repository");
     const job = await ctx.db.query("githubRepoJobs").withIndex("by_projectId", q => q.eq("projectId", a.projectId)).unique();
     if (job?.state === "working" && job.startedAt > Date.now() - REPO_LEASE_MS) return { state: "working" };
     if (job) await ctx.db.patch(job._id, { state: "working", startedAt: Date.now() });
@@ -359,14 +359,14 @@ async function createRepositoryFor(ctx: ActionCtx, projectId: Id<"projects">, re
       if (error instanceof GitHubError && error.status === 404) return null;
       throw error;
     });
-    if (repo && !repo.description?.includes(marker)) throw new Error(`${owner}/${name} already exists on GitHub. Choose another repository name.`);
+    if (repo && !repo.description?.includes(marker)) throw new ConvexError(`${owner}/${name} already exists on GitHub. Choose another repository name.`);
     if (!repo) {
       const description = [withoutControlCharacters(begun.description).trim().slice(0, 200), marker].filter(Boolean).join(" | ");
       repo = await github<Repository>(organization ? `/orgs/${encodeURIComponent(owner)}/repos` : "/user/repos", token, {
         method: "POST", body: { name, description, private: begun.visibility !== "public", has_issues: true, auto_init: true },
       });
     }
-    if (repo.owner.login.toLowerCase() !== owner.toLowerCase() || repo.private !== (begun.visibility !== "public")) throw new Error("GitHub returned an unexpected repository owner or visibility. Review it on GitHub before linking.");
+    if (repo.owner.login.toLowerCase() !== owner.toLowerCase() || repo.private !== (begun.visibility !== "public")) throw new ConvexError("GitHub returned an unexpected repository owner or visibility. Review it on GitHub before linking.");
     await ctx.runMutation(internal.integrations.repoResult, { projectId, state: "ready", repoUrl: repo.html_url, repoId: repo.id });
     await ctx.runMutation(internal.teamGitHub.finishRepository, { projectId, state: "done" });
     await protectCreated(ctx, found, projectId, repo.html_url);
@@ -438,7 +438,7 @@ async function withReadToken<T>(ctx: ActionCtx, project: ProjectView, fn: (token
 }
 
 const numberOf = (value: unknown, what: string) => {
-  if (!Number.isSafeInteger(value) || Number(value) < 1) throw new Error(`${what} required`);
+  if (!Number.isSafeInteger(value) || Number(value) < 1) throw new ConvexError(`${what} required`);
   return Number(value);
 };
 
@@ -498,9 +498,9 @@ async function sessionOperation(ctx: ActionCtx, sessionToken: string, operation:
       return createRepositoryFor(ctx, project._id, { name: nameOf(args.name), visibility: visibilityOf(args.visibility), manual: true, requestedBy: userId });
     }
     case "repositories": {
-      if (typeof args.teamId !== "string") throw new Error("Workspace required");
+      if (typeof args.teamId !== "string") throw new ConvexError("Workspace required");
       const admin = await ctx.runQuery(internal.teamGitHub.teamAccess, { sessionToken, teamId: args.teamId as Id<"teams"> });
-      if (!ADMIN_ROLES.has(admin.role)) throw new Error("A workspace admin chooses the repository");
+      if (!ADMIN_ROLES.has(admin.role)) throw new ConvexError("A workspace admin chooses the repository");
       const found = await requireConnection(ctx, args.teamId as Id<"teams">);
       const rows = await github<{ full_name: string; html_url: string; private: boolean }[]>("/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member", await userToken(ctx, found));
       return { login: found.row.accountLogin, repositories: rows.map((row) => ({ fullName: row.full_name, url: row.html_url, private: row.private })) };
@@ -508,14 +508,14 @@ async function sessionOperation(ctx: ActionCtx, sessionToken: string, operation:
     case "linkIssue": {
       const { project } = await requireProject(ctx, sessionToken, args.projectId, "editor");
       const number = numberOf(args.number, "Issue number");
-      if (typeof args.taskId !== "string") throw new Error("Issue required");
+      if (typeof args.taskId !== "string") throw new ConvexError("Issue required");
       const taskId = args.taskId as Id<"tasks">;
       const context = JSON.parse(await ctx.runQuery(internal.integrations.context, { projectId: project._id, taskId })) as { task: { githubIssueNumber?: number } | null };
-      if (!context.task) throw new Error("Issue not found");
+      if (!context.task) throw new ConvexError("Issue not found");
       await withReadToken(ctx, project, async (token, repo) => {
         const issue = await github<{ number: number; state: "open" | "closed"; updated_at: string; body?: string | null; pull_request?: unknown }>(`/repos/${repo.owner}/${repo.repo}/issues/${number}`, token);
         const ours = context.task!.githubIssueNumber ? context.task!.githubIssueNumber === number : Boolean(issue.body?.includes(`<!-- origin-task:${taskId} -->`));
-        if (issue.pull_request || issue.number !== number || !ours) throw new Error("That GitHub issue does not belong to this Origin issue");
+        if (issue.pull_request || issue.number !== number || !ours) throw new ConvexError("That GitHub issue does not belong to this Origin issue");
         const repoUrl = repoUrlOf(repo);
         await ctx.runMutation(internal.integrations.linkIssue, { projectId: project._id, taskId, repoUrl, number, issueUrl: `${repoUrl}/issues/${number}`, state: issue.state, updatedAt: Date.parse(issue.updated_at) });
       });
@@ -523,57 +523,57 @@ async function sessionOperation(ctx: ActionCtx, sessionToken: string, operation:
     }
     case "unlinkIssue": {
       const { project } = await requireProject(ctx, sessionToken, args.projectId, "editor");
-      if (typeof args.taskId !== "string") throw new Error("Issue required");
+      if (typeof args.taskId !== "string") throw new ConvexError("Issue required");
       const number = numberOf(args.number, "Issue number");
       const removed = await withReadToken(ctx, project, (token, repo) => github<{ state: "open" | "closed" }>(`/repos/${repo.owner}/${repo.repo}/issues/${number}`, token).then(
         (issue) => issue.state === "closed",
         (error: unknown) => { if (error instanceof GitHubError && [404, 410].includes(error.status)) return true; throw error; },
       ));
-      if (!removed) throw new Error("That GitHub issue is still open");
+      if (!removed) throw new ConvexError("That GitHub issue is still open");
       await ctx.runMutation(internal.integrations.unlinkIssue, { projectId: project._id, taskId: args.taskId as Id<"tasks">, number });
       return null;
     }
     case "webhookTargets": {
-      if (typeof args.repoUrl !== "string") throw new Error("Repository required");
+      if (typeof args.repoUrl !== "string") throw new ConvexError("Repository required");
       const rows = JSON.parse(await ctx.runQuery(internal.integrations.webhookTargets, { repoUrl: args.repoUrl, number: numberOf(args.number, "Issue number") })) as { projectId: string }[];
       return visibleOnly(ctx, sessionToken, rows);
     }
     case "prHumanContext": {
-      if (typeof args.projectId !== "string" || typeof args.taskId !== "string") throw new Error("Project and task required");
+      if (typeof args.projectId !== "string" || typeof args.taskId !== "string") throw new ConvexError("Project and task required");
       return JSON.parse(await ctx.runMutation(internal.taskPRs.humanContext, { sessionToken, projectId: args.projectId as Id<"projects">, taskId: args.taskId as Id<"tasks">, ...(args.choosePR === true ? { choosePR: true } : {}) }));
     }
     case "prFinalize": {
       const { project } = await requireProject(ctx, sessionToken, args.projectId, "editor");
-      if (typeof args.taskId !== "string") throw new Error("Task required");
+      if (typeof args.taskId !== "string") throw new ConvexError("Task required");
       const number = numberOf(record(args.snapshot).number, "Pull request number");
       const branch = await ctx.runQuery(internal.teamGitHub.taskBranch, { projectId: project._id, taskId: args.taskId as Id<"tasks"> });
       const snapshot = await withReadToken(ctx, project, (token, repo) => readSnapshot(repo, number, token));
-      if (!branch || snapshot.branch !== branch) throw new Error("That pull request is not on this issue's branch");
+      if (!branch || snapshot.branch !== branch) throw new ConvexError("That pull request is not on this issue's branch");
       return JSON.parse(await ctx.runMutation(internal.taskPRs.finalize, { sessionToken, projectId: project._id, taskId: args.taskId as Id<"tasks">, snapshot }));
     }
     case "prEventTargets": {
-      if (typeof args.repoUrl !== "string" || !Array.isArray(args.numbers)) throw new Error("Repository and pull requests required");
+      if (typeof args.repoUrl !== "string" || !Array.isArray(args.numbers)) throw new ConvexError("Repository and pull requests required");
       const numbers = args.numbers.map((value) => numberOf(value, "Pull request number")).slice(0, 100);
       const rows = await ctx.runQuery(internal.taskPRs.eventTargets, { repoUrl: args.repoUrl, numbers, ...(typeof args.headSha === "string" ? { headSha: args.headSha } : {}) });
       return visibleOnly(ctx, sessionToken, rows);
     }
     case "prBeginSync":
     case "prSync": {
-      if (typeof args.id !== "string") throw new Error("Pull request required");
+      if (typeof args.id !== "string") throw new ConvexError("Pull request required");
       const id = args.id as Id<"taskPullRequests">;
       const row = await ctx.runQuery(internal.teamGitHub.pullRequestProject, { id });
       if (!row) return null;
       const { project } = await requireProject(ctx, sessionToken, row.projectId, "editor");
       if (operation === "prBeginSync") return ctx.runMutation(internal.taskPRs.beginSync, { id });
       const snapshot = await withReadToken(ctx, project, async (token, repo) => {
-        if (`${repoUrlOf(repo)}/pull/${row.number}`.toLowerCase() !== row.url.toLowerCase()) throw new Error("Pull request repository changed");
+        if (`${repoUrlOf(repo)}/pull/${row.number}`.toLowerCase() !== row.url.toLowerCase()) throw new ConvexError("Pull request repository changed");
         return readSnapshot(repo, row.number, token);
       });
       return ctx.runMutation(internal.taskPRs.sync, { id, sequence: numberOf(args.sequence, "Sequence"), snapshot });
     }
     case "completeMergedIssue": {
       const { project } = await requireProject(ctx, sessionToken, args.projectId, "admin");
-      if (typeof args.taskId !== "string") throw new Error("Issue required");
+      if (typeof args.taskId !== "string") throw new ConvexError("Issue required");
       const issueNumber = numberOf(args.issueNumber, "Issue number");
       const claimed = record(args.pullRequest);
       const number = numberOf(claimed.number, "Pull request number");
@@ -592,7 +592,7 @@ async function sessionOperation(ctx: ActionCtx, sessionToken: string, operation:
       });
     }
     default:
-      throw new Error(`${operation} is not available to a member's Origin server`);
+      throw new ConvexError(`${operation} is not available to a member's Origin server`);
   }
 }
 

@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 const KEY_BYTES = 32;
 const IV_BYTES = 12;
 
@@ -20,7 +21,7 @@ export function sealingConfigured(): boolean {
 
 async function sealingKey(): Promise<CryptoKey> {
   const bytes = process.env.ORIGIN_SEALING_KEY ? decodeKey(process.env.ORIGIN_SEALING_KEY) : null;
-  if (!bytes) throw new Error(SEALING_MISSING);
+  if (!bytes) throw new ConvexError(SEALING_MISSING);
   return crypto.subtle.importKey("raw", bytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 

@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { canEdit, projectMember, requireTeamMember } from "./permissions";
@@ -16,17 +17,17 @@ export async function reorderWorkspaceProjects(ctx: MutationCtx, args: {
   expectedProjectIds?: Id<"projects">[];
 }): Promise<null> {
   const { member, user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
-  if (!canEdit(member)) throw new Error("Edit role required");
-  if (!validIds(args.projectIds) || (args.expectedProjectIds && !validIds(args.expectedProjectIds))) throw new Error("Invalid project order");
+  if (!canEdit(member)) throw new ConvexError("Edit role required");
+  if (!validIds(args.projectIds) || (args.expectedProjectIds && !validIds(args.expectedProjectIds))) throw new ConvexError("Invalid project order");
   const rows = await ctx.db.query("projects").withIndex("by_team", q => q.eq("teamId", args.teamId)).take(501);
-  if (rows.length > 500) throw new Error("This workspace exceeds the supported project ordering limit");
+  if (rows.length > 500) throw new ConvexError("This workspace exceeds the supported project ordering limit");
   rows.sort(compareProjectOrder);
   const visible = [];
   for (const row of rows) if (await projectMember(ctx, row, user)) visible.push(row._id);
   const allowed = new Set(visible);
-  if (args.projectIds.some(id => !allowed.has(id))) throw new Error("Project does not belong to this workspace");
+  if (args.projectIds.some(id => !allowed.has(id))) throw new ConvexError("Project does not belong to this workspace");
   if (args.expectedProjectIds && (!sameOrder(args.expectedProjectIds, visible) || args.projectIds.length !== visible.length)) {
-    throw new Error("Project order changed. Refresh the list and try again.");
+    throw new ConvexError("Project order changed. Refresh the list and try again.");
   }
   const selected = new Set(args.projectIds);
   const current = rows.filter(row => selected.has(row._id)).map(row => row._id);

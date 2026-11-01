@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { canEdit, requireMember, requireTeamMember } from "./lib/permissions";
@@ -21,20 +21,20 @@ const isDrawing = (canvas: Doc<"canvases">) => canvas.kind === undefined && !can
 async function sceneAccess(ctx: QueryCtx | MutationCtx, args: SceneArgs) {
   if (args.canvasId) {
     const canvas = await ctx.db.get(args.canvasId);
-    if (!canvas || canvas.teamId !== args.teamId || !isDrawing(canvas)) throw new Error("Canvas not found");
+    if (!canvas || canvas.teamId !== args.teamId || !isDrawing(canvas)) throw new ConvexError("Canvas not found");
     const access = await requireMember(ctx, canvas.projectId, args.sessionToken);
-    if (access.project.teamId !== args.teamId) throw new Error("Canvas not found");
+    if (access.project.teamId !== args.teamId) throw new ConvexError("Canvas not found");
     return { ...access, container: canvas as Doc<"canvases"> | Doc<"teams">, storageScope: { kind: "project", projectId: canvas.projectId } as StorageScope };
   }
   const access = await requireTeamMember(ctx, args.teamId, args.sessionToken);
   const team = await ctx.db.get(args.teamId);
-  if (!team) throw new Error("Workspace not found");
+  if (!team) throw new ConvexError("Workspace not found");
   return { ...access, container: team as Doc<"canvases"> | Doc<"teams">, storageScope: { kind: "workspace", teamId: args.teamId } as StorageScope };
 }
 
 async function editableScene(ctx: MutationCtx, args: SceneArgs) {
   const access = await sceneAccess(ctx, args);
-  if (!canEdit(access.member)) throw new Error("Edit role required");
+  if (!canEdit(access.member)) throw new ConvexError("Edit role required");
   return access;
 }
 
@@ -44,7 +44,7 @@ const scenePresence = (ctx: QueryCtx, args: SceneArgs) => ctx.db.query("drawingP
 
 function canvasName(name: string) {
   const trimmed = name.trim();
-  if (!trimmed || trimmed.length > 80) throw new Error("Enter a canvas name under 80 characters");
+  if (!trimmed || trimmed.length > 80) throw new ConvexError("Enter a canvas name under 80 characters");
   return trimmed;
 }
 
@@ -63,10 +63,10 @@ export const createCanvas = mutation({
   returns: v.id("canvases"),
   handler: async (ctx, args) => {
     const { member, project } = await requireMember(ctx, args.projectId, args.sessionToken);
-    if (!canEdit(member) || !project.teamId) throw new Error("Edit role required");
+    if (!canEdit(member) || !project.teamId) throw new ConvexError("Edit role required");
     const name = canvasName(args.name);
     const existing = await ctx.db.query("canvases").withIndex("by_project", q => q.eq("projectId", project._id).eq("archived", false)).take(200);
-    if (existing.filter(isDrawing).length >= MAX_CANVASES) throw new Error(`A project can have up to ${MAX_CANVASES} canvases`);
+    if (existing.filter(isDrawing).length >= MAX_CANVASES) throw new ConvexError(`A project can have up to ${MAX_CANVASES} canvases`);
     const now = Date.now();
     return ctx.db.insert("canvases", { teamId: project.teamId, projectId: project._id, name, archived: false, drawingElementCount: 0, drawingBytes: 0, createdAt: now, updatedAt: now });
   },
@@ -94,13 +94,13 @@ export const scene = query({
 type DrawingElement = { id: unknown; version: unknown; versionNonce: unknown; type: unknown; x: unknown; y: unknown; width: unknown; height: unknown };
 
 function parseElement(data: string) {
-  if (data.length > 64000) throw new Error("Drawing element is too large");
+  if (data.length > 64000) throw new ConvexError("Drawing element is too large");
   let element: DrawingElement;
-  try { element = JSON.parse(data) as DrawingElement; } catch { throw new Error("Invalid drawing element"); }
+  try { element = JSON.parse(data) as DrawingElement; } catch { throw new ConvexError("Invalid drawing element"); }
   if (!element || typeof element !== "object" || typeof element.id !== "string" || !element.id || element.id.length > 100
     || !Number.isSafeInteger(element.version) || (element.version as number) < 1 || !Number.isSafeInteger(element.versionNonce)
     || ![element.x, element.y, element.width, element.height].every(Number.isFinite)
-    || typeof element.type !== "string" || !ELEMENT_TYPES.has(element.type)) throw new Error("Invalid drawing element");
+    || typeof element.type !== "string" || !ELEMENT_TYPES.has(element.type)) throw new ConvexError("Invalid drawing element");
   return { id: element.id, version: element.version as number, nonce: element.versionNonce as number };
 }
 
@@ -111,7 +111,7 @@ export const updateElements = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { container } = await editableScene(ctx, args);
-    if (args.elements.length > 200) throw new Error("Drawing update too large");
+    if (args.elements.length > 200) throw new ConvexError("Drawing update too large");
     const counted = container.drawingElementCount !== undefined && container.drawingBytes !== undefined;
     const rows = counted ? [] : await sceneElements(ctx, args).take(MAX_ELEMENTS + 1);
     let count = counted ? container.drawingElementCount! : rows.length;
@@ -124,7 +124,7 @@ export const updateElements = mutation({
       if (existing && (existing.version > element.version || (existing.version === element.version && existing.nonce <= element.nonce))) continue;
       count += existing ? 0 : 1;
       bytes += byteLength(data) - (existing ? byteLength(existing.data) : 0);
-      if (count > MAX_ELEMENTS || bytes > MAX_BYTES) throw new Error("Canvas is full. Export your drawing before starting a new one");
+      if (count > MAX_ELEMENTS || bytes > MAX_BYTES) throw new ConvexError("Canvas is full. Export your drawing before starting a new one");
       const update = { version: element.version, nonce: element.nonce, data, updatedAt: now };
       if (existing) await ctx.db.patch(existing._id, update);
       else await ctx.db.insert("drawingElements", { teamId: args.teamId, canvasId: args.canvasId, elementId: element.id, ...update });
@@ -151,7 +151,7 @@ export const setPresence = mutation({
     const { user } = await sceneAccess(ctx, args);
     const row = await ctx.db.query("drawingPresence").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId).eq("userId", user._id)).first();
     if (args.leave) { if (row) await ctx.db.delete(row._id); return null; }
-    if (!Number.isFinite(args.x) || !Number.isFinite(args.y)) throw new Error("Invalid pointer");
+    if (!Number.isFinite(args.x) || !Number.isFinite(args.y)) throw new ConvexError("Invalid pointer");
     const patch = { name: user.name, x: args.x, y: args.y, button: args.button, updatedAt: Date.now() };
     if (row) await ctx.db.patch(row._id, patch);
     else await ctx.db.insert("drawingPresence", { teamId: args.teamId, canvasId: args.canvasId, userId: user._id, ...patch });
@@ -184,11 +184,11 @@ export const saveFile = mutation({
   handler: async (ctx, args) => {
     const { user, storageScope } = await editableScene(ctx, args);
     const metadata = await ctx.db.system.get(args.storageId);
-    if (!metadata || metadata.size > 15 * 1024 * 1024 || !DRAWING_IMAGE_TYPES.has(args.mimeType) || !args.fileId || args.fileId.length > 100) throw new Error("Choose an image under 15 MB");
+    if (!metadata || metadata.size > 15 * 1024 * 1024 || !DRAWING_IMAGE_TYPES.has(args.mimeType) || !args.fileId || args.fileId.length > 100) throw new ConvexError("Choose an image under 15 MB");
     await admitStorageReference(ctx, args.storageId, user, storageScope);
     const existing = await ctx.db.query("drawingFiles").withIndex("by_scene", q => q.eq("teamId", args.teamId).eq("canvasId", args.canvasId).eq("fileId", args.fileId)).first();
     if (existing) return null;
-    if ((await sceneFiles(ctx, args).take(MAX_FILES + 1)).length >= MAX_FILES) throw new Error("This canvas has reached its image limit");
+    if ((await sceneFiles(ctx, args).take(MAX_FILES + 1)).length >= MAX_FILES) throw new ConvexError("This canvas has reached its image limit");
     await ctx.db.insert("drawingFiles", { teamId: args.teamId, canvasId: args.canvasId, fileId: args.fileId, storageId: args.storageId, mimeType: args.mimeType });
     return null;
   },

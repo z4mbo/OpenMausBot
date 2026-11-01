@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { integrationDb, openIntegration, sealIntegration } from "./githubConnection";
 import { githubHeaders } from "./github-repo";
 import { originUrl } from "./integration-bridge";
+import { DEFAULT_OWNER_EMAIL } from "@/convex/lib/auth";
 
 export type GitHubAppConfig = { clientId: string; clientSecret: string; slug?: string; webhookSecret?: string; appId?: number; privateKey?: string };
 type TokenRecord = { access_token: string; refresh_token?: string; expires_at?: number };
@@ -22,6 +23,14 @@ export function githubAppConfig(): GitHubAppConfig | null {
   const credentials = { appId: process.env.GITHUB_APP_ID ? Number(process.env.GITHUB_APP_ID) : undefined, privateKey: process.env.GITHUB_APP_PRIVATE_KEY?.replace(/\\n/g, "\n") };
   if (row) { const saved = JSON.parse(openIntegration(row.encrypted, "github-app")); return { ...saved, appId: credentials.appId ?? saved.appId, privateKey: credentials.privateKey ?? saved.privateKey }; }
   return process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? { ...credentials, clientId: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, webhookSecret: process.env.GITHUB_WEBHOOK_SECRET } : null;
+}
+/**
+ * Who may register the instance's GitHub App with the manifest flow: while none is configured, any workspace owner
+ * or admin, and the operator named by ORIGIN_LEGACY_OWNER_EMAIL.
+ */
+export function canSetupGitHubApp(email: string, workspaceRole: string) {
+  if (githubAppConfig()) return false;
+  return ["owner", "admin"].includes(workspaceRole) || Boolean(DEFAULT_OWNER_EMAIL && email.trim().toLowerCase() === DEFAULT_OWNER_EMAIL);
 }
 export function saveGitHubApp(config: GitHubAppConfig) {
   db().prepare("INSERT INTO github_app VALUES(1,?) ON CONFLICT(id) DO UPDATE SET encrypted=excluded.encrypted").run(sealIntegration(JSON.stringify(config), "github-app"));

@@ -1,14 +1,22 @@
-import { registerMcpClient, oauthHeaders } from "@/lib/mcp-oauth";
-import { limitLocalAction } from "@/lib/localRealtime";
-import { readBoundedJson } from "@/lib/http-body";
+import { flushMcpRevocations, InvalidClientMetadata, oauthHeaders, registerMcpClient } from "@/lib/mcp-oauth";
+import { limitLocalAction, TooManyRequests } from "@/lib/localRealtime";
+import { BodyTooLarge, readBoundedJson } from "@/lib/http-body";
+import { clientAddress } from "@/lib/client-address";
 
 export const runtime = "nodejs";
 export async function POST(request: Request) {
+  const address = clientAddress(request);
   try {
-    limitLocalAction(`mcp-register:${request.headers.get("x-real-ip") || "unknown"}`, 15, 60000);
-    return Response.json(registerMcpClient(await readBoundedJson(request, 20000)), { status: 201, headers: oauthHeaders });
+    const body = await readBoundedJson(request, 20000);
+    // New clients only: per client address behind a trusted proxy, otherwise one bucket for this endpoint.
+    // Unused clients are deleted after a day, so neither can fill the table for long.
+    const client = registerMcpClient(body, () => address ? limitLocalAction(`mcp-register:ip:${address}`, 15, 60000) : limitLocalAction("mcp-register", 60, 60000));
+    return Response.json(client, { status: 201, headers: oauthHeaders });
   } catch (error) {
-    return Response.json({ error: error instanceof Error && error.message.includes("redirect") ? "invalid_redirect_uri" : "invalid_client_metadata", error_description: "Use HTTPS or loopback redirect URIs and token_endpoint_auth_method none." }, { status: 400, headers: oauthHeaders });
-  }
+    if (error instanceof TooManyRequests) return Response.json({ error: "temporarily_unavailable", error_description: "Too many registrations. Try again shortly." }, { status: 429, headers: { ...oauthHeaders, "Retry-After": "60" } });
+    if (error instanceof BodyTooLarge) return Response.json({ error: "invalid_client_metadata", error_description: "Request too large" }, { status: 413, headers: oauthHeaders });
+    const known = error instanceof InvalidClientMetadata;
+    return Response.json({ error: known ? error.code : "invalid_client_metadata", error_description: known ? error.message : "Invalid client metadata" }, { status: 400, headers: oauthHeaders });
+  } finally { await flushMcpRevocations().catch(() => {}); }
 }
 export async function OPTIONS() { return new Response(null, { status: 204, headers: { ...oauthHeaders, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization, MCP-Protocol-Version" } }); }

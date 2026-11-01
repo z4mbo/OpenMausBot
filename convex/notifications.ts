@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { mutation, query, internalMutation, type MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -71,7 +71,7 @@ export const markRead = mutation({
   handler: async (ctx, a) => {
     const { user } = await requireTeamMember(ctx, a.teamId, a.sessionToken);
     const row = await ctx.db.get(a.id);
-    if (!row || row.userId !== user._id || row.teamId !== a.teamId) throw new Error("Notification not found");
+    if (!row || row.userId !== user._id || row.teamId !== a.teamId) throw new ConvexError("Notification not found");
     await ctx.db.patch(row._id, { read: a.read, snoozedUntil: undefined }); return null;
   },
 });
@@ -80,8 +80,8 @@ export const snooze = mutation({
   handler: async (ctx, args) => {
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     const row = await ctx.db.get(args.id);
-    if (!row || row.userId !== user._id || row.teamId !== args.teamId) throw new Error("Notification not found");
-    if (!Number.isFinite(args.until) || args.until <= Date.now() || args.until > Date.now() + 30 * 86400000) throw new Error("Choose a time within the next 30 days");
+    if (!row || row.userId !== user._id || row.teamId !== args.teamId) throw new ConvexError("Notification not found");
+    if (!Number.isFinite(args.until) || args.until <= Date.now() || args.until > Date.now() + 30 * 86400000) throw new ConvexError("Choose a time within the next 30 days");
     await ctx.db.patch(row._id, { read: true, snoozedUntil: args.until });
     await ctx.scheduler.runAt(args.until, internal.notifications.wake, { id: row._id, until: args.until });
     return null;
@@ -127,10 +127,10 @@ export const chatMentions = internalMutation({
   args: { teamId: v.id("teams"), actorId: v.id("users"), messageId: v.string(), userIds: v.array(v.id("users")), conversation: v.optional(v.string()), preview: v.optional(v.string()) }, returns: v.null(),
   handler: async (ctx, a) => {
     const actor = await ctx.db.get(a.actorId);
-    if (a.userIds.length > 20 || a.messageId.length > 80) throw new Error("Invalid mention");
+    if (a.userIds.length > 20 || a.messageId.length > 80) throw new ConvexError("Invalid mention");
     const target = chatTarget(ctx, a.conversation);
-    if (!target) throw new Error("Invalid mention");
-    if (target.members && !target.members.includes(a.actorId)) throw new Error("Invalid mention");
+    if (!target) throw new ConvexError("Invalid mention");
+    if (target.members && !target.members.includes(a.actorId)) throw new ConvexError("Invalid mention");
     if (target.projectId && (await ctx.db.get(target.projectId))?.teamId !== a.teamId) return null;
     if (!actor || actor.status !== "active" || !await getActiveTeamMember(ctx, a.teamId, actor.email)) return null;
     const located = a.conversation === undefined ? {} : { conversation: a.conversation, ...(target.projectId ? { projectId: target.projectId } : {}) };

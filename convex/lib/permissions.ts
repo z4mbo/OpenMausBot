@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { normalizeEmail, requireUser } from "./auth";
@@ -29,23 +30,23 @@ export async function getActiveTeamMember(ctx: Ctx, teamId: Id<"teams">, email: 
 export async function requireTeamMember(ctx: Ctx, teamId: Id<"teams">, sessionToken: string) {
   const user = await requireUser(ctx, sessionToken);
   const member = await getActiveTeamMember(ctx, teamId, user.email);
-  if (!member || (member.userId && member.userId !== user._id)) throw new Error("No active team access");
+  if (!member || (member.userId && member.userId !== user._id)) throw new ConvexError("No active team access");
   return { member, user };
 }
 
 export async function requireTeamAdmin(ctx: Ctx, teamId: Id<"teams">, sessionToken: string) {
   const { member, user } = await requireTeamMember(ctx, teamId, sessionToken);
-  if (member.role !== "owner" && member.role !== "admin") throw new Error("Admin role required");
+  if (member.role !== "owner" && member.role !== "admin") throw new ConvexError("Admin role required");
   return { member, user };
 }
 
 export async function requireMember(ctx: Ctx, projectId: Id<"projects">, sessionToken: string) {
   const user = await requireUser(ctx, sessionToken);
   const project = await ctx.db.get(projectId);
-  if (!project) throw new Error("Project not found");
+  if (!project) throw new ConvexError("Project not found");
   const member = await projectMember(ctx, project, user);
   if (member) return { member, user, project };
-  throw new Error("No active project access");
+  throw new ConvexError("No active project access");
 }
 
 // Workspace admins see every project; everyone else needs explicit membership.
@@ -86,7 +87,7 @@ export async function projectPeople(ctx: Ctx, project: Doc<"projects">) {
 export async function requireAdmin(ctx: Ctx, projectId: Id<"projects">, sessionToken: string) {
   const { member, user, project } = await requireMember(ctx, projectId, sessionToken);
   if (member.role !== "owner" && member.role !== "admin") {
-    throw new Error("Admin role required");
+    throw new ConvexError("Admin role required");
   }
   return { member, user, project };
 }

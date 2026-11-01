@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { action, internalMutation, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { canEdit, changeOpenIssueCount, requireMember, touchProject } from "./lib/permissions";
@@ -31,7 +31,7 @@ type GitHubPullRequestSnapshot = {
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const result = await requireMember(ctx, projectId, sessionToken);
-  if (!canEdit(result.member)) throw new Error("Edit role required");
+  if (!canEdit(result.member)) throw new ConvexError("Edit role required");
   return result;
 }
 
@@ -93,7 +93,7 @@ export const syncRepo = action({
       return { ok: false, repo: "", issueCount: 0, pullRequestCount: 0, error: "Add a valid GitHub repo URL in Settings." };
     }
 
-    if (project.memberRole === "viewer") throw new Error("Edit role required");
+    if (project.memberRole === "viewer") throw new ConvexError("Edit role required");
     const user = await ctx.runQuery(api.auth.me, { sessionToken: args.sessionToken });
     const headers = githubHeaders(user?.email === DEFAULT_OWNER_EMAIL && project.ownerEmail === DEFAULT_OWNER_EMAIL);
     const [issuesResponse, pullRequestsResponse] = await Promise.all([
@@ -189,11 +189,11 @@ export const createIssueForTask = action({
       taskId: args.taskId,
     })) as { task: Doc<"tasks">; columns: Doc<"columns">[] };
     const column = details.columns.find(item => item._id === details.task.columnId);
-    if (column && isDraftColumn(column)) throw new Error("Draft issues stay in Origin. Move this issue to an active column before publishing it.");
+    if (column && isDraftColumn(column)) throw new ConvexError("Draft issues stay in Origin. Move this issue to an active column before publishing it.");
     const parsed = parseGitHubRepo(project.repoUrl);
     if (!parsed) return { ok: false, issueUrl: "", manualUrl: "", message: "Add a valid GitHub repo URL in Settings." };
 
-    if (project.memberRole === "viewer") throw new Error("Edit role required");
+    if (project.memberRole === "viewer") throw new ConvexError("Edit role required");
     if (details.task.githubIssueNumber) {
       return {
         ok: true,
@@ -224,10 +224,10 @@ export const linkTaskIssue = internalMutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
-    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
+    if (project.repoUrl !== args.repoUrl) throw new ConvexError("Repository changed; sync cancelled");
     const task = await ctx.db.get(args.taskId);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
-    if (task.githubIssueNumber && task.githubIssueNumber !== args.githubIssueNumber) throw new Error("Issue already linked");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
+    if (task.githubIssueNumber && task.githubIssueNumber !== args.githubIssueNumber) throw new ConvexError("Issue already linked");
     await ctx.db.patch(args.taskId, {
       githubIssueNumber: args.githubIssueNumber,
       githubIssueUrl: args.githubIssueUrl,
@@ -272,7 +272,7 @@ export const upsertRepoSnapshot = internalMutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const { project } = await requireEditor(ctx, args.projectId, args.sessionToken);
-    if (project.repoUrl !== args.repoUrl) throw new Error("Repository changed; sync cancelled");
+    if (project.repoUrl !== args.repoUrl) throw new ConvexError("Repository changed; sync cancelled");
     const now = Date.now();
     const columns = await ctx.db
       .query("columns")

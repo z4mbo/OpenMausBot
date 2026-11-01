@@ -24,6 +24,17 @@ two runners sharing its backend/Next build directory; use separate worktrees for
 simultaneous invocations. Only remove a stale `.origin-data-e2e/runner.lock` after
 checking that its recorded PID has exited.
 
+On systems where Playwright's downloaded Chromium cannot run (for example NixOS), point
+`PLAYWRIGHT_BROWSERS_PATH` at a browser directory prepared for the same Playwright version; the
+runner then skips its own install:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/path/to/prepared/browsers ORIGIN_E2E_PORT=3135 npm run e2e
+```
+
+The runner reuses the Convex ports saved in `.env.local`; stop any `convex dev` or `next dev` of
+this worktree first, because the runner starts its own on those ports and builds into `.next`.
+
 `ORIGIN_E2E_DEV=1` opts into Next dev for debugging. Production build/start is the
 default so compiling another route or regenerating local bindings cannot hot-reload
 call tracks, vault unlock state or open dialogs during concurrent tests.

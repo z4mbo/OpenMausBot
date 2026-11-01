@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { httpAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
@@ -10,7 +10,7 @@ import { BodyTooLarge, readBoundedBytes } from "../lib/http-body";
 async function uploadUser(ctx: MutationCtx, intent: Doc<"storageUploadIntents">) {
   const session = await ctx.db.get(intent.sessionId);
   const user = await ctx.db.get(intent.userId);
-  if (!session || session.userId !== intent.userId || session.expiresAt < Date.now() || !user || user.status !== "active" || (session.sessionVersion ?? 0) !== (user.sessionVersion ?? 0)) throw new Error("No upload access");
+  if (!session || session.userId !== intent.userId || session.expiresAt < Date.now() || !user || user.status !== "active" || (session.sessionVersion ?? 0) !== (user.sessionVersion ?? 0)) throw new ConvexError("No upload access");
   return user;
 }
 
@@ -18,10 +18,10 @@ export const beginUpload = internalMutation({
   args: { token: v.string() },
   returns: v.object({ intentId: v.id("storageUploadIntents"), maxBytes: v.number() }),
   handler: async (ctx, args) => {
-    if (!/^[a-f0-9]{64}$/.test(args.token)) throw new Error("No upload access");
+    if (!/^[a-f0-9]{64}$/.test(args.token)) throw new ConvexError("No upload access");
     const tokenHash = await hashToken(args.token);
     const found = await ctx.db.query("storageUploadIntents").withIndex("by_tokenHash", q => q.eq("tokenHash", tokenHash)).unique();
-    if (!found || found.state !== "issued" || found.expiresAt < Date.now()) throw new Error("No upload access");
+    if (!found || found.state !== "issued" || found.expiresAt < Date.now()) throw new ConvexError("No upload access");
     await writableUploadScope(ctx, await uploadUser(ctx, found), found.target);
     await ctx.db.patch(found._id, { state: "uploading" });
     return { intentId: found._id, maxBytes: uploadLimit(found.target) };
@@ -83,10 +83,10 @@ export const completeUpload = internalMutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const intent = await ctx.db.get(args.intentId);
-    if (!intent || intent.state !== "uploading" || intent.expiresAt < Date.now()) throw new Error("No upload access");
+    if (!intent || intent.state !== "uploading" || intent.expiresAt < Date.now()) throw new ConvexError("No upload access");
     const scope = await writableUploadScope(ctx, await uploadUser(ctx, intent), intent.target);
     const metadata = await ctx.db.system.get(args.storageId);
-    if (!metadata) throw new Error("File not found");
+    if (!metadata) throw new ConvexError("File not found");
     validateUpload(intent.target, metadata.size, metadata.contentType ?? args.contentType);
     await addStorageScope(ctx, args.storageId, scope, metadata.contentType ?? args.contentType);
     await ctx.db.patch(intent._id, { state: "complete", storageId: args.storageId });
