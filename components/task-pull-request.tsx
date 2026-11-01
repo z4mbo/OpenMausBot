@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { ExternalLink, GitPullRequest, Loader2 } from "lucide-react";
@@ -14,7 +15,7 @@ export function TaskPullRequest({ project, taskId, sessionToken, canEdit, saveDr
     {prs?.length === 0 && canEdit && project.repoUrl && <button className="ghost-button compact" type="button" disabled={busy} onClick={async () => {
       setBusy(true); setNotice("");
       try { await saveDraft(); const result = await localApi<{ message: string }>("/api/github/pull-requests", sessionToken, { method: "POST", json: { projectId: project._id, taskId } }); setNotice(result.message); }
-      catch (error) { setNotice(error instanceof Error ? error.message : "Could not create PR"); }
+      catch (error) { setNotice(errorText(error, "Could not create PR")); }
       finally { setBusy(false); }
     }}>{busy ? <Loader2 size={14} className="spin" /> : <GitPullRequest size={14} />}{busy ? "Creating PR…" : project.githubTaskMode === "pull_request" ? "Create draft PR" : "Create PR instead of GitHub issue"}</button>}
     {notice && <small role="status">{notice}</small>}

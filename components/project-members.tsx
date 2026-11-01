@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { localAppOrigin } from "@/lib/client-api";
 
 import { useState } from "react";
@@ -27,7 +28,7 @@ export function ProjectMembers({ projectId, sessionToken }: { projectId: Id<"pro
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState(false);
-  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(error instanceof Error ? error.message : "Could not update members"); } finally { setBusy(false); } };
+  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(errorText(error, "Could not update members")); } finally { setBusy(false); } };
   const available = workspacePeople?.filter(person => !people?.some(member => member.email === person.email)) || [];
   return <section className="project-members"><h3>Members</h3>{admin && <>
     <form className="project-members-form" onSubmit={event => { event.preventDefault(); void attempt(async () => { await add({ sessionToken, projectId, email, role }); setEmail(""); }); }}><label>Workspace member<select value={email} required onChange={event => setEmail(event.target.value)}><option value="">Select member</option>{available.map(person => <option key={person.email} value={person.email}>{person.username || person.name}</option>)}</select></label><label>Access<select value={role} onChange={event => setRole(event.target.value as typeof role)}><option value="member">Can edit</option><option value="viewer">Can view</option></select></label><button className="primary-button compact" disabled={busy || !email}><UserPlus size={15} />Add member</button></form>

@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import "./project-issues.css";
 
@@ -190,7 +191,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
       </div>
       {!canEdit ? <div className="notice">You have view-only access to this project, so issue creation is disabled.</div> : null}
       {boardNotice ? <div className="notice danger">{boardNotice}</div> : null}
-      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(error instanceof Error ? error.message : "Could not restore issue"); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Assignee</th><th scope="col">Priority</th><th scope="col">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(error.message))}><Circle size={17} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small>{task.title}</button></td><td>{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td>{task.assignedToName || task.assignedToEmail || "Unassigned"}</td><td><span className={clsx("priority", task.priority)}>{task.priority}</span></td><td>{task.dueDate || "?"}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className="kanban-scroll">
+      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(errorText(error, "Could not restore issue")); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Assignee</th><th scope="col">Priority</th><th scope="col">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(error.message))}><Circle size={17} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small>{task.title}</button></td><td>{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td>{task.assignedToName || task.assignedToEmail || "Unassigned"}</td><td><span className={clsx("priority", task.priority)}>{task.priority}</span></td><td>{task.dueDate || "?"}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className="kanban-scroll">
         {visualColumns.map((column, index) => {
           const tasks = board.tasks.filter(task => !task.done && matches(task) && columnForTask(task) === column._id);
           const completedCount = board.tasks.filter(task => task.done && matches(task) && columnForTask(task) === column._id).length;
@@ -248,7 +249,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
                         disabled={!canEdit}
                         onClick={(event) => {
                           event.stopPropagation();
-                          void updateTask({ projectId, sessionToken, taskId: task._id, done: !task.done }).catch(error => setBoardNotice(error.message));
+                          void updateTask({ projectId, sessionToken, taskId: task._id, done: !task.done }).catch(error => setBoardNotice(errorText(error, "Could not update issue")));
                         }}
                       >
                         {task.done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
@@ -270,7 +271,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         })}
       </div>}
       {columnEditor && <ColumnEditor column={columnEditor === "new" ? null : columnEditor} columns={visualColumns} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnEditor(null)} />}
-      {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={onOpenReference} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={() => setSelectedTaskId(null)} /> : null}
+      {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={(target, task) => { if (target === projectId && task) setSelectedTaskId(task); else { setSelectedTaskId(null); onOpenReference?.(target, task); } }} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={() => setSelectedTaskId(null)} /> : null}
     </section>
   );
 }
@@ -285,7 +286,7 @@ function ColumnEditor({ column, columns, projectId, sessionToken, onClose }: { c
   const create = useMutation(api.tasks.createColumn);
   const update = useMutation(api.tasks.updateColumn);
   const remove = useMutation(api.tasks.deleteColumn);
-  return <Dialog title={column ? "Edit column" : "New column"} onClose={onClose}><form className="dialog-body stack-form" onSubmit={async e => { e.preventDefault(); if (!online) return; setBusy(true); try { if (column) await update({ projectId, sessionToken, columnId: column._id, title, isDone: false }); else await create({ projectId, sessionToken, title, isDone: false }); onClose(); } catch (error) { setError(error instanceof Error ? error.message : "Could not save column"); } finally { setBusy(false); } }}><label>Name<input autoFocus value={title} onChange={e => setTitle(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<div className="dialog-actions"><button className="primary-button compact" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={busy || !online}>Save column</button>{column && columns.length > 1 && <button className="ghost-button danger compact" type="button" onClick={() => setDeleting(!deleting)}><Trash2 size={14} />Delete column</button>}</div>{deleting && column && <div className="column-delete-form"><label>Move its issues to<select value={destination} onChange={e => setDestination(e.target.value as Id<"columns">)}>{columns.filter(c => c._id !== column._id).map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label><button type="button" className="ghost-button danger" disabled={busy} onClick={async () => { setBusy(true); try { await remove({ projectId, sessionToken, columnId: column._id, moveToColumnId: destination as Id<"columns"> }); onClose(); } catch (error) { setError(error instanceof Error ? error.message : "Could not delete column"); } finally { setBusy(false); } }}>Delete and move issues</button></div>}</form></Dialog>;
+  return <Dialog title={column ? "Edit column" : "New column"} onClose={onClose}><form className="dialog-body stack-form" onSubmit={async e => { e.preventDefault(); if (!online) return; setBusy(true); try { if (column) await update({ projectId, sessionToken, columnId: column._id, title, isDone: false }); else await create({ projectId, sessionToken, title, isDone: false }); onClose(); } catch (error) { setError(errorText(error, "Could not save column")); } finally { setBusy(false); } }}><label>Name<input autoFocus value={title} onChange={e => setTitle(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<div className="dialog-actions"><button className="primary-button compact" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={busy || !online}>Save column</button>{column && columns.length > 1 && <button className="ghost-button danger compact" type="button" onClick={() => setDeleting(!deleting)}><Trash2 size={14} />Delete column</button>}</div>{deleting && column && <div className="column-delete-form"><label>Move its issues to<select value={destination} onChange={e => setDestination(e.target.value as Id<"columns">)}>{columns.filter(c => c._id !== column._id).map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label><button type="button" className="ghost-button danger" disabled={busy} onClick={async () => { setBusy(true); try { await remove({ projectId, sessionToken, columnId: column._id, moveToColumnId: destination as Id<"columns"> }); onClose(); } catch (error) { setError(errorText(error, "Could not delete column")); } finally { setBusy(false); } }}>Delete and move issues</button></div>}</form></Dialog>;
 }
 
 export function TaskModal({
@@ -368,7 +369,7 @@ export function TaskModal({
     const handle = window.setTimeout(() => { void saveDraft().catch(() => {}); }, 500);
     return () => window.clearTimeout(handle);
   }, [details?.task?._id, saveDraft]);
-  const closeIssue = () => { void saveDraft().then(onClose).catch(error => setActivityError(error instanceof Error ? error.message : "Could not save issue")); };
+  const closeIssue = () => { void saveDraft().then(onClose).catch(error => setActivityError(errorText(error, "Could not save issue"))); };
 
   const changeColumn = async (value: string) => {
     if (!canEdit || !value) return;
@@ -407,7 +408,7 @@ export function TaskModal({
       setGithubNotice(result.message);
     } catch (error) {
       setGithubState("error");
-      setGithubNotice(error instanceof Error ? error.message : "GitHub issue creation failed");
+      setGithubNotice(errorText(error, "GitHub issue creation failed"));
     }
   };
   return <Dialog title={details ? `${taskKey(details.task._id)} / ${project.name}` : "Issue details"} className="issue-detail-dialog" onClose={closeIssue}>
@@ -437,7 +438,7 @@ export function TaskModal({
         <dl className="issue-date-summary"><div><dt>Created</dt><dd>{fmtDate(details.task.createdAt)}</dd></div><div><dt>Updated</dt><dd>{fmtDate(details.task.updatedAt)}</dd></div></dl>
       </aside>
       <section className="issue-detail-activity">
-        <IssueFileUpload projectId={projectId} taskId={taskId} sessionToken={sessionToken} disabled={!canEdit} onLink={url => { void addAsset({ projectId, taskId, sessionToken, type: "link", name: url, url }).catch(error => setActivityError(error instanceof Error ? error.message : "Could not attach link")); }}>
+        <IssueFileUpload projectId={projectId} taskId={taskId} sessionToken={sessionToken} disabled={!canEdit} onLink={url => { void addAsset({ projectId, taskId, sessionToken, type: "link", name: url, url }).catch(error => setActivityError(errorText(error, "Could not attach link"))); }}>
         <header><h3><MessageCircle size={15} />Activity <span>{activity.length}</span></h3></header>
         <div className="issue-timeline">
           {!activity.length && <p className="activity-empty">No activity yet.</p>}

@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -67,22 +68,17 @@ export function IssueComposer({
   useEffect(() => {
     if (online && board?.columns.length === 0 && projectId)
       void ensureColumns({ sessionToken, projectId }).catch((error) =>
-        setError(error.message),
+        setError(errorText(error, "Could not prepare columns")),
       );
   }, [online, board?.columns.length, projectId, ensureColumns, sessionToken]);
   const selectedColumn = columns.find((c) => c._id === columnId) || columns[0];
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (
-      !online || busy ||
-      !projectId ||
-      !selectedColumn ||
-      !title.trim() ||
-      !priority ||
-      !assignee ||
-      !dueDate
-    )
-      return;
+    if (!online || busy || !projectId || !selectedColumn) return;
+    if (!title.trim()) { setError("Add a title"); titleInput.current?.focus(); return; }
+    const missing = [!priority && "priority", !assignee && "assignee", !dueDate && "due date"].filter(Boolean);
+    if (missing.length) { setError(`Choose ${missing.length > 1 ? `${missing.slice(0, -1).join(", ")} and ${missing.at(-1)}` : missing[0]}`); return; }
+    if (!priority) return;
     setBusy(true);
     setError("");
     try {
@@ -100,7 +96,7 @@ export function IssueComposer({
       onClose();
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Could not create issue",
+        errorText(error, "Could not create issue"),
       );
     } finally {
       setBusy(false);
@@ -115,7 +111,7 @@ export function IssueComposer({
         if (!busy) onClose();
       }}
     >
-      <form onSubmit={submit}>
+      <form onSubmit={submit} noValidate>
         {!editable.length ? (
           <div className="dialog-body muted">
             Create a project to add your first issue.
@@ -141,7 +137,7 @@ export function IssueComposer({
               autoFocus
               data-initial-focus
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); setError(""); }}
               placeholder="Issue title"
               required
               maxLength={250}
@@ -161,14 +157,14 @@ export function IssueComposer({
               columnId={selectedColumn?._id || ""}
               onColumnChange={setColumnId}
               priority={priority}
-              onPriorityChange={setPriority}
+              onPriorityChange={value => { setPriority(value); setError(""); }}
               assignee={assignee}
-              onAssigneeChange={setAssignee}
+              onAssigneeChange={value => { setAssignee(value); setError(""); }}
               dueDate={dueDate}
-              onDueDateChange={setDueDate}
+              onDueDateChange={value => { setDueDate(value); setError(""); }}
               disabled={busy}
             >
-              <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !title.trim() || !priority || !selectedColumn || !members?.length}>
+              <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !selectedColumn || !members?.length}>
                 {busy ? <Loader2 size={15} className="spin" /> : <Plus size={15} />}
                 Create issue
               </button>

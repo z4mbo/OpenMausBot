@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { useRef, useState, type ReactNode } from "react";
 import { useMutation } from "convex/react";
 import { Loader2, Upload } from "lucide-react";
@@ -24,7 +25,7 @@ export function IssueFileUpload({ projectId, taskId, sessionToken, disabled, onL
         const { file: saved } = await localApi<{ file: { id: string; name: string; contentType: string; size: number } }>(`/api/local-chat/files?teamId=${workspace._id}&projectId=${projectId}`, sessionToken, { method: "POST", body: form });
         await attach({ projectId, taskId, sessionToken, name: saved.name, type: /^image\/(png|jpeg|gif|webp)$/.test(saved.contentType) ? "image" : "file", localFileId: saved.id, contentType: saved.contentType, size: saved.size });
       }
-    } catch (error) { setError(error instanceof Error ? error.message : "Could not attach file"); }
+    } catch (error) { setError(errorText(error, "Could not attach file")); }
     finally { inFlight.current = false; setBusy(false); }
   };
   const drop = useFileDrop({ disabled: disabled || busy, onFiles: files => void upload(files), onLink });

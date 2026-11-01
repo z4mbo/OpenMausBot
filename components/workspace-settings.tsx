@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { localAppOrigin } from "@/lib/client-api";
 
 import { useState, type ReactNode } from "react";
@@ -36,7 +37,7 @@ function WorkspaceGeneral({ sessionToken }: { sessionToken: string }) {
   const update = useMutation(api.workspaces.update);
   const create = useMutation(api.workspaces.create);
   const admin = ["owner", "admin"].includes(workspace.role);
-  return <><h3>Workspace</h3><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { await update({ sessionToken, teamId: workspace._id, name }); setNotice("Workspace updated"); } catch (error) { setNotice(error instanceof Error ? error.message : "Could not save"); } }}><label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} disabled={!admin} /></label><label>Workspace URL<input value={`${typeof window !== "undefined" ? localAppOrigin() : ""}/${workspace.slug}`} readOnly /></label>{admin && <button className="primary-button compact">Save changes</button>}</form>{notice && <p className="notice">{notice}</p>}<div className="settings-section"><h4>Create another workspace</h4><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { const result = await create({ sessionToken, name: newName }); window.location.href = `/${result.slug}`; } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create workspace"); } }}><label>Name<input value={newName} onChange={e => setNewName(e.target.value)} required placeholder="New workspace" maxLength={60} /></label><button className="ghost-button compact">Create workspace</button></form></div></>;
+  return <><h3>Workspace</h3><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { await update({ sessionToken, teamId: workspace._id, name }); setNotice("Workspace updated"); } catch (error) { setNotice(errorText(error, "Could not save")); } }}><label>Name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} disabled={!admin} /></label><label>Workspace URL<input value={`${typeof window !== "undefined" ? localAppOrigin() : ""}/${workspace.slug}`} readOnly /></label>{admin && <button className="primary-button compact">Save changes</button>}</form>{notice && <p className="notice">{notice}</p>}<div className="settings-section"><h4>Create another workspace</h4><form className="stack-form" onSubmit={async e => { e.preventDefault(); try { const result = await create({ sessionToken, name: newName }); window.location.href = `/${result.slug}`; } catch (error) { setNotice(errorText(error, "Could not create workspace")); } }}><label>Name<input value={newName} onChange={e => setNewName(e.target.value)} required placeholder="New workspace" maxLength={60} /></label><button className="ghost-button compact">Create workspace</button></form></div></>;
 }
 
 function LeaveWorkspace({ sessionToken }: { sessionToken: string }) {
@@ -47,7 +48,7 @@ function LeaveWorkspace({ sessionToken }: { sessionToken: string }) {
   const [error, setError] = useState("");
   if (workspace.role === "owner") return null;
   return <div className="settings-section leave-workspace"><h4>Membership</h4>
-    {confirming ? <><p>Leave {workspace.name}? You will need a new invitation to return.</p><div className="settings-confirm-actions"><button className="ghost-button" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button><button className="ghost-button danger-text" disabled={busy} onClick={async () => { setBusy(true); try { await leave({ sessionToken, teamId: workspace._id }); window.location.assign("/"); } catch (e) { setError(e instanceof Error ? e.message : "Could not leave workspace"); setBusy(false); } }}><LogOut size={14} />Leave workspace</button></div></> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><LogOut size={14} />Leave workspace</button>}
+    {confirming ? <><p>Leave {workspace.name}? You will need a new invitation to return.</p><div className="settings-confirm-actions"><button className="ghost-button" disabled={busy} onClick={() => setConfirming(false)}>Cancel</button><button className="ghost-button danger-text" disabled={busy} onClick={async () => { setBusy(true); try { await leave({ sessionToken, teamId: workspace._id }); window.location.assign("/"); } catch (e) { setError(errorText(e, "Could not leave workspace")); setBusy(false); } }}><LogOut size={14} />Leave workspace</button></div></> : <button className="ghost-button danger-text" onClick={() => setConfirming(true)}><LogOut size={14} />Leave workspace</button>}
     {error && <p className="notice danger" role="alert">{error}</p>}
   </div>;
 }
@@ -67,7 +68,7 @@ export function WorkspaceMembers({ sessionToken, beforeOpenProfile }: { sessionT
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
-  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(error instanceof Error ? error.message : "Action failed"); } finally { setBusy(false); } };
+  const attempt = async (fn: () => Promise<unknown>) => { setBusy(true); setNotice(""); try { await fn(); } catch (error) { setNotice(errorText(error, "Action failed")); } finally { setBusy(false); } };
   const copy = async (value: string) => { try { await navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setNotice("Clipboard unavailable. Select and copy the invitation link."); } };
   const workspaceInvites = invitations?.filter(invite => !invite.projectId);
   return <><h3>Members & invitations</h3>{admin && <>

@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 import { ContentSkeleton } from "./content-skeleton";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -64,7 +65,7 @@ export function VaultPanel({ projectId, sessionToken }: Props) {
   const save = async (e: FormEvent) => {
     e.preventDefault(); if (!online) return; setBusy(true); setNotice("");
     try { await create({ projectId, sessionToken, kind, title, username: username || undefined, url: url || undefined, ...await encryptSecret(secret, passphrase) }); setOpen(false); setTitle(""); setUsername(""); setUrl(""); setSecret(""); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Could not save"); }
+    catch (error) { setNotice(errorText(error, "Could not save")); }
     finally { setBusy(false); }
   };
   if (items === undefined) return <ContentSkeleton label="Loading project files" />;
@@ -105,7 +106,7 @@ export function AssetsPanel({ projectId, sessionToken }: Props) {
     try {
       validateAttachmentFiles(selection); resetForm(); setFiles(selection); setBatch(selection.length > 1);
       setName(selection[0].name.slice(0, 150)); setType(assetFileType(selection[0])); setOpen(true);
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Invalid file"); }
+    } catch (error) { setNotice(errorText(error, "Invalid file")); }
   };
   const drop = useFileDrop({ disabled: !online || workspace.role === "viewer" || busy, onFiles: selectFiles, onLink: url => { resetForm(); setUrl(url); setName(new URL(url).hostname); setType(/(^|\.)figma\.com$/.test(new URL(url).hostname) ? "figma" : "document"); setOpen(true); } });
   const save = async (e: FormEvent) => {
@@ -126,7 +127,7 @@ export function AssetsPanel({ projectId, sessionToken }: Props) {
         });
       } else await create({ projectId, sessionToken, type, name, url: url || undefined, notes: notes || undefined });
       setOpen(false); resetForm(); setQuery(""); setFilter("all");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not save asset"); }
+    } catch (error) { setNotice(errorText(error, "Could not save asset")); }
     finally { inFlight.current = false; setBusy(false); setProgress(""); }
   };
   const filtered = design?.assets.filter(asset => (filter === "all" || asset.type === filter) && `${asset.name} ${asset.notes || ""}`.toLowerCase().includes(query.toLowerCase()));

@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 
@@ -162,7 +163,7 @@ export function ChatThread({
     const timer = setTimeout(() => {
       void localApi<{ messages: LocalChatMessage[]; hasMore: boolean }>(`${endpoint}&search=${encodeURIComponent(searchText)}`, sessionToken, { signal: controller.signal })
         .then(result => { if (!controller.signal.aborted) { setSearchResults(result.messages); setMoreResults(result.hasMore); } })
-        .catch(error => { if (!controller.signal.aborted) setNotice(error.message); })
+        .catch(error => { if (!controller.signal.aborted) setNotice(errorText(error, "Search failed")); })
         .finally(() => { if (generation === searchGeneration.current) setSearching(false); });
     }, 250);
     return () => { controller.abort(); clearTimeout(timer); };
@@ -173,7 +174,7 @@ export function ChatThread({
     try {
       const result = await localApi<{ messages: LocalChatMessage[]; hasMore: boolean }>(`${endpoint}&search=${encodeURIComponent(searchText)}&before=${searchResults[0]?.createdAt}`, sessionToken);
       if (generation === searchGeneration.current) { setSearchResults(current => [...result.messages, ...current]); setMoreResults(result.hasMore); }
-    } catch (error) { if (generation === searchGeneration.current) setNotice(error instanceof Error ? error.message : "Search failed"); }
+    } catch (error) { if (generation === searchGeneration.current) setNotice(errorText(error, "Search failed")); }
     finally { if (generation === searchGeneration.current) setSearching(false); }
   };
   const online = useWorkspaceOnline();
@@ -326,7 +327,7 @@ export function ChatThread({
       } catch (error) {
         if (!controller.signal.aborted) {
           setNotice(
-            error instanceof Error ? error.message : "Chat unavailable",
+            errorText(error, "Chat unavailable"),
           );
           setLoading(false);
         }
@@ -397,7 +398,7 @@ export function ChatThread({
       });
     } catch (error) {
       setNotice(
-        error instanceof Error ? error.message : "Could not load messages",
+        errorText(error, "Could not load messages"),
       );
     } finally {
       setLoadingOlder(false);
@@ -412,7 +413,7 @@ export function ChatThread({
       await refresh();
     } catch (error) {
       setNotice(
-        error instanceof Error ? error.message : "Could not update message",
+        errorText(error, "Could not update message"),
       );
     }
   };
@@ -457,7 +458,7 @@ export function ChatThread({
       stickRef.current = true;
       await refresh();
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Message failed");
+      setNotice(errorText(error, "Message failed"));
     } finally {
       sendLock.current = false;
       if (alive.current) setSending(false);
@@ -482,7 +483,7 @@ export function ChatThread({
         setAttachments((current) => [...current, result.file]);
       }
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Upload failed");
+      setNotice(errorText(error, "Upload failed"));
     } finally {
       uploadLock.current = false;
       setUploading(false);

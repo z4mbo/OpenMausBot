@@ -1,4 +1,5 @@
 "use client";
+import { errorText } from "@/lib/error-text";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -45,7 +46,7 @@ export function InboxCalendar({ sessionToken, onOpenTask, mine, done, project, p
           if (!task || task.dueDate === key) return;
           setPending(true); setNotice("");
           try { await update({ sessionToken, projectId: task.projectId, taskId: task._id, dueDate: key }); }
-          catch (error) { setNotice(error instanceof Error ? error.message : "Could not reschedule issue"); }
+          catch (error) { setNotice(errorText(error, "Could not reschedule issue")); }
           finally { setPending(false); }
         }}>
         <time dateTime={key}><span>{date.toLocaleDateString(undefined, { weekday: "short" })}</span><strong>{date.getDate()}</strong></time>
