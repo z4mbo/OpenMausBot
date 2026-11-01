@@ -177,7 +177,8 @@ button.task-assignee:hover { box-shadow: 0 0 0 2px var(--border-3); color: var(-
 @media (hover: none) {
   .task-menu-button.icon-button { display: none; }
   .task-chip::before, .task-assignee::before, .check-button::before { content: ""; position: absolute; inset: -11px 0; }
-  .task-assignee::before, .check-button::before { inset: -12px; }
+  .task-assignee::before { inset: -12px; }
+  .check-button::before { inset: -13px; }
   .kanban-tools .icon-button { opacity: 1; width: 36px; min-width: 36px; height: 36px; }
 }
 
