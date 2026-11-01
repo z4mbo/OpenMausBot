@@ -43,7 +43,14 @@ export function MessageMenu({ anchor, preview, own, pinned, reacted, canCreateIs
     if (!sheet) items(element).find(item => item.getAttribute("role") === "menuitem")?.focus({ preventScroll: true });
     else element.focus({ preventScroll: true });
   }, [anchor, sheet]);
-  const run = (action: MessageAction) => { onAction(action); onClose(action !== "edit" && action !== "reply"); };
+  // A sheet opens under the finger that held the message; ignore a press that arrives before the finger has lifted.
+  const openedAt = useRef(0);
+  useLayoutEffect(() => { openedAt.current = performance.now(); }, []);
+  const run = (action: MessageAction) => {
+    if (sheet && performance.now() - openedAt.current < 300) return;
+    onAction(action);
+    onClose(action !== "edit" && action !== "reply");
+  };
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     event.stopPropagation();
     const all = items(menu.current);

@@ -13,6 +13,7 @@ import {
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
+  type TouchEvent as ReactTouchEvent,
 } from "react";
 import {
   ArrowDown,
@@ -604,6 +605,8 @@ export function ChatThread({
     },
     onPointerUp: () => { const press = longPress.current; if (press && !press.fired) { window.clearTimeout(press.timer); longPress.current = null; } },
     onPointerCancel: () => { const press = longPress.current; if (press) window.clearTimeout(press.timer); longPress.current = null; },
+    // The click a phone makes after the finger lifts would land on the sheet that just opened under it.
+    onTouchEnd: (event: ReactTouchEvent<HTMLElement>) => { if (longPress.current?.fired) event.preventDefault(); },
     onClickCapture: (event: ReactMouseEvent<HTMLElement>) => {
       // The click a finished long-press produces must not follow a link or open a profile underneath.
       if (longPress.current?.fired) { event.preventDefault(); event.stopPropagation(); longPress.current = null; }
@@ -612,7 +615,7 @@ export function ChatThread({
       if (!canWrite || (event.target as HTMLElement).closest("a[href]")) return;
       event.preventDefault();
       if (longPress.current?.fired || menu) return;
-      openMenu(message, isSheetPointer() ? null : { left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY }, event.currentTarget);
+      openMenu(message, isSheetPointer() ? null : { left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY }, null);
     },
   });
   const filtered = (searchText ? searchResults : messages).filter(m => !pinnedOnly || m.pinned);
@@ -829,7 +832,8 @@ export function ChatThread({
                       aria-expanded={menu?.message.id === message.id}
                       onClick={(event) => {
                         const box = event.currentTarget.getBoundingClientRect();
-                        openMenu(message, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }, event.currentTarget);
+                        // Keyboard activation (detail 0) returns focus here on close; a mouse leaves it where the click went.
+                        openMenu(message, { left: box.left, top: box.top, right: box.right, bottom: box.bottom }, event.detail === 0 ? event.currentTarget : null);
                       }}
                     >
                       <Ellipsis size={14} />
@@ -1131,7 +1135,7 @@ export function ChatThread({
         canCreateIssue={Boolean(menuMessage.body)}
         onAction={action => void act(menuMessage, action)}
         onClose={restore => {
-          menu.opener?.classList.remove("is-pressed");
+          document.querySelectorAll(".conversation-message.is-pressed").forEach(element => element.classList.remove("is-pressed"));
           setMenu(null);
           if (restore && menu.anchor && menu.opener?.isConnected) menu.opener.focus({ preventScroll: true });
         }}
