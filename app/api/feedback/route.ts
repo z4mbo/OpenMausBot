@@ -19,5 +19,8 @@ export async function POST(request: Request) {
     limitLocalAction(`feedback:${key}`, 5, 3600000);
     await integrationBridge("feedback", { slug: body.slug, title: body.title, body: body.body, kind: body.kind });
     return NextResponse.json({ ok: true });
-  } catch (error) { return NextResponse.json({ error: "Unable to send feedback. Check your message or try again later." }, { status: error instanceof BodyTooLarge ? 413 : 400 }); }
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Too many requests")) return NextResponse.json({ error: "Too many submissions. Try again in an hour." }, { status: 429 });
+    return NextResponse.json({ error: "Unable to send feedback. Check your message or try again later." }, { status: error instanceof BodyTooLarge ? 413 : 400 });
+  }
 }
