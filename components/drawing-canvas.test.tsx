@@ -15,12 +15,13 @@ const f = vi.hoisted(() => ({
   canvas: { getSceneElementsIncludingDeleted: () => [], getAppState: () => ({}), updateScene: vi.fn(), getFiles: () => ({}), addFiles: vi.fn() },
 }));
 vi.mock("convex/react", () => ({
-  useQuery: (ref: FunctionReference<"query">) => getFunctionName(ref) === "draw:presence" ? f.rows : getFunctionName(ref) === "draw:files" ? f.files : f.scene,
+  useQuery: (ref: FunctionReference<"query">) => getFunctionName(ref) === "draw:presence" ? f.rows : getFunctionName(ref) === "draw:files" ? f.files : getFunctionName(ref) === "workspaces:members" ? [] : f.scene,
   useMutation: (ref: FunctionReference<"mutation">) => getFunctionName(ref) === "draw:updateElements" ? f.update : f.presence,
 }));
 vi.mock("./workspace-context", () => ({ useWorkspace: () => ({ _id: "team", name: "PG2", role: "member" }) }));
 vi.mock("./workspace-connection", () => ({ useWorkspaceOnline: () => true }));
 vi.mock("@excalidraw/excalidraw", () => ({
+  MainMenu: Object.assign(() => null, { DefaultItems: new Proxy({}, { get: () => () => null }) }),
   CaptureUpdateAction: { NEVER: "never" }, restoreElements: (elements: object[]) => elements, reconcileElements: (_current: object[], incoming: object[]) => incoming,
   Excalidraw: (props: CanvasProps) => {
     f.onChange = props.onChange;

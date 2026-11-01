@@ -3,7 +3,7 @@ import { errorText } from "@/lib/error-text";
 
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Excalidraw, CaptureUpdateAction, reconcileElements, restoreElements } from "@excalidraw/excalidraw";
+import { Excalidraw, CaptureUpdateAction, MainMenu, reconcileElements, restoreElements } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI, BinaryFileData, BinaryFiles, AppState } from "@excalidraw/excalidraw/types";
 import type { OrderedExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { RemoteExcalidrawElement } from "@excalidraw/excalidraw/data/reconcile";
@@ -13,6 +13,7 @@ import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { useWorkspace } from "./workspace-context";
 import { ContentSkeleton } from "./content-skeleton";
 import { useWorkspaceOnline } from "./workspace-connection";
+import { UserAvatar, avatarTone, memberName } from "./user-avatar";
 
 function imageBlob(file: BinaryFileData) {
   const separator = file.dataURL.indexOf(",");
@@ -34,6 +35,7 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
   const setPresence = useMutation(api.draw.setPresence);
   const uploadUrl = useMutation(api.draw.uploadUrl);
   const saveFile = useMutation(api.draw.saveFile);
+  const members = useQuery(api.workspaces.members, { sessionToken, teamId: workspace._id });
   const [canvas, setCanvas] = useState<ExcalidrawImperativeAPI | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [notice, setNotice] = useState("");
@@ -90,13 +92,23 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
       void setPresence({ ...args, ...currentPointer.current, leave: true }).catch(() => {});
     };
   }, [sessionToken, workspace._id, canvasId, update, setPresence]);
+  // Who else has the canvas open (seen in the last 30 seconds), as workspace members so avatars match the rest of the app.
+  const here = (online ? presence ?? [] : []).filter(member => member.userId !== user._id && member.updatedAt > clock - 30000)
+    .map(member => ({ ...member, person: members?.find(item => item.userId === member.userId) ?? { name: member.name } }));
+  const hereKey = here.map(member => `${member.userId}:${member.x}:${member.y}:${member.button}`).join("|");
   useEffect(() => {
-    if (!canvas || !presence) return;
+    if (!canvas) return;
     const collaborators: AppState["collaborators"] = new Map();
-    for (const member of online ? presence : []) if (member.userId !== user._id && member.updatedAt > clock - 30000) collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: member.name, // (0, 0) is the placeholder sent before someone moves their pointer; show them without a cursor until then.
-      pointer: member.x === 0 && member.y === 0 ? undefined : { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: "#2ebd85", stroke: "#16845b" } });
+    for (const member of here) {
+      const tone = avatarTone(member.person);
+      collaborators.set(String(member.userId) as Parameters<typeof collaborators.set>[0], { username: memberName(member.person),
+        // (0, 0) is the placeholder sent before someone moves their pointer; show them without a cursor until then.
+        pointer: member.x === 0 && member.y === 0 ? undefined : { x: member.x, y: member.y, tool: "pointer" }, button: member.button as "up" | "down", color: { background: tone, stroke: tone } });
+    }
     canvas.updateScene({ collaborators });
-  }, [canvas, presence, clock, user._id, online]);
+    // `hereKey` captures every field of `here` the scene uses.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvas, hereKey, members]);
   useEffect(() => {
     if (!canvas || !storedFiles) return;
     for (const file of storedFiles) {
@@ -123,12 +135,30 @@ export default function DrawingCanvas({ sessionToken, user, canvasId, readOnly =
     }
   };
   if (scene === undefined) return <ContentSkeleton kind="canvas" label="Loading drawing" />;
+  const presenceAvatars = here.length ? <div className="draw-presence" aria-label={`Also here: ${here.map(member => memberName(member.person)).join(", ")}`}>
+    {here.slice(0, 4).map(member => <span key={member.userId} title={memberName(member.person)}><UserAvatar user={member.person} size="small" /></span>)}
+    {here.length > 4 && <span className="draw-presence-more">+{here.length - 4}</span>}
+  </div> : null;
   return <div className="drawing-canvas">
     {(notice || unavailableFiles.length > 0) && <div className="drawing-status error" role="alert">{notice || "A drawing image could not be loaded"}</div>}
+    {/* Phones: Excalidraw's top row is the toolbar, so the avatars sit in the middle of its bottom bar. */}
+    {presenceAvatars && <div className="draw-presence-floating">{presenceAvatars}</div>}
     <Excalidraw excalidrawAPI={setCanvas} name={name || `${workspace.name} - Draw`} theme="dark" isCollaborating viewModeEnabled={readOnly || workspace.role === "viewer"} validateEmbeddable={false}
       initialData={{ elements: scene.map(data => JSON.parse(data)), appState: { viewBackgroundColor: "#ffffff", currentItemStrokeColor: "#1e1e1e" }, scrollToContent: true }}
       onChange={onChange}
       onPointerUpdate={({ pointer, button }) => { currentPointer.current = { x: pointer.x, y: pointer.y, button }; if (Date.now() - lastPointer.current < 200) return; lastPointer.current = Date.now(); void setPresence({ ...args, ...currentPointer.current }).catch(() => {}); }}
-      UIOptions={{ canvasActions: { loadScene: true, export: { saveFileToDisk: true }, saveToActiveFile: true, toggleTheme: false, changeViewBackgroundColor: false } }} />
+      UIOptions={{ canvasActions: { loadScene: true, export: { saveFileToDisk: true }, saveToActiveFile: true, toggleTheme: false, changeViewBackgroundColor: false } }}
+      renderTopRightUI={isMobile => isMobile ? null : presenceAvatars}>
+      {/* Excalidraw's menu without its own links (GitHub, X, Discord). */}
+      <MainMenu>
+        <MainMenu.DefaultItems.LoadScene />
+        <MainMenu.DefaultItems.SaveToActiveFile />
+        <MainMenu.DefaultItems.Export />
+        <MainMenu.DefaultItems.SaveAsImage />
+        <MainMenu.DefaultItems.SearchMenu />
+        <MainMenu.DefaultItems.Help />
+        <MainMenu.DefaultItems.ClearCanvas />
+      </MainMenu>
+    </Excalidraw>
   </div>;
 }
