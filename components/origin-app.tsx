@@ -2,7 +2,8 @@
 import { errorText, mediaErrorText } from "@/lib/error-text";
 
 import { useMutation, useQuery } from "convex/react";
-import { BoardTab, TaskModal } from "./project-issues";
+import { BoardTab } from "./project-issues";
+import { TaskModal } from "./issue-detail";
 import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
 import { FolderPlus, ChevronDown, ChevronRight, CheckCircle2, CircleDot, Power, RotateCcw, CircleAlert, ExternalLink, GitBranch, GitCommit, Inbox, KeyRound, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Settings, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
