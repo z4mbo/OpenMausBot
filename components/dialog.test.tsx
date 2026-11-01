@@ -10,10 +10,11 @@ afterEach(() => { act(() => root?.unmount()); root = undefined; document.body.in
 
 function Harness({ keep = false }: { keep?: boolean }) {
   const [open, setOpen] = useState(false);
-  return createElement("main", null,
-    createElement("h1", null, "Board"),
-    createElement("button", { id: "opener", onClick: () => setOpen(true) }, "Open"),
-    open && createElement(Dialog, { title: "Test", onClose: () => { if (!keep) setOpen(false); }, children: createElement("button", { id: "inside" }, "Inside") }));
+  return <main>
+    <h1>Board</h1>
+    <button id="opener" onClick={() => setOpen(true)}>Open</button>
+    {open && <Dialog title="Test" onClose={() => { if (!keep) setOpen(false); }}><button id="inside">Inside</button></Dialog>}
+  </main>;
 }
 
 function mount(keep = false) {
