@@ -404,6 +404,8 @@ function RepoTab({ project, sessionToken }: { project: Doc<"projects"> & { membe
   const savedCommits = useQuery(api.commits.list, { projectId: project._id, sessionToken });
   const [revision, setRevision] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Where the three columns stack (narrow windows, phones), one shows at a time.
+  const [shown, setShown] = useState<"commits" | "issues" | "pulls">("commits");
   const github = useGitHubSnapshot(project._id, project.repoUrl, sessionToken, revision);
   const admin = ["owner", "admin"].includes(project.memberRole);
   const commits = github.snapshot?.commits ?? savedCommits;
@@ -429,21 +431,22 @@ function RepoTab({ project, sessionToken }: { project: Doc<"projects"> & { membe
       </div>
       {github.error && <div className="notice danger" role="alert">{github.error}</div>}
       {github.snapshot?.commitsError && <div className="notice">{github.snapshot.commitsError}</div>}
-      <div className="repository-columns" data-columns={github.error ? 1 : 3}>
-        <RepoColumn icon={<GitCommitHorizontal size={15} />} title="Commits" count={commits?.length} loading={commits === undefined} empty="No commits">
+      {!github.error && <div className="segmented-control repo-switch" role="group" aria-label="Show">{([["commits", "Commits", commits?.length], ["issues", "Issues", github.snapshot?.issues.length], ["pulls", "Pull requests", github.snapshot?.pullRequests.length]] as const).map(([key, label, count]) => <button key={key} type="button" className={shown === key ? "active" : ""} aria-pressed={shown === key} onClick={() => setShown(key)}>{label}{count ? <span>{count}</span> : null}</button>)}</div>}
+      <div className="repository-columns" data-columns={github.error ? 1 : 3} data-shown={github.error ? "commits" : shown}>
+        <RepoColumn name="commits" icon={<GitCommitHorizontal size={15} />} title="Commits" count={commits?.length} loading={commits === undefined} empty="No commits">
           {commits?.map(commit => <a className="repository-item" key={commit.sha} href={commit.url || githubRepoHref(project.repoUrl) || undefined} target="_blank" rel="noreferrer">
             <strong>{commit.message.split("\n")[0]}</strong>
             <span className="repository-meta"><code>{shortSha(commit.sha)}</code><span>{commit.author}</span><time dateTime={new Date(commit.committedAt).toISOString()}>{formatRelative(commit.committedAt)}</time></span>
           </a>)}
         </RepoColumn>
-        {!github.error && <RepoColumn icon={<CircleDot size={15} />} title="Issues" count={github.snapshot?.issues.length} loading={waiting} empty="No issues">
+        {!github.error && <RepoColumn name="issues" icon={<CircleDot size={15} />} title="Issues" count={github.snapshot?.issues.length} loading={waiting} empty="No issues">
           {github.snapshot?.issues.map(issue => <a className="repository-item with-state" key={issue.number} href={issue.url} target="_blank" rel="noreferrer">
             <span className={`repository-state ${issue.state}`} aria-label={issue.state}>{issue.state === "open" ? <CircleDot size={14} /> : <CircleCheck size={14} />}</span>
             <strong>{issue.title}</strong>
             <span className="repository-meta"><span>#{issue.number}</span>{issue.author && <span>{issue.author}</span>}<time dateTime={new Date(issue.updatedAt).toISOString()}>{formatRelative(issue.updatedAt)}</time></span>
           </a>)}
         </RepoColumn>}
-        {!github.error && <RepoColumn icon={<GitPullRequest size={15} />} title="Pull requests" count={github.snapshot?.pullRequests.length} loading={waiting} empty="No pull requests">
+        {!github.error && <RepoColumn name="pulls" icon={<GitPullRequest size={15} />} title="Pull requests" count={github.snapshot?.pullRequests.length} loading={waiting} empty="No pull requests">
           {github.snapshot?.pullRequests.map(pr => <a className="repository-item with-state" key={pr.number} href={pr.url} target="_blank" rel="noreferrer">
             <span className={`repository-state ${pr.state}`} aria-label={pr.state}>{pr.state === "merged" ? <GitMerge size={14} /> : pr.state === "closed" ? <GitPullRequestClosed size={14} /> : <GitPullRequest size={14} />}</span>
             <strong>{pr.title}</strong>
@@ -456,8 +459,8 @@ function RepoTab({ project, sessionToken }: { project: Doc<"projects"> & { membe
   );
 }
 
-function RepoColumn({ icon, title, count, loading, empty, children }: { icon: ReactNode; title: string; count?: number; loading: boolean; empty: string; children: ReactNode }) {
-  return <section className="repository-column">
+function RepoColumn({ name, icon, title, count, loading, empty, children }: { name: string; icon: ReactNode; title: string; count?: number; loading: boolean; empty: string; children: ReactNode }) {
+  return <section className="repository-column" data-column={name}>
     <header>{icon}<h3>{title}</h3>{!loading && count ? <span>{count}</span> : null}</header>
     {loading ? <ContentSkeleton rows={4} label={`Loading ${title.toLowerCase()}`} /> : !count ? <p className="repository-empty">{empty}</p> : <div className="repository-items">{children}</div>}
   </section>;

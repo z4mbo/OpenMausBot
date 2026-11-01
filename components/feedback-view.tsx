@@ -13,10 +13,7 @@ import type { FunctionReturnType } from "convex/server";
 import { useWorkspace } from "./workspace-context";
 import { Dialog } from "./dialog";
 import { DelayedSkeleton } from "./delayed-skeleton";
-import { DatePicker } from "./date-picker";
-import { IssueSelect } from "./issue-select";
-import { MemberPicker } from "./member-picker";
-import { StatusIcon } from "./issue-icons";
+import { IssueFields } from "./issue-fields";
 import { ProjectEmpty } from "./project-library";
 
 type Portal = FunctionReturnType<typeof api.feedback.portals>[number];
@@ -96,16 +93,13 @@ function PortalSettings({ sessionToken, projectId, projectName, portal, onClose 
 function ConvertFeedback({ sessionToken, projectId, entry, onClose, onCreated }: { sessionToken: string; projectId: Id<"projects">; entry: Entry; onClose: () => void; onCreated: (id: Id<"tasks">) => void }) {
   const workspace = useWorkspace(); const convert = useMutation(api.feedback.convert);
   const board = useQuery(api.tasks.board, { sessionToken, projectId }); const members = useQuery(api.members.people, { sessionToken, projectId }); const me = useQuery(api.auth.me, { sessionToken });
-  const [column, setColumn] = useState(""); const [assignee, setAssignee] = useState(""); const [dueDate, setDueDate] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  const [column, setColumn] = useState(""); const [priority, setPriority] = useState<"low" | "medium" | "high">(entry.kind === "bug" ? "high" : "medium"); const [assignee, setAssignee] = useState(""); const [dueDate, setDueDate] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
   const columns = board?.columns.filter(c => !c.isDone && !/^done$/i.test(c.title)) || [];
   const defaultColumn = (columns.find(c => !isDraftColumn(c)) ?? columns[0])?._id || "";
-  return <Dialog title="Create issue" onClose={onClose}><form className="stack-form library-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || defaultColumn) as Id<"columns">, assignedToEmail: assignee, dueDate })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}>
+  return <Dialog title="New issue" onClose={onClose}><form className="stack-form library-form" onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); e.currentTarget.requestSubmit(); } }} onSubmit={async e => { e.preventDefault(); if (busy || !columns.length) return; setBusy(true); setError(""); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || defaultColumn) as Id<"columns">, assignedToEmail: assignee, dueDate, priority })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}>
     <p className="library-form-subject">{entry.kind === "bug" ? <Bug size={14} /> : <Lightbulb size={14} />}<span>{entry.title}</span></p>
-    <div className="issue-property-chips">
-      <IssueSelect label="Status" value={column || defaultColumn} onChange={setColumn} options={columns.map(c => ({ value: c._id, label: c.title, icon: <StatusIcon title={c.title} /> }))} caption="Status" />
-      <MemberPicker label="Assignee" placeholder="Assignee" noneLabel="Unassigned" members={members ?? []} value={assignee} onChange={setAssignee} currentEmail={me?.email} caption="Assignee" />
-      <DatePicker value={dueDate} onChange={setDueDate} />
-    </div>
+    {/* The composer's chips: status, priority, assignee, due date. */}
+    <IssueFields columns={columns} members={members ?? []} currentEmail={me?.email} columnId={column || defaultColumn} onColumnChange={setColumn} priority={priority} onPriorityChange={setPriority} assignee={assignee} onAssigneeChange={setAssignee} dueDate={dueDate} onDueDateChange={setDueDate} disabled={busy} />
     {error && <p className="notice danger" role="alert">{error}</p>}
     <div className="library-form-actions"><button type="button" className="ghost-button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={busy || !columns.length}>{busy ? <Loader2 className="spin" size={15} /> : <CirclePlus size={15} />}Create issue</button></div>
   </form></Dialog>;

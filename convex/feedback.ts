@@ -3,6 +3,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { canEdit, requireMember, requireTeamAdmin, requireTeamMember, visibleProjectRows } from "./lib/permissions";
 import { cleanText, requireWorkspaceEditor, workspaceProject } from "./lib/features";
 import { createTaskRecord } from "./tasks";
+import { priorityValidator } from "./lib/validators";
 
 const scope = { sessionToken: v.string(), teamId: v.id("teams") };
 const kind = v.union(v.literal("bug"), v.literal("idea"));
@@ -84,7 +85,7 @@ export const dismiss = mutation({
 });
 
 export const convert = mutation({
-  args: { ...scope, entryId: v.id("feedbackEntries"), columnId: v.optional(v.id("columns")), assignedToEmail: v.string(), dueDate: v.string() }, returns: v.id("tasks"),
+  args: { ...scope, entryId: v.id("feedbackEntries"), columnId: v.optional(v.id("columns")), assignedToEmail: v.string(), dueDate: v.string(), priority: v.optional(priorityValidator) }, returns: v.id("tasks"),
   handler: async (ctx, args) => {
     const { user } = await requireWorkspaceEditor(ctx, args.teamId, args.sessionToken);
     const entry = await ctx.db.get(args.entryId);
@@ -92,7 +93,7 @@ export const convert = mutation({
     if (!entry || !portal || portal.teamId !== args.teamId) throw new ConvexError("Feedback not found");
     if (!canEdit((await requireMember(ctx, portal.projectId, args.sessionToken)).member)) throw new ConvexError("Edit role required");
     if (entry.taskId && await ctx.db.get(entry.taskId)) return entry.taskId;
-    const taskId = await createTaskRecord(ctx, { projectId: portal.projectId, columnId: args.columnId, title: entry.title, description: `${entry.body}\n\nSource: customer feedback (${entry.kind})`, priority: entry.kind === "bug" ? "high" : "medium", assignedToEmail: args.assignedToEmail, dueDate: args.dueDate }, user._id);
+    const taskId = await createTaskRecord(ctx, { projectId: portal.projectId, columnId: args.columnId, title: entry.title, description: `${entry.body}\n\nSource: customer feedback (${entry.kind})`, priority: args.priority ?? (entry.kind === "bug" ? "high" : "medium"), assignedToEmail: args.assignedToEmail, dueDate: args.dueDate }, user._id);
     await ctx.db.patch(entry._id, { taskId, status: "planned" });
     return taskId;
   },

@@ -40,11 +40,9 @@
 .asset-info { display: grid; gap: 2px; min-width: 0; padding: var(--space-2) var(--space-3) var(--space-3); }
 .asset-info strong { overflow: hidden; color: var(--text-1); font-size: var(--text-base); font-weight: var(--weight-medium); text-overflow: ellipsis; white-space: nowrap; }
 .asset-info small { overflow: hidden; color: var(--text-3); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
-.asset-delete { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 1; height: 28px; min-width: 28px; padding: 0 7px; border: 0; border-radius: var(--radius-sm); background: rgba(8, 9, 10, 0.72); color: var(--text-1); backdrop-filter: blur(6px); opacity: 0; transition: opacity var(--duration-fast) var(--ease-out), background var(--duration-fast); }
-.asset-card:hover .asset-delete, .asset-card:has(:focus-visible) .asset-delete, .asset-delete.armed { opacity: 1; }
-@media (hover: hover) { .asset-delete:hover:not(:disabled) { background: rgba(8, 9, 10, 0.9); } }
-/* Same armed look as every ConfirmButton, laid on an opaque surface so it reads over images. */
-.asset-delete.armed, .asset-delete.armed:hover:not(:disabled) { background: linear-gradient(var(--red-soft), var(--red-soft)), var(--surface-2); color: var(--red); }
+.asset-delete { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--radius-sm); background: rgba(8, 9, 10, 0.72); color: var(--text-1); backdrop-filter: blur(6px); opacity: 0; transition: opacity var(--duration-fast) var(--ease-out), background var(--duration-fast), color var(--duration-fast); }
+.asset-card:hover .asset-delete, .asset-card:has(:focus-visible) .asset-delete { opacity: 1; }
+@media (hover: hover) { .asset-delete:hover:not(:disabled) { background: rgba(8, 9, 10, 0.9); color: var(--red); } }
 
 /* Assets: list. */
 .asset-list { display: grid; margin: 0; padding: 0; list-style: none; }
@@ -60,6 +58,12 @@
 .asset-row-name strong { color: var(--text-1); font-weight: var(--weight-medium); }
 .asset-row-name small, .asset-row-type, .asset-row-meta, .asset-row-date { color: var(--text-3); font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .asset-row-date { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Delete dialog subject (components/confirm-button.tsx DeleteDialog): the item's icon or thumbnail and its name. */
+.confirm-text.confirm-subject { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); }
+.confirm-subject > svg { flex: none; color: var(--text-3); }
+.confirm-subject > strong { min-width: 0; font-weight: var(--weight-medium); overflow-wrap: anywhere; }
+.confirm-text > .confirm-subject-thumb { position: relative; display: grid; flex: none; place-items: center; width: 32px; height: 32px; margin: 0; overflow: hidden; border-radius: var(--radius-sm); background: var(--surface-3); color: var(--text-3); font-size: inherit; }
 
 /* Add asset dialog. */
 .library-form { gap: var(--space-4); }
@@ -111,31 +115,43 @@
 .field-error { margin: 0; color: var(--red); font-size: var(--text-sm); animation: library-fade var(--duration) var(--ease-out); }
 
 @media (max-width: 760px) {
-  .library-search { max-width: none; }
+  /* Same weight as the Issues toolbar: 32-36px controls, icon-only actions (touch press areas below). */
+  .library-toolbar { gap: var(--space-2); }
+  .library-search { max-width: none; height: 34px; }
+  .library-filter { height: 34px; min-height: 34px; }
   .library-button-label { display: none; }
-  .library-toolbar > .primary-button, .library-toolbar > .ghost-button { width: var(--control-sm); padding: 0; }
+  .library-toolbar > .primary-button, .library-toolbar > .ghost-button { width: 36px; min-height: 32px; padding: 0; justify-content: center; }
+  .library-toolbar > .ghost-button { border-color: transparent; background: transparent; color: var(--text-2); }
+  .library-toolbar .icon-button { width: 36px; min-width: 36px; height: 36px; }
+  .library-view { padding: 0; border: 0; background: transparent; }
+  .library-view button, .library-view button:hover { width: 36px; min-width: 36px; height: 36px; color: var(--text-2); }
   .asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
   .asset-row-link { grid-template-columns: 32px minmax(0, 1fr) auto; }
   .asset-row-type, .asset-row-date { display: none; }
   .library-form-pair { grid-template-columns: minmax(0, 1fr); }
   .vault-row { padding-inline: var(--space-1); }
   .library-view button[aria-pressed="true"] { display: none; }
-  .library-view { padding: 2px; }
-  .library-filter { max-width: 96px; }
+  .library-filter { max-width: 112px; }
 }
 @media (pointer: coarse) {
   .asset-delete { top: auto; bottom: 2px; right: 2px; min-width: 44px; height: 44px; background: transparent; color: var(--text-3); backdrop-filter: none; opacity: 1; }
   .asset-card .asset-info { padding-right: 46px; }
-  .library-toolbar { padding-block: var(--space-1); }
-  .library-toolbar > .primary-button, .library-toolbar > .ghost-button, .library-search, .library-filter { min-height: 44px; height: 44px; }
-  .library-toolbar > .primary-button, .library-toolbar > .ghost-button { width: 44px; }
-  .library-view button { width: 40px; height: 40px; }
+  /* Toolbar controls keep their size and take a 44px press area, like the Issues toolbar. */
+  .library-toolbar :is(button, a.icon-button, .library-search) { position: relative; }
+  .library-toolbar :is(button, a.icon-button, .library-search)::before { content: ""; position: absolute; inset: -6px 0; }
+  .library-toolbar :is(.icon-button, .library-view button)::before { inset: -4px; }
+  .library-toolbar :is(.primary-button, .ghost-button).compact::after { content: none; }
+  .library-toolbar .segmented-control button::after { inset: -6px 0; }
+  .library-toolbar .segmented-control:not(.library-view) button::before { content: none; }
+  .library-toolbar .library-view button::after { content: none; }
+  .library-search input { position: relative; z-index: 1; }
   .library-row-actions .icon-button { width: 44px; min-width: 44px; height: 44px; }
   .vault-unlock input, .vault-unlock .primary-button { min-height: 44px; }
   .asset-card:hover { transform: none; }
 }
 @media (pointer: coarse) and (min-width: 761px) {
-  .library-toolbar > .primary-button, .library-toolbar > .ghost-button { width: auto; padding: 0 var(--space-3); }
+  .library-toolbar .icon-button { width: 36px; min-width: 36px; height: 36px; }
+  .library-toolbar > :is(.primary-button, .ghost-button).compact { min-height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .asset-card, .asset-image, .library-drop-overlay, .secret-code { transition: none; animation: none; }
