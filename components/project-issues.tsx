@@ -6,13 +6,13 @@ import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "convex/react";
 import type { OptimisticLocalStore } from "convex/browser";
 import clsx from "clsx";
-import { ArrowLeft, Check, CheckCircle2, Circle, Columns3, List, MoreHorizontal, PencilLine, Plus, Search, Trash2, X } from "lucide-react";
+import { Check, CheckCircle2, Circle, Columns3, List, MoreHorizontal, PencilLine, Plus, Search, Trash2, Undo2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { displayName, formatDate, formatDue } from "@/lib/format";
 import { hasOpenKeyboardOverlay, isEditingTarget } from "@/lib/keyboard-navigation";
 import { issueShortcut, matchesIssue, taskKey } from "../lib/project-issues";
-import { TaskMenu, type TaskMenuAnchor, type TaskMenuView } from "./task-actions-menu";
+import { MenuScrim, TaskMenu, type TaskMenuAnchor, type TaskMenuView } from "./task-actions-menu";
 import { IssueCard, type CardPerson } from "./issue-card";
 import { DatePopover } from "./date-picker";
 import { MemberPicker } from "./member-picker";
@@ -85,6 +85,25 @@ function readLayout(projectId: string): "board" | "list" {
   try { return typeof window !== "undefined" && localStorage.getItem(layoutKey(projectId)) === "list" ? "list" : "board"; } catch { return "board"; }
 }
 
+/**
+ * After a tap closes a popover that dismisses on press (the card due date), the click the browser makes for that tap
+ * must not open the card or button underneath. Swallows that one click if the popover is gone by then.
+ */
+function swallowTapThrough(popoverSelector: string) {
+  const block = (event: MouseEvent) => {
+    remove();
+    if (document.querySelector(popoverSelector)) return;
+    event.preventDefault(); event.stopPropagation();
+  };
+  const remove = () => {
+    window.removeEventListener("click", block, { capture: true });
+    window.removeEventListener("pointerdown", remove, { capture: true });
+  };
+  window.setTimeout(() => window.addEventListener("pointerdown", remove, { capture: true, once: true }), 0);
+  window.addEventListener("click", block, { capture: true });
+  window.setTimeout(remove, 800);
+}
+
 const cardElement = (root: ParentNode | null | undefined, taskId: string) => root?.querySelector<HTMLElement>(`.kanban-scroll [data-task-id="${CSS.escape(taskId)}"]`) ?? null;
 
 function EmptyBlock({ icon: Icon, title }: { icon: typeof Circle; title: string }) {
@@ -154,7 +173,6 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   }, [projectId, selectedTaskId]);
 
   const [assigneeFilter, setAssigneeFilter] = useState("");
-  const [completedColumnId, setCompletedColumnId] = useState<Id<"columns"> | null>(null);
   const [filter, setFilter] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const filterButton = useRef<HTMLButtonElement>(null);
@@ -171,6 +189,18 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const [expandedLanes, setExpandedLanes] = useState<Set<string>>(() => new Set());
   const [focusId, setFocusId] = useState<string | null>(null);
   const [laneCreate, setLaneCreate] = useState<Id<"columns"> | null>(null);
+
+  // A tap outside the card's date popover only closes it (mouse presses behave as before).
+  useEffect(() => {
+    if (!datePick) return;
+    const guard = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (event.pointerType === "mouse" || target?.closest?.(".date-picker-popover") || datePick.anchor.current.contains(target)) return;
+      swallowTapThrough(".date-picker-popover");
+    };
+    document.addEventListener("pointerdown", guard, true);
+    return () => document.removeEventListener("pointerdown", guard, true);
+  }, [datePick]);
 
   const showToast = (text: string, undo?: () => void) => setToast({ id: ++toastSeq, text, undo });
   const dnd = useIssueDrag({
@@ -253,10 +283,10 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const fallbackColumn = visualColumns.find(column => column.title.toLowerCase() === "todo") || visualColumns[0];
   const columnForTask = (task: Task) => visibleColumnIds.has(task.columnId) ? task.columnId : fallbackColumn?._id;
   const toneOf = (column: Column) => isDraftColumn(column) ? "draft" : laneTone(column.title);
-  const archivedTasks = board.tasks.filter(task => task.done && matches(task) && (!completedColumnId || columnForTask(task) === completedColumnId)).sort((a, b) => (b.completedAt ?? b.updatedAt) - (a.completedAt ?? a.updatedAt));
-  const showCompleted = (columnId: Id<"columns"> | null) => { setCompletedColumnId(columnId); setArchive(true); };
+  const archivedTasks = board.tasks.filter(task => task.done && matches(task)).sort((a, b) => (b.completedAt ?? b.updatedAt) - (a.completedAt ?? a.updatedAt));
   const visibleTasks = (columnId: string) => activeLaneTasks(board, columnId, matches);
   const activeTasks = visualColumns.flatMap(column => visibleTasks(column._id));
+  const boardHasActive = board.tasks.some(task => !task.done);
   const tabStopId = activeTasks.some(task => task._id === focusId) ? focusId : activeTasks[0]?._id ?? null;
   /** Column cards with the dragged card shown in its target slot. */
   const displayTasks = (columnId: string) => {
@@ -386,7 +416,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
 
   const toolbar = (
     <div className="board-header">
-      <div className="segmented-control"><span className="segment-glider" aria-hidden="true" /><button className={!archive ? "active" : ""} onClick={() => setArchive(false)}>Active<span>{board.tasks.filter(t => !t.done && matches(t)).length}</span></button><button className={archive ? "active" : ""} onClick={() => showCompleted(null)}>Completed<span>{board.tasks.filter(t => t.done && matches(t)).length}</span></button></div>
+      <div className="segmented-control"><span className="segment-glider" aria-hidden="true" /><button className={!archive ? "active" : ""} onClick={() => setArchive(false)}>Active<span>{board.tasks.filter(t => !t.done && matches(t)).length}</span></button><button className={archive ? "active" : ""} onClick={() => setArchive(true)}>Completed<span>{board.tasks.filter(t => t.done && matches(t)).length}</span></button></div>
       <div className="board-header-actions">
         <div className="board-filter-control" ref={filterBox}>
           {filter && !filterOpen
@@ -403,13 +433,12 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
 
   const archiveView = (
     <div className="archive-list">
-      {completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}
       {!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title={filtered ? "No matching issues" : "No completed issues"} />}
       {archivedTasks.map(task => <div key={task._id} className="archive-row" data-task-id={task._id} onClick={() => openTask(task._id)}>
         <span className="archive-check"><Check size={10} strokeWidth={3} /></span>
         <button className="archive-issue" onClick={event => { event.stopPropagation(); openTask(task._id); }}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button>
         <time>{formatDate(task.completedAt ?? task.updatedAt)}</time>
-        {canEdit && <button className="ghost-button compact" onClick={event => { event.stopPropagation(); void restore(task); }}><ArrowLeft size={13} />Restore</button>}
+        {canEdit && <button className="ghost-button compact archive-restore" aria-label={`Restore ${task.title}`} onClick={event => { event.stopPropagation(); void restore(task); }}><Undo2 size={14} /><span>Restore</span></button>}
       </div>)}
     </div>
   );
@@ -431,7 +460,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
             </td>
             <td className="col-status">{status && <span className={clsx("status-pill", toneOf(status))}><StatusIcon title={isDraftColumn(status) ? "Draft" : status.title} /><span>{status.title}</span></span>}</td>
             <td className="col-priority"><span className="issue-table-priority"><PriorityIcon priority={task.priority} /><span>{PRIORITY_LABEL[task.priority] ?? task.priority}</span></span></td>
-            <td className="col-assignee">{person ? <span className="issue-table-assignee" title={displayName(person)}><UserAvatar user={person} size="small" /><span>{displayName(person)}</span></span> : null}</td>
+            <td className="col-assignee">{person ? <span className="issue-table-assignee" title={displayName(person)}><UserAvatar user={person} /><span>{displayName(person)}</span></span> : null}</td>
             <td className="col-due">{due ? <span className={clsx("due-text", due.tone)}>{due.label}</span> : null}</td>
           </tr>;
         })}</tbody>
@@ -444,10 +473,10 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     <div className={clsx("kanban-scroll", drag?.mode === "pointer" && "is-dragging")}>
       {visualColumns.map(column => {
         const tasks = displayTasks(column._id);
-        const completedCount = board.tasks.filter(task => task.done && matches(task) && columnForTask(task) === column._id).length;
         const tone = toneOf(column);
         const statusTitle = tone === "draft" ? "Draft" : column.title;
-        const collapsed = activeTasks.length > 0 && !tasks.length && !expandedLanes.has(column._id) && drag?.origin.columnId !== column._id && drag?.target.columnId !== column._id && renaming !== column._id;
+        // Only lanes that are really empty fold; a lane emptied by the search or filter stays open and says so.
+        const collapsed = boardHasActive && !activeLaneTasks(board, column._id, () => true).length && !expandedLanes.has(column._id) && drag?.origin.columnId !== column._id && drag?.target.columnId !== column._id && renaming !== column._id;
         const canDelete = visualColumns.length > 1 && !isDraftColumn(column);
         return (
           <div
@@ -477,7 +506,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
                   </div>}
                 </div>
                 <div className="task-list">
-                  {tasks.length === 0 ? <div className="empty-lane">{completedCount ? <button className="archive-lane-link" aria-label={`View ${completedCount} completed issues in ${column.title}`} onClick={() => showCompleted(column._id)}><CheckCircle2 size={14} />{completedCount} completed</button> : filtered ? "No matching issues" : canEdit && online ? <button className="archive-lane-link" onClick={() => setLaneCreate(column._id)}><Plus size={14} />Add issue</button> : "No issues"}</div> : null}
+                  {tasks.length === 0 ? <div className="empty-lane">{filtered ? "No matching issues" : canEdit && online ? <button className="archive-lane-link" onClick={() => setLaneCreate(column._id)}><Plus size={14} />Add issue</button> : "No issues"}</div> : null}
                   {tasks.map(task => <IssueCard
                     key={task._id}
                     task={task}
@@ -501,7 +530,6 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
                     onHandleBlur={dnd.onHandleBlur}
                   />)}
                 </div>
-                {tasks.length > 0 && completedCount > 0 && <button className="archive-lane-link completed-lane-footer" aria-label={`View ${completedCount} completed issues in ${column.title}`} onClick={() => showCompleted(column._id)}><CheckCircle2 size={14} />{completedCount} completed</button>}
               </>}
           </div>
         );
@@ -538,7 +566,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         dueDate={menuTask.dueDate}
         onStatus={columnId => { if (columnId !== columnForTask(menuTask)) void moveTask({ projectId, sessionToken, taskId: menuTask._id, columnId: columnId as Id<"columns"> }).catch(report("Could not move issue")); }}
         onPriority={priority => { if (priority !== menuTask.priority) void update(menuTask._id, { priority }); }}
-        onAssignee={email => { if (email !== menuTask.assignedToEmail) void update(menuTask._id, { assignedToEmail: email }); }}
+        onAssignee={email => { if (email !== (menuTask.assignedToEmail ?? "")) void update(menuTask._id, { assignedToEmail: email }); }}
         onDueDate={() => {
           const taskId = menuTask._id;
           // After the menu has closed and handed focus back to the card.
@@ -604,7 +632,7 @@ function LaneMenu({ title, canDelete, onRename, onDelete }: { title: string; can
   return <>
     <button ref={trigger} className="icon-button" aria-label={`${title} column options`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}><MoreHorizontal size={15} /></button>
     {open && createPortal(<div className="task-menu-layer" onContextMenu={event => { event.preventDefault(); close(false); }}>
-      <div className="task-menu-scrim" onPointerDown={event => { event.preventDefault(); close(false); }} />
+      <MenuScrim onClose={() => close(false)} />
       <div ref={menu} role="menu" aria-label={`${title} column options`} className="origin-dropdown task-menu lane-menu" onKeyDown={event => {
         if (event.key === "Escape" || event.key === "Tab") { event.preventDefault(); close(); return; }
         if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;

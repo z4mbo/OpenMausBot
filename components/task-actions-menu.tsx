@@ -15,9 +15,23 @@ type Priority = "low" | "medium" | "high";
 
 const PRIORITIES: { value: Priority; label: string }[] = [{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }];
 const SUBMENUS: { view: Exclude<TaskMenuView, "root">; label: string }[] = [{ view: "status", label: "Status" }, { view: "priority", label: "Priority" }, { view: "assignee", label: "Assignee" }];
+const noAssignee = <span className="task-menu-no-assignee" aria-hidden="true"><UserRound size={12} /></span>;
 const items = (menu: HTMLElement | null) => Array.from(menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not(:disabled)') ?? []);
 const sheetLayout = () => typeof matchMedia === "function" && matchMedia("(max-width: 760px)").matches;
 const coarsePointer = () => typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
+
+/**
+ * The invisible layer behind a menu: pressing it closes the menu and nothing underneath gets the press. A mouse closes
+ * on press; a tap closes on its click, so the click the browser makes after a tap lands here and not on the card below.
+ */
+export function MenuScrim({ onClose }: { onClose: () => void }) {
+  const tap = useRef(false);
+  return <div className="task-menu-scrim" onPointerDown={event => {
+    event.preventDefault();
+    tap.current = event.pointerType !== "mouse";
+    if (!tap.current) onClose();
+  }} onClick={() => { if (tap.current) onClose(); }} />;
+}
 
 /**
  * The issue card menu: right-click / long-press / ⋯ open it at the root; the card's priority and assignee chips open a
@@ -88,7 +102,7 @@ export function TaskMenu({ title, view: initialView, anchor, status, statuses, p
     const values: Record<Exclude<TaskMenuView, "root">, { icon: ReactNode; value: string }> = {
       status: { icon: <StatusIcon title={statusTitle} />, value: statusTitle },
       priority: { icon: <PriorityIcon priority={priority} />, value: PRIORITIES.find(item => item.value === priority)?.label ?? "" },
-      assignee: { icon: person ? <UserAvatar user={person} size="small" /> : <UserRound size={14} />, value: person ? displayName(person) : "Unassigned" },
+      assignee: { icon: person ? <UserAvatar user={person} /> : noAssignee, value: person ? displayName(person) : "Unassigned" },
     };
     body = <>
       {SUBMENUS.map(item => <button key={item.view} type="button" role="menuitem" aria-haspopup="menu" data-view={item.view} onClick={() => open(item.view)}>
@@ -111,13 +125,14 @@ export function TaskMenu({ title, view: initialView, anchor, status, statuses, p
       }} /></div>}
       {view === "status" && statuses.map(item => option(item.id, item.id === status, <StatusIcon title={item.title} />, item.title, () => onStatus(item.id)))}
       {view === "priority" && PRIORITIES.map(item => option(item.value, item.value === priority, <PriorityIcon priority={item.value} />, item.label, () => onPriority(item.value)))}
-      {view === "assignee" && people.map(member => option(member.email, member.email === assignee, <UserAvatar user={member} size="small" />, displayName(member), () => onAssignee(member.email), member.email === currentEmail ? <small>You</small> : null))}
+      {view === "assignee" && !query.trim() && option("unassigned", !assignee, noAssignee, "Unassigned", () => onAssignee(""))}
+      {view === "assignee" && people.map(member => option(member.email, member.email === assignee, <UserAvatar user={member} />, displayName(member), () => onAssignee(member.email), member.email === currentEmail ? <small>You</small> : null))}
       {view === "assignee" && !people.length && <p className="task-menu-empty">No members found</p>}
     </>;
   }
 
   return createPortal(<div className={`task-menu-layer ${sheet ? "is-sheet" : ""}`} onContextMenu={event => { event.preventDefault(); close(false); }}>
-    <div className="task-menu-scrim" onPointerDown={event => { event.preventDefault(); close(false); }} />
+    <MenuScrim onClose={() => close(false)} />
     <div ref={menu} role="menu" aria-label={`Options for ${title}`} className="origin-dropdown task-menu" onKeyDown={onKeyDown}>
       {sheet && <div className="task-menu-title">{title}</div>}
       {body}
