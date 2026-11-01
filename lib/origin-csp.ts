@@ -6,17 +6,28 @@ function checkedOrigin(value: string): string {
   return url.origin;
 }
 
-export function originCsp(environment: Environment = {}, nonce?: string, target: "renderer" | "next" = "renderer"): string {
-  const origin = checkedOrigin(environment.ORIGIN_URL || environment.VITE_ORIGIN_URL || "http://localhost:3000");
-  const convex = checkedOrigin(environment.NEXT_PUBLIC_CONVEX_URL || environment.VITE_ORIGIN_CONVEX_URL || "http://localhost:3210");
+/** Convex serves HTTP actions (uploads, integrations) from the matching .convex.site origin. */
+function convexSiteUrl(environment: Environment, convexUrl: string): string | undefined {
+  if (environment.NEXT_PUBLIC_CONVEX_SITE_URL) return environment.NEXT_PUBLIC_CONVEX_SITE_URL;
+  const cloud = new URL(convexUrl);
+  if (cloud.hostname.endsWith(".convex.cloud")) return `${cloud.protocol}//${cloud.hostname.replace(/\.convex\.cloud$/, ".convex.site")}`;
+  return undefined;
+}
+
+export function originCsp(environment: Environment = {}, nonce?: string): string {
+  const origin = checkedOrigin(environment.ORIGIN_PUBLIC_URL || environment.ORIGIN_URL || "http://localhost:3000");
+  const convexUrl = environment.NEXT_PUBLIC_CONVEX_URL || "http://127.0.0.1:3210";
+  const convex = checkedOrigin(convexUrl);
+  const site = convexSiteUrl(environment, convexUrl);
+  const convexSite = site ? [checkedOrigin(site)] : [];
   const extra = (environment.ORIGIN_CSP_CONNECT_ORIGINS || "").split(/\s+/).filter(Boolean).map(checkedOrigin);
-  const destinations = [...new Set([origin, convex, ...extra])];
+  const destinations = [...new Set([origin, convex, ...convexSite, ...extra])];
   const sockets = destinations.map(value => value.replace(/^http/, "ws"));
   const drawingFonts = "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/fonts/";
   if (nonce && !/^[A-Za-z0-9+/_=-]+$/.test(nonce)) throw new Error("Invalid CSP nonce");
   return [
     "default-src 'self'",
-    `script-src 'self' 'wasm-unsafe-eval'${target === "next" && environment.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}${nonce ? ` 'nonce-${nonce}'` : ""}`,
+    `script-src 'self' 'wasm-unsafe-eval'${environment.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}${nonce ? ` 'nonce-${nonce}'` : ""}`,
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline'",
     `connect-src 'self' ${destinations.join(" ")} ${sockets.join(" ")} ${drawingFonts}`,

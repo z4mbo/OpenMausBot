@@ -3,7 +3,7 @@ import { originCsp } from "./lib/origin-csp";
 
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const policy = originCsp(process.env, nonce, "next");
+  const policy = originCsp(process.env, nonce);
   const headers = new Headers(request.headers);
   headers.set("x-nonce", nonce);
   headers.set("Content-Security-Policy", policy);
