@@ -64,7 +64,7 @@ export function MemberPicker({ members, value, onChange, label, disabled, allLab
       {caption && <div className="picker-sheet-caption" aria-hidden="true">{caption}</div>}
       {searchable && <div className="member-picker-search"><Search size={14} /><input ref={search} aria-label={`Search ${label.toLowerCase()}`} placeholder="Search..." role="combobox" aria-expanded="true" aria-controls={id} aria-activedescendant={options[active] ? `${id}-${active}` : undefined} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} /></div>}
       <div ref={list} tabIndex={-1} role="listbox" id={id} aria-label={label} aria-activedescendant={options[active] ? `${id}-${active}` : undefined}>{options.map((option, index) => <button id={`${id}-${index}`} key={`${option.kind}:${option.value}`} type="button" tabIndex={-1} role="option" aria-selected={value === option.value} data-highlighted={active === index} onMouseEnter={() => setActive(index)} onClick={() => choose(option)}>
-        {option.person ? <UserAvatar user={option.person} size="small" /> : option.kind === "all" ? <Users size={16} /> : <UserRound size={16} />}<span>{option.label}</span>{option.detail && <small>{option.detail}</small>}{value === option.value && <Check size={14} />}
+        {option.person ? <UserAvatar user={option.person} size="small" /> : option.kind === "all" ? <Users size={16} /> : <span className="avatar-empty" aria-hidden="true"><UserRound size={12} /></span>}<span>{option.label}</span>{option.detail && <small>{option.detail}</small>}{value === option.value && <Check size={14} />}
       </button>)}{!options.length && <p>No members found</p>}</div>
     </div>}
   </div>;

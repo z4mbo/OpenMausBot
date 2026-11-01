@@ -20,7 +20,7 @@
 .primary-button { background: var(--accent); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12); }
 .primary-button:hover:not(:disabled) { background: var(--accent-hover); }
 .ghost-button { background: var(--surface-3); border-color: var(--border-2); color: var(--text-1); }
-.ghost-button:hover:not(:disabled) { background: var(--surface-4); border-color: var(--border-3); }
+@media (hover: hover) { .ghost-button:hover:not(:disabled) { background: var(--surface-4); border-color: var(--border-3); } }
 .primary-button:active:not(:disabled), .ghost-button:active:not(:disabled) { transform: scale(0.98); }
 .primary-button.compact, .ghost-button.compact { min-height: var(--control-sm); padding: 0 10px; font-size: var(--text-sm); }
 .primary-button.large, .ghost-button.large { min-height: var(--control-lg); padding: 0 var(--space-4); font-size: var(--text-md); }
@@ -46,7 +46,8 @@
   text-decoration: none;
   transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
-.icon-button:hover:not(:disabled), .icon-button[aria-expanded="true"], .icon-button.selected { background: var(--hover); color: var(--text-1); }
+.icon-button[aria-expanded="true"], .icon-button.selected { background: var(--hover); color: var(--text-1); }
+@media (hover: hover) { .icon-button:hover:not(:disabled) { background: var(--hover); color: var(--text-1); } }
 .icon-button:active:not(:disabled) { background: var(--active); }
 
 /* Segmented control. */
@@ -154,7 +155,8 @@ input[type="checkbox"][role="switch"]:disabled { cursor: not-allowed; opacity: 0
   text-align: left;
 }
 .origin-dropdown button svg { color: var(--text-3); }
-.origin-dropdown button:hover:not(:disabled), .origin-dropdown button:focus-visible, .member-picker-popover [role="option"][data-highlighted="true"], .issue-select-popover [role="option"][data-highlighted="true"] { background: var(--surface-5); outline: none; }
+.origin-dropdown button:focus-visible, .member-picker-popover [role="option"][data-highlighted="true"], .issue-select-popover [role="option"][data-highlighted="true"] { background: var(--surface-5); outline: none; }
+@media (hover: hover) { .origin-dropdown button:hover:not(:disabled) { background: var(--surface-5); outline: none; } }
 .origin-dropdown button:disabled { opacity: 0.4; }
 .origin-dropdown button > span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .origin-dropdown button:active:not(:disabled) { background: var(--active); }

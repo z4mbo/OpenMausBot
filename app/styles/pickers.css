@@ -109,3 +109,6 @@
 .picker-sheet .date-picker-grid [role="gridcell"] button { height: 44px; min-height: 44px; }
 .picker-sheet .date-picker-weekdays > span { height: 28px; font-size: var(--text-sm); }
 @keyframes picker-sheet-in { from { transform: translateY(24px); opacity: 0; } }
+/* The empty assignee option: a dashed circle where the avatar goes (same as the board's card menu). */
+.avatar-empty, .member-picker-popover [role="option"] > span.avatar-empty { display: grid; flex: none; place-items: center; width: 20px; height: 20px; border: 1px dashed var(--border-3); border-radius: 50%; color: var(--text-3); }
+.picker-sheet [role="option"] > span.avatar-empty { width: 22px; height: 22px; }

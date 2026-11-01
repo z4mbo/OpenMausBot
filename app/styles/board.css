@@ -228,10 +228,12 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 .task-menu-search input { min-width: 0; min-height: 32px; padding: 0; border: 0; background: none; box-shadow: none; }
 .task-menu-search input:focus { box-shadow: none; }
 .task-menu-empty { margin: 0; padding: var(--space-2); color: var(--text-3); font-size: var(--text-sm); }
-.task-menu-title { overflow: hidden; padding: var(--space-2) var(--space-3) var(--space-3); color: var(--text-2); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
+.task-menu-title { overflow: hidden; padding: var(--space-1) var(--space-2) var(--space-2); color: var(--text-2); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
 .task-menu-layer.is-sheet .task-menu-scrim { background: var(--scrim); animation: o-fade var(--duration) var(--ease-out); }
 .task-menu-layer.is-sheet .task-menu.origin-dropdown { left: var(--space-2) !important; right: var(--space-2); top: auto !important; bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); width: auto; max-height: 70vh; padding: var(--space-2); border-radius: var(--radius-lg); animation: task-sheet-in var(--duration-slow) var(--ease-out); }
 .task-menu-layer.is-sheet .task-menu button { min-height: 44px; font-size: var(--text-md); }
+.task-menu-layer.is-sheet .task-menu .origin-user-avatar { --avatar-size: 22px; }
+.task-menu-layer.is-sheet .task-menu button > span.task-menu-no-assignee { width: 22px; height: 22px; }
 @keyframes task-sheet-in { from { transform: translateY(24px); opacity: 0; } }
 
 /* Undo toast. */

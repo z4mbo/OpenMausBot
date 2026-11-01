@@ -15,7 +15,8 @@
 .notification-read-all { margin-left: auto; }
 .notification-rows { display: grid; margin: 0; padding: 0; list-style: none; }
 .notification-row { position: relative; display: flex; align-items: flex-start; gap: var(--space-3); min-height: 44px; padding: 6px var(--space-2); border-radius: var(--radius-sm); transition: background var(--duration-fast); }
-.notification-row:hover, .notification-row:focus-within { background: var(--hover); }
+.notification-row:focus-within { background: var(--hover); }
+@media (hover: hover) { .notification-row:hover { background: var(--hover); } }
 .notification-kind { display: grid; flex: none; place-items: center; width: 16px; height: 20px; color: var(--text-3); }
 .notification-row.unread .notification-kind { color: var(--accent-text); }
 .notification-content { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-4); flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--text-3); text-align: left; line-height: 20px; }
@@ -51,7 +52,8 @@
 /* Issue rows. */
 .work-issue-list { padding-top: var(--space-1); }
 .work-issue-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) minmax(80px, 160px) 24px 72px 20px; align-items: center; gap: var(--space-3); min-height: 38px; padding: 0 var(--space-2); border-radius: var(--radius-sm); transition: background var(--duration-fast), opacity var(--duration); }
-.work-issue-row:hover, .work-issue-row:focus-within { background: var(--hover); }
+.work-issue-row:focus-within { background: var(--hover); }
+@media (hover: hover) { .work-issue-row:hover { background: var(--hover); } }
 .work-issue-row.pending { opacity: 0.6; }
 .work-complete { width: 24px; min-width: 24px; height: 24px; border-radius: 50%; }
 .work-complete:hover:not(:disabled) { color: var(--green); background: var(--green-soft); }
