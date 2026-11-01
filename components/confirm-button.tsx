@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { Loader2, Trash2 } from "lucide-react";
+import { errorText } from "@/lib/error-text";
+import { Dialog } from "./dialog";
 
 /**
- * The one two-step destructive button (project and workspace settings, assets, vault): the first press arms it (it
+ * The one two-step button for low-stakes or reversible actions (disconnect, deactivate, revoke, remove a member): the first press arms it (it
  * widens into a red confirm label), the second confirms. It disarms after a few seconds, on Escape or when focus
  * leaves, so a stray tap never deletes anything. Without `text` it is an icon button labelled by `label`.
  */
@@ -30,4 +32,27 @@ export function ConfirmButton({ label, text, confirmLabel = "Delete", onConfirm,
       try { await onConfirm(); } finally { setBusy(false); }
     }}
   >{busy ? <Loader2 className="spin" size={14} /> : icon ?? <Trash2 size={14} />}{text ? <span>{armed ? confirmLabel : text}</span> : <span className="confirm-button-text" aria-hidden={!armed}>{confirmLabel}</span>}</button>;
+}
+
+/**
+ * Confirm dialog for deletes that cannot be undone (assets, vault items), the same dialog issues use: it names what
+ * goes, Cancel and Delete. It stays open while the delete runs and shows its error; `onCancel` also runs for Escape
+ * and the close button. Low-stakes or reversible actions keep the inline ConfirmButton.
+ */
+export function DeleteDialog({ title, subject, icon, onCancel, onConfirm }: { title: string; subject: string; icon?: ReactNode; onCancel: () => void; onConfirm: () => Promise<unknown> }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  return <Dialog title={title} className="confirm-dialog" onClose={() => { if (!busy) onCancel(); }}>
+    <div className="dialog-body">
+      <p className="confirm-text confirm-subject">{icon}<strong>{subject}</strong></p>
+      {error && <p className="notice danger" role="alert">{error}</p>}
+      <div className="dialog-actions">
+        <button type="button" className="ghost-button compact" disabled={busy} onClick={onCancel}>Cancel</button>
+        <button type="button" className="primary-button danger compact" autoFocus disabled={busy} onClick={async () => {
+          setBusy(true); setError("");
+          try { await onConfirm(); } catch (failure) { setError(errorText(failure, "Could not delete")); setBusy(false); }
+        }}>{busy && <Loader2 className="spin" size={14} />}Delete</button>
+      </div>
+    </div>
+  </Dialog>;
 }

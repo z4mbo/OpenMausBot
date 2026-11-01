@@ -46,9 +46,15 @@
 .project-empty-icon.sent { color: var(--green); }
 .feedback-honeypot { position: absolute !important; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
+/* Touch: row actions keep the toolbar's size with a 44px press area. */
+@media (pointer: coarse) {
+  .feedback-actions .ghost-button.compact { min-height: 32px; }
+  .feedback-actions .icon-button { position: relative; width: 36px; min-width: 36px; height: 36px; }
+  .feedback-actions .icon-button::before { content: ""; position: absolute; inset: -4px; }
+}
 @media (max-width: 760px) {
-  .feedback-entry { grid-template-columns: 28px minmax(0, 1fr); }
-  .feedback-actions { grid-column: 2; justify-content: flex-start; margin-top: var(--space-1); }
+  .feedback-entry { grid-template-columns: 28px minmax(0, 1fr); row-gap: var(--space-2); }
+  .feedback-actions { grid-column: 2; justify-content: flex-start; gap: var(--space-2); }
   .feature-toolbar > .feature-search { flex: 1; min-width: 140px; }
   .feature-toolbar > .feature-search input { width: 100%; }
   .feature-form { padding: var(--space-2) var(--space-4) var(--space-5); }

@@ -39,7 +39,9 @@
 .repo-settings-section h3 { margin: 0; color: var(--text-1); font-size: var(--text-base); font-weight: var(--weight-semibold); }
 .repo-settings-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); }
 .repo-settings-actions > .confirm-button { margin-right: auto; }
-.repo-settings-saved { margin-right: auto; color: var(--green); font-size: var(--text-sm); }
+.repo-settings-section h3 { display: flex; align-items: center; gap: var(--space-2); min-height: 20px; }
+.repo-settings-saved { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; color: var(--green); font-size: var(--text-sm); font-weight: var(--weight-regular); animation: library-fade var(--duration) var(--ease-out); }
+.repo-settings-state { margin-left: auto; color: var(--text-3); }
 .repo-provisioning { display: grid; justify-items: start; gap: var(--space-2); padding-top: var(--space-1); }
 .repo-settings .repo-workspace-setup { padding: 0; border-top: 0; }
 
@@ -48,8 +50,25 @@
 .repo-choice legend { margin-bottom: var(--space-2); color: var(--text-2); font-size: var(--text-sm); font-weight: var(--weight-medium); }
 .stack-form .repo-choice label { display: flex; align-items: center; gap: var(--space-2); color: var(--text-1); font-size: var(--text-base); font-weight: var(--weight-regular); }
 
+.repo-switch { display: none; align-self: flex-start; }
+
 @media (max-width: 1100px) {
   .repository-columns { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+  /* Stacked, the columns become one list with a switch above it. */
+  .repo-switch { display: inline-flex; }
+  .repository-columns[data-columns="3"] > .repository-column:not([data-column="commits"]) { display: none; }
+  .repository-columns[data-shown="issues"] > .repository-column[data-column="commits"],
+  .repository-columns[data-shown="pulls"] > .repository-column[data-column="commits"] { display: none; }
+  .repository-columns[data-shown="issues"] > .repository-column[data-column="issues"],
+  .repository-columns[data-shown="pulls"] > .repository-column[data-column="pulls"] { display: flex; }
+  .repo-switch ~ .repository-columns .repository-column > header { display: none; }
+}
+@media (max-width: 760px) {
+  .repo-dashboard { gap: var(--space-2); }
+  .repo-address-row > a { font-size: var(--text-base); }
+}
+@media (pointer: coarse) {
+  .repo-address-row .ghost-button.compact { min-height: 32px; }
 }
 .repository-columns[data-columns="1"] { grid-template-columns: minmax(0, 1fr); max-width: 720px; }
 

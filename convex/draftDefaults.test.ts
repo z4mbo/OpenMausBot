@@ -182,8 +182,11 @@ describe("Draft defaults at the task and workflow boundary", () => {
     const taskId = await f.t.mutation(api.feedback.convert, { ...scope, entryId: entries[0]._id });
     expect((await f.t.run(ctx => ctx.db.get(taskId)))?.columnId).toBe(f.columns[0]._id);
     expect(await f.t.mutation(api.feedback.convert, { ...scope, entryId: entries[0]._id, columnId: f.columns[1]._id })).toBe(taskId);
-    const explicit = await f.t.mutation(api.feedback.convert, { ...scope, entryId: entries[1]._id, columnId: f.columns[1]._id });
+    const explicit = await f.t.mutation(api.feedback.convert, { ...scope, entryId: entries[1]._id, columnId: f.columns[1]._id, priority: "low" });
     expect((await f.t.run(ctx => ctx.db.get(explicit)))?.columnId).toBe(f.columns[1]._id);
+    // Priority follows the composer chip when sent, else the kind (an idea is medium).
+    expect((await f.t.run(ctx => ctx.db.get(taskId)))?.priority).toBe("medium");
+    expect((await f.t.run(ctx => ctx.db.get(explicit)))?.priority).toBe("low");
   });
 
   test("pending legacy Idea tasks stay out of mirror discovery and publish context before repair", async () => {
