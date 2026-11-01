@@ -13,7 +13,7 @@ import { ContentSkeleton } from "./content-skeleton";
 import { UserAvatar, memberName } from "./user-avatar";
 import { useMemberProfile } from "./workspace-context";
 import { InboxCalendar } from "./inbox-calendar";
-import { PriorityIcon } from "./priority-icon";
+import { PriorityIcon } from "./issue-icons";
 import { GitHubIssueIndicator } from "./github-issue-indicator";
 import { IssueSelect } from "./issue-select";
 

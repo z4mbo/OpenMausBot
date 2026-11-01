@@ -49,7 +49,7 @@
 .invite-link input { font-size: 11px; min-width: 0; }
 .workspace-member-list { margin-top: 24px; }
 .workspace-member { display: flex; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-2); }
-.workspace-member > img, .member-avatar { width: 30px; height: 30px; object-fit: cover; display: grid; place-items: center; background: var(--surface-5); border-radius: 50%; color: var(--text-2); font-size: 10px; flex: none; }
+.workspace-member > img { width: 30px; height: 30px; object-fit: cover; display: grid; place-items: center; background: var(--surface-5); border-radius: 50%; color: var(--text-2); font-size: 10px; flex: none; }
 .workspace-member > div { flex: 1; min-width: 0; }
 .workspace-member strong, .pending-invitation strong { display: block; font-size: 12px; font-weight: 500; }
 .workspace-member small, .pending-invitation small { display: block; color: var(--text-3); margin-top: 3px; font-size: 11px; overflow-wrap: anywhere; }
@@ -74,25 +74,26 @@
 .member-profile-header small { display: block; margin-top: 10px; color: var(--text-2); text-transform: capitalize; }
 .member-profile-avatar { --avatar-size: 64px; }
 .member-profile-issues { min-height: 220px; max-height: min(450px, 48dvh); overflow-y: auto; }
-.member-profile-issue { display: flex; width: 100%; gap: 12px; align-items: center; padding: 15px 4px; text-align: left; background: transparent; color: inherit; border: 0; border-bottom: 1px solid var(--border-2); cursor: pointer; font: inherit; }
-.member-profile-issue:hover { background: var(--surface-4); }
+.member-profile-issue { display: flex; width: 100%; gap: 12px; align-items: center; padding: 10px 6px; text-align: left; background: transparent; color: inherit; border: 0; border-bottom: 1px solid var(--border-2); cursor: pointer; font: inherit; }
+.member-profile-issue:hover { background: var(--hover); }
 .member-profile-issue > svg { flex: 0 0 16px; color: var(--text-3); }
 .member-profile-issue > span { flex: 1; min-width: 0; }
 .member-profile-issue strong { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
 .member-profile-issue small { display: flex; align-items: center; gap: 6px; color: var(--text-2); margin-top: 6px; font-size: 11px; }
 .member-profile-issue i { width: 7px; height: 7px; border-radius: 2px; }
 .member-profile-issue .completed-issue-icon { color: var(--green); }
-.member-profile-issue .priority-label { margin: 0; flex-shrink: 0; }
+.member-profile-issue .priority { flex-shrink: 0; }
+.member-issue-tabs { margin-bottom: var(--space-2); }
 .member-profile-empty { padding: 50px 0; text-align: center; color: var(--text-2); font-size: 13px; }
 .member-profile-trigger > span:last-child { min-width: 0; }
 .member-profile-trigger:hover strong, .chat-profile-name:hover { text-decoration: underline; }
-.workspace-member .member-profile-trigger img, .workspace-member .member-avatar { flex: 0 0 32px; }
+.workspace-member .member-profile-trigger img { flex: 0 0 32px; }
 @media (max-width: 520px) {
 .member-profile-body { padding: 16px; }
 .member-profile-header { gap: 12px; }
 .member-profile-header h3 { font-size: 18px; }
 .member-profile-avatar { --avatar-size: 48px; }
-.member-profile-issue .priority-label { display: none; }
+.member-profile-issue .priority { display: none; }
 }
 .settings-dialog { width: min(920px, calc(100vw - 24px)); overflow: hidden; }
 .settings-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); min-height: min(560px, calc(100dvh - 120px)); }

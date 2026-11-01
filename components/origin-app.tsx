@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { BoardTab, TaskModal } from "./project-issues";
 import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
-import { ChevronDown, ChevronRight, CheckCircle2, CircleDot, Power, RotateCcw, CircleAlert, ExternalLink, GitBranch, GitCommit, Inbox, KeyRound, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Settings, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
+import { FolderPlus, ChevronDown, ChevronRight, CheckCircle2, CircleDot, Power, RotateCcw, CircleAlert, ExternalLink, GitBranch, GitCommit, Inbox, KeyRound, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Settings, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
@@ -649,7 +649,7 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
 function EmptyProjects({ sessionToken, onCreated }: { sessionToken: string; onCreated: (id: Id<"projects">) => void }) {
   const workspace = useWorkspace();
   const admin = ["owner", "admin"].includes(workspace.role);
-  return <section className="empty-projects"><Sparkles size={28} /><h1>{admin ? "Your first project." : "No projects yet."}</h1>{admin ? <div className="empty-create"><WorkspaceGitHubSetup sessionToken={sessionToken} /><CreateProjectInline sessionToken={sessionToken} onCreated={onCreated} /></div> : <p>A workspace admin can add you to a project.</p>}</section>;
+  return <section className="empty-projects"><FolderPlus size={22} /><h1>No projects</h1>{admin ? <div className="empty-create"><CreateProjectInline sessionToken={sessionToken} onCreated={onCreated} /></div> : <p>A workspace admin can add you to a project.</p>}</section>;
 }
 
 function SearchDialog({

@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState, type ComponentType } from "re
 import { useMutation, useQuery } from "convex/react";
 import type { OptimisticLocalStore } from "convex/browser";
 import clsx from "clsx";
-import { ArrowLeft, CalendarDays, Check, CheckCircle2, Circle, Columns2, Columns3, ExternalLink, LinkIcon, GripVertical, List, Loader2, MoreHorizontal, Paperclip, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, CheckCircle2, Circle, Columns2, Columns3, ExternalLink, LinkIcon, GripVertical, List, Loader2, MoreHorizontal, Paperclip, Plus, Search, Trash2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { localApi } from "@/lib/client-api";
@@ -24,7 +24,7 @@ import { TaskPullRequest } from "./task-pull-request";
 import { MemberPicker } from "./member-picker";
 import { Dialog } from "./dialog";
 import { IssueFields } from "./issue-fields";
-import { PriorityIcon } from "./priority-icon";
+import { PriorityIcon, StatusIcon, laneTone } from "./issue-icons";
 import { IssueCommentBody, IssueCommentComposer } from "./issue-comments";
 import { IssueFileUpload } from "./issue-file-upload";
 import { useBoardScroll } from "./use-board-scroll";
@@ -39,20 +39,6 @@ type ProjectWithUi = Doc<"projects"> & { memberRole: string; iconUrl?: string | 
 type Priority = "low" | "medium" | "high";
 type AvatarUser = { username?: string; name: string; email: string; avatarUrl?: string | null };
 type OpenReference = (projectId: Id<"projects">, taskId?: Id<"tasks">) => void;
-
-function normalizeLaneTitle(title: string) {
-  return title.trim().toLowerCase().replace(/[\s_-]+/g, "");
-}
-
-function laneTone(title: string) {
-  const normalized = normalizeLaneTitle(title);
-  if (normalized === "idea") return "idea";
-  if (normalized === "todo") return "todo";
-  if (normalized === "done") return "done";
-  if (normalized === "inprogress" || normalized === "doing") return "progress";
-  if (normalized === "inreview" || normalized === "review") return "review";
-  return "custom";
-}
 
 function dueInfo(value?: string) {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
@@ -135,12 +121,12 @@ function githubNewIssueHref(repoUrl: string | undefined, title = "", body = "") 
 function LoadingState({ label = "Loading" }: { label?: string }) {
   return <ContentSkeleton label={label} kind={label.includes("board") || label.includes("project") ? "board" : "list"} rows={4} />;
 }
-function EmptyBlock({ icon: Icon, title, body }: { icon: typeof Sparkles; title: string; body: string }) {
+function EmptyBlock({ icon: Icon, title, body }: { icon: typeof Circle; title: string; body?: string }) {
   return (
     <div className="empty-block">
-      <Icon size={22} />
+      <Icon size={20} />
       <h3>{title}</h3>
-      <p>{body}</p>
+      {body && <p>{body}</p>}
     </div>
   );
 }
@@ -237,7 +223,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
       </div>
       {!canEdit ? <div className="notice">View only</div> : null}
       {boardNotice ? <div className="notice danger">{boardNotice}</div> : null}
-      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(errorText(error, "Could not restore issue")); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col" className="col-status">Status</th><th scope="col" className="col-priority">Priority</th><th scope="col" className="col-assignee">Assignee</th><th scope="col" className="col-due">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(errorText(error, "Could not update issue")))}><Circle size={15} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small><span>{task.title}</span></button></td><td className="col-status">{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td className="col-priority"><span className={clsx("priority", task.priority)}><PriorityIcon priority={task.priority} />{task.priority}</span></td><td className="col-assignee">{task.assignedToEmail ? <span className="issue-table-assignee"><UserAvatar user={assignees.get(task.assignedToEmail) || { name: task.assignedToName || task.assignedToEmail, email: task.assignedToEmail }} size="small" /><span>{task.assignedToName || task.assignedToEmail}</span></span> : <span className="muted">Unassigned</span>}</td><td className="col-due">{(() => { const due = dueInfo(task.dueDate); return due ? <span className={clsx("due-text", due.tone)}>{due.label}</span> : null; })()}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className={clsx("kanban-scroll", drag?.mode === "pointer" && "is-dragging")}>
+      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title={filter ? "No matching issues" : "No completed issues"} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(errorText(error, "Could not restore issue")); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col" className="col-status">Status</th><th scope="col" className="col-priority">Priority</th><th scope="col" className="col-assignee">Assignee</th><th scope="col" className="col-due">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(errorText(error, "Could not update issue")))}><Circle size={15} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small><span>{task.title}</span></button></td><td className="col-status">{(() => { const title = visualColumns.find(column => column._id === columnForTask(task))?.title || ""; return <span className="issue-table-status"><StatusIcon title={title} />{title}</span>; })()}</td><td className="col-priority"><span className={clsx("priority", task.priority)}><PriorityIcon priority={task.priority} />{task.priority}</span></td><td className="col-assignee">{task.assignedToEmail ? <span className="issue-table-assignee"><UserAvatar user={assignees.get(task.assignedToEmail) || { name: task.assignedToName || task.assignedToEmail, email: task.assignedToEmail }} size="small" /><span>{task.assignedToName || task.assignedToEmail}</span></span> : <span className="muted">Unassigned</span>}</td><td className="col-due">{(() => { const due = dueInfo(task.dueDate); return due ? <span className={clsx("due-text", due.tone)}>{due.label}</span> : null; })()}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title={filter || assigneeFilter ? "No matching issues" : "No active issues"} />}</div> : <div className={clsx("kanban-scroll", drag?.mode === "pointer" && "is-dragging")}>
         {visualColumns.map((column, index) => {
           const tasks = displayTasks(column._id, drag?.target ?? null);
           const completedCount = board.tasks.filter(task => task.done && matches(task) && columnForTask(task) === column._id).length;

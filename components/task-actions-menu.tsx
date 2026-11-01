@@ -3,7 +3,7 @@ import { errorText } from "@/lib/error-text";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ArrowRight, Settings2, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, MoreHorizontal, Trash2 } from "lucide-react";
 
 export function TaskActionsMenu({ title, canEdit, canMoveLeft, canMoveRight, onMoveLeft, onMoveRight, onDelete, onError }: {
   title: string; canEdit: boolean; canMoveLeft: boolean; canMoveRight: boolean;
@@ -47,7 +47,7 @@ export function TaskActionsMenu({ title, canEdit, canMoveLeft, canMoveRight, onM
     const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
     event.preventDefault(); items[next]?.focus({ preventScroll: true });
   }}>
-    <button type="button" className="icon-button" aria-label={`Issue options for ${title}`} title="Issue options" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen(!open)}><Settings2 size={14} /></button>
+    <button type="button" className="icon-button" aria-label={`Issue options for ${title}`} title="Issue options" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen(!open)}><MoreHorizontal size={14} /></button>
     {open && createPortal(<div className="origin-project-portal"><div ref={menu} role="menu" aria-label={`Options for ${title}`} className="origin-dropdown task-options" style={position}>
       <button role="menuitem" disabled={busy || !canMoveLeft} onClick={() => void run(onMoveLeft)}><ArrowLeft size={14} />Move left</button>
       <button role="menuitem" disabled={busy || !canMoveRight} onClick={() => void run(onMoveRight)}><ArrowRight size={14} />Move right</button>

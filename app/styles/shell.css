@@ -178,3 +178,5 @@
   .modal-backdrop { padding: var(--space-2); }
   .search-modal { max-height: 80dvh; }
 }
+.empty-create > .ghost-button { width: auto; }
+.project-viewer[data-self-viewer] { display: none; }

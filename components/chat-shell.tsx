@@ -312,7 +312,7 @@ export function ChatView(props: Props) {
             ) : !conversations.length ? (
               <div className="dm-list-empty">
                 <MessageCircle size={24} />
-                <span>No direct messages yet</span>
+                <span>No messages</span>
                 <button
                   className="ghost-button compact"
                   disabled={!online} title={!online ? RECONNECT_TO_CREATE : undefined}
@@ -391,7 +391,7 @@ export function ChatView(props: Props) {
         ) : (
           <div className="dm-no-selection">
             <MessageCircle size={30} />
-            <p>Your conversations, together.</p>
+            <p>Select a conversation</p>
           </div>
         )}
       </div>

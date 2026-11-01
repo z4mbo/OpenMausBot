@@ -101,7 +101,7 @@
 .calendar-day > time strong { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: var(--text-2); font-weight: var(--weight-medium); }
 .calendar-day.today > time strong { background: var(--accent); color: #fff; }
 .calendar-day.other-month { background: var(--bg); }
-.calendar-day.other-month > time { opacity: 0.6; }
+.calendar-day.other-month > time strong { color: var(--text-3); }
 .calendar-day > div { display: grid; gap: var(--space-1); }
 .calendar-task { display: flex; align-items: flex-start; gap: 6px; width: 100%; min-width: 0; padding: 6px; border: 1px solid var(--border-1); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-1); text-align: left; transition: background var(--duration-fast), border-color var(--duration-fast); }
 .calendar-task:hover { border-color: var(--border-2); background: var(--surface-3); }
@@ -111,7 +111,7 @@
 .calendar-task > span { display: grid; gap: 1px; min-width: 0; }
 .calendar-task strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); font-weight: var(--weight-medium); }
 .calendar-task small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-3); font-size: var(--text-xs); }
-.calendar-task.done { opacity: 0.6; }
+.calendar-task.done strong { color: var(--text-3); text-decoration: line-through; }
 
 @media (max-width: 760px) {
   .work-toolbar { padding-top: var(--space-3); gap: var(--space-2); }

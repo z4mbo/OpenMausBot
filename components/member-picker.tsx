@@ -15,7 +15,7 @@ export function MemberPicker({ members, value, onChange, label, disabled, allLab
   const menu = useRef<HTMLDivElement>(null), search = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false), [query, setQuery] = useState(""), [active, setActive] = useState(0);
   const selected = members.find(member => member.email === value);
-  const selectedLabel = selected ? memberName(selected) : value ? value.split("@")[0] : allLabel || "Select member";
+  const selectedLabel = selected ? memberName(selected) : value ? value.split("@")[0] : allLabel || label;
   const people = members.filter(member => `${memberName(member)} ${member.name || ""} ${member.email}`.toLowerCase().includes(query.toLowerCase()));
   const options = [...(allLabel && !query ? [{ value: "", label: allLabel, person: undefined as Person | undefined }] : []), ...people.map(person => ({ value: person.email, label: memberName(person), person }))];
   const close = () => { setOpen(false); trigger.current?.focus({ preventScroll: true }); };

@@ -136,9 +136,9 @@
   .dm-list { flex: 1; padding-right: 0; border-right: 0; }
   .direct-chat.has-conversation .dm-list, .dm-no-selection { display: none; }
   .chat-thread .dm-back { display: grid; }
-  .conversation-message { padding: var(--space-2) 0; gap: var(--space-2); }
+  .conversation-message { flex-wrap: wrap; padding: var(--space-2) 0; gap: var(--space-2); }
   .conversation-message:hover { background: transparent; }
-  .message-tools { display: none; position: static; margin-top: var(--space-1); padding: 0; border: 0; background: none; box-shadow: none; opacity: 1; gap: 2px; }
+  .message-tools { display: none; position: static; flex-basis: 100%; margin: 0 0 0 36px; padding: 0; border: 0; background: none; box-shadow: none; opacity: 1; gap: 2px; }
   .conversation-message:focus-within .message-tools { display: flex; }
   .conversation-message:focus { outline: none; background: var(--hover); }
   .message-tools button { width: 36px; height: 32px; }

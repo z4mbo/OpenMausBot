@@ -136,7 +136,7 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
 .issue-table-scroll { flex: 1; min-height: 0; overflow: auto; }
 .issue-table { width: 100%; border-collapse: collapse; text-align: left; }
 .issue-table th { position: sticky; top: 0; z-index: 1; height: 32px; padding: 0 var(--space-3); border-bottom: 1px solid var(--border-1); background: var(--surface-1); color: var(--text-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
-.issue-table td { height: 40px; padding: 0 var(--space-3); border-bottom: 1px solid var(--border-1); color: var(--text-2); white-space: nowrap; }
+.issue-table td { height: 40px; padding: 6px var(--space-3); border-bottom: 1px solid var(--border-1); color: var(--text-2); white-space: nowrap; }
 .issue-table tbody tr { cursor: default; transition: background var(--duration-fast); }
 .issue-table tbody tr:hover { background: var(--hover); }
 .issue-table td:first-child { display: flex; align-items: center; gap: var(--space-3); min-width: 280px; }
@@ -349,3 +349,12 @@ html.issue-dragging, html.issue-dragging * { cursor: grabbing !important; -webki
   .issue-composer-footer { margin: var(--space-2) calc(var(--space-4) * -1) calc(var(--space-4) * -1); padding: var(--space-3) var(--space-4); }
   .issue-composer-fields > textarea { font-size: 16px; }
 }
+
+/* Status ring colors follow the lane tones. */
+.status-icon { flex: none; color: var(--text-3); }
+.status-icon.idea { color: var(--violet); }
+.status-icon.todo { color: var(--cyan); }
+.status-icon.progress { color: var(--amber); }
+.status-icon.review { color: var(--blue); }
+.status-icon.done { color: var(--green); }
+.issue-table-status { display: inline-flex; align-items: center; gap: var(--space-2); }

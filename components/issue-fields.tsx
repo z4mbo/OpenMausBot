@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { CalendarDays, Circle } from "lucide-react";
-import { PriorityIcon } from "./priority-icon";
+import { PriorityIcon, StatusIcon } from "./issue-icons";
 import { MemberPicker } from "./member-picker";
 import { IssueSelect } from "./issue-select";
 import type { AvatarIdentity } from "./user-avatar";
@@ -17,7 +17,7 @@ export function IssueFields({ columns, members, columnId, onColumnChange, priori
   labeled?: boolean;
   children?: ReactNode;
 }) {
-  const status = <IssueSelect label="Status" icon={<Circle size={14} />} value={columnId} onChange={onColumnChange} options={columns.map(column => ({ value: column._id, label: column.title }))} disabled={disabled} />;
+  const status = <IssueSelect label="Status" icon={<Circle size={14} />} value={columnId} onChange={onColumnChange} options={columns.map(column => ({ value: column._id, label: column.title, icon: <StatusIcon title={column.title} /> }))} disabled={disabled} />;
   const priorityField = <IssueSelect label="Priority" icon={<PriorityIcon priority={priority} />} value={priority} onChange={value => onPriorityChange(value as "low" | "medium" | "high")} options={(["low", "medium", "high"] as const).map(value => ({ value, label: value[0].toUpperCase() + value.slice(1), icon: <PriorityIcon priority={value} /> }))} disabled={disabled} />;
   const assigneeField = <div className="issue-assignee-field"><MemberPicker label="Assignee" members={members} value={assignee} onChange={onAssigneeChange} disabled={disabled} required /></div>;
   const due = <label className="issue-date-chip"><CalendarDays size={14} /><input aria-label="Due date" required type="date" value={dueDate} onChange={e => onDueDateChange(e.target.value)} disabled={disabled} /></label>;
