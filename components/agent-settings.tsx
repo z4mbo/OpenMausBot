@@ -1,11 +1,13 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Check, Copy, KeyRound, Loader2, Plug, Trash2 } from "lucide-react";
+import { Bot, Check, Copy, KeyRound, Loader2, Plug, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { useWorkspace } from "./workspace-context";
 import { localAppOrigin } from "@/lib/client-api";
 import { errorText } from "@/lib/error-text";
+import { formatDate } from "@/lib/format";
+import { ConfirmButton } from "./settings-controls";
 
 const CLIENTS = ["Claude Code", "Codex", "OpenCode", "omp", "T3 Code", "ChatGPT"] as const;
 type Client = typeof CLIENTS[number];
@@ -49,7 +51,6 @@ export function AgentSettings({ sessionToken }: { sessionToken: string }) {
   const submit = (event: FormEvent) => { event.preventDefault(); void attempt(async () => { const result = await createToken({ sessionToken, teamId: workspace._id, name: name.trim(), write: write && canWrite, days }); setCreated({ token: result.token, name: name.trim() }); setName(""); }); };
 
   return <div className="agent-settings">
-    <h3>Agents</h3>
     <div className="agent-url"><Plug size={15} /><input aria-label="MCP server URL" value={url} readOnly onFocus={e => e.currentTarget.select()} /><CopyButton value={url} label="Copy MCP URL" /></div>
 
     <div className="agent-clients" role="tablist" aria-label="Client">{CLIENTS.map(item => <button key={item} type="button" role="tab" aria-selected={client === item} className={client === item ? "active" : ""} onClick={() => setClient(item)}>{item}</button>)}</div>
@@ -59,7 +60,7 @@ export function AgentSettings({ sessionToken }: { sessionToken: string }) {
       {setup.note && <p>{setup.note}</p>}
     </div>
 
-    <div className="settings-section">
+    <section className="settings-group">
       <h4>Access tokens</h4>
       <form className="agent-token-form" onSubmit={submit}>
         <input aria-label="Token name" placeholder="Name" value={name} maxLength={60} required onChange={e => setName(e.target.value)} />
@@ -67,16 +68,16 @@ export function AgentSettings({ sessionToken }: { sessionToken: string }) {
         <select aria-label="Expires" value={days} onChange={e => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option><option value={365}>1 year</option></select>
         <button className="primary-button compact" disabled={busy || !name.trim()}>{busy ? <Loader2 size={14} className="spin" /> : <KeyRound size={14} />}Create</button>
       </form>
-      {created && <div className="agent-new-token"><input aria-label={`Token ${created.name}`} value={created.token} readOnly onFocus={e => e.currentTarget.select()} /><CopyButton value={created.token} label="Copy token" /><small>Shown once. The setup above now includes it.</small></div>}
+      {created && <div className="agent-new-token"><input aria-label={`Token ${created.name}`} value={created.token} readOnly onFocus={e => e.currentTarget.select()} /><CopyButton value={created.token} label="Copy token" /><small>Copy it now. It is shown once.</small></div>}
       {notice && <p className="notice danger" role="alert">{notice}</p>}
-    </div>
+    </section>
 
-    <div className="settings-section">
-      <h4>Connected</h4>
-      <div className="connector-grants">
-        {active?.map(g => <div className="connector-grant" key={g._id}><div><strong>{g.name}</strong><small>{g.write ? "Read & write" : "Read only"} · Expires {new Date(g.expiresAt).toLocaleDateString()}</small></div><button className="icon-button" title={`Revoke ${g.name}`} aria-label={`Revoke ${g.name}`} disabled={busy} onClick={() => attempt(async () => { await revoke({ sessionToken, teamId: workspace._id, grantId: g._id }); })}><Trash2 size={15} /></button></div>)}
-        {active && !active.length && <p className="muted">None</p>}
+    <section className="settings-group">
+      <h4>Connected{active?.length ? <span className="settings-count">{active.length}</span> : null}</h4>
+      <div className="settings-list connector-grants">
+        {active?.map(g => <div className="settings-list-row connector-grant" key={g._id}><span className="settings-row-icon"><Bot size={15} /></span><div><strong>{g.name}</strong><small>{g.write ? "Read & write" : "Read only"} · Expires {formatDate(g.expiresAt)}</small></div><ConfirmButton label={`Revoke ${g.name}`} confirmLabel="Revoke" disabled={busy} icon={<Trash2 size={14} />} onConfirm={() => void attempt(async () => { await revoke({ sessionToken, teamId: workspace._id, grantId: g._id }); })} /></div>)}
+        {active && !active.length && <p className="settings-empty">No agents connected</p>}
       </div>
-    </div>
+    </section>
   </div>;
 }

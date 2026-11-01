@@ -57,7 +57,7 @@ export function OriginEntry() {
     if (path === "/") return <Welcome />;
     return <PublicAuth signup={path === "/signup"} inviteToken={inviteToken} invitation={invitation} onSession={saveSession} />;
   }
-  if (inviteToken) return <main className="public-auth"><Link className="origin-wordmark" href="/"><OriginMark />Origin</Link><section className="auth-content"><h1>{invitation ? `Join ${invitation.name}` : invitation === undefined ? "Loading invitation" : "Invitation unavailable"}</h1><p className="muted">{invitation ? `Signed in as ${user.email}` : "This link may have expired or been revoked."}</p>{notice && <p className="notice danger">{notice}</p>}{invitation && <button className="primary-button" onClick={async () => { try { const result = await acceptInvite({ sessionToken: token, token: inviteToken }); router.replace(`/${result.slug}`); } catch (error) { setNotice(errorText(error, "Could not join")); } }}>Join workspace</button>}</section></main>;
+  if (inviteToken) return <main className="public-auth"><Link className="origin-wordmark" href="/"><OriginMark />Origin</Link><section className="auth-content"><h1>{invitation ? `Join ${invitation.name}` : invitation === undefined ? "Loading invitation" : "Invitation unavailable"}</h1><p className="muted">{invitation ? `Signed in as ${user.email}` : "This link may have expired or been revoked."}</p>{notice && <p className="notice danger" role="alert">{notice}</p>}{invitation && <JoinButton onJoin={async () => { try { const result = await acceptInvite({ sessionToken: token, token: inviteToken }); router.replace(`/${result.slug}`); } catch (error) { setNotice(errorText(error, "Could not join")); } }} name={invitation.name} />}</section></main>;
   if (workspaces === undefined) return <WorkspaceSkeleton />;
   if (!workspaces.length) return <WorkspaceOnboarding sessionToken={token} onCreated={s => router.replace(`/${s}`)} />;
   if (!workspace) return <main className="public-auth"><section className="auth-content"><h1>Your workspaces</h1>{workspaces.map(w => <Link className="workspace-choice" href={`/${w.slug}`} key={w._id}><span>{w.name}</span><ArrowRight size={16} /></Link>)}{notice && <p className="notice danger">{notice}</p>}</section></main>;
@@ -101,6 +101,11 @@ function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession 
       <button type="submit" className="primary-button large" disabled={busy}>{busy ? <Loader2 className="spin" size={16} /> : signup ? "Create account" : "Sign in"}</button>
     </form>}{(signup || !inviteOnly) && <p className="auth-switch">{signup ? "Have an account?" : "No account?"} <button onClick={() => { setSignup(!signup); setError(""); }}>{signup ? "Sign in" : "Create an account"}</button></p>}
   </section></main>;
+}
+
+function JoinButton({ name, onJoin }: { name: string; onJoin: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  return <button className="primary-button large" disabled={busy} onClick={async () => { setBusy(true); try { await onJoin(); } finally { setBusy(false); } }}>{busy && <Loader2 className="spin" size={16} />}Join {name}</button>;
 }
 
 function OriginMark() {

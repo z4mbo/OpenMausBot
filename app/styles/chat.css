@@ -87,6 +87,9 @@
 .composer-context > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .composer-context > button { margin-left: auto; }
 .composer-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--space-2); }
+.composer-attachments > span.composer-image { position: relative; padding: 0; overflow: hidden; border: 1px solid var(--border-2); background: var(--surface-3); animation: o-pop var(--duration) var(--ease-out); }
+.composer-image img { display: block; width: 64px; height: 64px; object-fit: cover; }
+.composer-attachments > .composer-image button { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(8, 9, 10, 0.72); color: var(--text-1); }
 .composer-attachments > span { display: flex; align-items: center; gap: 4px; min-width: 0; max-width: 100%; padding: 2px 2px 2px var(--space-2); border-radius: var(--radius-sm); background: var(--surface-4); color: var(--text-2); font-size: var(--text-xs); overflow-wrap: anywhere; }
 .chat-suggestions { position: absolute; bottom: calc(100% + 6px); left: 0; z-index: 6; width: min(380px, 100%); max-height: min(300px, 40dvh); overflow-y: auto; overscroll-behavior: contain; padding: var(--space-1); border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-3); box-shadow: var(--shadow-md); }
 .chat-suggestions > button { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: 40px; padding: var(--space-1) var(--space-2); border: 0; border-radius: var(--radius-xs); background: none; color: var(--text-1); text-align: left; }

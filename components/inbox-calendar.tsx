@@ -1,5 +1,6 @@
 "use client";
 import { errorText } from "@/lib/error-text";
+import { LOCALE } from "@/lib/format";
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -32,14 +33,14 @@ export function InboxCalendar({ sessionToken, onOpenTask, mine, done, project, p
       <button className="ghost-button compact" onClick={() => setAnchor(day(new Date()))}><CalendarDays size={14} />Today</button>
       <IssueSelect label="Calendar range" value={mode} onChange={value => setMode(value as typeof mode)} options={[{ value: "week", label: "Week" }, { value: "month", label: "Month" }]} />
       <button className="icon-button" aria-label="Previous period" title="Previous period" onClick={() => move(-1)}><ChevronLeft size={17} /></button>
-      <span className="calendar-period">{current.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</span>
+      <span className="calendar-period">{current.toLocaleDateString(LOCALE, { month: "long", year: "numeric" })}</span>
       <button className="icon-button" aria-label="Next period" title="Next period" onClick={() => move(1)}><ChevronRight size={17} /></button>
     </div>
     {notice && <p className="notice danger" role="alert">{notice}</p>}
     {calendar?.truncated && <p className="notice">Showing the first 500 issues.</p>}
     {!calendar ? <ContentSkeleton rows={7} /> : <div className={`calendar-grid ${mode}`} aria-busy={pending}>{days.map(date => {
       const key = day(date); const tasks = calendar.tasks.filter(task => task.dueDate === key && Boolean(task.done) === done && (!project || task.projectId === project) && (!priority || task.priority === priority) && `${task.title} ${task.projectName}`.toLowerCase().includes(search.trim().toLowerCase()));
-      return <section className={`calendar-day ${key === day(new Date()) ? "today" : ""} ${date.getMonth() !== current.getMonth() ? "other-month" : ""}`} key={key} aria-label={date.toLocaleDateString(undefined, { dateStyle: "full" })}
+      return <section className={`calendar-day ${key === day(new Date()) ? "today" : ""} ${date.getMonth() !== current.getMonth() ? "other-month" : ""}`} key={key} aria-label={date.toLocaleDateString(LOCALE, { dateStyle: "full" })}
         onDragOver={event => { if (workspace.role !== "viewer") event.preventDefault(); }} onDrop={async event => {
           event.preventDefault(); if (pending || workspace.role === "viewer") return;
           const task = calendar.tasks.find(t => t._id === event.dataTransfer.getData("application/x-origin-issue"));
@@ -49,7 +50,7 @@ export function InboxCalendar({ sessionToken, onOpenTask, mine, done, project, p
           catch (error) { setNotice(errorText(error, "Could not reschedule issue")); }
           finally { setPending(false); }
         }}>
-        <time dateTime={key}><span>{date.toLocaleDateString(undefined, { weekday: "short" })}</span><strong>{date.getDate()}</strong></time>
+        <time dateTime={key}><span>{date.toLocaleDateString(LOCALE, { weekday: "short" })}</span><strong>{date.getDate()}</strong></time>
         <div>{tasks.map(task => <button className={`calendar-task ${task.done ? "done" : ""}`} key={task._id} draggable={workspace.role !== "viewer" && !pending} onDragStart={event => event.dataTransfer.setData("application/x-origin-issue", task._id)} onClick={() => onOpenTask(task.projectId, task._id)} title={task.title}>
           {task.done ? <CheckCircle2 size={13} /> : <Circle className={`priority-${task.priority}`} size={13} />}<span><strong>{task.title}</strong><small>{task.projectName}</small></span>
         </button>)}</div>

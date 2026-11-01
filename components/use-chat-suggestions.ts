@@ -8,7 +8,8 @@ import type { ChatReference } from "@/lib/localRealtime";
 import type { ChatMember } from "./chat-shell";
 import { memberName } from "./user-avatar";
 
-export type ChatSuggestion = { key: string; label: string; detail: string; member?: ChatMember; reference?: ChatReference };
+/** `label` is what the composer inserts (the @handle for people); `name` is what the list shows. */
+export type ChatSuggestion = { key: string; label: string; name?: string; detail: string; member?: ChatMember; reference?: ChatReference };
 
 export function useChatSuggestions(trigger: ChatTrigger | null, members: ChatMember[] | undefined, sessionToken: string, teamId: Id<"teams">) {
   const referencing = trigger?.kind === "reference";
@@ -17,7 +18,7 @@ export function useChatSuggestions(trigger: ChatTrigger | null, members: ChatMem
   const query = trigger?.query.toLowerCase() || "";
   let options: ChatSuggestion[] = [];
   if (trigger?.kind === "member") {
-    options = (members || []).filter(m => m.userId && `${m.name} ${m.username || ""} ${m.email}`.toLowerCase().includes(query)).slice(0, 8).map(member => ({ key: member.userId!, label: memberName(member), detail: member.name, member }));
+    options = (members || []).filter(m => m.userId && `${m.name} ${m.username || ""} ${m.email}`.toLowerCase().includes(query)).slice(0, 8).map(member => ({ key: member.userId!, label: member.username || member.email.split("@")[0] || memberName(member), name: memberName(member), detail: member.username ? `@${member.username}` : member.email, member }));
   } else if (referencing) {
     const projectMatches: ChatSuggestion[] = (projects || []).filter(p => p.name.toLowerCase().includes(query)).slice(0, 5).map(p => ({ key: p._id, label: p.name, detail: "Project", reference: { type: "project", id: p._id, projectId: p._id, label: p.name } }));
     const issueMatches: ChatSuggestion[] = issues.results.filter(t => `${t.title} ${t.projectName} ORI-${t._id.slice(-4)}`.toLowerCase().includes(query)).slice(0, 8 - projectMatches.length).map(t => ({ key: t._id, label: t.title, detail: `${t.projectName} · ORI-${t._id.slice(-4).toUpperCase()}`, reference: { type: "issue", id: t._id, projectId: t.projectId, label: t.title } }));
