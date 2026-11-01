@@ -440,7 +440,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
           <button className="icon-button" type="button" onClick={() => setSearchOpen(true)} aria-label="Search" title="Search (F or ⌘K)" aria-keyshortcuts="f Meta+K Control+K /">
             <Search size={17} />
           </button>
-          <button className="icon-button sidebar-new-issue" title="Create issue (C)" aria-label="Create issue" aria-keyshortcuts="C" onClick={() => setIssueOpen(true)}><SquarePen size={17} /></button>
+          <button className="icon-button sidebar-new-issue" title="Create issue (C)" aria-label="Create issue" aria-keyshortcuts="C" disabled={workspace.role === "viewer"} onClick={() => setIssueOpen(true)}><SquarePen size={17} /></button>
         </div>
         <div className="sidebar-content">
           <span className="nav-glider" aria-hidden="true"><span className="nav-glider-avatar"><UserAvatar user={user} size="small" /></span></span>

@@ -3,7 +3,10 @@
 .issue-table { width: 100%; border-collapse: collapse; text-align: left; }
 .issue-table th { color: var(--muted, #9498a3); font-weight: 500; font-size: 12px; }
 .issue-table th, .issue-table td { padding: 14px 12px; border-bottom: 1px solid var(--line-soft, #1d2026); }
-.issue-table td:first-child { display: flex; align-items: center; gap: 12px; min-width: 240px; }
-.issue-table-title { display: inline-flex; align-items: center; gap: 14px; text-align: left; }
+.issue-table td:first-child { min-width: 240px; white-space: nowrap; }
+.issue-table td:first-child > button { vertical-align: middle; }
+.issue-table td:first-child > .check-button { margin-right: 10px; }
+.issue-table-title { display: inline-flex; align-items: center; gap: 14px; max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; white-space: normal; cursor: pointer; }
+.issue-table-title:hover { color: var(--o-text, #fff); }
 .issue-table-title small { color: var(--muted, #9498a3); font-family: monospace; white-space: nowrap; }
 .issue-table tr:hover { background: var(--panel-2, #17191d); }
