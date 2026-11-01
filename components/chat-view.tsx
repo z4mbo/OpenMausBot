@@ -59,7 +59,7 @@ import {
 } from "./use-chat-suggestions";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { IssueComposer } from "./issue-composer";
+import { IssueComposer } from "./lazy-views";
 import { LocalAttachment } from "./local-attachment";
 import { LOCALE, displayName, formatDate, formatDateTime, formatTime } from "@/lib/format";
 import { activeChatTags, chatMessageParts, chatTextParts } from "@/lib/chat-text";

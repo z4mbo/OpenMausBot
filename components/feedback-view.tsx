@@ -14,7 +14,7 @@ import { useWorkspace } from "./workspace-context";
 import { Dialog } from "./dialog";
 import { DelayedSkeleton } from "./delayed-skeleton";
 import { IssueFields } from "./issue-fields";
-import { ProjectEmpty } from "./project-library";
+import { ProjectEmpty } from "./project-empty";
 
 type Portal = FunctionReturnType<typeof api.feedback.portals>[number];
 type Entry = FunctionReturnType<typeof api.feedback.list>[number];
