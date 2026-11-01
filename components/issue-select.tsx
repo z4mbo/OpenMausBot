@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { shouldFocusSearch, useAnchoredPopover } from "./use-anchored-popover";
+import { SheetHeader } from "./sheet-header";
 
 type Option = { value: string; label: string; icon?: ReactNode; detail?: string };
 
@@ -40,7 +41,7 @@ export function IssueSelect({ label, value, options, onChange, disabled, icon, p
       if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); show(); }
     }}>{selected?.icon || icon}<span>{selected?.label || placeholder || label}</span><ChevronDown size={12} /></button>
     {open && <div ref={menu} popover="manual" className="issue-select-popover">
-      {caption && <div className="picker-sheet-caption" aria-hidden="true">{caption}</div>}
+      <SheetHeader caption={caption} />
       {searchable && <div className="issue-select-search"><Search size={14} /><input ref={search} aria-label={`Search ${label.toLowerCase()}`} role="combobox" aria-expanded="true" aria-controls={id} aria-activedescendant={matches[active] ? `${id}-${active}` : undefined} placeholder="Search..." value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} /></div>}
       <div ref={list} tabIndex={-1} role="listbox" id={id} aria-label={label} aria-activedescendant={matches[active] ? `${id}-${active}` : undefined}>{matches.map((option, index) => <button id={`${id}-${index}`} key={option.value} type="button" tabIndex={-1} role="option" aria-selected={option.value === value} data-highlighted={active === index} onMouseEnter={() => setActive(index)} onClick={() => choose(option)}>{option.icon || icon}<span>{option.label}</span>{option.detail && <small>{option.detail}</small>}{value === option.value && <Check size={14} />}</button>)}{!matches.length && <p>No results</p>}</div>
     </div>}

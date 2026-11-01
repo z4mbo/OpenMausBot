@@ -53,24 +53,31 @@ export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLElement
         return;
       }
       const box = button.getBoundingClientRect();
-      const top = viewport?.offsetTop || 0;
-      const bottom = top + (viewport?.height || window.innerHeight);
-      // Stay inside the dialog the trigger lives in (the issue view), else inside the viewport.
+      // Stay inside the dialog the trigger lives in (the issue view, the composer), else inside the viewport.
       const frame = button.closest("dialog[open]")?.getBoundingClientRect();
+      const viewTop = viewport?.offsetTop || 0;
+      const top = Math.max(viewTop, frame?.top ?? viewTop) + 8;
+      const bottom = Math.min(viewTop + (viewport?.height || window.innerHeight), frame?.bottom ?? Infinity) - 8;
       const minLeft = Math.max(0, frame?.left ?? 0) + 8;
       const maxRight = Math.min(window.innerWidth, frame?.right ?? window.innerWidth) - 8;
       const width = Math.min(preferredWidth, maxRight - minLeft, window.innerWidth - 24);
       Object.assign(popover.style, { width: `${width}px`, maxHeight: `${preferredHeight}px` });
       const natural = Math.min(preferredHeight, popover.scrollHeight + 2);
-      const below = bottom - box.bottom - 12;
-      const above = box.top - top - 12;
-      const upward = natural > below && above > below;
+      const below = bottom - box.bottom - 5;
+      const above = box.top - top - 5;
       // Left-aligned with the trigger; right-aligned when that would leave the frame.
       const left = box.left + width <= maxRight ? box.left : box.right - width;
+      // Below the trigger, else above it (anchored by its bottom edge so content changes grow away from the trigger),
+      // else beside it (a short dialog such as the composer), slid up until it fits the frame; it scrolls only when the
+      // frame itself is smaller.
+      const upward = natural > below && natural <= above;
+      const fitsVertically = natural <= below || upward;
+      const side = fitsVertically ? null : box.right + 5 + width <= maxRight ? box.right + 5 : box.left - 5 - width >= minLeft ? box.left - 5 - width : null;
+      const y = natural <= below ? box.bottom + 5 : upward ? 0 : Math.max(top, Math.min(side === null ? box.bottom + 5 : box.bottom - natural, bottom - natural));
       Object.assign(popover.style, {
-        maxHeight: `${Math.min(preferredHeight, Math.max(80, upward ? above : below))}px`,
-        left: `${Math.max(minLeft, Math.min(left, maxRight - width))}px`,
-        top: upward ? "auto" : `${box.bottom + 5}px`,
+        maxHeight: `${Math.max(80, Math.min(preferredHeight, upward ? above : bottom - y))}px`,
+        left: `${side ?? Math.max(minLeft, Math.min(left, maxRight - width))}px`,
+        top: upward ? "auto" : `${y}px`,
         bottom: upward ? `${window.innerHeight - box.top + 5}px` : "auto",
       });
     };

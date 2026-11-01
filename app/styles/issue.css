@@ -21,11 +21,12 @@
 .issue-detail-heading h2 > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .issue-detail-heading h2 > svg { flex: none; color: var(--text-3); }
 .issue-detail-heading h2 .project-icon { width: 14px; height: 14px; color: var(--text-3); }
-.issue-detail-key { flex: none; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.issue-detail-key { flex: none; color: var(--text-1); }
+/* Issue keys ("ORI-CBBX") are letters: tabular figures would widen the hyphen into "ORI - CBBX". Shared by every key. */
+.issue-key, .task-code, .issue-table-title small, .archive-issue > span, .confirm-text > span { font-variant-numeric: normal; }
 .issue-save-state { display: grid; place-items: center; width: 28px; height: 28px; color: var(--text-3); }
 .issue-actions { display: contents; }
 .issue-actions-menu { position: fixed; inset: auto; margin: 0; }
-.issue-actions-menu button.confirming { background: var(--red-soft); }
 
 .issue-detail-layout { position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .issue-detail-layout::after { content: ""; position: absolute; top: 0; bottom: 0; right: var(--issue-side); width: 1px; background: var(--border-1); pointer-events: none; }
@@ -103,9 +104,17 @@
 .related-issue-list > div > button:not(.icon-button):hover > span { text-decoration: underline; text-underline-offset: 3px; }
 .issue-add-row { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 var(--space-2); margin-left: calc(var(--space-2) * -1); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-3); font-size: var(--text-sm); transition: background var(--duration-fast), color var(--duration-fast); }
 .issue-add-row:hover { background: var(--hover); color: var(--text-1); }
-.relation-picker { display: grid; gap: var(--space-2); width: 100%; padding: var(--space-2); border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-2); animation: o-pop var(--duration) var(--ease-out); }
-.relation-picker-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
-.relation-picker-head .issue-select-trigger { width: auto; border-color: var(--border-2); font-size: var(--text-sm); }
+/* Link issue picker: relationship segments, search, then issue rows like the other pickers. */
+.link-issue-popover, .link-issue-popover.picker-sheet { display: flex; flex-direction: column; overflow: hidden; }
+.link-issue-kinds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: var(--space-1); }
+.link-issue-kinds button { justify-content: center; padding: 0 var(--space-1); white-space: nowrap; }
+.link-issue-kinds button[aria-checked="true"] { background: var(--surface-4); color: var(--text-1); }
+.link-issue-kinds button:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); }
+.link-issue-popover .issue-select-search { flex: none; }
+.link-issue-popover [role="listbox"] { flex: 1; min-height: 0; max-height: none; }
+.link-issue-popover [role="option"] > svg:first-child { flex: none; color: var(--text-3); }
+.link-issue-popover [role="option"] > svg.done { color: var(--green); }
+.link-issue-popover [role="option"] > small { font-variant-numeric: normal; }
 .issue-attachments { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
 .activity-attachment { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--border-2); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-1); font-size: var(--text-sm); text-decoration: none; }
 .activity-attachment > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -181,7 +190,8 @@
 .issue-composer-fields > .issue-title-input { min-height: 36px; font-size: var(--text-xl); font-weight: var(--weight-semibold); letter-spacing: -0.01em; }
 .issue-composer-fields > .issue-title-input[aria-invalid="true"] { box-shadow: none; }
 .issue-composer-fields > .issue-field-error { margin-top: -4px; }
-.issue-composer-fields > textarea { min-height: 72px; max-height: 40dvh; padding: 0; border: 0; background: transparent; resize: none; field-sizing: content; font-size: var(--text-md); line-height: 1.6; }
+/* Tall enough on desktop that the due date calendar opens inside the dialog. */
+.issue-composer-fields > textarea { min-height: 184px; max-height: 40dvh; padding: 0; border: 0; background: transparent; resize: none; field-sizing: content; font-size: var(--text-md); line-height: 1.6; }
 .issue-composer-fields > textarea::placeholder { color: var(--text-3); }
 .issue-composer-fields > textarea:focus { box-shadow: none; }
 .issue-composer-fields > .issue-property-chips { padding-top: var(--space-2); }
@@ -194,6 +204,7 @@
 .issue-project-options > button { display: flex; align-items: center; gap: var(--space-3); min-height: 36px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-1); text-align: left; }
 .issue-project-options > button:is(:hover, :focus-visible, [aria-selected="true"]) { background: var(--surface-4); }
 .issue-project-options > button > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.issue-project-options > p { margin: 0; padding: var(--space-2); color: var(--text-3); font-size: var(--text-sm); }
 
 @media (pointer: coarse) {
   .issue-create-submit kbd { display: none; }
@@ -242,13 +253,15 @@
   .issue-add-row { height: 36px; }
 
   .origin-dialog.issue-composer-dialog { width: 100vw; max-width: 100vw; margin: auto 0 0; }
+  /* The delete confirmation is a full-width sheet like every other phone dialog. */
+  .origin-dialog.confirm-dialog { width: 100vw; max-width: 100vw; }
   .issue-composer-fields { padding: 0 var(--space-4) var(--space-4); }
   .issue-composer-footer { margin: var(--space-2) calc(var(--space-4) * -1) calc(var(--space-4) * -1); padding: var(--space-3) var(--space-4); }
   .issue-composer-fields > textarea, .issue-composer-fields > .issue-title-input { font-size: 16px; }
+  .issue-composer-fields > textarea { min-height: 72px; }
   .issue-composer-fields > .issue-title-input { font-size: var(--text-lg); }
   .issue-property-chips :is(.member-picker-trigger, .issue-select-trigger, .date-picker-trigger) { min-height: 36px; font-size: var(--text-base); }
-  .issue-breadcrumb .issue-select-trigger, .relation-picker-head .issue-select-trigger { min-height: 36px; }
-  .relation-picker .feature-search input { min-height: 44px; font-size: 16px; }
+  .issue-breadcrumb .issue-select-trigger { min-height: 36px; }
 }
 
 /* Touch: every control in the issue view and composer gets a 44px target; dense controls keep their size and grow an
@@ -259,6 +272,5 @@
   :is(.issue-detail-dialog, .issue-composer-dialog) :is(.member-picker-trigger, .issue-select-trigger, .date-picker-trigger, .icon-button, .issue-add-row, .send-message)::after,
   .issue-labels > span > button::after, .issue-label-add::after { content: ""; position: absolute; inset: -4px; }
   .issue-labels > span > button::after { inset: -8px; }
-  .related-issue-list > div > button:not(.icon-button), .relation-picker .feature-picker-results > button, .issue-mention-menu button { min-height: 44px; }
+  .related-issue-list > div > button:not(.icon-button), .issue-mention-menu button { min-height: 44px; }
 }
-@media (hover: none) { .relation-picker .feature-picker-results > button:hover { background: none; } }
