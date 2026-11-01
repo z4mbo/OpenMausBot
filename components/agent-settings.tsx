@@ -24,7 +24,7 @@ export function clientSetup(client: Client, url: string, token?: string): { file
       ? { file: "~/.codex/config.toml", code: `[mcp_servers.origin]\nurl = "${url}"\nhttp_headers = { "Authorization" = "${bearer}" }` }
       : { code: `codex mcp add origin --url ${url}\ncodex mcp login origin` };
     case "OpenCode": return { file: "opencode.json", code: json({ $schema: "https://opencode.ai/config.json", mcp: { origin: { type: "remote", url, ...(token ? { headers: { Authorization: bearer } } : {}) } } }), ...(token ? {} : { note: "Then run opencode mcp auth origin." }) };
-    case "omp": return { file: "~/.omp/agent/mcp.json", code: json({ mcpServers: { origin: { type: "http", url, ...(token ? { headers: { Authorization: bearer } } : {}) } } }) };
+    case "omp": return { file: "~/.omp/agent/mcp.json", code: json({ mcpServers: { origin: { type: "http", url, ...(token ? { headers: { Authorization: bearer } } : {}) } } }), ...(token ? {} : { note: "Then run /mcp reauth origin in omp to sign in." }) };
     case "T3 Code": return { note: "T3 Code uses your Codex, Claude Code or OpenCode setup." };
     case "ChatGPT": return { note: "Settings → Apps → Advanced settings → Developer mode → Create app. Paste the URL and choose OAuth. Needs a public HTTPS address." };
   }
