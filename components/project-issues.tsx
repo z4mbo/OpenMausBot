@@ -23,8 +23,7 @@ import { swallowNextClick, useCardFlip, useIssueDrag } from "./use-issue-drag";
 import { isSheetLayout } from "./use-anchored-popover";
 import { compareTaskOrder, planTaskMove } from "../lib/task-order";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
-import { TaskModal } from "./issue-detail";
-import { IssueComposer } from "./issue-composer";
+import { IssueComposer, TaskModal } from "./lazy-views";
 import { IssueDeleteDialog, subscribeCreatedIssue, type OpenReference, type ProjectWithUi } from "./issue-shared";
 import { DelayedSkeleton } from "./delayed-skeleton";
 

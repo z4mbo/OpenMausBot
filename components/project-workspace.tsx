@@ -9,13 +9,10 @@ import { localApi } from "@/lib/client-api";
 import { formatRelative } from "@/lib/format";
 import { normalizeProjectEmoji } from "@/lib/project-emoji";
 import { BoardTab } from "./project-issues";
-import { TaskModal } from "./issue-detail";
-import { IssueComposer } from "./issue-composer";
+import { AssetsPanel, FeedbackView, IssueComposer, ProjectMembers, TaskModal, VaultPanel } from "./lazy-views";
 import { RepositorySettings } from "./repository-settings";
 import { ProjectIcon, ProjectIconPicker } from "./project-icon";
-import { ProjectMembers } from "./project-members";
-import { AssetsPanel, ProjectEmpty, VaultPanel } from "./project-library";
-import { FeedbackView } from "./feedback-view";
+import { ProjectEmpty } from "./project-empty";
 import { DelayedSkeleton } from "./delayed-skeleton";
 import { ContentSkeleton } from "./content-skeleton";
 import { ConfirmButton } from "./confirm-button";
@@ -162,11 +159,13 @@ export function ProjectWorkspace({ projectId, sessionToken, user, initialTaskId,
     window.history.pushState(null, "", url);
   };
 
-  if (!project) return <DelayedSkeleton kind="board" label="Opening project" />;
+  // The warmers mount before the project arrives, so the board's queries load alongside it instead of after it.
+  const warmers = <TabWarmers projectId={projectId} sessionToken={sessionToken} teamId={workspace._id} warm={warm} />;
+  if (!project) return <>{warmers}<DelayedSkeleton kind="board" label="Opening project" /></>;
   const canEdit = project.memberRole !== "viewer";
-  return (
+  return (<>
+    {warmers}
     <div className="project-shell">
-      <TabWarmers projectId={projectId} sessionToken={sessionToken} teamId={workspace._id} warm={warm} />
       <ProjectHeader project={project} tab={tab} onSelect={openTab} onIntent={warmTab} />
       {project.status !== "active" && <ProjectStateBanner project={project} sessionToken={sessionToken} />}
       <div key={tab} className="project-panel" data-tab={tab} role="tabpanel" id="project-panel" aria-labelledby={`project-tab-${tab}`}>
@@ -180,7 +179,7 @@ export function ProjectWorkspace({ projectId, sessionToken, user, initialTaskId,
       {feedbackTask && <TaskModal project={project} projectId={projectId} sessionToken={sessionToken} taskId={feedbackTask} canEdit={canEdit} onClose={() => setFeedbackTask(null)} />}
       {issueOpen && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} onClose={() => setIssueOpen(false)} onCreated={() => openTab("issues")} />}
     </div>
-  );
+  </>);
 }
 
 /**

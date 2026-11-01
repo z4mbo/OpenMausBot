@@ -2,8 +2,8 @@
 import { errorText, mediaErrorText } from "@/lib/error-text";
 
 import { useMutation, useQuery } from "convex/react";
-import { TaskModal } from "./issue-detail";
 import { ProjectWorkspace } from "./project-workspace";
+import { ChatView, CreateWorkspaceDialog, InboxView, IssueComposer, MemberProfile, TaskModal, WorkspaceSettings, preloadViews } from "./lazy-views";
 import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
 import { FolderPlus, Check, ChevronDown, ChevronRight, CircleDot, CircleAlert, ImageUp, Inbox, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
@@ -11,7 +11,6 @@ import { FormEvent, useEffect, useRef, useState, type CSSProperties } from "reac
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { MemberProfileContext, useMemberProfile, useWorkspace, type Workspace } from "./workspace-context";
-import { MemberProfile } from "./member-profile";
 import { useModalKeyboard } from "./use-modal-keyboard";
 import { WorkspaceGitHubSetup } from "./repository-settings";
 import { useNotifications } from "./use-notifications";
@@ -22,17 +21,12 @@ import { useProjectPresence } from "./use-project-presence";
 import { Dialog } from "./dialog";
 import { MotionLayer } from "./motion-layer";
 import { ErrorBoundary } from "./error-boundary";
-import { IssueComposer } from "./issue-composer";
-import { InboxView } from "./inbox-view";
 import { CallDevices } from "./call-devices";
 import { CallAudio } from "./call-audio";
-import { WorkspaceSettings } from "./workspace-settings";
 import { FormStatus, type FormNotice } from "./settings-controls";
-import { ChatView } from "./chat-shell";
 import { UserAvatar, memberName } from "./user-avatar";
 import { ContentSkeleton } from "./content-skeleton";
 import { DrawView } from "./draw-view";
-import { CreateWorkspaceDialog } from "./create-workspace-dialog";
 import { SidebarResizeHandle } from "./sidebar-resize-handle";
 import { useSidebarLayout } from "./use-sidebar-layout";
 import { focusInitialInput, focusQuietly } from "@/lib/initial-focus";
@@ -194,6 +188,7 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
   const [initialIssue, setInitialIssue] = useState<{ projectId: Id<"projects">; taskId: Id<"tasks"> } | null>(null);
   const reorder = useMutation(api.projects.reorder);
   const projects = useQuery(api.projects.listForUser, { sessionToken, teamId: workspace._id });
+  useEffect(() => { if (projects) preloadViews(); }, [projects]);
   const workspaceRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const root = workspaceRef.current;

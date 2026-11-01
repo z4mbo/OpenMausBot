@@ -3,7 +3,7 @@ import { formatBytes } from "@/lib/format-bytes";
 import { errorText } from "@/lib/error-text";
 import { formatDate } from "@/lib/format";
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import clsx from "clsx";
 import { Check, Copy, Eye, EyeOff, File, FileText, ImageIcon, KeyRound, KeySquare, LayoutGrid, Link2, List, Loader2, LockKeyhole, PenTool, Plus, Search, Shapes, Shuffle, Smartphone, SquareAsterisk, StickyNote, Type, Upload, X, type LucideIcon } from "lucide-react";
@@ -26,10 +26,8 @@ function LibrarySearch({ label, value, onChange }: { label: string; value: strin
   return <label className="library-search"><Search size={14} aria-hidden="true" /><input type="search" aria-label={label} placeholder={label} value={value} onChange={event => onChange(event.target.value)} onKeyDown={event => { if (event.key === "Escape" && value) { event.stopPropagation(); onChange(""); } }} /></label>;
 }
 
-/** Shared empty state: icon, short title, at most one action. */
-export function ProjectEmpty({ icon: Icon, title, spin, children }: { icon: LucideIcon; title: string; spin?: boolean; children?: ReactNode }) {
-  return <div className="project-empty"><span className="project-empty-icon" aria-hidden="true"><Icon size={20} className={spin ? "spin" : undefined} /></span><h2>{title}</h2>{children}</div>;
-}
+export { ProjectEmpty } from "./project-empty";
+import { ProjectEmpty } from "./project-empty";
 
 /* ---------------------------------------------------------------- vault */
 
