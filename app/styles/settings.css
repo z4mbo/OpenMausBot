@@ -75,9 +75,6 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
 
 /* Danger zone and inline confirmation. */
 .danger-zone .setting-row > span { color: var(--text-2); }
-.confirm-panel { display: grid; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid rgba(242, 113, 107, 0.28); border-radius: var(--radius-md); background: var(--red-soft); animation: o-drop var(--duration-slow) var(--ease-out); }
-.confirm-panel p { margin: 0; color: var(--text-2); font-size: var(--text-sm); line-height: var(--leading); }
-.settings-confirm-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
 
 /* Lists: members, invites, connected agents. */
 .settings-list { display: grid; min-width: 0; }
@@ -89,8 +86,10 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
 .settings-list-row > select { flex: none; width: 104px; min-height: var(--control-sm); padding-top: 0; padding-bottom: 0; font-size: var(--text-sm); }
 .settings-list-row > .role-label { flex: none; width: 104px; padding-left: 10px; color: var(--text-3); font-size: var(--text-sm); }
 .settings-row-icon { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-3); color: var(--text-3); }
-.invite-link-form { display: flex; align-items: flex-end; gap: var(--space-2); }
-.invite-link-form label { flex: 0 1 200px; }
+.invite-form { display: flex; align-items: center; gap: var(--space-2); }
+.invite-form > input { flex: 1 1 auto; min-width: 0; }
+.invite-form > select { flex: 0 0 112px; }
+.invite-form > button { flex: none; }
 .copy-field.invite-link { animation: o-drop var(--duration-slow) var(--ease-out); }
 
 /* Members, also used by project settings (project-members.tsx). */
@@ -102,7 +101,7 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
 .member-profile-trigger:hover strong, .chat-profile-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .pending-invitation { display: flex; align-items: center; gap: var(--space-2); min-width: 0; padding: var(--space-2) 0; }
 .pending-invitation > div, .pending-invitation > span:not(.settings-row-icon) { flex: 1; min-width: 0; }
-.invite-link { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-3) 0; }
+.invite-link { display: flex; align-items: center; gap: var(--space-2); }
 .invite-link input { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: var(--text-sm); }
 .role-label { color: var(--text-3); font-size: var(--text-sm); text-transform: capitalize; }
 
@@ -194,9 +193,10 @@ label.file-button:has(input:focus-visible) { outline: 2px solid var(--focus); ou
   .settings-avatar-row { flex-wrap: wrap; }
   .settings-list-row > select, .settings-list-row > .role-label { width: 92px; }
   .pending-invitation small, .connector-grant small { white-space: normal; }
-  .invite-link-form { flex-wrap: wrap; }
-  .invite-link-form label { flex: 1 1 100%; }
-  .invite-link-form button { flex: 1; }
+  .invite-form { flex-wrap: wrap; }
+  .invite-form > input { flex-basis: 100%; }
+  .invite-form > select { flex: 0 0 112px; }
+  .invite-form > button { flex: 1; }
   .integration-section { grid-template-columns: minmax(0, 1fr); }
   .integration-actions { justify-content: flex-start; }
   .agent-clients { flex-wrap: nowrap; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); overflow-x: auto; scrollbar-width: none; }

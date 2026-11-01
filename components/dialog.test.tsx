@@ -50,3 +50,20 @@ test("a dialog that refuses to close is shown again after a native close", async
   await act(async () => { dialog.close(); await new Promise(resolve => setTimeout(resolve, 10)); });
   expect(document.querySelector("dialog")?.open).toBe(true);
 });
+
+test("Escape in a dialog opened from another dialog closes only the inner one", () => {
+  const closed: string[] = [];
+  function Nested() {
+    const [inner, setInner] = useState(true);
+    return <Dialog title="Outer" onClose={() => closed.push("outer")}>
+      {inner && <Dialog title="Inner" onClose={() => { closed.push("inner"); setInner(false); }}><button>Inside</button></Dialog>}
+    </Dialog>;
+  }
+  const host = document.createElement("div");
+  document.body.append(host);
+  root = createRoot(host);
+  act(() => root!.render(createElement(Nested)));
+  const inner = document.querySelector('dialog[aria-label="Inner"]')!;
+  act(() => { inner.dispatchEvent(new Event("cancel", { cancelable: true })); });
+  expect(closed).toEqual(["inner"]);
+});

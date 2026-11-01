@@ -64,11 +64,16 @@ export function Dialog({ title, heading, children, onClose, className = "" }: { 
       element.removeEventListener("keydown", onKeyDown);
       if (element.open) element.close();
       document.body.style.overflow = previous;
-      // Another dialog opened from this one takes care of its own focus.
-      if (!document.querySelector("dialog[open]")) restoreFocus(opener, taskId);
+      // Another dialog opened from this one takes care of its own focus; one opened from inside a dialog that stays
+      // open (a confirm over Settings) hands focus back to its opener there.
+      if (!document.querySelector("dialog[open]") || (opener instanceof HTMLElement && opener.closest("dialog[open]"))) restoreFocus(opener, taskId);
     };
   }, [opener]);
-  return createPortal(<dialog ref={ref} className={`origin-dialog ${className}`} aria-label={title} onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) { const box = event.currentTarget.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) onClose(); } }}>
+  return createPortal(<dialog ref={ref} className={`origin-dialog ${className}`} aria-label={title} onCancel={event => {
+    // React hands a dialog portaled out of this one its cancel too; only this dialog's own Escape closes it.
+    if (event.target !== event.currentTarget) return;
+    event.preventDefault(); onClose();
+  }} onClick={event => { if (event.target === event.currentTarget) { const box = event.currentTarget.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) onClose(); } }}>
     <header className="dialog-heading">{heading || <h2>{title}</h2>}<button type="button" className="icon-button" onClick={onClose} aria-label="Close dialog"><X size={18} /></button></header>
     {children}
   </dialog>, document.body);

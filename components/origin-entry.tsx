@@ -1,7 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +15,11 @@ import { WorkspaceSkeleton } from "./content-skeleton";
 const OriginWorkspace = dynamic(() => import("./origin-app").then(module => module.OriginWorkspace), {
   loading: () => <WorkspaceSkeleton />,
 });
+
+/** Signed-out paths render nothing until the stored session is read, instead of flashing the workspace skeleton. */
+const publicPath = (path: string) => path === "/" || path === "/login" || path === "/signup" || path.startsWith("/join/");
+/** A deleted workspace is worth mentioning on the empty screen for a week; the backend keeps notices longer. */
+const RECENT_DELETION = 7 * 86_400_000;
 
 export function OriginEntry() {
   const [token, setToken] = useState<string | null>(null);
@@ -31,17 +36,16 @@ export function OriginEntry() {
   const invitation = useQuery(api.workspaces.invitePreview, inviteToken ? { token: inviteToken } : "skip");
   const slug = path.split("/")[1];
   const workspace = workspaces?.find(w => w.slug === slug);
+  const redirecting = !inviteToken && ["", "login", "signup"].includes(slug) && Boolean(workspaces?.length);
   useEffect(() => { setToken(localStorage.getItem("origin.sessionToken")); setReady(true); }, []);
   useEffect(() => {
     if (token && user) void ensureLegacy({ sessionToken: token }).catch(error => setNotice(errorText(error, "Could not open your workspace")));
   }, [token, user?._id, ensureLegacy]);
   useEffect(() => {
-    if (!token || !user || !workspaces?.length || inviteToken) return;
-    if (["", "login", "signup"].includes(slug)) {
-      const preferred = workspaces.find(w => w.slug === localStorage.getItem("origin.workspace")) || workspaces[0];
-      router.replace(`/${preferred.slug}`);
-    }
-  }, [token, user, workspaces, inviteToken, slug, router]);
+    if (!token || !user || !workspaces?.length || !redirecting) return;
+    const preferred = workspaces.find(w => w.slug === localStorage.getItem("origin.workspace")) || workspaces[0];
+    router.replace(`/${preferred.slug}`);
+  }, [token, user, workspaces, redirecting, router]);
   const saveSession = async (sessionToken: string, destination?: string | null) => {
     localStorage.setItem("origin.sessionToken", sessionToken);
     // Signing in or up from an invitation link joins right away instead of asking again.
@@ -52,16 +56,44 @@ export function OriginEntry() {
     setToken(sessionToken);
     if (!inviteToken && destination) router.replace(`/${destination}`);
   };
-  if (!ready || (token && user === undefined)) return <WorkspaceSkeleton />;
+  /** Ends the session here first so the screen changes at once; `to` keeps an invitation link open for another account. */
+  const signOut = async (to = "/login") => {
+    if (!token) return;
+    localStorage.removeItem("origin.sessionToken");
+    flushSync(() => setToken(null));
+    router.replace(to);
+    await logout({ sessionToken: token }).catch(() => { /* The session is gone locally either way. */ });
+  };
+  if (!ready || (token && user === undefined)) return publicPath(path) ? <main className="public-auth" aria-busy="true" /> : <WorkspaceSkeleton />;
   if (!user || !token) {
     if (path === "/") return <Welcome />;
-    return <PublicAuth signup={path === "/signup"} inviteToken={inviteToken} invitation={invitation} onSession={saveSession} />;
+    return <PublicAuth key={inviteToken ?? "auth"} signup={path === "/signup" || Boolean(inviteToken)} inviteToken={inviteToken} invitation={invitation} onSession={saveSession} />;
   }
-  if (inviteToken) return <main className="public-auth"><Link className="origin-wordmark" href="/"><OriginMark />Origin</Link><section className="auth-content"><h1>{invitation ? `Join ${invitation.name}` : invitation === undefined ? "Loading invitation" : "Invitation unavailable"}</h1><p className="muted">{invitation ? `Signed in as ${user.email}` : "This link may have expired or been revoked."}</p>{notice && <p className="notice danger" role="alert">{notice}</p>}{invitation && <JoinButton onJoin={async () => { try { const result = await acceptInvite({ sessionToken: token, token: inviteToken }); router.replace(`/${result.slug}`); } catch (error) { setNotice(errorText(error, "Could not join")); } }} name={invitation.name} />}</section></main>;
-  if (workspaces === undefined) return <WorkspaceSkeleton />;
-  if (!workspaces.length) return <WorkspaceOnboarding sessionToken={token} onCreated={s => router.replace(`/${s}`)} />;
-  if (!workspace) return <main className="public-auth"><section className="auth-content"><h1>Your workspaces</h1>{workspaces.map(w => <Link className="workspace-choice" href={`/${w.slug}`} key={w._id}><span>{w.name}</span><ArrowRight size={16} /></Link>)}{notice && <p className="notice danger">{notice}</p>}</section></main>;
-  return <WorkspaceContext.Provider value={workspace}><OriginWorkspace key={workspace._id} sessionToken={token} user={user} workspaces={workspaces} onLogout={async () => { localStorage.removeItem("origin.sessionToken"); flushSync(() => setToken(null)); router.replace("/login"); await logout({ sessionToken: token }).catch(() => { /* The session is gone locally either way. */ }); }} /></WorkspaceContext.Provider>;
+  if (inviteToken) return <AuthFrame>
+    <h1>{invitation ? `Join ${invitation.name}` : invitation === undefined ? "Loading invitation" : "Invitation unavailable"}</h1>
+    {invitation === null && <p>This link has expired or was revoked.</p>}
+    {notice && <p className="notice danger" role="alert">{notice}</p>}
+    {invitation && <JoinButton name={invitation.name} onJoin={async () => { try { const result = await acceptInvite({ sessionToken: token, token: inviteToken }); router.replace(`/${result.slug}`); } catch (error) { setNotice(errorText(error, "Could not join")); } }} />}
+    {invitation === null && <Link className="primary-button large" href="/">Open Origin</Link>}
+    <SignedInAs email={user.email} onSignOut={() => void signOut(path)} />
+  </AuthFrame>;
+  if (workspaces === undefined || redirecting) return <WorkspaceSkeleton />;
+  if (!workspaces.length) return <WorkspaceOnboarding sessionToken={token} email={user.email} onSignOut={() => void signOut()} onCreated={s => router.replace(`/${s}`)} />;
+  if (!workspace) return <AuthFrame>
+    <h1>Workspace not found</h1>
+    <nav className="workspace-choices" aria-label="Your workspaces">{workspaces.map(w => <Link className="workspace-choice" href={`/${w.slug}`} key={w._id}><span className="workspace-initial" aria-hidden="true">{w.name.slice(0, 1).toUpperCase()}</span><span>{w.name}</span><ArrowRight size={16} /></Link>)}</nav>
+    {notice && <p className="notice danger">{notice}</p>}
+    <SignedInAs email={user.email} onSignOut={() => void signOut()} />
+  </AuthFrame>;
+  return <WorkspaceContext.Provider value={workspace}><OriginWorkspace key={workspace._id} sessionToken={token} user={user} workspaces={workspaces} onLogout={() => void signOut()} /></WorkspaceContext.Provider>;
+}
+
+function AuthFrame({ children }: { children: ReactNode }) {
+  return <main className="public-auth"><Link className="origin-wordmark" href="/"><OriginMark />Origin</Link><section className="auth-content">{children}</section></main>;
+}
+
+function SignedInAs({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+  return <p className="auth-switch">{email} <button type="button" onClick={onSignOut}>Sign out</button></p>;
 }
 
 function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession }: { signup: boolean; inviteToken?: string; invitation?: { name: string; role: string; email?: string } | null; onSession: (token: string, slug?: string | null) => Promise<void> }) {
@@ -81,6 +113,12 @@ function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession 
   const inviteOnly = Boolean(mode?.inviteOnly) && !inviteToken;
   useEffect(() => setHost(window.location.host), []);
   useEffect(() => { if (invitation?.email) setEmail(invitation.email); }, [invitation?.email]);
+  // The address follows the form, so a reload or a shared link opens the same screen.
+  const switchMode = () => {
+    const next = !signup;
+    setSignup(next); setError(""); setVisible(false);
+    if (!inviteToken) window.history.replaceState(null, "", next ? "/signup" : "/login");
+  };
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setBusy(true); setError("");
     try {
@@ -89,18 +127,22 @@ function PublicAuth({ signup: initialSignup, inviteToken, invitation, onSession 
     } catch (error) { setError(errorText(error, "Please try again")); }
     finally { setBusy(false); }
   };
-  return <main className="public-auth"><Link className="origin-wordmark" href="/"><OriginMark />Origin</Link><section className="auth-content">
-    <h1>{invitation ? `Join ${invitation.name}` : signup ? "Create account" : "Sign in"}</h1>
-    {inviteToken && invitation === null && <p className="notice danger">This invitation has expired or was revoked.</p>}
+  if (inviteToken && invitation === null) return <AuthFrame>
+    <h1>Invitation unavailable</h1>
+    <p>This link has expired or was revoked.</p>
+    <Link className="primary-button large" href="/login">Sign in</Link>
+  </AuthFrame>;
+  return <AuthFrame>
+    <h1>{invitation ? `Join ${invitation.name}` : inviteToken ? "Join workspace" : signup ? "Create account" : "Sign in"}</h1>
     {signup && inviteOnly ? <p className="notice">Sign-up is invite-only. Ask a workspace admin for an invitation link.</p> : <form className="stack-form" onSubmit={submit}>
-      {signup && <label>Your name<input autoComplete="name" value={name} onChange={e => setName(e.target.value)} required maxLength={100} /></label>}
-      <label>Email<input autoComplete="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required /></label>
-      <label>Password<span className="password-input"><input autoComplete={signup ? "new-password" : "current-password"} type={visible ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={signup ? 10 : undefined} maxLength={128} placeholder={signup ? "At least 10 characters" : undefined} /><button type="button" aria-label={visible ? "Hide password" : "Show password"} onClick={() => setVisible(!visible)}>{visible ? <EyeOff size={16} /> : <Eye size={16} />}</button></span></label>
-      {signup && !inviteToken && <><label>Workspace name<input value={workspaceName} onChange={e => { setWorkspaceName(e.target.value); setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")); }} required maxLength={60} /></label><label>Workspace URL<span className="slug-input"><span>{host}/</span><input value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} required minLength={2} maxLength={48} /></span></label></>}
+      {signup && <label>Your name<input autoComplete="name" value={name} onChange={e => setName(e.target.value)} required maxLength={100} autoFocus /></label>}
+      <label>Email<input autoComplete="email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} value={email} onChange={e => setEmail(e.target.value)} required autoFocus={!signup} /></label>
+      <label>Password<span className="password-input"><input autoComplete={signup ? "new-password" : "current-password"} type={visible ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={signup ? 10 : undefined} maxLength={128} placeholder={signup ? "At least 10 characters" : undefined} /><button type="button" aria-label={visible ? "Hide password" : "Show password"} aria-pressed={visible} onClick={() => setVisible(!visible)}>{visible ? <EyeOff size={16} /> : <Eye size={16} />}</button></span></label>
+      {signup && !inviteToken && <><label>Workspace name<input value={workspaceName} onChange={e => { setWorkspaceName(e.target.value); setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")); }} required maxLength={60} /></label><label>Workspace URL<span className="slug-input"><span>{host}/</span><input value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} required minLength={2} maxLength={48} autoCapitalize="none" spellCheck={false} /></span></label></>}
       {error && <p role="alert" className="notice danger">{error}</p>}
       <button type="submit" className="primary-button large" disabled={busy}>{busy ? <Loader2 className="spin" size={16} /> : signup ? "Create account" : "Sign in"}</button>
-    </form>}{(signup || !inviteOnly) && <p className="auth-switch">{signup ? "Have an account?" : "No account?"} <button onClick={() => { setSignup(!signup); setError(""); }}>{signup ? "Sign in" : "Create an account"}</button></p>}
-  </section></main>;
+    </form>}{(signup || !inviteOnly) && <p className="auth-switch">{signup ? "Have an account?" : "No account?"} <button type="button" onClick={switchMode}>{signup ? "Sign in" : "Create an account"}</button></p>}
+  </AuthFrame>;
 }
 
 function JoinButton({ name, onJoin }: { name: string; onJoin: () => Promise<void> }) {
@@ -116,10 +158,23 @@ function Welcome() {
   return <main className="public-auth welcome"><section className="auth-content"><span className="origin-wordmark"><OriginMark />Origin</span><div className="welcome-actions"><Link className="primary-button large" href="/login">Sign in</Link><Link className="ghost-button large" href="/signup">Create account</Link></div></section></main>;
 }
 
-function WorkspaceOnboarding({ sessionToken, onCreated }: { sessionToken: string; onCreated: (slug: string) => void }) {
+function WorkspaceOnboarding({ sessionToken, email, onSignOut, onCreated }: { sessionToken: string; email: string; onSignOut: () => void; onCreated: (slug: string) => void }) {
   const create = useMutation(api.workspaces.create);
+  const deleted = useQuery(api.workspaces.deleted, { sessionToken });
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  return <main className="public-auth"><section className="auth-content"><h1>Create a workspace</h1><form className="stack-form" onSubmit={async e => { e.preventDefault(); setBusy(true); try { const result = await create({ sessionToken, name }); onCreated(result.slug); } catch (error) { setError(errorText(error, "Could not create workspace")); } finally { setBusy(false); } }}><label>Workspace name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} /></label>{error && <p className="notice danger">{error}</p>}<button className="primary-button" disabled={busy}>Create workspace</button></form></section></main>;
+  // Read once on mount: the notice is about why this screen is empty, not a live clock.
+  const [shownSince] = useState(() => Date.now() - RECENT_DELETION);
+  const recent = deleted?.find(notice => !notice.byYou && notice.deletedAt > shownSince);
+  return <AuthFrame>
+    <h1>Create a workspace</h1>
+    {recent && <p className="notice">{recent.name} was deleted by {recent.deletedBy}.</p>}
+    <form className="stack-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { const result = await create({ sessionToken, name }); onCreated(result.slug); } catch (error) { setError(errorText(error, "Could not create workspace")); setBusy(false); } }}>
+      <label>Workspace name<input value={name} onChange={e => setName(e.target.value)} required maxLength={60} autoFocus /></label>
+      {error && <p className="notice danger" role="alert">{error}</p>}
+      <button className="primary-button large" disabled={busy || !name.trim()}>{busy ? <Loader2 className="spin" size={16} /> : "Create workspace"}</button>
+    </form>
+    <SignedInAs email={email} onSignOut={onSignOut} />
+  </AuthFrame>;
 }

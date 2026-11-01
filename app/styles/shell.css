@@ -134,7 +134,8 @@
 .sidebar-resize-handle:is(:hover, .is-dragging)::after { background: var(--border-3); }
 .workspace-app:has(.sidebar-resize-handle.is-dragging), .workspace-app:has(.sidebar-resize-handle.is-dragging) * { cursor: col-resize; user-select: none; }
 
-/* Empty workspace. */
+/* Empty workspace: the one action sits a little above the optical center of the panel. */
+.workspace > .empty-projects { min-height: 100%; padding-bottom: 12vh; }
 .empty-create { display: grid; gap: var(--space-3); justify-items: center; margin-top: var(--space-2); }
 
 /* Search palette. */
@@ -180,7 +181,6 @@
   .account-dropdown { left: var(--space-3); right: auto; width: min(280px, calc(86vw - 24px)); }
   .account-dropdown button { min-height: 40px; }
 }
-.empty-create > .ghost-button { width: auto; }
 .project-viewer[data-self-viewer] { display: none; }
 .account-identity { display: flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-2); }
 .account-identity .origin-user-avatar { --avatar-size: 24px; }
