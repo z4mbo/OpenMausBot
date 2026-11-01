@@ -1,9 +1,10 @@
 import { ConvexError } from "convex/values";
+import { after } from "next/server";
 import { BodyTooLarge, readBoundedJson } from "@/lib/http-body";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { getConvexClient, requireLocalUser, sessionTokenFromRequest, limitLocalAction } from "@/lib/localRealtime";
-import { authorizationError, issueMcpCode, OAuthError, validateMcpAuthorization } from "@/lib/mcp-oauth";
+import { authorizationError, issueMcpCode, maintainMcpOAuth, OAuthError, validateMcpAuthorization } from "@/lib/mcp-oauth";
 import { originUrl } from "@/lib/integration-bridge";
 
 export const runtime = "nodejs";
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
     const write = body.write === true && auth.scope.split(" ").includes("origin:write");
     const convex = getConvexClient();
     const grant = await convex.mutation(api.mcp.createOAuthGrant, { sessionToken, teamId: body.teamId as Id<"teams">, name: `${auth.name} (${describe(auth.redirect)})`.slice(0, 120), write });
+    // Each consent also sweeps earlier abandoned ones (codes that expired unused) out of Settings > Agents.
+    after(() => maintainMcpOAuth().catch(() => {}));
     try { return Response.json({ url: issueMcpCode(auth, grant.token, grant.expiresAt, write) }, { headers: noStore }); }
     catch (error) { await convex.mutation(api.mcp.revokeOwnToken, { token: grant.token }).catch(() => {}); throw error; }
   } catch (error) {

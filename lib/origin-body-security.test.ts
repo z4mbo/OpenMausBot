@@ -26,7 +26,7 @@ vi.mock("./github-workspace", () => ({ lockGitHubJob: work, saveGitHubJob: work 
 vi.mock("./githubConnection", () => ({ saveGitHubConnection: work }));
 vi.mock("./github-sync", () => ({ createGitHubTask: work, createProjectRepository: work, syncGitHubPage: work }));
 vi.mock("./github-prs", () => ({ createTaskPR: work, syncPRPage: work }));
-vi.mock("./mcp-oauth", () => ({ validateMcpAuthorization: work, validateMcpClient: work, issueMcpCode: work, authorizationError: work, OAuthError: Error }));
+vi.mock("./mcp-oauth", () => ({ validateMcpAuthorization: work, validateMcpClient: work, issueMcpCode: work, authorizationError: work, maintainMcpOAuth: work, OAuthError: Error }));
 vi.mock("./invite-mail", () => ({ sendInviteMail: work }));
 afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); });
 
