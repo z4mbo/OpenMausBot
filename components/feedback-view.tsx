@@ -102,8 +102,8 @@ function ConvertFeedback({ sessionToken, projectId, entry, onClose, onCreated }:
   return <Dialog title="Create issue" onClose={onClose}><form className="stack-form library-form" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); try { onCreated(await convert({ sessionToken, teamId: workspace._id, entryId: entry._id, columnId: (column || defaultColumn) as Id<"columns">, assignedToEmail: assignee, dueDate })); } catch (error) { setError(errorText(error, "Could not create issue")); } finally { setBusy(false); } }}>
     <p className="library-form-subject">{entry.kind === "bug" ? <Bug size={14} /> : <Lightbulb size={14} />}<span>{entry.title}</span></p>
     <div className="issue-property-chips">
-      <IssueSelect label="Status" value={column || defaultColumn} onChange={setColumn} options={columns.map(c => ({ value: c._id, label: c.title, icon: <StatusIcon title={c.title} /> }))} />
-      <MemberPicker label="Assignee" placeholder="Assignee" noneLabel="Unassigned" members={members ?? []} value={assignee} onChange={setAssignee} currentEmail={me?.email} />
+      <IssueSelect label="Status" value={column || defaultColumn} onChange={setColumn} options={columns.map(c => ({ value: c._id, label: c.title, icon: <StatusIcon title={c.title} /> }))} caption="Status" />
+      <MemberPicker label="Assignee" placeholder="Assignee" noneLabel="Unassigned" members={members ?? []} value={assignee} onChange={setAssignee} currentEmail={me?.email} caption="Assignee" />
       <DatePicker value={dueDate} onChange={setDueDate} />
     </div>
     {error && <p className="notice danger" role="alert">{error}</p>}
