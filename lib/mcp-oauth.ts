@@ -93,6 +93,15 @@ export async function flushMcpRevocations(revoke: (connectorToken: string) => Pr
   }
 }
 
+/**
+ * Revokes grants whose codes expired unused (abandoned consents), then mirrors queued revocations to Convex.
+ * Runs from the signed integration tick (Convex cron, every 2 minutes) and after each consent, so an abandoned
+ * connection leaves Settings > Agents within minutes even when no other OAuth request arrives.
+ */
+export async function maintainMcpOAuth(revoke?: Parameters<typeof flushMcpRevocations>[0]) {
+  try { cleanup(); } finally { await flushMcpRevocations(revoke); }
+}
+
 const LOOPBACK = new Set(["127.0.0.1", "[::1]", "localhost"]);
 function isLoopback(url: URL) { return url.protocol === "http:" && LOOPBACK.has(url.hostname); }
 export function validRedirect(value: string) {

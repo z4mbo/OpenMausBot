@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   try {
     const user = await requireLocalWorkspace(request);
     const config = githubAppConfig(); const connection = workspaceGitHubInfo(user.teamId);
-    return NextResponse.json({ configured: Boolean(config), canSetup: canSetupGitHubApp(user.email, user.workspaceRole), login: connection?.login || null,
+    return NextResponse.json({ configured: Boolean(config), canSetup: await canSetupGitHubApp(user, user.workspaceRole), login: connection?.login || null,
       prPermissionNotice: config ? permissionNotice : null, permissionApprovalUrl: "https://github.com/settings/installations",
       installationUrl: config?.slug ? `https://github.com/apps/${config.slug}/installations/new` : null });
   } catch { return NextResponse.json({ error: "Workspace access required" }, { status: 403 }); }

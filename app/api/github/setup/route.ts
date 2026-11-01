@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     const user = await requireLocalWorkspace(request);
     if (githubAppConfig()) throw new Error("GitHub App is already configured");
-    if (!canSetupGitHubApp(user.email, user.workspaceRole)) throw new Error("Workspace admin access required");
+    if (!await canSetupGitHubApp(user, user.workspaceRole)) throw new Error("Only the instance operator can set up the GitHub App");
     limitLocalAction(`github-setup:${user._id}`, 3, 60000);
     const { state, browser } = createGithubState({ teamId: user.teamId, userId: user._id, sessionToken: sessionTokenFromRequest(request), slug: user.slug, mode: "setup" });
     const origin = originUrl();

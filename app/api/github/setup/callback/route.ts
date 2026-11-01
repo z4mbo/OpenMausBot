@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 async function requireSetupAdmin(state: GithubState) {
   const user = await requireLocalUser(state.sessionToken);
   const access = await getConvexClient().query(api.workspaces.access, { sessionToken: state.sessionToken, teamId: state.teamId as Id<"teams"> });
-  if (user._id !== state.userId || !canSetupGitHubApp(user.email, access.role)) throw new Error("Setup unavailable");
+  if (user._id !== state.userId || !await canSetupGitHubApp(user, access.role)) throw new Error("Setup unavailable");
 }
 export async function GET(request: NextRequest) {
   try {

@@ -50,13 +50,23 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm r
 
 Origin is a remote MCP server at `https://<your-origin>/api/mcp` (Streamable HTTP). Agents act as you, with your workspace and project permissions. Settings → Agents has the URL, per-client setup and access tokens.
 
+Sign in with OAuth (each opens Origin's consent page):
+
 ```sh
-claude mcp add --transport http origin https://<your-origin>/api/mcp   # Claude Code; sign in with /mcp
+claude mcp add --transport http origin https://<your-origin>/api/mcp           # Claude Code, then /mcp
 codex mcp add origin --url https://<your-origin>/api/mcp && codex mcp login origin
+opencode mcp auth origin    # OpenCode, with origin as a "remote" server in opencode.json
 ```
 
-- **Sign-in:** OAuth 2.1 with dynamic client registration and PKCE (Claude Code, Codex, OpenCode, omp, ChatGPT developer mode).
-- **Header-only clients:** create an access token in Settings → Agents and send `Authorization: Bearer <token>`.
+omp reads `~/.omp/agent/mcp.json` (`{"mcpServers": {"origin": {"type": "http", "url": "..."}}}`); sign in with `/mcp reauth origin`.
+
+Or create an access token in Settings → Agents and send it as a header:
+
+```sh
+claude mcp add --transport http origin https://<your-origin>/api/mcp --header "Authorization: Bearer origin_pat_..."
+```
+
+- **Tested with:** Claude Code 2.1 (token), Codex 0.166, OpenCode 1.19 and omp 18.14 (token and OAuth). ChatGPT developer mode uses OAuth and needs a public HTTPS address.
 - **Tools:** `get_workspace`, `list_projects`, `list_issues`, `get_issue`, `get_inbox`, `list_members`, and with write access `create_issue`, `update_issue`, `move_issue`, `add_comment`.
 
 Revoke connections and tokens in Settings → Agents.

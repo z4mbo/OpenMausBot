@@ -277,3 +277,12 @@ export const kick = internalAction({
     return null;
   },
 });
+
+/** The instance operator when ORIGIN_ADMIN_EMAILS is unset: the current owner of the first workspace created here. */
+export const instanceOperator = internalQuery({
+  args: {}, returns: v.union(v.object({ userId: v.id("users") }), v.null()),
+  handler: async ctx => {
+    const first = await ctx.db.query("teams").order("asc").first();
+    return first ? { userId: first.ownerUserId } : null;
+  },
+});
