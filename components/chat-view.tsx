@@ -1082,17 +1082,7 @@ export function ChatThread({
                 <Paperclip size={17} />
               )}
             </button>
-            <button
-              type="button"
-              className="icon-button"
-              aria-label="Tag a project or issue"
-              title="Tag a project or issue"
-              disabled={!canWrite || sending || Boolean(editing)}
-              onClick={() => openSuggestions("#")}
-            >
-              <Hash size={17} />
-            </button>
-            {!conversation && (
+            {!conversation && others?.length !== 0 && (
               <button
                 type="button"
                 className="icon-button"
@@ -1104,6 +1094,16 @@ export function ChatThread({
                 <AtSign size={17} />
               </button>
             )}
+            <button
+              type="button"
+              className="icon-button"
+              aria-label="Tag a project or issue"
+              title="Tag a project or issue"
+              disabled={!canWrite || sending || Boolean(editing)}
+              onClick={() => openSuggestions("#")}
+            >
+              <Hash size={17} />
+            </button>
           </div>
           <button
             className="send-message"

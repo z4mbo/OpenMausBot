@@ -58,9 +58,11 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
   const update = useMutation(api.tasks.updateTask);
   const filtered = results.filter(task => `${task.title} ${task.projectName} ${task.assignedToName || ""}`.toLowerCase().includes(search.trim().toLowerCase()));
   const hasFilters = Boolean(project || priority || search);
+  // Without a project there are no issues to filter, plan or search: the empty list stands alone.
+  const noProjects = projects?.length === 0;
   const clearFilters = () => { setSearch(""); setPriority(""); setProject(""); };
   const notifications = <NotificationList sessionToken={sessionToken} onOpenTask={onOpenTask} onOpenChat={onOpenChat} />;
-  return <section className={`work-inbox ${section === "calendar" && !(phone && pane === "notifications") ? "calendar-inbox" : ""}`} aria-label="Inbox">
+  return <section className={`work-inbox ${section === "calendar" && !noProjects && !(phone && pane === "notifications") ? "calendar-inbox" : ""}`} aria-label="Inbox">
     <header className="view-header"><h1>Inbox</h1></header>
     {phone ? <div className="segmented-control inbox-pane-switch" role="group" aria-label="Inbox section">
       <button className={pane === "notifications" ? "active" : ""} aria-pressed={pane === "notifications"} onClick={() => setPane("notifications")}>Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</button>
@@ -68,7 +70,7 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
     </div>
     : <details className="inbox-notifications" open={notificationsOpen}><summary onClick={event => { event.preventDefault(); setNotificationsOpen(open => !open); }}><ChevronRight size={14} />Notifications{unread > 0 && <span className="notification-count">{unread}</span>}</summary>{notificationsOpen && notifications}</details>}
     {phone && pane === "notifications" ? notifications : <>
-    <div className="work-toolbar">
+    {!noProjects && <div className="work-toolbar">
       <div className="work-toolbar-modes">
         <div className="segmented-control" role="group" aria-label="Issue ownership"><button className={mine ? "active" : ""} aria-pressed={mine} aria-label="Assigned to me" onClick={() => setMine(true)}><span className="label-long">Assigned to me</span><span className="label-short">Mine</span></button><button className={!mine ? "active" : ""} aria-pressed={!mine} aria-label="All issues" onClick={() => setMine(false)}><span className="label-long">All issues</span><span className="label-short">All</span></button></div>
         <div className="segmented-control" role="group" aria-label="Issue completion"><button className={!done ? "active" : ""} aria-pressed={!done} onClick={() => setDone(false)}>Active</button><button className={done ? "active" : ""} aria-pressed={done} aria-label="Completed" onClick={() => setDone(true)}><span className="label-long">Completed</span><span className="label-short">Done</span></button></div>
@@ -81,8 +83,8 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
         {hasFilters && <button className="icon-button" title="Clear filters" aria-label="Clear filters" onClick={clearFilters}><X size={14} /></button>}
       </div>
       {search && !searchOpen && <button type="button" className="filter-chip" aria-label={`Clear search ${search}`} onClick={() => setSearch("")}><Search size={12} /><span>{search}</span><X size={12} /></button>}
-    </div>
-    {section === "calendar" ? <InboxCalendar sessionToken={sessionToken} onOpenTask={onOpenTask} mine={mine} done={done} project={project} priority={priority} search={search} /> : <>
+    </div>}
+    {section === "calendar" && !noProjects ? <InboxCalendar sessionToken={sessionToken} onOpenTask={onOpenTask} mine={mine} done={done} project={project} priority={priority} search={search} /> : <>
     {notice && <div className="notice danger" role="alert">{notice}</div>}
     <div className="work-issue-list">
       {status === "LoadingFirstPage" ? <ContentSkeleton label="Loading issues" rows={6} /> : !filtered.length ? <div className="work-empty"><Inbox size={22} /><strong>{hasFilters ? "No matching issues" : done ? "No completed issues" : "You're all caught up"}</strong>{hasFilters && <button className="ghost-button compact" onClick={clearFilters}>Clear filters</button>}</div> : filtered.map(task => {
