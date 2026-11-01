@@ -25,7 +25,7 @@ import { compareTaskOrder, planTaskMove } from "../lib/task-order";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 import { TaskModal } from "./issue-detail";
 import { IssueComposer } from "./issue-composer";
-import { subscribeCreatedIssue, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { IssueDeleteDialog, subscribeCreatedIssue, type OpenReference, type ProjectWithUi } from "./issue-shared";
 import { DelayedSkeleton } from "./delayed-skeleton";
 
 type Task = Doc<"tasks">;
@@ -695,20 +695,12 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         onChange={dueDate => void update(datePickTask._id, { dueDate })}
         onClose={restore => { const id = datePick.taskId; setDatePick(null); if (restore) focusCard(id); }}
       />}
-      {deleting && <Dialog title="Delete issue" className="confirm-dialog" onClose={() => { const id = deleting._id; setDeleting(null); focusCard(id); }}>
-        <div className="dialog-body">
-          <p className="confirm-text"><span className="issue-key">{taskKey(deleting._id)}</span> {deleting.title}</p>
-          <div className="dialog-actions">
-            <button type="button" className="ghost-button compact" onClick={() => { const id = deleting._id; setDeleting(null); focusCard(id); }}>Cancel</button>
-            <button type="button" className="primary-button danger compact" autoFocus disabled={!online} onClick={() => {
-              const task = deleting;
-              const next = neighbourOf(task._id);
-              setDeleting(null);
-              deleteTask({ projectId, sessionToken, taskId: task._id }).then(() => focusCard(next), report("Could not delete issue"));
-            }}>Delete</button>
-          </div>
-        </div>
-      </Dialog>}
+      {deleting && <IssueDeleteDialog taskId={deleting._id} title={deleting.title} disabled={!online} onCancel={() => { const id = deleting._id; setDeleting(null); focusCard(id); }} onConfirm={() => {
+        const task = deleting;
+        const next = neighbourOf(task._id);
+        setDeleting(null);
+        deleteTask({ projectId, sessionToken, taskId: task._id }).then(() => focusCard(next), report("Could not delete issue"));
+      }} />}
       {columnDelete && <ColumnDeleteDialog column={columnDelete} columns={visualColumns} issueCount={board.tasks.filter(task => task.columnId === columnDelete._id).length} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnDelete(null)} />}
       {laneCreate && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} initialColumnId={laneCreate} onClose={() => setLaneCreate(null)} onCreated={() => undefined} />}
       {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={(target, task) => { if (target === projectId && task) setSelectedTaskId(task); else { closeTask(); onOpenReference?.(target, task); } }} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={closeTask} /> : null}
