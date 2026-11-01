@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/controls.css";
+import "./styles/pickers.css";
 import "./styles/shell.css";
 import "./styles/project.css";
 import "./styles/board.css";
