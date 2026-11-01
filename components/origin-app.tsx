@@ -667,7 +667,10 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
   const createProject = useMutation(api.projects.create);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [repoMode, setRepoMode] = useState<"create" | "existing">("create");
+  const github = useQuery(api.integrations.status, open ? { sessionToken, teamId: workspace._id } : "skip");
+  const [chosenRepoMode, setRepoMode] = useState<"create" | "existing" | "later" | null>(null);
+  // Without a connected GitHub account a "create" request would only sit pending, so default to no repository.
+  const repoMode = chosenRepoMode ?? (github?.login && github.autoCreate ? "create" : "later");
   const [repoUrl, setRepoUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -677,9 +680,10 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
     setBusy(true);
     setError("");
     try {
-      const id = await createProject({ name, sessionToken, teamId: workspace._id, repoUrl: repoMode === "existing" ? repoUrl : undefined });
+      const id = await createProject({ name, sessionToken, teamId: workspace._id, repoUrl: repoMode === "existing" ? repoUrl : undefined, ...(repoMode === "later" ? { githubRepo: "later" as const } : {}) });
       setName("");
       setRepoUrl("");
+      setRepoMode(null);
       setOpen(false);
       onCreated(id);
     } catch (err) {
@@ -688,7 +692,7 @@ function CreateProjectInline({ sessionToken, onCreated, iconOnly = false }: { se
       setBusy(false);
     }
   };
-  return <><button className={clsx("ghost-button", iconOnly ? "icon-create" : "full")} type="button" aria-label="Create project" title="Create project" disabled={workspace.role === "viewer"} onClick={() => setOpen(true)}><Plus size={14} strokeWidth={1.5} />{iconOnly ? null : "New project"}</button>{open && <Dialog title="New project" onClose={() => setOpen(false)}><form className="dialog-body stack-form" onSubmit={submit}><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Project name" autoFocus required maxLength={100} /></label><fieldset className="repo-choice"><legend>Repository</legend><label><input type="radio" name="repository-mode" checked={repoMode === "create"} onChange={() => setRepoMode("create")} />Create a private repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "existing"} onChange={() => setRepoMode("existing")} />Link an existing repository</label></fieldset>{repoMode === "existing" && <label>GitHub repository<input value={repoUrl} onChange={event => setRepoUrl(event.target.value)} placeholder="owner/repository" required /></label>}<WorkspaceGitHubSetup sessionToken={sessionToken} />{error ? <div className="notice danger">{error}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit" disabled={busy}>{busy ? "Creating..." : "Create project"}</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form></Dialog>}</>;
+  return <><button className={clsx("ghost-button", iconOnly ? "icon-create" : "full")} type="button" aria-label="Create project" title="Create project" disabled={workspace.role === "viewer"} onClick={() => setOpen(true)}><Plus size={14} strokeWidth={1.5} />{iconOnly ? null : "New project"}</button>{open && <Dialog title="New project" onClose={() => setOpen(false)}><form className="dialog-body stack-form" onSubmit={submit}><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Project name" autoFocus required maxLength={100} /></label><fieldset className="repo-choice"><legend>Repository</legend><label><input type="radio" name="repository-mode" checked={repoMode === "create"} onChange={() => setRepoMode("create")} />Create a private repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "existing"} onChange={() => setRepoMode("existing")} />Link an existing repository</label><label><input type="radio" name="repository-mode" checked={repoMode === "later"} onChange={() => setRepoMode("later")} />No repository</label></fieldset>{repoMode === "existing" && <label>GitHub repository<input value={repoUrl} onChange={event => setRepoUrl(event.target.value)} placeholder="owner/repository" required /></label>}<WorkspaceGitHubSetup sessionToken={sessionToken} />{error ? <div className="notice danger">{error}</div> : null}<div className="row gap"><button className="primary-button compact" type="submit" disabled={busy}>{busy ? "Creating..." : "Create project"}</button><button className="ghost-button compact" type="button" onClick={() => setOpen(false)}>Cancel</button></div></form></Dialog>}</>;
 }
 
 
