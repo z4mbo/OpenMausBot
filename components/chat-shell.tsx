@@ -221,7 +221,7 @@ export function ChatView(props: Props) {
                 <UserAvatar user={member} size="small" />
               </button>
             ))}
-            <button
+            {peers.length > 0 && <button
               className="icon-button chat-members-browse"
               aria-label="Browse members"
               title="Browse members"
@@ -229,7 +229,7 @@ export function ChatView(props: Props) {
             >
               {peers.length > 3 && <span>+{peers.length - 3}</span>}
               <MessageSquarePlus size={17} />
-            </button>
+            </button>}
           </div>
           {(section === "chat" || selected) && <>
             <button
@@ -306,7 +306,7 @@ export function ChatView(props: Props) {
           <aside className="dm-list" aria-label="Direct conversations">
             <div className="dm-list-heading">
               <span>Messages</span>
-              <button
+              {peers.length > 0 && <button
                 className="icon-button"
                 title={!online ? RECONNECT_TO_CREATE : "New message"}
                 disabled={!online}
@@ -314,7 +314,7 @@ export function ChatView(props: Props) {
                 onClick={() => setPeopleOpen(true)}
               >
                 <Pencil size={15} />
-              </button>
+              </button>}
             </div>
             {conversations === null ? (
               <ContentSkeleton
@@ -403,12 +403,12 @@ export function ChatView(props: Props) {
             onRead={refreshConversations}
             initialUnread={section === "dm" ? selected?.unread : 0}
           />
-        ) : (
+        ) : conversations?.length ? (
           <div className="dm-no-selection">
             <MessageCircle size={30} />
             <p>Select a conversation</p>
           </div>
-        )}
+        ) : <div className="dm-no-selection" />}
       </div>
       {peopleOpen && (
         <Dialog title="Members" onClose={() => setPeopleOpen(false)}>
