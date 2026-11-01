@@ -15,6 +15,11 @@ export function useBoardScroll(enabled: boolean) {
       if (next === board.scrollLeft) return;
       event.preventDefault(); board.scrollLeft = next;
     };
+    // On phones one lane fills the screen: start on the first lane that has issues.
+    if (matchMedia("(max-width: 760px)").matches && board.scrollLeft === 0) {
+      const lane = Array.from(board.querySelectorAll<HTMLElement>(".kanban-column")).find(column => column.querySelector(".task-card"));
+      if (lane && lane !== board.firstElementChild) board.scrollLeft = lane.getBoundingClientRect().left - board.getBoundingClientRect().left - 16;
+    }
     board.addEventListener("wheel", wheel, { passive: false });
     return () => board.removeEventListener("wheel", wheel);
   }, [enabled]);

@@ -5,59 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { BoardTab, TaskModal } from "./project-issues";
 import { taskKey } from "../lib/project-issues";
 import clsx from "clsx";
-import {
-  ArrowUp,
-  ArrowUpDown,
-  ChevronDown,
-  ChevronRight,
-  CheckCircle2,
-  Circle,
-  Columns3,
-  CircleDot,
-  Power,
-  RotateCcw,
-  CircleAlert,
-  Copy,
-  ExternalLink,
-  FileText,
-  GitBranch,
-  GitCommit,
-  Image,
-  Inbox,
-  KeyRound,
-  LinkIcon,
-  Loader2,
-  LockKeyhole,
-  LogOut,
-  Menu,
-  Maximize2,
-  MessageCircle,
-  Mic,
-  MicOff,
-  MonitorUp,
-  MonitorOff,
-  Pencil,
-  PenTool,
-  PhoneOff,
-  Paperclip,
-  Plus,
-  Rocket,
-  Search,
-  Send,
-  Settings2,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  PanelLeftClose,
-  PanelLeftOpen,
-  SquarePen,
-  Trash2,
-  UserPlus,
-  Users,
-  Video,
-  VideoOff,
-  X,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, CircleDot, Power, RotateCcw, CircleAlert, ExternalLink, GitBranch, GitCommit, Inbox, KeyRound, Loader2, LogOut, Menu, Maximize2, MessageCircle, Mic, MicOff, MonitorUp, MonitorOff, PenTool, PhoneOff, Plus, Search, Settings2, Settings, Sparkles, PanelLeftClose, PanelLeftOpen, SquarePen, Video, VideoOff, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
@@ -76,7 +24,6 @@ import { projectSortOptions, sortProjects, type ProjectSort } from "@/lib/projec
 import { useProjectPresence } from "./use-project-presence";
 import { Dialog } from "./dialog";
 import { MotionLayer } from "./motion-layer";
-import { WhatsNew } from "./whats-new";
 import { ErrorBoundary } from "./error-boundary";
 import { IssueComposer } from "./issue-composer";
 import { InboxView } from "./inbox-view";
@@ -166,13 +113,13 @@ type GitHubSnapshot = {
   hosted: "origin-local";
 };
 
-const tabs: Array<{ key: TabKey; label: string; icon: typeof Columns3 }> = [
-  { key: "board", label: "Issues", icon: Columns3 },
-  { key: "assets", label: "Assets", icon: Paperclip },
-  { key: "vault", label: "Vault", icon: LockKeyhole },
-  { key: "repo", label: "Repo", icon: GitBranch },
-  { key: "feedback", label: "Feedback", icon: MessageCircle },
-  { key: "settings", label: "Settings", icon: Settings },
+const tabs: Array<{ key: TabKey; label: string }> = [
+  { key: "board", label: "Issues" },
+  { key: "assets", label: "Assets" },
+  { key: "vault", label: "Vault" },
+  { key: "repo", label: "Repo" },
+  { key: "feedback", label: "Feedback" },
+  { key: "settings", label: "Settings" },
 ];
 const roles: Role[] = ["admin", "member", "viewer"];
 const credentialKinds: Array<{ value: CredentialKind; label: string }> = [
@@ -508,7 +455,6 @@ export function OriginWorkspace({ sessionToken, user, workspaces, onLogout }: { 
               </div>}
           </div>
         </div>
-        <WhatsNew userId={user._id} createdAt={user.createdAt} />
       </aside>
       {!sidebarCollapsed && <SidebarResizeHandle width={sidebarLayout.width} onResize={width => setSidebarLayout(current => ({ ...current, width }))} onCollapse={width => { setSidebarLayout({ width, collapsed: true }); setSidebarHover(false); }} />}
       <main ref={workspaceRef} className={clsx("workspace", mainView === "draw" && "draw-workspace", viewLoading && "view-loading")} aria-busy={viewLoading}>
@@ -1253,11 +1199,12 @@ function ProjectWorkspace({ projectId, sessionToken, user, viewers, initialTaskI
   const [pendingTask, setPendingTask] = useState(initialTaskId);
   const [feedbackTask, setFeedbackTask] = useState<Id<"tasks"> | null>(null);
   const project = useQuery(api.projects.get, { projectId, sessionToken });
+  const openTab = (key: TabKey) => { setTab(key); setPendingTask(undefined); const params = new URLSearchParams(window.location.search); params.set("tab", key); params.delete("issue"); window.history.replaceState(null, "", `${location.pathname}?${params}`); };
   if (!project) return <LoadingState label="Opening project" />;
   return (
     <div className={clsx("project-shell", tabLoading && "tab-loading")} aria-busy={tabLoading}>
       {tabLoading && <div className="view-loading-overlay"><ContentSkeleton kind={tab === "board" ? "board" : "list"} label="Loading project view" /></div>}
-      <div className="project-navigation"><div className="project-identity"><ProjectIcon project={project} /><strong>{project.name}</strong></div><nav className="tabs" aria-label="Project views"><span className="tab-glider" aria-hidden="true" />{tabs.map((item) => { const Icon = item.icon; return <button key={item.key} aria-label={item.label} title={item.label} className={clsx(tab === item.key && "active", item.key === "feedback" && "project-feedback-tab", item.key === "settings" && "project-settings-tab")} onClick={() => { setTab(item.key); setPendingTask(undefined); const params = new URLSearchParams(window.location.search); params.set("tab", item.key); window.history.replaceState(null, "", `${location.pathname}?${params}`); }}><Icon size={16} />{item.key !== "settings" && <span>{item.label}</span>}</button>; })}</nav></div>
+      <div className="project-navigation"><div className="project-identity"><ProjectIcon project={project} /><strong>{project.name}</strong></div><nav className="tabs" aria-label="Project views"><span className="tab-glider" aria-hidden="true" />{tabs.filter(item => item.key !== "settings").map(item => <button key={item.key} aria-current={tab === item.key ? "page" : undefined} className={clsx(tab === item.key && "active")} onClick={() => openTab(item.key)}>{item.label}</button>)}</nav><button className={clsx("icon-button project-settings-tab", tab === "settings" && "selected")} aria-label="Settings" title="Project settings" aria-pressed={tab === "settings"} onClick={() => openTab("settings")}><Settings size={16} /></button></div>
       {project.status !== "active" && <ProjectStateBanner project={project} sessionToken={sessionToken} />}
       {tab === "board" ? <BoardTab key={projectId} project={project} projectId={projectId} sessionToken={sessionToken} userEmail={user.email} canEdit={project.memberRole !== "viewer"} onCreateIssue={() => setIssueOpen(true)} initialTaskId={pendingTask} onOpenReference={onOpenReference} /> : null}
       {tab === "repo" ? <RepoTab project={project} sessionToken={sessionToken} /> : null}

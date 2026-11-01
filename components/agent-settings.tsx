@@ -6,7 +6,6 @@ import { api } from "@/convex/_generated/api";
 import { useWorkspace } from "./workspace-context";
 import { localAppOrigin } from "@/lib/client-api";
 import { errorText } from "@/lib/error-text";
-import "./agent-settings.css";
 
 const CLIENTS = ["Claude Code", "Codex", "OpenCode", "omp", "T3 Code", "ChatGPT"] as const;
 type Client = typeof CLIENTS[number];

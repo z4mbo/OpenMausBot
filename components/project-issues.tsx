@@ -3,20 +3,20 @@ import { errorText } from "@/lib/error-text";
 import { isDraftColumn } from "@/lib/origin-columns";
 import { ErrorBoundary } from "./error-boundary";
 
-import "./project-issues.css";
 
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { OptimisticLocalStore } from "convex/browser";
 import clsx from "clsx";
-import { ArrowLeft, CalendarDays, Check, CheckCircle2, Circle, CircleDot, Columns2, Columns3, Copy, ExternalLink, Flag, GitBranch, GripVertical, List, Loader2, MessageCircle, MoreHorizontal, Paperclip, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, CheckCircle2, Circle, Columns2, Columns3, ExternalLink, LinkIcon, GripVertical, List, Loader2, MoreHorizontal, Paperclip, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { localApi } from "@/lib/client-api";
 import { hasOpenKeyboardOverlay, isEditingTarget } from "@/lib/keyboard-navigation";
 import { issueShortcut, matchesIssue, taskKey } from "../lib/project-issues";
 import { TaskActionsMenu } from "./task-actions-menu";
-import { IssueRelations } from "./issue-relations";
+import { IssueLabels, IssueRelations } from "./issue-relations";
+import { ProjectIcon } from "./project-icon";
 import { useMemberProfile, useWorkspace } from "./workspace-context";
 import { GitHubIssueIndicator } from "./github-issue-indicator";
 import { LocalAttachment } from "./local-attachment";
@@ -24,6 +24,7 @@ import { TaskPullRequest } from "./task-pull-request";
 import { MemberPicker } from "./member-picker";
 import { Dialog } from "./dialog";
 import { IssueFields } from "./issue-fields";
+import { PriorityIcon } from "./priority-icon";
 import { IssueCommentBody, IssueCommentComposer } from "./issue-comments";
 import { IssueFileUpload } from "./issue-file-upload";
 import { useBoardScroll } from "./use-board-scroll";
@@ -48,6 +49,8 @@ function laneTone(title: string) {
   if (normalized === "idea") return "idea";
   if (normalized === "todo") return "todo";
   if (normalized === "done") return "done";
+  if (normalized === "inprogress" || normalized === "doing") return "progress";
+  if (normalized === "inreview" || normalized === "review") return "review";
   return "custom";
 }
 
@@ -85,18 +88,18 @@ function activeLaneTasks(board: { columns: Doc<"columns">[]; tasks: Doc<"tasks">
   return board.tasks.filter(task => !task.done && matches(task) && (ids.has(task.columnId) ? task.columnId : fallback?._id) === columnId);
 }
 
-function BoardProgress({ done, total }: { done: number; total: number }) {
-  const percent = total ? Math.round((done / total) * 100) : 0;
-  return (
-    <div className="board-progress" title={`${done} of ${total} issues completed`} aria-label={`${percent}% of issues completed`}>
-      <svg viewBox="0 0 36 36" aria-hidden="true"><circle className="board-progress-track" cx="18" cy="18" r="15" /><circle className="board-progress-value" cx="18" cy="18" r="15" pathLength={100} style={{ strokeDasharray: `${percent} 100` }} /></svg>
-      <strong>{percent}%</strong>
-    </div>
-  );
-}
-
 function sidebarUsername(user: Pick<AvatarUser, "username" | "name" | "email">) {
   return user.username || user.email.split("@")[0] || user.name;
+}
+function relativeTime(timestamp: number) {
+  const minutes = Math.round((Date.now() - timestamp) / 60000);
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(timestamp);
 }
 function fmtDate(timestamp?: number) {
   if (!timestamp) return "—";
@@ -220,22 +223,21 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   return (
     <section className="board-section" ref={boardScroll}>
       <div className="board-header">
-        <div className="segmented-control"><span className="segment-glider" aria-hidden="true" /><button className={!archive ? "active" : ""} onClick={() => setArchive(false)}><Circle size={14} />Active<span>{board.tasks.filter(t => !t.done && matches(t)).length}</span></button><button className={archive ? "active" : ""} onClick={() => showCompleted(null)}><CheckCircle2 size={14} />Completed<span>{board.tasks.filter(t => t.done && matches(t)).length}</span></button></div>
-        <BoardProgress done={board.tasks.filter(task => task.done).length} total={board.tasks.length} />
+        <div className="segmented-control"><span className="segment-glider" aria-hidden="true" /><button className={!archive ? "active" : ""} onClick={() => setArchive(false)}>Active<span>{board.tasks.filter(t => !t.done && matches(t)).length}</span></button><button className={archive ? "active" : ""} onClick={() => showCompleted(null)}>Completed<span>{board.tasks.filter(t => t.done && matches(t)).length}</span></button></div>
         <div className="board-header-actions">
-          <div className="segmented-control issue-layout-switch" role="group" aria-label="Issue layout"><button aria-label="Board view" aria-pressed={layout === "board"} className={layout === "board" ? "active" : ""} onClick={() => setLayout("board")} title="Board (B)"><Columns3 size={15} /></button><button aria-label="List view" aria-pressed={layout === "list"} className={layout === "list" ? "active" : ""} onClick={() => setLayout("list")} title="List (L)"><List size={15} /></button></div>
-          <MemberPicker label="Issue assignee filter" members={[...new Map([...(board.assignees || []), ...(projectMembers || [])].map(member => [member.email, member])).values()]} value={assigneeFilter} onChange={setAssigneeFilter} allLabel="All issues" currentEmail={userEmail} />
-          {canEdit && <button disabled={!online} title={!online ? RECONNECT_TO_CREATE : "Add column"} className="board-column-button" aria-label="Add column" onClick={() => setColumnEditor("new")}><Columns2 size={15} /><span>Column</span></button>}
           <div className="board-filter-control">
-            <button ref={filterButton} className={`icon-button ${filter ? "selected" : ""}`} aria-label="Search issues" title="Search issues" aria-expanded={filterOpen} onClick={() => setFilterOpen(!filterOpen)}><Search size={16} /></button>
-            {filterOpen && <div className="board-filter-popover"><input autoFocus value={filter} onChange={event => setFilter(event.target.value)} placeholder="Search issues" aria-label="Search project issues" onKeyDown={event => { if (event.key === "Escape") { setFilterOpen(false); filterButton.current?.focus(); } }} /><button className="icon-button" aria-label="Close issue filter" onClick={() => { setFilterOpen(false); filterButton.current?.focus(); }}><X size={14} /></button></div>}
+            <button ref={filterButton} className={`icon-button ${filter ? "selected" : ""}`} aria-label="Search issues" title="Search (/)" aria-expanded={filterOpen} onClick={() => setFilterOpen(!filterOpen)}><Search size={15} /></button>
+            {filterOpen && <div className="board-filter-popover"><Search size={14} /><input autoFocus value={filter} onChange={event => setFilter(event.target.value)} placeholder="Search issues" aria-label="Search project issues" onKeyDown={event => { if (event.key === "Escape") { setFilterOpen(false); filterButton.current?.focus(); } }} /><button className="icon-button" aria-label="Close issue filter" onClick={() => { setFilterOpen(false); filterButton.current?.focus(); }}><X size={14} /></button></div>}
           </div>
-          {canEdit && <button disabled={!online} title={!online ? RECONNECT_TO_CREATE : undefined} className="primary-button compact project-create-issue" onClick={onCreateIssue}><CircleDot size={15} />Create issue</button>}
+          <MemberPicker label="Issue assignee filter" members={[...new Map([...(board.assignees || []), ...(projectMembers || [])].map(member => [member.email, member])).values()]} value={assigneeFilter} onChange={setAssigneeFilter} allLabel="All issues" currentEmail={userEmail} />
+          <div className="segmented-control issue-layout-switch" role="group" aria-label="Issue layout"><button aria-label="Board view" aria-pressed={layout === "board"} className={layout === "board" ? "active" : ""} onClick={() => setLayout("board")} title="Board (B)"><Columns3 size={14} /></button><button aria-label="List view" aria-pressed={layout === "list"} className={layout === "list" ? "active" : ""} onClick={() => setLayout("list")} title="List (L)"><List size={14} /></button></div>
+          {canEdit && <button disabled={!online} title={!online ? RECONNECT_TO_CREATE : "Add column"} className="icon-button board-column-button" aria-label="Add column" onClick={() => setColumnEditor("new")}><Columns2 size={15} /></button>}
+          {canEdit && <button disabled={!online} title={!online ? RECONNECT_TO_CREATE : "Create issue (C)"} className="primary-button compact project-create-issue" onClick={onCreateIssue}><Plus size={14} /><span>Create issue</span></button>}
         </div>
       </div>
       {!canEdit ? <div className="notice">View only</div> : null}
       {boardNotice ? <div className="notice danger">{boardNotice}</div> : null}
-      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(errorText(error, "Could not restore issue")); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col">Status</th><th scope="col">Assignee</th><th scope="col">Priority</th><th scope="col">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(errorText(error, "Could not update issue")))}><Circle size={17} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small>{task.title}</button></td><td>{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td>{task.assignedToName || task.assignedToEmail || "Unassigned"}</td><td><span className={clsx("priority", task.priority)}>{task.priority}</span></td><td>{dueInfo(task.dueDate)?.label ?? ""}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className={clsx("kanban-scroll", drag?.mode === "pointer" && "is-dragging")}>
+      {archive ? <div className="archive-list">{completedColumnId && <div className="completed-scope"><span>{visualColumns.find(c => c._id === completedColumnId)?.title}</span><button className="ghost-button compact" onClick={() => showCompleted(null)}>All completed<X size={13} /></button></div>}{!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title="No completed issues" body={filter ? "No issues match your search." : "Completed work will appear here."} />}{archivedTasks.map(task => <div key={task._id} className="archive-row"><CheckCircle2 size={16} /><button className="archive-issue" onClick={() => setSelectedTaskId(task._id)}><span>{taskKey(task._id)}</span><strong>{task.title}</strong></button><time>{fmtDate(task.updatedAt)}</time>{canEdit && <button className="ghost-button compact" onClick={async () => { const target = columnForTask(task); if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; } try { if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target }); await updateTask({ projectId, sessionToken, taskId: task._id, done: false }); } catch (error) { setBoardNotice(errorText(error, "Could not restore issue")); } }}><ArrowLeft size={13} />Restore</button>}</div>)}</div> : layout === "list" ? <div className="issue-table-scroll"><table className="issue-table"><caption className="sr-only">Active project issues</caption><thead><tr><th scope="col">Issue</th><th scope="col" className="col-status">Status</th><th scope="col" className="col-priority">Priority</th><th scope="col" className="col-assignee">Assignee</th><th scope="col" className="col-due">Due</th></tr></thead><tbody>{board.tasks.filter(task => !task.done && matches(task)).map(task => <tr key={task._id} data-task-id={task._id}><td><button className="check-button" aria-label={`Complete ${task.title}`} disabled={!canEdit} onClick={() => void updateTask({ projectId, sessionToken, taskId: task._id, done: true }).catch(error => setBoardNotice(errorText(error, "Could not update issue")))}><Circle size={15} /></button><button className="issue-table-title" onClick={() => setSelectedTaskId(task._id)}><small>{taskKey(task._id)}</small><span>{task.title}</span></button></td><td className="col-status">{visualColumns.find(column => column._id === columnForTask(task))?.title}</td><td className="col-priority"><span className={clsx("priority", task.priority)}><PriorityIcon priority={task.priority} />{task.priority}</span></td><td className="col-assignee">{task.assignedToEmail ? <span className="issue-table-assignee"><UserAvatar user={assignees.get(task.assignedToEmail) || { name: task.assignedToName || task.assignedToEmail, email: task.assignedToEmail }} size="small" /><span>{task.assignedToName || task.assignedToEmail}</span></span> : <span className="muted">Unassigned</span>}</td><td className="col-due">{(() => { const due = dueInfo(task.dueDate); return due ? <span className={clsx("due-text", due.tone)}>{due.label}</span> : null; })()}</td></tr>)}</tbody></table>{!board.tasks.some(task => !task.done && matches(task)) && <EmptyBlock icon={Circle} title="No active issues" body="Create an issue or adjust your filters." />}</div> : <div className={clsx("kanban-scroll", drag?.mode === "pointer" && "is-dragging")}>
         {visualColumns.map((column, index) => {
           const tasks = displayTasks(column._id, drag?.target ?? null);
           const completedCount = board.tasks.filter(task => task.done && matches(task) && columnForTask(task) === column._id).length;
@@ -274,33 +276,37 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
                     tabIndex={0}
                     onKeyDown={event => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); setSelectedTaskId(task._id); } }}
                   >
-                    <div className="task-card-head">
-                      <span className="task-code">{taskKey(task._id)}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
-                      {canEdit && <button className="drag-handle" type="button" aria-label={`Move ${task.title}`} aria-pressed={drag?.mode === "keyboard" && drag.taskId === task._id} onKeyDown={event => dnd.onHandleKeyDown(event, task._id)} onClick={event => dnd.onHandleClick(event, task._id)} onBlur={() => dnd.onHandleBlur(task._id)}>
-                        <GripVertical size={14} />
-                      </button>}
-                    </div>
-                    <div className="task-top">
-                      <button
-                        className="check-button"
-                        aria-label={`Complete ${task.title}`}
-                        type="button"
-                        disabled={!canEdit}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          void updateTask({ projectId, sessionToken, taskId: task._id, done: !task.done }).catch(error => setBoardNotice(errorText(error, "Could not update issue")));
-                        }}
-                      >
-                        {task.done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
-                      </button>
-                      <strong>{task.title}</strong>
-                    </div>
-                    <div className="task-meta">
-                      <span className={clsx("priority", task.priority)}><Flag size={11} /> {task.priority}</span>
-                      {(() => { const due = dueInfo(task.dueDate); return due ? <span className={clsx("due-chip", due.tone)} title={`Due ${task.dueDate}`}><CalendarDays size={11} />{due.label}</span> : null; })()}
-                      {task.assignedToEmail && (() => { const member = assignees.get(task.assignedToEmail) || { name: task.assignedToName || task.assignedToEmail, email: task.assignedToEmail }; const nickname = sidebarUsername(member); return <button className="task-assignee-profile" title={nickname} aria-label={`View ${nickname} profile`} onClick={event => { event.stopPropagation(); openMember(member.email); }}><UserAvatar user={member} size="small" /></button>; })()}
-                    </div>
-                    <TaskActionsMenu title={task.title} canEdit={canEdit} canMoveLeft={!!prev} canMoveRight={!!next} onMoveLeft={() => moveTask({ projectId, sessionToken, taskId: task._id, columnId: prev!._id })} onMoveRight={() => moveTask({ projectId, sessionToken, taskId: task._id, columnId: next!._id })} onDelete={() => deleteTask({ projectId, sessionToken, taskId: task._id })} onError={setBoardNotice} />
+                    {(() => {
+                      const member = task.assignedToEmail ? assignees.get(task.assignedToEmail) || { name: task.assignedToName || task.assignedToEmail, email: task.assignedToEmail } : null;
+                      const due = dueInfo(task.dueDate);
+                      return <>
+                        <div className="task-card-head">
+                          <span className="task-code">{taskKey(task._id)}<GitHubIssueIndicator number={task.githubIssueNumber} /></span>
+                          {canEdit && <button className="drag-handle" type="button" aria-label={`Move ${task.title}`} aria-pressed={drag?.mode === "keyboard" && drag.taskId === task._id} onKeyDown={event => dnd.onHandleKeyDown(event, task._id)} onClick={event => dnd.onHandleClick(event, task._id)} onBlur={() => dnd.onHandleBlur(task._id)}><GripVertical size={13} /></button>}
+                          {member && <button className="task-assignee-profile" title={sidebarUsername(member)} aria-label={`View ${sidebarUsername(member)} profile`} onClick={event => { event.stopPropagation(); openMember(member.email); }}><UserAvatar user={member} size="small" /></button>}
+                        </div>
+                        <div className="task-top">
+                          <button
+                            className="check-button"
+                            aria-label={`Complete ${task.title}`}
+                            type="button"
+                            disabled={!canEdit}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              void updateTask({ projectId, sessionToken, taskId: task._id, done: !task.done }).catch(error => setBoardNotice(errorText(error, "Could not update issue")));
+                            }}
+                          >
+                            {task.done ? <CheckCircle2 size={15} /> : <Circle size={15} />}
+                          </button>
+                          <strong>{task.title}</strong>
+                        </div>
+                        <div className="task-meta">
+                          <span className={clsx("priority", task.priority)}><PriorityIcon priority={task.priority} />{task.priority}</span>
+                          {due && <span className={clsx("due-chip", due.tone)} title={`Due ${task.dueDate}`}><CalendarDays size={12} />{due.label}</span>}
+                          <TaskActionsMenu title={task.title} canEdit={canEdit} canMoveLeft={!!prev} canMoveRight={!!next} onMoveLeft={() => moveTask({ projectId, sessionToken, taskId: task._id, columnId: prev!._id })} onMoveRight={() => moveTask({ projectId, sessionToken, taskId: task._id, columnId: next!._id })} onDelete={() => deleteTask({ projectId, sessionToken, taskId: task._id })} onError={setBoardNotice} />
+                        </div>
+                      </>;
+                    })()}
                   </article>
                 ))}
               </div>
@@ -455,40 +461,41 @@ function TaskModalContent({
       setGithubNotice(errorText(error, "GitHub issue creation failed"));
     }
   };
-  return <Dialog title={details ? `${taskKey(details.task._id)} / ${project.name}` : "Issue details"} className="issue-detail-dialog" onClose={closeIssue}>
+  const copyLink = async () => { const url = new URL(`/${workspace.slug}`, window.location.origin); url.searchParams.set("project", projectId); url.searchParams.set("issue", taskId); try { await navigator.clipboard.writeText(url.href); setCopied(true); window.setTimeout(() => setCopied(false), 1600); } catch { setActivityError("Clipboard unavailable. Copy the issue URL from the address bar."); } };
+  const dialogTitle = details ? `${taskKey(details.task._id)} / ${project.name}` : "Issue details";
+  return <Dialog title={dialogTitle} className="issue-detail-dialog" onClose={closeIssue} heading={<div className="issue-detail-heading">
+      <h2><ProjectIcon project={project} /><span>{project.name}</span>{details && <><span aria-hidden="true">/</span><span className="issue-detail-key">{taskKey(details.task._id)}</span></>}</h2>
+      {details && <span className={clsx("issue-save-state", saveState === "error" && "danger")} aria-live="polite">{saveState === "saving" ? "Saving" : saveState === "saved" ? "Saved" : saveState === "error" ? "Not saved. Check required fields." : ""}</span>}
+      {details && <button type="button" className="icon-button" aria-label={copied ? "Issue link copied" : "Copy issue link"} title={copied ? "Copied" : "Copy link"} onClick={() => void copyLink()}>{copied ? <Check size={15} /> : <LinkIcon size={15} />}</button>}
+    </div>}>
     {details ? <div className="issue-detail-layout">
       <section className="issue-description-section">
-        <button type="button" className="ghost-button compact" aria-label={copied ? "Issue link copied" : "Copy issue link"} onClick={async () => { const url = new URL(`/${workspace.slug}`, window.location.origin); url.searchParams.set("project", projectId); url.searchParams.set("issue", taskId); try { await navigator.clipboard.writeText(url.href); setCopied(true); } catch { setActivityError("Clipboard unavailable. Copy the issue URL from the address bar."); } }}>{copied ? <Check size={14} /> : <Copy size={14} />}{copied ? "Issue link copied" : "Copy issue link"}</button>
-        <div className="issue-detail-status" aria-live="polite">
-          {details.task.done && <span className="issue-completed-badge"><CheckCircle2 size={14} />Completed</span>}
-          <span className={saveState === "error" ? "danger" : ""}>{saveState === "saving" ? "Saving..." : saveState === "saved" ? "Saved" : saveState === "error" ? "Not saved. Check required fields." : "All changes saved"}</span>
-        </div>
-        <textarea className="issue-title-input" aria-label="Issue title" autoFocus={canEdit} value={title} onChange={event => setTitle(event.target.value)} disabled={!canEdit} rows={2} maxLength={250} required />
-        <textarea className="issue-detail-description" aria-label="Issue description" value={description} onChange={event => setDescription(event.target.value)} rows={5} placeholder="Add a description..." disabled={!canEdit} />
+        {details.task.done && <span className="issue-completed-badge"><CheckCircle2 size={14} />Completed</span>}
+        <textarea className="issue-title-input" aria-label="Issue title" autoFocus={canEdit} value={title} onChange={event => setTitle(event.target.value)} disabled={!canEdit} rows={1} maxLength={250} required />
+        <textarea className="issue-detail-description" aria-label="Issue description" value={description} onChange={event => setDescription(event.target.value)} rows={4} placeholder="Add a description..." disabled={!canEdit} />
         <IssueRelations sessionToken={sessionToken} taskId={taskId} canEdit={canEdit} onOpen={openReference} />
       </section>
       <aside className="issue-detail-sidebar" aria-label="Issue properties">
-        <h3>Properties</h3>
-        <IssueFields columns={details.columns.filter(column => !(column.isDone ?? column.title.toLowerCase() === "done"))} members={details.members} columnId={columnId} onColumnChange={value => void changeColumn(value)} priority={priority} onPriorityChange={setPriority} assignee={assignedToEmail} onAssigneeChange={setAssignedToEmail} dueDate={dueDate} onDueDateChange={setDueDate} disabled={!canEdit} />
-        <section className="issue-github-section">
-          <h3><GitBranch size={14} />GitHub</h3>
+        <IssueFields labeled columns={details.columns.filter(column => !(column.isDone ?? column.title.toLowerCase() === "done"))} members={details.members} columnId={columnId} onColumnChange={value => void changeColumn(value)} priority={priority} onPriorityChange={setPriority} assignee={assignedToEmail} onAssigneeChange={setAssignedToEmail} dueDate={dueDate} onDueDateChange={setDueDate} disabled={!canEdit} />
+        <div className="issue-property"><span>Labels</span><IssueLabels sessionToken={sessionToken} taskId={taskId} canEdit={canEdit} /></div>
+        {(project.repoUrl || linkedGitHubUrl) && <div className="issue-property issue-github-section"><span>GitHub</span><div>
           <span className="issue-repository-name">{githubRepoLabel(project.repoUrl)}</span>
-          {linkedGitHubUrl ? <a className="ghost-button compact" href={linkedGitHubUrl} target="_blank" rel="noreferrer"><ExternalLink size={14} />Open GitHub issue</a>
-            : githubIssueHref && (details.task.githubTaskMode ?? project.githubTaskMode) !== "pull_request" ? <button className="ghost-button compact" type="button" onClick={createGitHubIssue} disabled={!canEdit || githubState === "creating"}>{githubState === "creating" ? <Loader2 className="spin" size={14} /> : <Plus size={14} />}{githubState === "creating" ? "Creating..." : "Create GitHub issue"}</button>
+          {linkedGitHubUrl ? <a className="ghost-button compact" href={linkedGitHubUrl} target="_blank" rel="noreferrer"><ExternalLink size={13} />Open issue</a>
+            : githubIssueHref && (details.task.githubTaskMode ?? project.githubTaskMode) !== "pull_request" ? <button className="ghost-button compact" type="button" onClick={createGitHubIssue} disabled={!canEdit || githubState === "creating"}>{githubState === "creating" ? <Loader2 className="spin" size={13} /> : <Plus size={13} />}{githubState === "creating" ? "Creating" : "Create GitHub issue"}</button>
             : null}
           <TaskPullRequest project={project} taskId={taskId} sessionToken={sessionToken} canEdit={canEdit} saveDraft={saveDraft} />
           {githubNotice && <small className={clsx("github-notice", githubState === "error" && "danger")}>{githubNotice}</small>}
-        </section>
+        </div></div>}
         <dl className="issue-date-summary"><div><dt>Created</dt><dd>{fmtDate(details.task.createdAt)}</dd></div><div><dt>Updated</dt><dd>{fmtDate(details.task.updatedAt)}</dd></div></dl>
       </aside>
       <section className="issue-detail-activity">
         <IssueFileUpload projectId={projectId} taskId={taskId} sessionToken={sessionToken} disabled={!canEdit} onLink={url => { void addAsset({ projectId, taskId, sessionToken, type: "link", name: url, url }).catch(error => setActivityError(errorText(error, "Could not attach link"))); }}>
-        <header><h3><MessageCircle size={15} />Activity <span>{activity.length}</span></h3></header>
+        <header><h3>Activity</h3></header>
         <div className="issue-timeline">
-          {!activity.length && <p className="activity-empty">No activity yet.</p>}
+          {!activity.length && <p className="activity-empty">No comments yet</p>}
           {activity.map(entry => <article className="issue-timeline-entry" key={entry.item._id}>
-            {entry.kind === "comment" ? <UserAvatar user={details.members.find(member => member.userId === entry.item.authorUserId) || { name: entry.item.authorName, email: entry.item.authorEmail }} size="small" /> : <span className="activity-avatar" aria-hidden="true"><Paperclip size={14} /></span>}
-            <div className="activity-entry-content"><header><strong>{entry.kind === "comment" ? entry.item.authorName : "Attachment"}</strong><time dateTime={new Date(entry.at).toISOString()} title={new Date(entry.at).toLocaleString()}>{new Intl.DateTimeFormat("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(entry.at)}</time></header>
+            {entry.kind === "comment" ? <UserAvatar user={details.members.find(member => member.userId === entry.item.authorUserId) || { name: entry.item.authorName, email: entry.item.authorEmail }} size="small" /> : <span className="activity-avatar" aria-hidden="true"><Paperclip size={12} /></span>}
+            <div className="activity-entry-content"><header><strong>{entry.kind === "comment" ? entry.item.authorName : "Attachment"}</strong><time dateTime={new Date(entry.at).toISOString()} title={new Date(entry.at).toLocaleString()}>{relativeTime(entry.at)}</time></header>
               {entry.kind === "comment" ? <><IssueCommentBody comment={entry.item} sessionToken={sessionToken} canEdit={canEdit} onOpenReference={openReference} /><div className="comment-media">{details.assets.filter(asset => asset.commentId === entry.item._id && asset.localFileId).map(asset => <LocalAttachment key={asset._id} file={{ id: asset.localFileId!, name: asset.name, size: asset.size || 0, contentType: asset.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} />)}</div></> : entry.item.localFileId ? <LocalAttachment file={{ id: entry.item.localFileId, name: entry.item.name, size: entry.item.size || 0, contentType: entry.item.contentType || "application/octet-stream" }} sessionToken={sessionToken} scope={`teamId=${workspace._id}`} /> : <a className="activity-attachment" href={entry.item.url} target="_blank" rel="noreferrer"><span>{entry.item.name}</span><ExternalLink size={13} /></a>}
             </div>
           </article>)}

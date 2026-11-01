@@ -1,0 +1,217 @@
+.voice-room {
+  display: grid;
+  gap: 8px;
+}
+.voice-room.in-call {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+.voice-workspace-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 14px;
+}
+.voice-room.stage {
+  min-height: 0;
+  align-content: start;
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  padding: 12px;
+  overflow: auto;
+}
+.voice-room.stage.in-call {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.call-tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-1);
+  background: var(--bg);
+}
+.stage .call-tile {
+  aspect-ratio: 16 / 10;
+  min-height: 220px;
+}
+.call-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.call-tile.connecting {
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.call-tile.connecting small {
+  color: var(--text-2);
+}
+.call-tile-meta {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border: 1px solid var(--border-1);
+  border-radius: 6px;
+  background: rgba(7, 8, 10, 0.72);
+  color: #f5f6f8;
+  font-size: 11px;
+  padding: 4px 6px;
+  backdrop-filter: blur(8px);
+}
+.call-tile-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.video-avatar {
+  display: grid;
+  place-items: center;
+}
+.call-controls {
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.call-notice {
+  color: var(--red);
+}
+@media (max-width: 1080px) {
+.voice-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+.voice-room.stage.in-call {
+    grid-template-columns: 1fr;
+  }
+}
+.workspace-app .voice-workspace { min-height: 100%; display: flex; flex-direction: column; gap: 22px; }
+.workspace-app .voice-workspace-grid { flex: 1; display: flex; flex-direction: row-reverse; gap: 22px; min-height: 0; }
+.workspace-app .voice-room.stage { flex: 1; min-width: 0; padding: 0; background: #121519; border: 1px solid var(--border-2); border-radius: 8px; min-height: 400px; display: grid; align-content: stretch; }
+.workspace-app .voice-room.stage.in-call { background: transparent; border: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; align-content: start; }
+.workspace-app .call-tile { border: 1px solid #343b45; background: #202832; border-radius: 8px; aspect-ratio: 16 / 10; width: 100%; min-height: 0; overflow: hidden; position: relative; }
+.workspace-app .call-tile video { width: 100%; height: 100%; object-fit: cover; }
+.workspace-app .screen-share-tile { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+.workspace-app .screen-share-tile video { object-fit: contain; background: var(--bg); }
+.workspace-app .call-controls { display: flex; gap: 7px; }
+.workspace-app .call-controls button { min-width: 38px; min-height: 38px; border: 1px solid var(--border-3); border-radius: 6px; background: #20262e; color: #c2cede; padding: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.workspace-app .call-controls .leave-call { color: var(--red); background: var(--red); border-color: #a45154; }
+.workspace-app .call-controls .sharing { background: #28483d; color: var(--green); }
+.call-lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+.call-lobby h2 { font-size: 24px; font-weight: 500; margin: 24px 0 5px; text-align: center; }
+.call-lobby p { color: #8d9aab; font-size: 13px; }
+.lobby-devices { display: flex; gap: 10px; margin: 16px 0 24px; }
+.lobby-devices button { border: 1px solid #39434f; background: #222b37; color: var(--blue); padding: 12px; border-radius: 50%; width: 46px; height: 46px; display: grid; place-items: center; }
+@media (max-width: 760px) {
+.workspace-app .voice-room.stage { min-height: 360px; }
+.workspace-app .voice-workspace-grid { display: flex; }
+.workspace-app .voice-room.stage.in-call { grid-template-columns: 1fr; }
+.call-lobby h2 { font-size: 22px; }
+}
+.call-member-profile { background: transparent; border: 0; color: inherit; font: inherit; padding: 0; text-align: left; cursor: pointer; }
+.call-member-profile:hover { text-decoration: underline; }
+.workspace-app .voice-workspace { position: relative; gap: 16px; }
+.call-utility-bar { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.call-dock { order: 3; display: flex; justify-content: center; position: sticky; bottom: 0; padding: 16px 0; background: var(--surface-1); border-top: 1px solid var(--border-3); z-index: 3; }
+.workspace-app .call-dock .call-controls { justify-content: center; flex-wrap: wrap; gap: 12px; }
+.workspace-app .call-dock .call-controls button { min-width: 44px; min-height: 44px; background: var(--surface-5); border-color: var(--border-3); color: var(--text-1); }
+.workspace-app .call-dock .call-controls .leave-call { background: #842e3c; border-color: var(--red); color: white; }
+.workspace-app .call-dock .call-controls .sharing { background: #265d48; border-color: #438368; color: var(--green); }
+.workspace-app .voice-room.stage { background: var(--surface-2); border: 0; border-radius: 0; min-height: 360px; }
+.workspace-app .voice-room.stage.in-call { align-content: center; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.workspace-app .call-tile { aspect-ratio: 16/10; min-height: 0; background: var(--surface-4); border-radius: 6px; overflow: hidden; position: relative; }
+.workspace-app .call-tile.screen-share-tile { grid-column: 1 / -1; aspect-ratio: 16/9; max-height: 65dvh; background: var(--surface-1); }
+.workspace-app .call-tile.screen-share-tile video { object-fit: contain; }
+.call-tile:fullscreen { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; background: black; }
+.call-tile:fullscreen video { object-fit: contain; }
+.call-tile-meta .call-fullscreen { margin-left: auto; width: 30px; height: 30px; color: #e4e7ec; }
+.call-tile-meta { gap: 10px; }
+.call-tile-error { position: absolute; bottom: 50px; left: 12px; right: 12px; background: var(--surface-3); color: var(--red); padding: 8px; font-size: 11px; }
+.call-lobby { min-height: 360px; }
+.call-lobby h2 { font-size: 20px; }
+.lobby-devices button[aria-pressed=false] { color: var(--red); background: #41232a; }
+.call-device-panel { position: absolute; top: 46px; right: 0; z-index: 5; width: min(340px, 100%); padding: 16px; border: 1px solid var(--border-3); border-radius: 8px; background: var(--surface-4); box-shadow: 0 12px 35px #0005; }
+.call-device-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-size: 13px; }
+.call-device-panel label { display: grid; grid-template-columns: 16px 1fr; align-items: center; gap: 8px; margin: 14px 0; font-size: 12px; color: var(--text-2); }
+.call-device-panel select { grid-column: 1 / -1; width: 100%; min-width: 0; font-size: 12px; }
+.call-device-panel video { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 5px; margin-top: 12px; }
+.call-notice { order: 4; padding: 8px 0; }
+@media (max-width: 700px) {
+.workspace-app .voice-room.stage.in-call { grid-template-columns: 1fr; }
+.workspace-app .voice-workspace-grid { gap: 0; }
+.workspace-app .call-tile.screen-share-tile { min-height: 180px; }
+.call-dock { padding: 12px 0; }
+.call-lobby, .workspace-app .voice-room.stage { min-height: 300px; }
+.call-device-panel { width: min(340px, 100%); }
+}
+.workspace-app .voice-workspace { height: 100%; min-height: 0; gap: 12px; }
+.call-utility-bar { min-height: 44px; gap: 12px; flex-wrap: nowrap; flex: none; }
+.call-participant-strip { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; flex-wrap: wrap; }
+.call-participant-chip { display: flex; align-items: center; gap: 7px; border: 0; background: none; color: var(--text-2); padding: 4px 0; min-width: 0; max-width: 160px; font-size: 12px; }
+.call-participant-chip > span:not(.avatar) { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.call-header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.call-elapsed { font-variant-numeric: tabular-nums; color: var(--text-2); font-size: 12px; }
+.call-dock[hidden] { display: none; }
+.call-dock { position: static; padding: 0; flex: none; border-top: 0; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.workspace-app .call-dock .call-controls { flex: none; flex-wrap: nowrap; gap: 8px; }
+.call-filmstrip { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 4px 0; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scroll-snap-type: x proximity; }
+.workspace-app .call-filmstrip .call-thumbnail { flex: 0 0 152px; width: 152px; height: 88px; min-height: 0; aspect-ratio: auto; border-color: var(--border-3); scroll-snap-align: start; }
+.call-thumbnail:hover { border-color: #929aa7; }
+.call-thumbnail .call-tile-meta { padding: 6px 8px; gap: 5px; font-size: 11px; background: linear-gradient(transparent, #000b); }
+.call-thumbnail-name { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.call-thumbnail .call-tile-meta svg { flex: none; }
+.call-thumbnail .video-avatar small { display: none; }
+.call-audio-output { position: absolute; z-index: 4; top: 60px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; pointer-events: none; }
+.call-audio-output .call-enable-audio { position: static; pointer-events: auto; }
+.workspace-app .voice-workspace-grid { min-height: 0; overflow: hidden; }
+.workspace-app .voice-room.stage { min-height: 0; width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; flex: 1; }
+.workspace-app .voice-room.stage.in-call { display: flex; position: relative; min-height: 120px; }
+.call-enable-audio { position: absolute; z-index: 3; left: 12px; top: 12px; background: var(--surface-4); border: 1px solid var(--border-3); color: #f1f3f5; }
+.workspace-app .voice-room.call-main-stage > .call-tile { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; min-height: 0; max-height: none; border-color: var(--border-3); }
+.workspace-app .call-main-stage video { object-fit: contain; background: var(--surface-2); }
+.call-tile-focus { position: absolute; z-index: 1; inset: 0; border: 0; background: transparent; padding: 0; cursor: zoom-in; }
+.call-tile-focus:focus-visible { outline-offset: -4px; }
+.call-tile-meta { z-index: 2; pointer-events: none; }
+.call-tile-meta button { pointer-events: auto; }
+.call-lobby { height: 100%; min-height: 300px; }
+.workspace-app .voice-room:not(.in-call) { display: flex; align-items: stretch; justify-content: center; }
+.call-lobby .lobby-avatar { margin-top: auto; }
+@media (max-width: 640px) {
+.call-dock { gap: 10px; }
+.workspace-app .call-dock .call-controls { gap: 4px; }
+.workspace-app .call-dock .call-controls button { width: 36px; height: 40px; min-width: 36px; min-height: 40px; padding: 7px; }
+.workspace-app .call-filmstrip .call-thumbnail { flex-basis: 108px; width: 108px; height: 68px; }
+.call-participant-chip { max-width: 90px; font-size: 11px; }
+.call-participant-strip { gap: 5px; }
+.call-tile-meta { padding: 8px; gap: 5px; }
+.call-member-profile { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+}
+.call-thumbnail .call-tile-meta { background: rgba(0, 0, 0, 0.72); }
+.workspace-app.sidebar-collapsed :is(.project-navigation, .chat-toolbar, .work-toolbar, .call-utility-bar) { padding-left: 38px; }
+@media (max-width: 760px) {
+.workspace-app.sidebar-collapsed :is(.project-navigation, .chat-toolbar, .work-toolbar, .call-utility-bar) { padding-left: 0; }
+}
+
+/* Moved from shared controls. */
+.lobby-avatar .avatar { width: 74px; height: 74px; border-radius: 50%; font-size: 24px; }
+.call-lobby .lobby-avatar .avatar { width: 76px; height: 76px; flex: 0 0 76px; }
+.call-lobby .ghost-button { margin-top: 12px; }
+.call-participant-chip .avatar { width: 22px; height: 22px; font-size: 9px; }
+.workspace-app .call-thumbnail .video-avatar > .avatar { width: 32px; height: 32px; font-size: 11px; }
+.workspace-app .video-avatar > .avatar { width: 72px; height: 72px; font-size: 23px; }
+.lobby-avatar > .avatar { width: 100%; height: 100%; font-size: 25px; }
+.call-lobby > .ghost-button { margin-bottom: auto; }
+@media (max-width: 640px) {
+.call-header-actions .primary-button { font-size: 12px; }
+}

@@ -3,7 +3,7 @@ import { errorText } from "@/lib/error-text";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronRight, Circle, Loader2, Plus } from "lucide-react";
+import { ChevronRight, Circle, Loader2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Dialog } from "./dialog";
@@ -114,7 +114,7 @@ export function IssueComposer({
       <form onSubmit={submit} noValidate>
         {!editable.length ? (
           <div className="dialog-body muted">
-            Create a project to add your first issue.
+            Create a project first.
           </div>
         ) : !projectId ? (
           <div className="issue-project-choice">
@@ -163,17 +163,14 @@ export function IssueComposer({
               dueDate={dueDate}
               onDueDateChange={value => { setDueDate(value); setError(""); }}
               disabled={busy}
-            >
+            />
+            <footer className="issue-composer-footer">
+              {error ? <div role="alert" className="notice danger">{error}</div> : <span />}
               <button type="submit" className="primary-button compact issue-create-submit" title={!online ? RECONNECT_TO_CREATE : undefined} disabled={!online || busy || !selectedColumn || !members?.length}>
-                {busy ? <Loader2 size={15} className="spin" /> : <Plus size={15} />}
+                {busy && <Loader2 size={14} className="spin" />}
                 Create issue
               </button>
-            </IssueFields>
-            {error && (
-              <div role="alert" className="notice danger">
-                {error}
-              </div>
-            )}
+            </footer>
           </div>
         )}
       </form>

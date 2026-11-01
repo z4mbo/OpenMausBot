@@ -17,7 +17,7 @@ export function TaskPullRequest({ project, taskId, sessionToken, canEdit, saveDr
       try { await saveDraft(); const result = await localApi<{ message: string }>("/api/github/pull-requests", sessionToken, { method: "POST", json: { projectId: project._id, taskId } }); setNotice(result.message); }
       catch (error) { setNotice(errorText(error, "Could not create PR")); }
       finally { setBusy(false); }
-    }}>{busy ? <Loader2 size={14} className="spin" /> : <GitPullRequest size={14} />}{busy ? "Creating PR…" : project.githubTaskMode === "pull_request" ? "Create draft PR" : "Create PR instead of GitHub issue"}</button>}
+    }}>{busy ? <Loader2 size={14} className="spin" /> : <GitPullRequest size={14} />}{busy ? "Creating PR" : project.githubTaskMode === "pull_request" ? "Create draft PR" : "Create PR"}</button>}
     {notice && <small role="status">{notice}</small>}
   </div>;
 }

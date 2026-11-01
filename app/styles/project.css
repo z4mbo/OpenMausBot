@@ -1,0 +1,37 @@
+/* Project view: header with project identity, the in-project menu and per-tab containers. */
+.project-shell { position: relative; display: flex; flex-direction: column; min-height: 100%; }
+.project-navigation {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-4);
+  height: 52px;
+  margin: 0 calc(var(--space-6) * -1);
+  padding: 0 var(--space-4) 0 var(--space-6);
+  border-bottom: 1px solid var(--border-1);
+  background: var(--surface-1);
+}
+.project-identity { display: flex; flex: none; align-items: center; gap: var(--space-2); min-width: 0; max-width: 260px; }
+.project-identity .project-icon { width: 16px; height: 16px; color: var(--text-2); }
+.project-identity strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-md); font-weight: var(--weight-semibold); }
+.project-navigation .tabs { position: relative; display: flex; flex: 1; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.project-navigation .tabs::-webkit-scrollbar { display: none; }
+.project-navigation .tabs button { position: relative; z-index: 1; flex: none; height: 28px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: var(--text-base); font-weight: var(--weight-medium); white-space: nowrap; transition: color var(--duration-fast), background var(--duration-fast); }
+.project-navigation .tabs button:hover { color: var(--text-1); background: var(--hover); }
+.project-navigation .tabs button.active { color: var(--text-1); background: var(--surface-4); }
+.project-navigation .tabs:has(> .tab-glider[data-visible="true"]) button.active { background: transparent; }
+.project-settings-tab { flex: none; }
+.project-state-banner { display: flex; flex: none; align-items: center; gap: var(--space-2); min-height: 36px; margin-top: var(--space-3); padding: 0 var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-2); font-size: var(--text-sm); }
+.project-state-banner > span { overflow-wrap: anywhere; }
+.project-shell.tab-loading > :not(.project-navigation):not(.view-loading-overlay) { visibility: hidden; }
+.project-shell > .view-loading-overlay { inset: 64px 0 0; }
+.project-shell > :not(.project-navigation):not(.view-loading-overlay):not(.board-section):not(.origin-dialog) { margin-top: var(--space-4); }
+
+@media (max-width: 760px) {
+  .project-navigation { height: 44px; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-2) 0 var(--space-3); gap: var(--space-2); background: var(--bg); }
+  .project-identity { display: none; }
+  .project-navigation .tabs button { height: 32px; padding: 0 var(--space-2); font-size: var(--text-md); }
+}

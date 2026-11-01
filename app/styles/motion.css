@@ -1,0 +1,39 @@
+/* Motion layer (components/motion-layer.tsx): sliding selection highlights, exit ghosts, completion burst.
+   Everything degrades to the static styles when the layer is absent or motion is reduced. */
+.nav-glider, .tab-glider, .segment-glider {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-4);
+  transition: transform var(--duration-slow) var(--ease-out), width var(--duration-slow) var(--ease-out), height var(--duration-slow) var(--ease-out), opacity var(--duration);
+}
+.segment-glider { border-radius: var(--radius-xs); }
+.nav-glider-avatar { display: none; position: absolute; place-items: center; line-height: 1; transition: left var(--duration-slow) var(--ease-out); }
+.motion-overlay { position: fixed; inset: 0; z-index: 70; pointer-events: none; overflow: hidden; }
+.motion-ghost { position: fixed; margin: 0; z-index: 71; pointer-events: none; box-shadow: var(--shadow-drag); will-change: transform, opacity; }
+.check-burst { position: fixed; width: 0; height: 0; }
+.check-burst::before { content: ""; position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--green); animation: o-burst-ring 0.55s var(--ease-out) forwards; }
+.check-burst i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; border-radius: 50%; background: var(--tone); animation: o-burst-dot 0.65s var(--ease-out) forwards; }
+
+@keyframes content-arrive { from { opacity: 0.6; } to { opacity: 1; } }
+@keyframes o-drop { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes o-pop { from { opacity: 0; transform: translateY(-2px) scale(0.98); } }
+@keyframes o-fade { from { opacity: 0; } }
+@keyframes o-rise { from { opacity: 0; transform: translateY(6px); } }
+@keyframes o-palette { from { opacity: 0; transform: translateY(-6px) scale(0.985); } }
+@keyframes o-message { from { opacity: 0; transform: translateY(4px); } }
+@keyframes o-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70%, 100% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } }
+@keyframes o-working { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--lane) 12%, transparent); } }
+@keyframes o-burst-ring { from { transform: scale(0.4); opacity: 1; } to { transform: scale(1.8); opacity: 0; border-width: 0.5px; } }
+@keyframes o-burst-dot { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-glider, .tab-glider, .segment-glider, .nav-glider-avatar { transition: none; }
+  .check-burst { display: none; }
+}
