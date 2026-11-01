@@ -39,8 +39,10 @@ const dayLabelFormat = new Intl.DateTimeFormat(LOCALE, { weekday: "long", month:
  * Due date field: a trigger showing the formatted due date and a popover with quick picks and a calendar.
  * `value` and `onChange` use "YYYY-MM-DD"; an empty string means no date.
  */
-export function DatePicker({ value, onChange, disabled, label = "Due date", placeholder, className }: {
+export function DatePicker({ value, onChange, disabled, label = "Due date", placeholder, className, done = false }: {
   value: string; onChange: (value: string) => void; disabled?: boolean; label?: string; placeholder?: string; className?: string;
+  /** A completed issue: its date shows in the neutral tone, never overdue. */
+  done?: boolean;
 }) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
@@ -49,7 +51,7 @@ export function DatePicker({ value, onChange, disabled, label = "Due date", plac
   const close = (restore = true) => { setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }); };
 
   return <div className={clsx("date-picker", className)}>
-    <button ref={trigger} type="button" className={clsx("date-picker-trigger", due && `due-${due.tone}`)} data-empty={!due || undefined} aria-label={due ? `${label}: ${due.label}` : label} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { if (open) close(false); else setOpen(true); }} onKeyDown={event => {
+    <button ref={trigger} type="button" className={clsx("date-picker-trigger", due && !done && `due-${due.tone}`)} data-empty={!due || undefined} aria-label={due ? `${label}: ${due.label}` : label} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled} onClick={() => { if (open) close(false); else setOpen(true); }} onKeyDown={event => {
       if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) { event.preventDefault(); setOpen(true); }
       else if (open && event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); }
       else if (open && event.key === "Tab") close(false);

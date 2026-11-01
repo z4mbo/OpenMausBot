@@ -17,12 +17,14 @@ export const PRIORITY_OPTIONS = (["high", "medium", "low"] as const).map(value =
  * Status, priority, assignee and due date. `labeled` renders property rows with visible labels (issue view sidebar);
  * otherwise a wrapping row of chips (composer). Each control opens the matching picker.
  */
-export function IssueFields({ columns, members, columnId, onColumnChange, priority, onPriorityChange, assignee, onAssigneeChange, dueDate, onDueDateChange, disabled = false, labeled = false, currentEmail, errors, children }: {
+export function IssueFields({ columns, members, columnId, onColumnChange, priority, onPriorityChange, assignee, onAssigneeChange, dueDate, onDueDateChange, done = false, disabled = false, labeled = false, currentEmail, errors, children }: {
   columns: { _id: string; title: string }[]; members: (AvatarIdentity & { email: string })[];
   columnId: string; onColumnChange: (value: string) => void;
   priority: "" | Priority; onPriorityChange: (value: Priority) => void;
   assignee: string; onAssigneeChange: (value: string) => void;
   dueDate: string; onDueDateChange: (value: string) => void; disabled?: boolean;
+  /** The issue is completed: its due date is neutral. */
+  done?: boolean;
   labeled?: boolean;
   /** Shown first in the assignee picker as "You". */
   currentEmail?: string;
@@ -33,7 +35,7 @@ export function IssueFields({ columns, members, columnId, onColumnChange, priori
   const status = <IssueSelect label="Status" icon={<Circle size={14} />} value={columnId} onChange={onColumnChange} options={columns.map(column => ({ value: column._id, label: column.title, icon: <StatusIcon title={column.title} /> }))} disabled={disabled} caption="Status" />;
   const priorityField = <IssueSelect label="Priority" icon={<PriorityIcon priority={priority} />} value={priority} onChange={value => onPriorityChange(value as Priority)} options={PRIORITY_OPTIONS} disabled={disabled} caption="Priority" />;
   const assigneeField = <MemberPicker label="Assignee" placeholder={labeled ? "Unassigned" : "Assignee"} noneLabel="Unassigned" members={members} value={assignee} onChange={onAssigneeChange} currentEmail={currentEmail} disabled={disabled} caption="Assignee" />;
-  const due = <DatePicker label="Due date" placeholder={labeled ? "No due date" : "Due date"} value={dueDate} onChange={onDueDateChange} disabled={disabled} />;
+  const due = <DatePicker label="Due date" placeholder={labeled ? "No due date" : "Due date"} value={dueDate} onChange={onDueDateChange} disabled={disabled} done={done} />;
   const error = (key: IssueFieldKey) => errors?.[key] ? <small className="issue-field-error" role="alert">{errors[key]}</small> : null;
   if (labeled) return <div className="issue-properties">
     <div className="issue-property" data-field="status"><span>Status</span><div>{status}{error("status")}</div></div>

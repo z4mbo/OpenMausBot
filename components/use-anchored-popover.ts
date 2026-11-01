@@ -28,7 +28,7 @@ type Options = {
 
 /**
  * Shows `menu` in the top layer and focuses `focus` (a search field or the list itself). On desktop the popover sits
- * next to `trigger`, flips above it when there is no room below and stays inside the surrounding dialog; on phones and
+ * under `trigger`, flips above it when there is no room below and stays inside the surrounding dialog while it fits; on phones and
  * touch screens it is a bottom sheet above the on-screen keyboard.
  */
 export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLElement | null>, menu: RefObject<HTMLDivElement | null>, focus: RefObject<HTMLElement | null>, options?: Options) {
@@ -53,31 +53,36 @@ export function useAnchoredPopover(open: boolean, trigger: RefObject<HTMLElement
         return;
       }
       const box = button.getBoundingClientRect();
-      // Stay inside the dialog the trigger lives in (the issue view, the composer), else inside the viewport.
-      const frame = button.closest("dialog[open]")?.getBoundingClientRect();
       const viewTop = viewport?.offsetTop || 0;
-      const top = Math.max(viewTop, frame?.top ?? viewTop) + 8;
-      const bottom = Math.min(viewTop + (viewport?.height || window.innerHeight), frame?.bottom ?? Infinity) - 8;
-      const minLeft = Math.max(0, frame?.left ?? 0) + 8;
-      const maxRight = Math.min(window.innerWidth, frame?.right ?? window.innerWidth) - 8;
-      const width = Math.min(preferredWidth, maxRight - minLeft, window.innerWidth - 24);
-      Object.assign(popover.style, { width: `${width}px`, maxHeight: `${preferredHeight}px` });
+      const viewBottom = viewTop + (viewport?.height || window.innerHeight);
+      // Stay inside the dialog the trigger lives in (the issue view, the composer) when there is room; the popover is
+      // in the top layer, so in a short dialog it leaves the frame and uses the viewport. Always below or above the
+      // trigger, never beside it.
+      const frame = button.closest("dialog[open]")?.getBoundingClientRect();
+      const bounds = (inFrame: boolean) => ({
+        top: Math.max(viewTop, inFrame ? frame?.top ?? viewTop : viewTop) + 8,
+        bottom: Math.min(viewBottom, inFrame ? frame?.bottom ?? Infinity : Infinity) - 8,
+        left: Math.max(0, inFrame ? frame?.left ?? 0 : 0) + 8,
+        right: Math.min(window.innerWidth, inFrame ? frame?.right ?? window.innerWidth : window.innerWidth) - 8,
+      });
+      const measure = (inFrame: boolean) => {
+        const area = bounds(inFrame);
+        return { area, width: Math.min(preferredWidth, area.right - area.left, window.innerWidth - 24), below: area.bottom - box.bottom - 5, above: box.top - area.top - 5 };
+      };
+      const framed = measure(true);
+      Object.assign(popover.style, { width: `${framed.width}px`, maxHeight: `${preferredHeight}px` });
       const natural = Math.min(preferredHeight, popover.scrollHeight + 2);
-      const below = bottom - box.bottom - 5;
-      const above = box.top - top - 5;
-      // Left-aligned with the trigger; right-aligned when that would leave the frame.
-      const left = box.left + width <= maxRight ? box.left : box.right - width;
+      const { area, width, below, above } = frame && natural > framed.below && natural > framed.above ? measure(false) : framed;
       // Below the trigger, else above it (anchored by its bottom edge so content changes grow away from the trigger),
-      // else beside it (a short dialog such as the composer), slid up until it fits the frame; it scrolls only when the
-      // frame itself is smaller.
-      const upward = natural > below && natural <= above;
-      const fitsVertically = natural <= below || upward;
-      const side = fitsVertically ? null : box.right + 5 + width <= maxRight ? box.right + 5 : box.left - 5 - width >= minLeft ? box.left - 5 - width : null;
-      const y = natural <= below ? box.bottom + 5 : upward ? 0 : Math.max(top, Math.min(side === null ? box.bottom + 5 : box.bottom - natural, bottom - natural));
+      // else on the roomier side, scrolling inside.
+      const upward = natural > below && (natural <= above || above > below);
+      // Left-aligned with the trigger; right-aligned when that would leave the area.
+      const left = box.left + width <= area.right ? box.left : box.right - width;
       Object.assign(popover.style, {
-        maxHeight: `${Math.max(80, Math.min(preferredHeight, upward ? above : bottom - y))}px`,
-        left: `${side ?? Math.max(minLeft, Math.min(left, maxRight - width))}px`,
-        top: upward ? "auto" : `${y}px`,
+        width: `${width}px`,
+        maxHeight: `${Math.max(80, Math.min(preferredHeight, upward ? above : below))}px`,
+        left: `${Math.max(area.left, Math.min(left, area.right - width))}px`,
+        top: upward ? "auto" : `${box.bottom + 5}px`,
         bottom: upward ? `${window.innerHeight - box.top + 5}px` : "auto",
       });
     };

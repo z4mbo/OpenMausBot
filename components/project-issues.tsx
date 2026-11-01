@@ -1,7 +1,7 @@
 "use client";
 import { errorText } from "@/lib/error-text";
 import { isDraftColumn } from "@/lib/origin-columns";
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "convex/react";
 import type { OptimisticLocalStore } from "convex/browser";
@@ -25,7 +25,8 @@ import { compareTaskOrder, planTaskMove } from "../lib/task-order";
 import { RECONNECT_TO_CREATE, useWorkspaceOnline } from "./workspace-connection";
 import { TaskModal } from "./issue-detail";
 import { IssueComposer } from "./issue-composer";
-import { IssueDeleteDialog, subscribeCreatedIssue, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { IssueDeleteDialog, IssueToastHost, dismissIssueToast, showIssueToast, subscribeCreatedIssue, type OpenReference, type ProjectWithUi } from "./issue-shared";
+import { IssueSelect } from "./issue-select";
 import { DelayedSkeleton } from "./delayed-skeleton";
 
 type Task = Doc<"tasks">;
@@ -34,12 +35,10 @@ type Priority = "low" | "medium" | "high";
 type MoveTaskArgs = { projectId: Id<"projects">; sessionToken: string; taskId: Id<"tasks">; columnId: Id<"columns">; beforeTaskId?: Id<"tasks"> };
 type UpdateTaskArgs = { projectId: Id<"projects">; sessionToken: string; taskId: Id<"tasks">; priority?: Priority; assignedToEmail?: string; dueDate?: string; done?: boolean };
 type MenuState = { taskId: Id<"tasks">; view: TaskMenuView; anchor: TaskMenuAnchor; from: HTMLElement };
-type Toast = { id: number; text: string; icon?: ReactNode; undo?: () => void };
 
 /** How long a completed card stays (checked) before it collapses, and how long the collapse takes. */
 const COMPLETE_HOLD_MS = 600;
 const COLLAPSE_MS = 220;
-let toastSeq = 0;
 const LONG_PRESS_MS = 350;
 const TOUCH_SLOP = 8;
 
@@ -107,7 +106,7 @@ function swallowTapThrough(popoverSelector: string) {
 }
 
 /** A board card or list row. */
-const cardElement = (root: ParentNode | null | undefined, taskId: string) => root?.querySelector<HTMLElement>(`:is(.kanban-scroll, .issue-table) [data-task-id="${CSS.escape(taskId)}"]`) ?? null;
+const cardElement = (root: ParentNode | null | undefined, taskId: string) => root?.querySelector<HTMLElement>(`:is(.kanban-scroll, .issue-table, .archive-list) [data-task-id="${CSS.escape(taskId)}"]`) ?? null;
 
 /** Scrolls the board's own scroll areas (never the page around them) just enough to show `element`. */
 function revealInBoard(element: HTMLElement) {
@@ -160,7 +159,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     window.history.pushState({ originIssue: taskId }, "", url);
     pushedIssue.current = taskId;
   };
-  const closeTask = () => {
+  const closeTask = (refocus = true) => {
     const closing = selectedTaskId;
     if (closing && pushedIssue.current === closing && window.history.state?.originIssue === closing) window.history.back();
     else {
@@ -171,7 +170,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     pushedIssue.current = null;
     setSelectedTaskId(null);
     // Give focus back to the card the issue was opened from.
-    if (closing) requestAnimationFrame(() => {
+    if (closing && refocus) requestAnimationFrame(() => {
       if (document.activeElement && document.activeElement !== document.body) return;
       cardElement(boardScroll.current, closing)?.focus({ preventScroll: true });
     });
@@ -202,7 +201,6 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   /** The card whose due date popover is open, anchored to its due chip (or the card). */
   const [datePick, setDatePick] = useState<{ taskId: Id<"tasks">; anchor: { current: HTMLElement } } | null>(null);
   const [completing, setCompleting] = useState<Record<string, "checked">>({});
-  const [toast, setToast] = useState<Toast | null>(null);
   const [deleting, setDeleting] = useState<Task | null>(null);
   const [columnDelete, setColumnDelete] = useState<Column | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -212,6 +210,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
    * fold; a lane emptied later (a drop, a completion, a move) stays open, so nothing slides after a card settles.
    */
   const [openLanes, setOpenLanes] = useState<Set<string>>(() => new Set());
+  /** Columns on the board when it first drew; a column added later (Add column) never folds. */
+  const [firstColumns, setFirstColumns] = useState<Set<string> | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [laneCreate, setLaneCreate] = useState<Id<"columns"> | null>(null);
   /** A card to focus quietly once it is on the board (a new issue). */
@@ -230,7 +230,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     return () => document.removeEventListener("pointerdown", guard, true);
   }, [datePick]);
 
-  const showToast = (text: string, undo?: () => void, icon?: ReactNode) => setToast({ id: ++toastSeq, text, undo, icon });
+  const showToast = showIssueToast;
   const dnd = useIssueDrag({
     rootRef: boardScroll,
     enabled: canEdit,
@@ -248,6 +248,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   useCardFlip(boardScroll);
   const drag = dnd.drag;
   // Remember every lane that has cards (or that a dragged card opened), so it never folds under the person later.
+  if (board && !firstColumns) setFirstColumns(new Set(board.columns.map(column => column._id as string)));
   if (board) {
     const open = board.columns.filter(column => activeLaneTasks(board, column._id, () => true).length).map(column => column._id as string);
     if (drag) open.push(drag.target.columnId);
@@ -281,12 +282,6 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [filterOpen]);
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(current => current?.id === toast.id ? null : current), 5000);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
 
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach(timer => window.clearTimeout(timer)), []);
@@ -342,7 +337,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const visibleTasks = (columnId: string) => activeLaneTasks(board, columnId, matches);
   const activeTasks = visualColumns.flatMap(column => visibleTasks(column._id));
   const boardHasActive = board.tasks.some(task => !task.done);
-  const tabStopId = activeTasks.some(task => task._id === focusId) ? focusId : activeTasks[0]?._id ?? null;
+  const focusable = archive ? archivedTasks : activeTasks;
+  const tabStopId = focusable.some(task => task._id === focusId) ? focusId : focusable[0]?._id ?? null;
   /** Column cards with the dragged card shown in its target slot. */
   const displayTasks = (columnId: string) => {
     const tasks = visibleTasks(columnId);
@@ -367,7 +363,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
       const next = neighbourOf(task._id);
       updateTask({ projectId, sessionToken, taskId: task._id, done: true })
         .then(() => clear())
-        .then(() => showToast("Completed", () => void updateTask({ projectId, sessionToken, taskId: task._id, done: false }).then(() => { setToast(null); focusCard(task._id); }).catch(report("Could not restore issue"))))
+        .then(() => showToast("Completed", () => void updateTask({ projectId, sessionToken, taskId: task._id, done: false }).then(() => { dismissIssueToast(); focusCard(task._id); }).catch(report("Could not restore issue"))))
         .catch(error => { clear(); cardElement(boardScroll.current, task._id)?.getAnimations().forEach(animation => animation.cancel()); report("Could not complete issue")(error); });
       if (hadFocus || document.activeElement === document.body) focusCard(next);
     };
@@ -450,7 +446,8 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const onCardKeyDown = (event: ReactKeyboardEvent<HTMLElement>, task: Task) => {
     if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey) return;
     const card = event.currentTarget;
-    const row = card.matches("tr");
+    // List and completed rows open on Space; only a board card is picked up.
+    const row = !card.classList.contains("task-card");
     if (event.key === "Enter") { event.preventDefault(); openTask(task._id); return; }
     if (event.key === " ") { event.preventDefault(); if (canEdit && !row) dnd.pickUp(task._id); else openTask(task._id); return; }
     if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey)) {
@@ -483,13 +480,23 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
     target.scrollIntoView({ block: "nearest", inline: "nearest" });
   };
 
-  const restore = async (task: Task) => {
+  const restore = async (task: Task, fromMenu = false) => {
     const target = columnForTask(task);
     if (!target) { setBoardNotice("Add a workflow column before restoring an issue"); return; }
+    // The row leaves the completed list: keep focus on the list.
+    const hadFocus = fromMenu || Boolean(document.activeElement?.closest(`[data-task-id="${CSS.escape(task._id)}"]`)) || document.activeElement === document.body;
+    const next = neighbourOf(task._id);
     try {
       if (!visibleColumnIds.has(task.columnId)) await moveTask({ projectId, sessionToken, taskId: task._id, columnId: target as Id<"columns"> });
       await updateTask({ projectId, sessionToken, taskId: task._id, done: false });
+      if (hadFocus) focusCard(next);
     } catch (error) { setBoardNotice(errorText(error, "Could not restore issue")); }
+  };
+  /** Delete confirmed in the issue view: close it and focus a neighbouring card, as a delete from the card menu does. */
+  const deleteFromIssue = (taskId: Id<"tasks">) => {
+    const next = neighbourOf(taskId);
+    closeTask(false);
+    deleteTask({ projectId, sessionToken, taskId }).then(() => focusCard(next), report("Could not delete issue"));
   };
   const copyLink = (task: Task) => {
     const url = new URL(window.location.href);
@@ -528,7 +535,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
           {filterOpen && <div className="board-filter-popover"><Search size={14} /><input autoFocus value={filter} onChange={event => setFilter(event.target.value)} placeholder="Search issues" aria-label="Search project issues" onKeyDown={event => { if (event.key === "Escape" || event.key === "Enter") { event.preventDefault(); setFilterOpen(false); requestAnimationFrame(() => filterButton.current?.focus()); } }} />{filter && <button className="icon-button" aria-label="Clear search" onClick={() => setFilter("")}><X size={14} /></button>}</div>}
         </div>
         <MemberPicker label="Issue assignee filter" members={[...people.values()]} value={assigneeFilter} onChange={setAssigneeFilter} allLabel="All issues" currentEmail={userEmail} caption="Assignee" />
-        <div className={clsx("segmented-control issue-layout-switch", archive && "is-idle")} role="group" aria-label="Issue layout" inert={archive} aria-hidden={archive || undefined}><button aria-label="Board view" aria-pressed={layout === "board"} className={layout === "board" ? "active" : ""} onClick={() => setLayout("board")} title="Board (B)"><Columns3 size={14} /></button><button aria-label="List view" aria-pressed={layout === "list"} className={layout === "list" ? "active" : ""} onClick={() => setLayout("list")} title="List (L)"><List size={14} /></button></div>
+        <div className={clsx("segmented-control issue-layout-switch", archive && "is-idle")} role="group" aria-label="Issue layout"><button aria-label="Board view" aria-pressed={layout === "board"} className={layout === "board" ? "active" : ""} disabled={archive} onClick={() => setLayout("board")} title="Board (B)"><Columns3 size={14} /></button><button aria-label="List view" aria-pressed={layout === "list"} className={layout === "list" ? "active" : ""} disabled={archive} onClick={() => setLayout("list")} title="List (L)"><List size={14} /></button></div>
         {canEdit && <button disabled={!online} title={!online ? RECONNECT_TO_CREATE : "Create issue (C)"} className="primary-button compact project-create-issue" onClick={onCreateIssue}><Plus size={14} /><span>Create issue</span></button>}
       </div>
     </div>
@@ -537,11 +544,26 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
   const archiveView = (
     <div className="archive-list">
       {!archivedTasks.length && <EmptyBlock icon={CheckCircle2} title={filtered ? "No matching issues" : "No completed issues"} />}
-      {archivedTasks.map(task => <div key={task._id} className="archive-row" data-task-id={task._id} onClick={() => openTask(task._id)}>
+      {archivedTasks.map(task => <div
+        key={task._id}
+        className={clsx("archive-row", canEdit && "can-press", selectedTaskId === task._id && "is-selected", menu?.taskId === task._id && "has-menu")}
+        data-task-id={task._id}
+        tabIndex={tabStopId === task._id ? 0 : -1}
+        aria-label={`${taskKey(task._id)} ${task.title}`}
+        onClick={() => openTask(task._id)}
+        onFocus={event => { if (event.target === event.currentTarget) setFocusId(task._id); }}
+        onKeyDown={event => onCardKeyDown(event, task)}
+        onPointerDown={event => onRowPointerDown(event, task._id)}
+        onContextMenu={event => {
+          if (!canEdit) return;
+          event.preventDefault();
+          openMenu(task._id, "root", { left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY }, event.currentTarget);
+        }}
+      >
         <span className="check-done archive-check"><Check size={10} strokeWidth={3} /></span>
-        <button className="archive-issue" onClick={event => { event.stopPropagation(); openTask(task._id); }}><span className="issue-key">{taskKey(task._id)}</span><strong>{task.title}</strong></button>
+        <span className="archive-issue"><span className="issue-key">{taskKey(task._id)}</span><strong>{task.title}</strong></span>
         <time>{formatDate(task.completedAt ?? task.updatedAt)}</time>
-        {canEdit && <button className="ghost-button compact archive-restore" aria-label={`Restore ${task.title}`} onClick={event => { event.stopPropagation(); void restore(task); }}><Undo2 size={14} /><span>Restore</span></button>}
+        {canEdit && <button className="ghost-button compact archive-restore" tabIndex={-1} aria-label={`Restore ${task.title}`} onClick={event => { event.stopPropagation(); void restore(task); }}><Undo2 size={14} /><span>Restore</span></button>}
       </div>)}
     </div>
   );
@@ -584,7 +606,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         const tone = toneOf(column);
         const statusTitle = tone === "draft" ? "Draft" : column.title;
         // Only lanes that were empty from the start fold; a lane emptied by the search or filter stays open and says so.
-        const collapsed = boardHasActive && !openLanes.has(column._id) && !activeLaneTasks(board, column._id, () => true).length && drag?.target.columnId !== column._id && renaming !== column._id;
+        const collapsed = boardHasActive && Boolean(firstColumns?.has(column._id)) && !openLanes.has(column._id) && !activeLaneTasks(board, column._id, () => true).length && drag?.target.columnId !== column._id && renaming !== column._id;
         const canDelete = visualColumns.length > 1 && !isDraftColumn(column);
         return (
           <div
@@ -685,6 +707,7 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         }}
         onCopyLink={() => copyLink(menuTask)}
         onDelete={() => setDeleting(menuTask)}
+        onRestore={menuTask.done ? () => void restore(menuTask, true) : undefined}
         onClose={closeMenu}
       />}
       {datePick && datePickTask && <DatePopover
@@ -701,20 +724,12 @@ export function BoardTab({ project, projectId, sessionToken, canEdit, userEmail,
         setDeleting(null);
         deleteTask({ projectId, sessionToken, taskId: task._id }).then(() => focusCard(next), report("Could not delete issue"));
       }} />}
-      {columnDelete && <ColumnDeleteDialog column={columnDelete} columns={visualColumns} issueCount={board.tasks.filter(task => task.columnId === columnDelete._id).length} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnDelete(null)} />}
+      {columnDelete && <ColumnDeleteDialog column={columnDelete} columns={visualColumns} activeCount={board.tasks.filter(task => task.columnId === columnDelete._id && !task.done).length} completedCount={board.tasks.filter(task => task.columnId === columnDelete._id && task.done).length} projectId={projectId} sessionToken={sessionToken} onClose={() => setColumnDelete(null)} />}
       {laneCreate && <IssueComposer sessionToken={sessionToken} activeProjectId={projectId} projects={[project]} initialColumnId={laneCreate} onClose={() => setLaneCreate(null)} onCreated={() => undefined} />}
-      {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={(target, task) => { if (target === projectId && task) setSelectedTaskId(task); else { closeTask(); onOpenReference?.(target, task); } }} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={closeTask} /> : null}
-      {toast && <BoardToast key={toast.id} toast={toast} onDismiss={() => setToast(null)} />}
+      {selectedTaskId ? <TaskModal key={selectedTaskId} onOpenReference={(target, task) => { if (target === projectId && task) setSelectedTaskId(task); else { closeTask(); onOpenReference?.(target, task); } }} project={project} projectId={projectId} sessionToken={sessionToken} taskId={selectedTaskId} canEdit={canEdit} onClose={closeTask} onDelete={() => deleteFromIssue(selectedTaskId)} /> : null}
+      <IssueToastHost />
     </section>
   );
-}
-
-function BoardToast({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
-  return createPortal(<div className="board-toast" role="status">
-    <span className="board-toast-icon">{toast.icon ?? <Check size={14} />}</span>
-    <span>{toast.text}</span>
-    {toast.undo && <button type="button" onClick={() => { toast.undo?.(); onDismiss(); }}>Undo</button>}
-  </div>, document.body);
 }
 
 /** Lane ⋯ menu: rename in place, or delete (with a destination for its issues only when it has some). */
@@ -748,13 +763,22 @@ function LaneMenu({ title, canDelete, onRename, onDelete }: { title: string; can
   </>;
 }
 
-function ColumnDeleteDialog({ column, columns, issueCount, projectId, sessionToken, onClose }: { column: Column; columns: Column[]; issueCount: number; projectId: Id<"projects">; sessionToken: string; onClose: () => void }) {
+/** "2 issues", "1 issue and 3 completed", "3 completed issues": the active count matches the lane header. */
+function issueCountText(active: number, completed: number) {
+  const issues = (count: number) => `${count} ${count === 1 ? "issue" : "issues"}`;
+  if (!completed) return issues(active);
+  if (!active) return `${completed} completed ${completed === 1 ? "issue" : "issues"}`;
+  return `${issues(active)} and ${completed} completed`;
+}
+
+function ColumnDeleteDialog({ column, columns, activeCount, completedCount, projectId, sessionToken, onClose }: { column: Column; columns: Column[]; activeCount: number; completedCount: number; projectId: Id<"projects">; sessionToken: string; onClose: () => void }) {
   const online = useWorkspaceOnline();
   const others = columns.filter(c => c._id !== column._id);
   const [destination, setDestination] = useState<string>(others.find(c => !isDraftColumn(c))?._id ?? others[0]?._id ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const remove = useMutation(api.tasks.deleteColumn);
+  const issueCount = activeCount + completedCount;
   return <Dialog title={`Delete ${column.title}`} className="confirm-dialog" onClose={onClose}>
     <form className="dialog-body stack-form" onSubmit={async event => {
       event.preventDefault();
@@ -764,11 +788,13 @@ function ColumnDeleteDialog({ column, columns, issueCount, projectId, sessionTok
       catch (error) { setError(errorText(error, "Could not delete column")); }
       finally { setBusy(false); }
     }}>
-      {issueCount > 0 && <label>Move {issueCount === 1 ? "its issue" : `its ${issueCount} issues`} to<select value={destination} onChange={event => setDestination(event.target.value)}>{others.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}</select></label>}
+      {issueCount > 0 && <div className="column-delete-move"><span>Move {issueCountText(activeCount, completedCount)} to</span>
+        <IssueSelect label="Move issues to" caption="Move to" value={destination} onChange={setDestination} options={others.map(c => ({ value: c._id, label: c.title, icon: <StatusIcon title={isDraftColumn(c) ? "Draft" : c.title} /> }))} />
+      </div>}
       {error && <p className="notice danger">{error}</p>}
       <div className="dialog-actions">
         <button type="button" className="ghost-button compact" onClick={onClose}>Cancel</button>
-        <button className="primary-button danger compact" autoFocus={!issueCount} title={!online ? RECONNECT_TO_CREATE : undefined} disabled={busy || !online}>Delete column</button>
+        <button className="primary-button danger compact" data-initial-focus title={!online ? RECONNECT_TO_CREATE : undefined} disabled={busy || !online}>Delete column</button>
       </div>
     </form>
   </Dialog>;

@@ -2,10 +2,12 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { requireMember, requireTeamMember, visibleProjectRows } from "./lib/permissions";
 import { workspaceProject } from "./lib/features";
+import { isDraftColumn } from "./lib/columns";
 
 export const issues = query({
   args: { sessionToken: v.string(), teamId: v.id("teams"), text: v.string(), projectId: v.optional(v.id("projects")), done: v.optional(v.boolean()) },
-  returns: v.array(v.object({ _id: v.id("tasks"), projectId: v.id("projects"), title: v.string(), done: v.boolean(), milestoneId: v.optional(v.id("milestones")) })),
+  // `status`: the issue's lane title ("Draft" for the draft lane) for its status icon. Additive; older clients ignore it.
+  returns: v.array(v.object({ _id: v.id("tasks"), projectId: v.id("projects"), title: v.string(), done: v.boolean(), milestoneId: v.optional(v.id("milestones")), status: v.optional(v.string()) })),
   handler: async (ctx, args) => {
     const { user } = await requireTeamMember(ctx, args.teamId, args.sessionToken);
     if (args.projectId) await workspaceProject(ctx, args.teamId, args.projectId);
@@ -17,7 +19,12 @@ export const issues = query({
     }).take(50) : args.projectId
       ? args.done === undefined ? await ctx.db.query("tasks").withIndex("by_project", q => q.eq("projectId", args.projectId!)).order("desc").take(50) : await ctx.db.query("tasks").withIndex("by_project_and_done", q => q.eq("projectId", args.projectId!).eq("done", args.done!)).order("desc").take(50)
       : await ctx.db.query("tasks").withIndex("by_teamId_and_done", q => q.eq("teamId", args.teamId).eq("done", args.done ?? false)).order("desc").take(50);
-    return (await visibleProjectRows(ctx, rows, user)).map(({ _id, projectId, title, done, milestoneId }) => ({ _id, projectId, title, done, milestoneId }));
+    const visible = await visibleProjectRows(ctx, rows, user);
+    const columns = new Map(await Promise.all([...new Set(visible.map(row => row.columnId))].map(async id => [id, await ctx.db.get(id)] as const)));
+    return visible.map(({ _id, projectId, title, done, milestoneId, columnId }) => {
+      const column = columns.get(columnId);
+      return { _id, projectId, title, done, milestoneId, ...(column ? { status: isDraftColumn(column) ? "Draft" : column.title } : {}) };
+    });
   },
 });
 

@@ -54,9 +54,10 @@
 .work-issue-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) minmax(80px, 160px) 24px 72px 20px; align-items: center; gap: var(--space-3); min-height: 38px; padding: 0 var(--space-2); border-radius: var(--radius-sm); transition: background var(--duration-fast), opacity var(--duration); }
 .work-issue-row:focus-within { background: var(--hover); }
 @media (hover: hover) { .work-issue-row:hover { background: var(--hover); } }
-.work-issue-row.pending { opacity: 0.6; }
-.work-complete { width: 24px; min-width: 24px; height: 24px; border-radius: 50%; }
-.work-complete:hover:not(:disabled) { color: var(--green); background: var(--green-soft); }
+.work-issue-row.pending:not(.is-completing) { opacity: 0.6; }
+.work-issue-row.is-completing .work-issue-main strong { color: var(--text-3); text-decoration: line-through; }
+/* The shared complete control (components/issue-card.tsx CompleteCheck) with a row-sized press area. */
+.check-button.work-complete { width: 24px; min-width: 24px; height: 24px; margin: 0; }
 .work-issue-main { display: flex; align-items: center; gap: var(--space-2); min-width: 0; align-self: stretch; padding: 0; border: 0; background: transparent; color: var(--text-1); text-align: left; }
 .work-issue-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--weight-medium); }
 .work-project { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--text-3); font-size: var(--text-sm); text-align: left; transition: color var(--duration-fast); }
@@ -112,7 +113,7 @@
   .work-filters { width: 100%; margin-left: 0; }
   .work-filters .issue-select { flex: 1; min-width: 0; max-width: none; }
   .work-issue-row { grid-template-columns: 24px minmax(0, 1fr) auto; grid-template-rows: auto auto; gap: 0 var(--space-2); min-height: 52px; padding: 6px var(--space-1); }
-  .work-complete { grid-row: 1 / 3; align-self: center; width: 36px; min-width: 36px; height: 36px; margin-left: -6px; }
+  .check-button.work-complete { grid-row: 1 / 3; align-self: center; width: 36px; min-width: 36px; height: 36px; margin-left: -6px; }
   .work-issue-main { grid-column: 2 / 4; grid-row: 1; min-height: 22px; }
   .work-project { grid-column: 2; grid-row: 2; }
   .work-assignee, .work-priority { display: none; }
@@ -140,8 +141,10 @@
 @media (pointer: coarse) {
   .work-toolbar-modes .segmented-control button { height: 36px; }
   .work-filters .issue-select-trigger { min-height: 40px; }
-  .work-complete { width: 44px; min-width: 44px; height: 44px; margin-left: -8px; }
+  .check-button.work-complete { width: 44px; min-width: 44px; height: 44px; margin-left: -8px; }
   .work-issue-main, .work-project { position: relative; }
   .work-issue-main::after { content: ""; position: absolute; inset: -8px 0 0; }
   .work-project::after { content: ""; position: absolute; inset: 0 0 -8px; }
 }
+/* The row-sized complete control is its own press area (the card's larger one would overlap the title). */
+@media (hover: none) { .check-button.work-complete::before, .check-button.member-issue-check::before { inset: 0; } }

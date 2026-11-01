@@ -82,6 +82,8 @@ describe("Project access", () => {
     await expect(f.t.query(api.tasks.details, { sessionToken: f.member.token, projectId: f.privateProject, taskId: f.privateIssue })).rejects.toThrow("No active project access");
     const rows = await f.t.query(api.workspaceSearch.issues, { sessionToken: f.member.token, teamId: f.teamId, text: "issue" });
     expect(rows.map(row => row._id)).toEqual([f.issue]);
+    // The lane title, for the Link issue picker's status icon.
+    expect(rows[0]?.status).toBe("Todo");
     const inbox = await f.t.query(api.inbox.list, { sessionToken: f.member.token, teamId: f.teamId, mine: false, done: false, paginationOpts: page });
     expect(inbox.page.map(row => row._id)).toEqual([f.issue]);
     await expect(f.t.mutation(api.projects.reorder, { sessionToken: f.member.token, teamId: f.teamId, projectIds: [f.privateProject] })).rejects.toThrow();

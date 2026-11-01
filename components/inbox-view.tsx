@@ -5,7 +5,7 @@ import { focusQuietly } from "@/lib/initial-focus";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
-import { CalendarDays, List, ChevronRight, CheckCircle2, Circle, Inbox, Loader2, Search, X } from "lucide-react";
+import { CalendarDays, List, ChevronRight, Circle, Inbox, Loader2, Search, X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useWorkspace } from "./workspace-context";
@@ -18,6 +18,7 @@ import { InboxCalendar } from "./inbox-calendar";
 import { PriorityIcon } from "./issue-icons";
 import { GitHubIssueIndicator } from "./github-issue-indicator";
 import { IssueSelect } from "./issue-select";
+import { CompleteCheck } from "./issue-card";
 
 const phoneQuery = "(max-width: 760px)";
 const subscribePhone = (change: () => void) => { const query = matchMedia(phoneQuery); query.addEventListener("change", change); return () => query.removeEventListener("change", change); };
@@ -87,12 +88,13 @@ export function InboxView({ sessionToken, onOpenTask, onOpenChat, unread, onOpen
       {status === "LoadingFirstPage" ? <ContentSkeleton label="Loading issues" rows={6} /> : !filtered.length ? <div className="work-empty"><Inbox size={22} /><strong>{hasFilters ? "No matching issues" : done ? "No completed issues" : "You're all caught up"}</strong>{hasFilters && <button className="ghost-button compact" onClick={clearFilters}>Clear filters</button>}</div> : filtered.map(task => {
         const member = members?.find(member => member.email === task.assignedToEmail);
         const due = formatDue(task.dueDate);
-        return <div className={`work-issue-row ${pending === task._id ? "pending" : ""}`} key={task._id}>
-          <button className="icon-button work-complete" title={done ? "Reopen issue" : "Complete issue"} aria-label={`${done ? "Reopen" : "Complete"} ${task.title}`} disabled={workspace.role === "viewer" || pending === task._id} onClick={async () => { setPending(task._id); setNotice(""); try { await update({ sessionToken, projectId: task.projectId, taskId: task._id, done: !task.done }); } catch (error) { setNotice(errorText(error, "Could not update issue")); } finally { setPending(null); } }}>{pending === task._id ? <Loader2 size={16} className="spin" /> : done ? <CheckCircle2 size={16} /> : <Circle size={16} />}</button>
+        const isPending = pending === task._id;
+        return <div className={`work-issue-row ${isPending ? "pending" : ""} ${isPending && !task.done ? "is-completing" : ""}`} key={task._id}>
+          <CompleteCheck className="work-complete" task={task} done={isPending ? !task.done : task.done} reopen canEdit={workspace.role !== "viewer" && !pending} onComplete={async () => { setPending(task._id); setNotice(""); try { await update({ sessionToken, projectId: task.projectId, taskId: task._id, done: !task.done }); } catch (error) { setNotice(errorText(error, "Could not update issue")); } finally { setPending(null); } }} />
           <button className="work-issue-main" onClick={() => onOpenTask(task.projectId, task._id)}><strong>{task.title}</strong><GitHubIssueIndicator number={task.githubIssueNumber} /></button>
           <button className="work-project" onClick={() => onOpenProject(task.projectId)}><ProjectIcon project={task} size={14} /><span>{task.projectName}</span></button>
           {member ? <button className="work-assignee icon-button" title={memberName(member)} aria-label={`View ${memberName(member)} profile`} onClick={() => openMember(member.email)}><UserAvatar user={member} size="small" /></button> : <span className="work-assignee" />}
-          <time className={due && !done ? `due-${due.tone}` : ""} dateTime={task.dueDate} title={task.dueDate ? `Due ${formatDate(new Date(`${task.dueDate}T12:00:00`))}` : undefined}>{due?.label}</time>
+          <time className={due && !task.done ? `due-${due.tone}` : ""} dateTime={task.dueDate} title={task.dueDate ? `Due ${formatDate(new Date(`${task.dueDate}T12:00:00`))}` : undefined}>{due?.label}</time>
           <span className={`work-priority priority ${task.priority}`} title={`${task.priority[0].toUpperCase()}${task.priority.slice(1)} priority`}><PriorityIcon priority={task.priority} /><span className="sr-only">{task.priority} priority</span></span>
         </div>;
       })}

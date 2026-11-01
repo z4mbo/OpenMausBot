@@ -58,9 +58,13 @@ const box = (element: Element): TaskMenuAnchor => { const rect = element.getBoun
 const openChip = (task: Task, view: TaskMenuView, onMenu: OnMenu) => (event: ReactMouseEvent<HTMLButtonElement>) => { event.stopPropagation(); onMenu(task, view, box(event.currentTarget), event.currentTarget); };
 const pointAt = (event: ReactMouseEvent): TaskMenuAnchor => ({ left: event.clientX, top: event.clientY, right: event.clientX, bottom: event.clientY });
 
-/** The complete control: a rounded square (status icons are rings), a green tick once done. */
-export function CompleteCheck({ task, done, canEdit, onComplete }: { task: Task; done: boolean; canEdit: boolean; onComplete: (task: Task) => void }) {
-  return <button className="check-button" type="button" tabIndex={-1} aria-label={done ? `Completed ${task.title}` : `Complete ${task.title}`} disabled={!canEdit || done} onClick={event => { event.stopPropagation(); onComplete(task); }}>
+/**
+ * The complete control on every issue surface: a rounded square (status icons are rings), a green tick once done.
+ * With `reopen`, a done issue's tick stays pressable and calls `onComplete` again to reopen it (Inbox, profiles), and
+ * the control is its own Tab stop (those rows have no card menu to reach it from).
+ */
+export function CompleteCheck<T extends { title: string }>({ task, done, canEdit, onComplete, reopen = false, className }: { task: T; done: boolean; canEdit: boolean; onComplete: (task: T) => void; reopen?: boolean; className?: string }) {
+  return <button className={clsx("check-button", className)} type="button" tabIndex={reopen ? undefined : -1} aria-label={done ? `${reopen ? "Reopen" : "Completed"} ${task.title}` : `Complete ${task.title}`} disabled={!canEdit || (done && !reopen)} onClick={event => { event.stopPropagation(); onComplete(task); }}>
     {done ? <span className="check-done"><Check size={10} strokeWidth={3} /></span> : <span className="check-box" />}
   </button>;
 }
@@ -83,8 +87,10 @@ export function PriorityChip({ task, canEdit, onMenu }: { task: Task; canEdit: b
 export function DueChip({ task, canEdit, onDueDate, empty = false }: { task: Task; canEdit: boolean; onDueDate: OnDueDate; empty?: boolean }) {
   const due = formatDue(task.dueDate);
   if (!due && !(empty && canEdit)) return null;
-  if (!canEdit) return <span className={clsx("task-chip due-chip", due!.tone)}><CalendarDays size={12} /><span>{due!.label}</span></span>;
-  return <button type="button" tabIndex={-1} className={clsx("task-chip due-chip", due ? due.tone : "is-empty")} aria-label={due ? `Due ${due.label}` : "Set due date"} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); onDueDate(task, event.currentTarget); }}>
+  // A completed issue is never overdue.
+  const tone = due && !task.done ? due.tone : undefined;
+  if (!canEdit) return <span className={clsx("task-chip due-chip", tone)}><CalendarDays size={12} /><span>{due!.label}</span></span>;
+  return <button type="button" tabIndex={-1} className={clsx("task-chip due-chip", due ? tone : "is-empty")} aria-label={due ? `Due ${due.label}` : "Set due date"} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); onDueDate(task, event.currentTarget); }}>
     <CalendarDays size={12} />{due && <span>{due.label}</span>}
   </button>;
 }
