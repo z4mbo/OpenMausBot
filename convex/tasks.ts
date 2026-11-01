@@ -24,7 +24,7 @@ const person = {
 
 async function requireEditor(ctx: QueryCtx | MutationCtx, projectId: Id<"projects">, sessionToken: string) {
   const result = await requireMember(ctx, projectId, sessionToken);
-  if (!canEdit(result.member)) throw new Error("Edit role required");
+  if (!canEdit(result.member)) throw new ConvexError("Edit role required");
   return result;
 }
 
@@ -171,12 +171,12 @@ export const createColumn = mutation({
   returns: v.id("columns"),
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
-    if (!args.title.trim() || args.title.length > 60) throw new Error("Enter a column name under 60 characters");
+    if (!args.title.trim() || args.title.length > 60) throw new ConvexError("Enter a column name under 60 characters");
     if (normalizeColumnTitle(args.title) !== "draft") await ensureDraftColumn(ctx, args.projectId);
     const now = Date.now();
     const columns = await ctx.db.query("columns").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).take(20);
     const order = columns.length ? Math.max(...columns.map((column) => column.order)) + 1 : 0;
-    if (columns.length >= 20) throw new Error("A workflow can have up to 20 columns");
+    if (columns.length >= 20) throw new ConvexError("A workflow can have up to 20 columns");
     const id = await ctx.db.insert("columns", { projectId: args.projectId, title: args.title.trim(), isDone: false, ...(normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), order, createdAt: now, updatedAt: now });
     await ensureDraftColumn(ctx, args.projectId);
     await touchProject(ctx, args.projectId);
@@ -218,8 +218,8 @@ export const updateColumn = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const column = await ctx.db.get(args.columnId);
-    if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
-    if (!args.title.trim() || args.title.length > 60) throw new Error("Enter a column name under 60 characters");
+    if (!column || column.projectId !== args.projectId) throw new ConvexError("Column not found");
+    if (!args.title.trim() || args.title.length > 60) throw new ConvexError("Enter a column name under 60 characters");
     await ctx.db.patch(args.columnId, { title: args.title.trim(), isDone: false, ...(isDraftColumn(column) || normalizeColumnTitle(args.title) === "draft" ? { isDraft: true } : {}), updatedAt: Date.now() });
     await ensureDraftColumn(ctx, args.projectId);
     await touchProject(ctx, args.projectId);
@@ -233,14 +233,14 @@ export const deleteColumn = mutation({
   handler: async (ctx, args) => {
     await requireEditor(ctx, args.projectId, args.sessionToken);
     const column = await ctx.db.get(args.columnId);
-    if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
+    if (!column || column.projectId !== args.projectId) throw new ConvexError("Column not found");
     const columns = await ctx.db.query("columns").withIndex("by_project", q => q.eq("projectId", args.projectId)).take(21);
-    if (columns.length < 2) throw new Error("Keep at least one workflow column");
+    if (columns.length < 2) throw new ConvexError("Keep at least one workflow column");
     const tasks = await ctx.db.query("tasks").withIndex("by_column", (q) => q.eq("columnId", args.columnId)).collect();
     if (tasks.length) {
       const target = args.moveToColumnId ? await ctx.db.get(args.moveToColumnId) : null;
-      if (!target || target._id === column._id || target.projectId !== args.projectId) throw new Error("Choose a destination for the issues in this column");
-      if (isDoneColumn(target) && tasks.some(task => !task.done)) throw new Error("Complete the open issues before moving them to Done");
+      if (!target || target._id === column._id || target.projectId !== args.projectId) throw new ConvexError("Choose a destination for the issues in this column");
+      if (isDoneColumn(target) && tasks.some(task => !task.done)) throw new ConvexError("Complete the open issues before moving them to Done");
       for (const [index, task] of tasks.entries()) await ctx.db.patch(task._id, { columnId: target._id, order: Date.now() + index, updatedAt: Date.now(),
         ...(!task.done && task.githubIssueNumber && isDraftColumn(column) && !isDraftColumn(target) ? { githubIssueReopenRequested: true } : {}) });
     }
@@ -451,9 +451,9 @@ export const moveTask = mutation({
 
 export async function moveTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks">; columnId: Id<"columns">; beforeTaskId?: Id<"tasks"> }) {
     const [task, column] = await Promise.all([ctx.db.get(args.taskId), ctx.db.get(args.columnId)]);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
-    if (!column || column.projectId !== args.projectId) throw new Error("Column not found");
-    if (!task.done && isDoneColumn(column)) throw new Error("Complete this issue before moving it to Done");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
+    if (!column || column.projectId !== args.projectId) throw new ConvexError("Column not found");
+    if (!task.done && isDoneColumn(column)) throw new ConvexError("Complete this issue before moving it to Done");
     const reopenAsDraft = task.done && isDraftColumn(column);
     const previousColumn = task.githubIssueNumber && !task.done && !isDraftColumn(column) ? await ctx.db.get(task.columnId) : null;
     const reopen = Boolean(previousColumn && isDraftColumn(previousColumn));
@@ -607,7 +607,7 @@ export const authorizeLocalFile = query({
     if (!assets.length) return null;
     for (const asset of assets) {
       const project = await ctx.db.get(asset.projectId);
-      if (project?.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new Error("No active project access");
+      if (project?.teamId !== args.teamId || !await projectMember(ctx, project, user)) throw new ConvexError("No active project access");
     }
     return null;
   },
@@ -615,7 +615,7 @@ export const authorizeLocalFile = query({
 
 export async function deleteTaskRecord(ctx: MutationCtx, args: { projectId: Id<"projects">; taskId: Id<"tasks"> }) {
     const task = await ctx.db.get(args.taskId);
-    if (!task || task.projectId !== args.projectId) throw new Error("Task not found");
+    if (!task || task.projectId !== args.projectId) throw new ConvexError("Task not found");
     const comments = await ctx.db.query("taskComments").withIndex("by_task", (q) => q.eq("taskId", args.taskId)).collect();
     const assets = await ctx.db.query("taskAssets").withIndex("by_task", (q) => q.eq("taskId", args.taskId)).collect();
     for (const comment of comments) await ctx.db.delete(comment._id);
